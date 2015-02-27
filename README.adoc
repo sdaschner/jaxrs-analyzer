@@ -1,0 +1,45 @@
+= JAX-RS Analyzer
+Sebastian Daschner
+
+Generates an overview of all JAX-RS resources in a project by bytecode analysis.
+
+== Maven Plugin
+
+The Analyzer can be added to your project via Maven plugin. To enable the plugin, simply add these lines to your pom.xml in the `<plugins>` section.
+
+NOTE: This will work, as soon as the project is on Maven Central. Until then the project (including the Maven plugin) has to be built manually.
+
+----
+<plugin>
+    <groupId>com.sebastian_daschner</groupId>
+    <artifactId>jaxrs-analyzer-maven-plugin</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    <executions>
+        <execution>
+            <goals>
+                <goal>analyze-jaxrs</goal>
+            </goals>
+            <configuration>
+                <!-- Available backends, defaults to plaintext -->
+                <!-- <backend>plaintext</backend> -->
+                <!-- <backend>swagger</backend> -->
+            </configuration>
+        </execution>
+    </executions>
+</plugin>
+----
+
+After building your project, the documentation resides under 'target/jaxrs-analyzer/'.
+
+== Backends
+
+=== Plain text
+
+The plain text backend simply generates a test file with all REST resources.
+
+=== Swagger
+
+The swagger backend generates a swagger.json which can be loaded by the swagger-ui.
+
+ Swagger UI is a dependency-free collection of HTML, Javascript, and CSS assets that dynamically generate beautiful documentation from a Swagger-compliant API.
+
