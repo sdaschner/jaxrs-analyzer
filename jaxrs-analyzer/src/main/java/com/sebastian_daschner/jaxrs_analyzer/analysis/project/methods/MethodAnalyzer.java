@@ -1,0 +1,274 @@
+package com.sebastian_daschner.jaxrs_analyzer.analysis.project.methods;
+
+import com.sebastian_daschner.jaxrs_analyzer.LogProvider;
+import com.sebastian_daschner.jaxrs_analyzer.analysis.utils.JavaUtils;
+import com.sebastian_daschner.jaxrs_analyzer.model.elements.HttpResponse;
+import com.sebastian_daschner.jaxrs_analyzer.model.results.ClassResult;
+import com.sebastian_daschner.jaxrs_analyzer.analysis.project.AnnotationInterpreter;
+import com.sebastian_daschner.jaxrs_analyzer.model.results.MethodResult;
+import javassist.CtClass;
+import javassist.CtMethod;
+import javassist.NotFoundException;
+import javassist.bytecode.BadBytecode;
+import javassist.bytecode.SignatureAttribute;
+
+import javax.json.JsonArray;
+import javax.json.JsonObject;
+import javax.json.JsonStructure;
+import javax.json.JsonValue;
+import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.Response;
+import java.util.*;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+import java.util.stream.Stream;
+
+/**
+ * Analyzes a method by searching for JAX-RS relevant information. This class is thread-safe.
+ *
+ * @author Sebastian Daschner
+ */
+public class MethodAnalyzer {
+
+    private static final Class<?>[] RELEVANT_METHOD_ANNOTATIONS = {Path.class, GET.class, PUT.class, POST.class, DELETE.class, OPTIONS.class, HEAD.class};
+    private static final Class<?>[] RELEVANT_PARAMETER_ANNOTATIONS = {MatrixParam.class, QueryParam.class, PathParam.class, CookieParam.class,
+            HeaderParam.class, FormParam.class, Context.class};
+
+    private final Lock lock = new ReentrantLock();
+    private final ResponseMethodAnalyzer responseMethodAnalyzer = new ResponseMethodAnalyzer();
+    private final SubResourceLocatorMethodAnalyzer subResourceLocatorMethodAnalyzer = new SubResourceLocatorMethodAnalyzer();
+    private final JsonResponseMethodAnalyzer jsonResponseMethodAnalyzer = new JsonResponseMethodAnalyzer();
+    private List<CtClass> superClasses;
+    private CtMethod annotatedSuperMethod;
+    private CtMethod method;
+
+    /**
+     * Analyzes the given method by searching for JAX-RS relevant information.
+     *
+     * @return The method result or {@code null} if the method is not relevant
+     */
+    public MethodResult analyze(final CtMethod ctMethod) {
+        lock.lock();
+        try {
+            this.method = ctMethod;
+
+            determineAnnotatedSuperMethod();
+
+            if (!isRelevant())
+                return null;
+
+            return analyzeInternal();
+        } catch (Exception e) {
+            LogProvider.getLogger().accept("Could not analyze the method: " + method);
+            e.printStackTrace();
+            return null;
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    /**
+     * Determines a potential super method which is annotated with JAX-RS annotations.
+     */
+    private void determineAnnotatedSuperMethod() {
+        superClasses = new LinkedList<>();
+        try {
+            determineSuperDeclarations();
+        } catch (NotFoundException e) {
+            LogProvider.getLogger().accept("Could not determine super classes");
+            // ignore
+        }
+        annotatedSuperMethod = MethodFinder.findFirstMethod(superClasses, method.getSignature(), MethodAnalyzer::hasJaxRsAnnotations);
+    }
+
+    /**
+     * Determines all super classes and interfaces of the enclosing class recursively (exclusive the contained class itself and {@link java.lang.Object}).
+     */
+    private void determineSuperDeclarations() throws NotFoundException {
+        CtClass ctClass = method.getDeclaringClass();
+        final Queue<CtClass> classesToCheck = new LinkedBlockingQueue<>();
+
+        do {
+            if (ctClass.getSuperclass() != null && !Object.class.getName().equals(ctClass.getSuperclass().getName()))
+                classesToCheck.add(ctClass.getSuperclass());
+
+            Stream.of(ctClass.getInterfaces()).forEach(classesToCheck::add);
+
+            if (!method.getDeclaringClass().equals(ctClass))
+                superClasses.add(ctClass);
+
+        } while ((ctClass = classesToCheck.poll()) != null);
+    }
+
+    /**
+     * Checks if the method is somehow relevant for JAX-RS analysis.
+     * This means the method itself or any super class or interface method definition which this method overrides has JAX-RS annotations.
+     *
+     * @return {@code true} if the method is relevant for analysis
+     */
+    private boolean isRelevant() {
+        if (JavaUtils.isInitializerName(method.getName()))
+            return false;
+
+        if (hasJaxRsAnnotations(method))
+            return true;
+
+        return annotatedSuperMethod != null;
+    }
+
+    /**
+     * Analyzes the current method.
+     *
+     * @return The method result
+     * @throws NotFoundException If some method could not be accessed
+     * @throws BadBytecode       If the return type could not be determined
+     */
+    private MethodResult analyzeInternal() throws NotFoundException, BadBytecode {
+        final MethodResult methodResult = new MethodResult();
+
+        analyzeMethodInformation(method, methodResult);
+
+        if (methodResult.getHttpMethod() == null) {
+            // method is a sub resource locator
+            analyzeSubResourceLocator(methodResult);
+            return methodResult;
+        }
+
+        analyzeReturnTypes(methodResult);
+
+        return methodResult;
+    }
+
+    /**
+     * Analyzes the method annotations and parameters.
+     *
+     * @param ctMethod     The method to analyze
+     * @param methodResult The method result
+     * @throws NotFoundException If some method could not be accessed
+     */
+    private void analyzeMethodInformation(final CtMethod ctMethod, final MethodResult methodResult) throws NotFoundException {
+
+        if (!hasJaxRsAnnotations(ctMethod) && annotatedSuperMethod != null) {
+            // handle inherited annotations from superclass
+            analyzeMethodInformation(annotatedSuperMethod, methodResult);
+            return;
+        }
+
+        for (final Object annotation : ctMethod.getAvailableAnnotations()) {
+            AnnotationInterpreter.interpretMethodAnnotation(annotation, methodResult);
+        }
+
+        analyzeMethodParameters(ctMethod, methodResult);
+    }
+
+    /**
+     * Analyzes the method parameters and parameter annotations.
+     *
+     * @param ctMethod     The method to analyze
+     * @param methodResult The method result
+     * @throws NotFoundException If some method could not be accessed
+     */
+    private void analyzeMethodParameters(final CtMethod ctMethod, final MethodResult methodResult) throws NotFoundException {
+        // method parameters and parameter annotations
+        final CtClass[] parameterTypes = ctMethod.getParameterTypes();
+
+        for (int index = 0; index < parameterTypes.length; index++) {
+            final CtClass parameterType = parameterTypes[index];
+            final Object[][] parameterAnnotations = ctMethod.getAvailableParameterAnnotations();
+
+            if (isEntityParameter(ctMethod, index)) {
+                methodResult.setRequestBodyType(parameterType.getName());
+                continue;
+            }
+
+            for (final Object annotation : parameterAnnotations[index]) {
+                AnnotationInterpreter.interpretMethodParameterAnnotation(annotation, parameterType.getName(), methodResult);
+            }
+
+        }
+    }
+
+    /**
+     * Analyzes the method as sub-resource-locator.
+     *
+     * @param methodResult The method result
+     */
+    private void analyzeSubResourceLocator(final MethodResult methodResult) {
+        final ClassResult classResult = new ClassResult();
+        methodResult.setSubResource(classResult);
+        subResourceLocatorMethodAnalyzer.analyze(method, classResult);
+    }
+
+    /**
+     * Analyzes the method return type and gathers further information for known return types (e.g. {@link Response} or {@link JsonObject}).
+     *
+     * @param methodResult The method result
+     * @throws BadBytecode If the content could not be analyzed
+     */
+    private void analyzeReturnTypes(final MethodResult methodResult) throws BadBytecode {
+        final Set<Class<?>> jsonClasses = new HashSet<>(Arrays.asList(JsonObject.class, JsonStructure.class, JsonArray.class, JsonValue.class));
+
+        final String returnType = determineReturnType();
+
+        if (Response.class.getName().equals(returnType)) {
+            responseMethodAnalyzer.analyze(method, methodResult);
+        } else if (jsonClasses.stream().map(Class::getName).anyMatch(c -> c.equals(returnType))) {
+            jsonResponseMethodAnalyzer.analyze(method, methodResult);
+        } else {
+            final HttpResponse response = new HttpResponse();
+            response.getEntityTypes().add(returnType);
+            methodResult.getResponses().add(response);
+        }
+    }
+
+    /**
+     * Returns the return type of the method. The parameterized type is taken, if generics are used.
+     *
+     * @return The return type
+     * @throws BadBytecode If the method signature could not be analyzed
+     */
+    private String determineReturnType() throws BadBytecode {
+        final String sig = method.getGenericSignature() != null ? method.getGenericSignature() : method.getSignature();
+        return SignatureAttribute.toMethodSignature(sig).getReturnType().toString();
+    }
+
+    /**
+     * Checks if the parameter with {@code index} of the method is the entity parameter of the JAX-RS method.
+     *
+     * @param ctMethod The method
+     * @param index    The {@code index}-th parameter of the method
+     * @return {@code true} if entity parameter
+     */
+    private boolean isEntityParameter(final CtMethod ctMethod, final int index) {
+        for (final Object annotation : ctMethod.getAvailableParameterAnnotations()[index]) {
+            if (Stream.of(RELEVANT_PARAMETER_ANNOTATIONS).anyMatch(c -> c.isAssignableFrom(annotation.getClass()))) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Checks if the method has relevant JAX-RS annotations at the method itself or any method parameters.
+     *
+     * @return {@code true} if the method has relevant annotations
+     */
+    private static boolean hasJaxRsAnnotations(final CtMethod ctMethod) {
+        for (final Object annotation : ctMethod.getAvailableAnnotations()) {
+            if (Stream.of(RELEVANT_METHOD_ANNOTATIONS).anyMatch(c -> c.isAssignableFrom(annotation.getClass())))
+                return true;
+        }
+
+        for (Object[] annotations : ctMethod.getAvailableParameterAnnotations()) {
+            for (Object annotation : annotations) {
+                if (Stream.of(RELEVANT_PARAMETER_ANNOTATIONS).anyMatch(c -> c.isAssignableFrom(annotation.getClass())))
+                    return true;
+            }
+        }
+
+        return false;
+    }
+
+}

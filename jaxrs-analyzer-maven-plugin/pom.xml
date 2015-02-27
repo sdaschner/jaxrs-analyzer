@@ -1,0 +1,70 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <artifactId>jaxrs-analyzer-parent</artifactId>
+        <groupId>com.sebastian_daschner</groupId>
+        <version>1.0-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
+    <artifactId>jaxrs-analyzer-maven-plugin</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    <name>JAX-RS Analyzer Maven Plugin</name>
+    <packaging>maven-plugin</packaging>
+
+    <url>http://maven.apache.org</url>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.sebastian_daschner</groupId>
+            <artifactId>jaxrs-analyzer</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.maven</groupId>
+            <artifactId>maven-plugin-api</artifactId>
+            <version>3.2.5</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.maven</groupId>
+            <artifactId>maven-core</artifactId>
+            <version>3.2.5</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-plugin-plugin</artifactId>
+                <version>3.4</version>
+                <configuration>
+                    <goalPrefix>jaxrs-analyzer</goalPrefix>
+                    <!--
+                    The automated generation of the descriptor is prevented due to a bug in the descriptor-mojo functionality
+                    which cannot parse some JDK 1.8 features. Just uncomment the line and remove plugin.xml as soon as it get fixed.
+                    For this reason, the JavaDoc tags are still existent in the Mojo.
+                    -->
+                    <!--<skipErrorNoDescriptorsFound>true</skipErrorNoDescriptorsFound>-->
+                    <skipDescriptor>true</skipDescriptor>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>mojo-descriptor</id>
+                        <goals>
+                            <goal>descriptor</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>
