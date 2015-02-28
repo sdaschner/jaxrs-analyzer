@@ -16,21 +16,32 @@
 
 package com.sebastian_daschner.jaxrs_analyzer.analysis;
 
-import com.sebastian_daschner.jaxrs_analyzer.model.rest.HttpMethod;
-import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeRepresentation;
 import com.sebastian_daschner.jaxrs_analyzer.builder.ResourceMethodBuilder;
 import com.sebastian_daschner.jaxrs_analyzer.builder.ResponseBuilder;
+import com.sebastian_daschner.jaxrs_analyzer.model.rest.HttpMethod;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.ResourceMethod;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.Resources;
+import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeRepresentation;
+import javassist.NotFoundException;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 import javax.json.Json;
+import javax.tools.JavaCompiler;
+import javax.tools.JavaFileObject;
+import javax.tools.StandardJavaFileManager;
+import javax.tools.ToolProvider;
+import java.io.File;
 import java.net.MalformedURLException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.stream.Stream;
+
+import static org.junit.Assert.assertTrue;
 
 public class ProjectAnalyzerTest {
 
@@ -38,12 +49,19 @@ public class ProjectAnalyzerTest {
     private Path path;
 
     @Before
-    public void setUp() throws MalformedURLException {
-        // workaround to find correct path in both the IDE test and maven test
-        final String prefix = Stream.of(Paths.get(".").toFile().list()).anyMatch("jaxrs-test"::equals) ? "" : "../";
-        final String binPath = prefix + "jaxrs-test/target/classes";
+    public void setUp() throws MalformedURLException, NotFoundException {
 
-        this.path = Paths.get(binPath).toAbsolutePath();
+        final String testClassPath = "src/test/jaxrs-test";
+
+        // invoke compilation for jaxrs-test classes
+        final JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
+        final StandardJavaFileManager fileManager = compiler.getStandardFileManager(null, null, null);
+        final List<JavaFileObject> compilationUnits = findClassFiles(testClassPath, fileManager);
+
+        final JavaCompiler.CompilationTask compilationTask = compiler.getTask(null, null, null, null, null, compilationUnits);
+        assertTrue("Could not compile test project", compilationTask.call());
+
+        this.path = Paths.get(testClassPath).toAbsolutePath();
         this.classUnderTest = new ProjectAnalyzer();
     }
 
@@ -201,6 +219,21 @@ public class ProjectAnalyzerTest {
 
     private static void addMethods(final Resources resources, final String path, final ResourceMethod... methods) {
         Stream.of(methods).forEach(m -> resources.addMethod(path, m));
+    }
+
+    private static List<JavaFileObject> findClassFiles(final String classPath, final StandardJavaFileManager fileManager, final String... packages) {
+        final Iterable<? extends JavaFileObject> fileObjects = fileManager.getJavaFileObjects(Paths.get(classPath, packages).toFile().listFiles((dir, name) -> name.endsWith(".java")));
+        List<JavaFileObject> classFiles = new LinkedList<>();
+        fileObjects.forEach(classFiles::add);
+
+        Stream.of(Paths.get(classPath, packages).toFile().listFiles(File::isDirectory)).map(File::getName)
+                .map(n -> {
+                    final String[] packagesNames = Arrays.copyOf(packages, packages.length + 1);
+                    packagesNames[packages.length] = n;
+                    return packagesNames;
+                }).forEach(p -> classFiles.addAll(findClassFiles(classPath, fileManager, p)));
+
+        return classFiles;
     }
 
 }

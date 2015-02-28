@@ -16,11 +16,12 @@
 
 package com.sebastian_daschner.jaxrs_analyzer.analysis.bytecode.collection;
 
+import com.sebastian_daschner.jaxrs_analyzer.model.instructions.LoadInstruction;
 import com.sebastian_daschner.jaxrs_analyzer.model.instructions.LoadStoreInstruction;
 import com.sebastian_daschner.jaxrs_analyzer.model.instructions.StoreInstruction;
-import com.sebastian_daschner.jaxrs_analyzer.model.instructions.LoadInstruction;
 import javassist.bytecode.*;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.IntStream;
@@ -54,6 +55,8 @@ class LoadStoreInstructionBuilder {
      * @return The variable names for the variable indexes
      */
     private Map<Integer, String> buildVariableNames(final LocalVariableAttribute variableAttribute) {
+        if (variableAttribute == null)
+            return Collections.emptyMap();
         return IntStream.range(0, variableAttribute.tableLength())
                 .collect(HashMap::new,
                         (m, i) -> m.put(variableAttribute.index(i), variableAttribute.variableName(i))
@@ -69,15 +72,15 @@ class LoadStoreInstructionBuilder {
      */
     private Map<Integer, String> buildVariableTypes(final LocalVariableAttribute variableAttribute,
                                                     final LocalVariableTypeAttribute variableTypeAttribute) {
-        final Map<Integer, String> types = IntStream.range(0, variableAttribute.tableLength())
-                .collect(HashMap::new,
-                        (m, i) -> m.put(variableAttribute.index(i), getType(variableAttribute, i))
-                        , Map::putAll);
+        final Map<Integer, String> types = new HashMap<>();
 
-        if (variableTypeAttribute != null) {
+        if (variableAttribute != null)
+            IntStream.range(0, variableAttribute.tableLength())
+                    .forEach(i -> types.put(variableAttribute.index(i), getType(variableAttribute, i)));
+
+        if (variableTypeAttribute != null)
             IntStream.range(0, variableTypeAttribute.tableLength())
                     .forEach(i -> types.put(variableTypeAttribute.index(i), getType(variableTypeAttribute, i)));
-        }
 
         return types;
     }
