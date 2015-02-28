@@ -5,22 +5,32 @@
     <parent>
         <groupId>com.sebastian-daschner</groupId>
         <artifactId>jaxrs-analyzer-parent</artifactId>
-        <version>1.0-SNAPSHOT</version>
+        <version>0.1-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
     <artifactId>jaxrs-analyzer-maven-plugin</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>0.1-SNAPSHOT</version>
     <name>JAX-RS Analyzer Maven Plugin</name>
     <packaging>maven-plugin</packaging>
 
-    <url>http://maven.apache.org</url>
+    <description>Maven plugin for the JAX-RS Analyzer.</description>
+    <url>https://github.com/sdaschner/jaxrs-analyzer</url>
 
-    <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
-    </properties>
+    <licenses>
+        <license>
+            <name>The Apache License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+        </license>
+    </licenses>
+
+    <developers>
+        <developer>
+            <name>Sebastian Daschner</name>
+            <organization>sebastian-daschner.com</organization>
+            <organizationUrl>http://www.sebastian-daschner.com</organizationUrl>
+        </developer>
+    </developers>
 
     <dependencies>
         <dependency>
@@ -41,6 +51,8 @@
     </dependencies>
 
     <build>
+        <finalName>jaxrs-analyzer-maven-plugin</finalName>
+
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -65,6 +77,54 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <version>2.4</version>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <goals>
+                            <goal>jar-no-fork</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-gpg-plugin</artifactId>
+                <version>1.6</version>
+                <executions>
+                    <execution>
+                        <id>sign-artifacts</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>sign</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-release-plugin</artifactId>
+                <version>2.5.1</version>
+                <configuration>
+                    <tagNameFormat>v@{project.version}</tagNameFormat>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
+    </properties>
+
+    <scm>
+        <connection>scm:git:git@github.com:sdaschner/jaxrs-analyzer.git</connection>
+        <developerConnection>scm:git:git@github.com:sdaschner/jaxrs-analyzer.git</developerConnection>
+        <url>scm:git:git@github.com:sdaschner/jaxrs-analyzer.git</url>
+        <tag>HEAD</tag>
+    </scm>
 </project>

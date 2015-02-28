@@ -7,7 +7,7 @@
     <description/>
     <groupId>com.sebastian-daschner</groupId>
     <artifactId>jaxrs-analyzer-maven-plugin</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>0.1-SNAPSHOT</version>
     <goalPrefix>jaxrs-analyzer</goalPrefix>
     <isolatedRealm>false</isolatedRealm>
     <inheritedByDefault>true</inheritedByDefault>
@@ -62,7 +62,7 @@
             <groupId>com.sebastian-daschner</groupId>
             <artifactId>jaxrs-analyzer</artifactId>
             <type>jar</type>
-            <version>1.0-SNAPSHOT</version>
+            <version>0.1-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.apache.maven</groupId>

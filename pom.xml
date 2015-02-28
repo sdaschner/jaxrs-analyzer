@@ -4,7 +4,7 @@
 
     <groupId>com.sebastian-daschner</groupId>
     <artifactId>jaxrs-analyzer-parent</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>0.1-SNAPSHOT</version>
     <name>REST Documentation Generator Parent</name>
     <packaging>pom</packaging>
 
