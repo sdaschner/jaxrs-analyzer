@@ -3,8 +3,8 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
+        <groupId>com.sebastian-daschner</groupId>
         <artifactId>jaxrs-analyzer-parent</artifactId>
-        <groupId>com.sebastian_daschner</groupId>
         <version>1.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
@@ -24,7 +24,7 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.sebastian_daschner</groupId>
+            <groupId>com.sebastian-daschner</groupId>
             <artifactId>jaxrs-analyzer</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
