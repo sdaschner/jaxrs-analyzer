@@ -17,8 +17,8 @@
 package com.sebastian_daschner.jaxrs_analyzer.analysis;
 
 import com.sebastian_daschner.jaxrs_analyzer.LogProvider;
-import com.sebastian_daschner.jaxrs_analyzer.analysis.results.ResultInterpreter;
 import com.sebastian_daschner.jaxrs_analyzer.analysis.project.classes.ClassAnalyzer;
+import com.sebastian_daschner.jaxrs_analyzer.analysis.results.ResultInterpreter;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.Resources;
 import com.sebastian_daschner.jaxrs_analyzer.model.results.ClassResult;
 import javassist.ClassPool;
@@ -46,6 +46,15 @@ public class ProjectAnalyzer {
     private final ResultInterpreter resultInterpreter = new ResultInterpreter();
 
     /**
+     * Creates a project analyzer with given dependency locations. The locations are included in the classpath.
+     *
+     * @param dependencyLocations The locations of additional project dependencies
+     */
+    public ProjectAnalyzer(final Path... dependencyLocations) {
+        Stream.of(dependencyLocations).forEach(ProjectAnalyzer::addToClassPool);
+    }
+
+    /**
      * Analyzes all classes in the given project location.
      *
      * @param projectLocation The valid project root location
@@ -54,7 +63,7 @@ public class ProjectAnalyzer {
     public Resources analyze(final Path projectLocation) {
         lock.lock();
         try {
-            addProjectLocation(projectLocation);
+            addToClassPool(projectLocation);
 
             // load classes
             final Set<CtClass> classes = getClasses(projectLocation.toString());
@@ -71,17 +80,17 @@ public class ProjectAnalyzer {
     }
 
     /**
-     * Adds the project location to the class pool.
+     * Adds the location to the class pool.
      *
-     * @param projectLocation The project root location
+     * @param location The location of a jar file or a directory
      */
-    private static void addProjectLocation(final Path projectLocation) {
-        if (!projectLocation.toFile().exists())
-            throw new IllegalArgumentException("Project location '" + projectLocation + "' does not exist!");
+    private static void addToClassPool(final Path location) {
+        if (!location.toFile().exists())
+            throw new IllegalArgumentException("The location '" + location + "' does not exist!");
         try {
-            ClassPool.getDefault().appendClassPath(projectLocation.toString());
+            ClassPool.getDefault().insertClassPath(location.toString());
         } catch (NotFoundException e) {
-            throw new IllegalArgumentException("Project location could not be loaded!", e);
+            throw new IllegalArgumentException("The location '" + location + "' could not be loaded!", e);
         }
     }
 
