@@ -3,6 +3,14 @@ Sebastian Daschner
 
 Generates an overview of all JAX-RS resources in a project by bytecode analysis.
 
+*Yet another such JAX-RS plugin?* +
+Yes, but this tool gathers the information about the JAX-RS resource classes by bytecode analysis (not just by reflection).
+This gains more information in several situations.
+
 == Maven Plugin
 
 The Analyzer can be added to your project via https://github.com/sdaschner/jaxrs-analyzer-maven-plugin[Maven plugin].
+
+== Swagger Backend
+
+One of the output formats of the REST documentation is the heavily used Swagger API format. The tool creates the JSON file which can be loaded with Swagger UI.
