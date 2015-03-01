@@ -78,7 +78,6 @@ public class MethodAnalyzer {
             return analyzeInternal();
         } catch (Exception e) {
             LogProvider.getLogger().accept("Could not analyze the method: " + method);
-            e.printStackTrace();
             return null;
         } finally {
             lock.unlock();
