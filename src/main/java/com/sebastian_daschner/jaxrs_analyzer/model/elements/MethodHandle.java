@@ -16,13 +16,14 @@
 
 package com.sebastian_daschner.jaxrs_analyzer.model.elements;
 
+import com.sebastian_daschner.jaxrs_analyzer.analysis.bytecode.simulation.MethodPool;
+import com.sebastian_daschner.jaxrs_analyzer.model.methods.Method;
 import com.sebastian_daschner.jaxrs_analyzer.model.methods.MethodIdentifier;
 
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 /**
  * Represents a method handle element on the stack.
@@ -30,7 +31,7 @@ import java.util.stream.IntStream;
  *
  * @author Sebastian Daschner
  */
-public class MethodHandle extends Element {
+public class MethodHandle extends Element implements Method {
 
     /**
      * The possible identifier of the method which are encapsulated.
@@ -63,6 +64,23 @@ public class MethodHandle extends Element {
     }
 
     @Override
+    public Element invoke(final Element unused, final List<Element> arguments) {
+        // transfer invoke dynamic arguments
+        final List<Element> combinedArguments = Stream.concat(transferredArguments.stream(), arguments.stream()).collect(Collectors.toList());
+        return possibleIdentifiers.stream()
+                .map(i -> {
+                    final Method method = MethodPool.getInstance().get(i);
+                    if (!i.isStaticMethod()) {
+                        final List<Element> actualArguments = new ArrayList<>(combinedArguments);
+                        final Element object = actualArguments.remove(0);
+                        return method.invoke(object, actualArguments);
+                    }
+                    return method.invoke(null, combinedArguments);
+                })
+                .filter(Objects::nonNull).reduce(Element::merge).orElse(null);
+    }
+
+    @Override
     public Element merge(final Element element) {
         super.merge(element);
         if (element instanceof MethodHandle) {
@@ -86,5 +104,4 @@ public class MethodHandle extends Element {
                 ", type='" + getType() + '\'' +
                 '}';
     }
-
 }

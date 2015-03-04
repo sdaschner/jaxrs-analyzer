@@ -25,6 +25,7 @@ public abstract class GetPropertyInstruction implements Instruction {
 
     private final String className;
     private final String propertyName;
+    // TODO check if parameterized types are used
     private final String propertyType;
 
     protected GetPropertyInstruction(final String className, final String propertyName, final String propertyType) {

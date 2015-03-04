@@ -160,48 +160,18 @@ public class MethodSimulator {
         Collections.reverse(arguments);
 
         Element object = null;
+        Method method;
         if (!identifier.isStaticMethod()) {
             object = runtimeStack.pop();
             if (object instanceof MethodHandle) {
-                simulateMethodHandleInvoke((MethodHandle) object, arguments);
-                return;
+                method = (Method) object;
+            } else {
+                method = methodPool.get(identifier);
             }
+        } else {
+            method = methodPool.get(identifier);
         }
-        simulateMethodInvoke(identifier, object, arguments);
-    }
-
-    /**
-     * Simulates the invoke of a method handle. Pushes the merged result to the stack.
-     *
-     * @param methodHandle The method handle
-     * @param arguments    The actual arguments
-     */
-    private void simulateMethodHandleInvoke(final MethodHandle methodHandle, final List<Element> arguments) {
-        // transfer invoke dynamic arguments
-        final List<Element> combinedArguments = Stream.concat(methodHandle.getTransferredArguments().stream(), arguments.stream()).collect(Collectors.toList());
-        methodHandle.getPossibleIdentifiers().stream()
-                .map(i -> {
-                    final Method method = methodPool.get(i);
-                    if (!i.isStaticMethod()) {
-                        final List<Element> actualArguments = new ArrayList<>(combinedArguments);
-                        final Element object = actualArguments.remove(0);
-                        return method.invoke(object, actualArguments);
-                    }
-                    return method.invoke(null, combinedArguments);
-                })
-                .filter(Objects::nonNull).reduce(Element::merge)
-                .ifPresent(runtimeStack::push);
-    }
-
-    /**
-     * Simulates the invoke of a method. Pushes the result to the stack.
-     *
-     * @param identifier The method identifier
-     * @param object     The object on which the method is invoked
-     * @param arguments  The actual arguments
-     */
-    private void simulateMethodInvoke(final MethodIdentifier identifier, final Element object, final List<Element> arguments) {
-        final Element returnedElement = methodPool.get(identifier).invoke(object, arguments);
+        final Element returnedElement = method.invoke(object, arguments);
         if (returnedElement != null)
             runtimeStack.push(returnedElement);
     }

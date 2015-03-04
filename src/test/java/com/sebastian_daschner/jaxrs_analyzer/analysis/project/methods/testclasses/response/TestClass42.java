@@ -16,9 +16,10 @@
 
 package com.sebastian_daschner.jaxrs_analyzer.analysis.project.methods.testclasses.response;
 
-import com.sebastian_daschner.jaxrs_analyzer.model.elements.HttpResponse;
 import com.sebastian_daschner.jaxrs_analyzer.model.elements.Element;
+import com.sebastian_daschner.jaxrs_analyzer.model.elements.HttpResponse;
 import com.sebastian_daschner.jaxrs_analyzer.model.elements.JsonArray;
+import com.sebastian_daschner.jaxrs_analyzer.model.elements.JsonObject;
 
 import javax.json.Json;
 import javax.json.JsonArrayBuilder;
@@ -26,9 +27,8 @@ import javax.ws.rs.core.Response;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collector;
 
-public class TestClass39 {
+public class TestClass42 {
 
     private List<Object> tasks;
 
@@ -37,10 +37,12 @@ public class TestClass39 {
     }
 
     public javax.json.JsonArray buildJsonArray() {
-        final Collector<String, JsonArrayBuilder, JsonArrayBuilder> collector = Collector.of(Json::createArrayBuilder, JsonArrayBuilder::add,
-                JsonArrayBuilder::add);
-        return tasks.stream().map(Object::toString).
-                collect(collector).build();
+        return tasks.stream().map(this::toObject).
+                collect(Json::createArrayBuilder, JsonArrayBuilder::add, JsonArrayBuilder::add).build();
+    }
+
+    private javax.json.JsonObject toObject(final Object o) {
+        return Json.createObjectBuilder().add("key", o.toString()).build();
     }
 
     public static Set<HttpResponse> getResult() {
@@ -50,10 +52,11 @@ public class TestClass39 {
         result.getEntityTypes().add("javax.json.JsonArray");
 
         final JsonArray jsonArray = new JsonArray();
-        jsonArray.getElements().add(new Element("java.lang.String"));
+        final JsonObject jsonObject = new JsonObject();
+        jsonObject.getStructure().put("key", new Element("java.lang.String"));
+        jsonArray.getElements().add(new Element("javax.json.JsonObject", jsonObject));
 
-        // TODO un-comment
-//        result.getInlineEntities().add(jsonArray);
+        result.getInlineEntities().add(jsonArray);
 
         return Collections.singleton(result);
     }

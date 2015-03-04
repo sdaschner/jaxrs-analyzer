@@ -23,6 +23,9 @@ import javassist.NotFoundException;
 import javassist.bytecode.BadBytecode;
 import javassist.bytecode.SignatureAttribute;
 
+import java.util.List;
+import java.util.Set;
+
 /**
  * Contains Java and Javassist utility functionality.
  *
@@ -32,6 +35,11 @@ public final class JavaUtils {
 
     public static final String INITIALIZER_NAME = "<init>";
     public static final String BOOTSTRAP_ATTRIBUTE_NAME = "BootstrapMethods";
+    private static final String OBJECT = Object.class.getName();
+    private static final String LIST = List.class.getName();
+    private static final String LIST_SEARCH = "List<";
+    private static final String SET= Set.class.getName();
+    private static final String SET_SEARCH = "Set<";
 
     private JavaUtils() {
         throw new UnsupportedOperationException();
@@ -110,6 +118,43 @@ public final class JavaUtils {
             return nestedClassType.getDeclaringClass().getName() + '$' + nestedClassType.getName();
         }
         return type.toString();
+    }
+
+    /**
+     * Checks if the given type is a collection type (e.g. {@code java.util.List<java.lang.String>} or {@code java.util.List}).
+     *
+     * @param type The type to check
+     * @return {@code true} if the generic or parameterized type is a collection
+     */
+    public static boolean isCollection(final String type) {
+        return type.contains(LIST_SEARCH) || type.contains(SET_SEARCH) || LIST.equals(type) || SET.equals(type);
+    }
+
+    /**
+     * Removes one nested collection from the type.
+     *
+     * @param type The collection type
+     * @return The normalized type
+     */
+    public static String trimCollection(final String type) {
+        int foundIndex = type.indexOf(LIST_SEARCH);
+        if (foundIndex != -1) {
+            final int startIndex = foundIndex + LIST_SEARCH.length();
+            final int occurrences = (int) type.substring(0, startIndex).chars().filter(c -> c == '<').count();
+            return type.substring(startIndex, type.length() - occurrences);
+        }
+
+        foundIndex = type.indexOf(SET_SEARCH);
+        if (foundIndex != -1) {
+            final int startIndex = foundIndex + SET_SEARCH.length();
+            final int occurrences = (int) type.substring(0, startIndex).chars().filter(c -> c == '<').count();
+            return type.substring(startIndex, type.length() - occurrences);
+        }
+
+        if (LIST.equals(type) || SET.equals(type))
+            return OBJECT;
+
+        return type;
     }
 
 }

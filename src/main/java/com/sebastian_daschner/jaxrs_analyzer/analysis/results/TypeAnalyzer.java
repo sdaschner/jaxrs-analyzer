@@ -76,7 +76,7 @@ class TypeAnalyzer {
     TypeRepresentation analyze(final String type) {
         lock.lock();
         try {
-            collection = ResponseTypeNormalizer.isCollection(type);
+            collection = JavaUtils.isCollection(type);
             this.type = ResponseTypeNormalizer.normalizeWrapper(type);
 
             if (!isRelevant())
@@ -97,9 +97,9 @@ class TypeAnalyzer {
     }
 
     private static JsonValue analyzeInternal(final String type) {
-        if (ResponseTypeNormalizer.isCollection(type)) {
+        if (JavaUtils.isCollection(type)) {
             final JsonArrayBuilder arrayBuilder = Json.createArrayBuilder();
-            addToArray(arrayBuilder, ResponseTypeNormalizer.normalizeCollection(type));
+            addToArray(arrayBuilder, JavaUtils.trimCollection(type));
             return arrayBuilder.build();
         }
 

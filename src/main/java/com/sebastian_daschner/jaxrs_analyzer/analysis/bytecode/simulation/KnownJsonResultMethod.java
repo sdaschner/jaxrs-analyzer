@@ -36,7 +36,7 @@ import static com.sebastian_daschner.jaxrs_analyzer.analysis.bytecode.simulation
  *
  * @author Sebastian Daschner
  */
-public enum KnownJsonResultMethod implements IdentifiableMethod {
+enum KnownJsonResultMethod implements IdentifiableMethod {
 
     JSON_ARRAY_BUILDER_CREATE(MethodIdentifier.ofStatic(JSON, "createArrayBuilder", JSON_ARRAY_BUILDER), (object, arguments) -> new Element(JSON_ARRAY, new JsonArray())),
 

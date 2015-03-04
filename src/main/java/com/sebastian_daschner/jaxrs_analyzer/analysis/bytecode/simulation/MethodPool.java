@@ -42,7 +42,6 @@ public class MethodPool {
      */
     private static final MethodPool INSTANCE = new MethodPool();
     private static final Function<MethodIdentifier, Method> DEFAULT_METHOD = identifier -> (object, arguments) -> {
-//        System.err.println("applying DEFAULT method for: " + identifier + " (" + object + ", " + arguments + ')');
         if (identifier.getReturnType() != null)
             return new Element(identifier.getReturnType());
         return null;
