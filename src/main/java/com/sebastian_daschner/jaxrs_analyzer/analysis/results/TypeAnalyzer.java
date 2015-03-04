@@ -143,7 +143,13 @@ class TypeAnalyzer {
             return false;
 
         final String name = method.getName();
-        return name.startsWith("get") && name.length() > 3 && Stream.of(NAMES_TO_IGNORE).noneMatch(n -> n.equals(name));
+        if (Stream.of(NAMES_TO_IGNORE).anyMatch(n -> n.equals(name)))
+            return false;
+
+        if (name.startsWith("get") && name.length() > 3)
+            return !method.getSignature().endsWith(")V");
+
+        return name.startsWith("is") && name.length() > 2 && method.getSignature().endsWith(")Z");
     }
 
     private static Pair<String, String> mapField(final CtField field) {
@@ -169,13 +175,14 @@ class TypeAnalyzer {
     }
 
     /**
-     * Converts a getter name to the property name (without the "get" and lowercase).
+     * Converts a getter name to the property name (without the "get" or "is" and lowercase).
      *
-     * @param name The name of the method (MUST match "get[A-Z]+"
+     * @param name The name of the method (MUST match "get[A-Z]+|is[A-Z]+")
      * @return The name of the property
      */
     private static String normalizeGetter(final String name) {
-        final char chars[] = name.substring(3).toCharArray();
+        final int size = name.startsWith("is") ? 2 : 3;
+        final char chars[] = name.substring(size).toCharArray();
         chars[0] = Character.toLowerCase(chars[0]);
         return new String(chars);
     }
