@@ -1,0 +1,22 @@
+= Changelog
+Sebastian Daschner
+
+// new versions are placed on the top
+
+== v0.3
+- Improved POJO getter analysis for return types (e.g. isXY() -> boolean, etc.)
+- Added JDK 1.8 Streams as known methods (analysis will notice and simulate these)
+- Improved JAXB analysis of POJOs (all `XmlAccessorType's`, `XmlElement` and `XmlTransient` supported)
+
+== v0.2
+- Minor updated needed for Sonatype release
+
+== v0.1
+- JAX-RS 2.0 annotations analysis
+- `Response` return types analysis (determines where the returned objects ``come from'', follows method invocations, actual arguments, etc.)
+- JSON-P API analysis (e.g. methods with return type `JsonObject` or JSON-P contained in `Response#entity()`)
+- Analysis of POJO responses
+- JAXB analysis of POJOs (only `XmlAccessorType#PUBLIC_MEMBER`)
+- JDK 1.8 lambdas analysis
+- Swagger API JSON backend format
+- Plain text backend format
