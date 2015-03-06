@@ -155,43 +155,38 @@ public class ProjectAnalyzerTest {
         addMethods(resources, "complex/{info}", sixthGet);
 
         // complex/sub
-        ResourceMethod secondPost = ResourceMethodBuilder.withMethod(HttpMethod.POST).andRequestBodyType("java.lang.String")
+        ResourceMethod secondPost = ResourceMethodBuilder.withMethod(HttpMethod.POST).andRequestBodyType("java.lang.String").andQueryParam("query", "java.lang.String")
                 .andResponse(202, ResponseBuilder.newBuilder().andHeaders("X-Info").build()).build();
         addMethods(resources, "complex/sub", secondPost);
 
         // subsub
-        ResourceMethod secondPostWithQuery = ResourceMethodBuilder.withMethod(HttpMethod.POST).andRequestBodyType("java.lang.String")
-                .andQueryParam("query", "java.lang.String").andResponse(202, ResponseBuilder.newBuilder().andHeaders("X-Info").build()).build();
-        addMethods(resources, "subsub", secondPostWithQuery);
+        addMethods(resources, "subsub", secondPost);
 
         // complex/sub/{name}
-        ResourceMethod seventhGet = ResourceMethodBuilder.withMethod(HttpMethod.GET).andPathParam("name", "java.lang.String")
+        ResourceMethod seventhGet = ResourceMethodBuilder.withMethod(HttpMethod.GET).andPathParam("name", "java.lang.String").andQueryParam("query", "java.lang.String")
                 .andResponse(200, ResponseBuilder.withResponseBody(new TypeRepresentation("java.lang.String")).build()).build();
         addMethods(resources, "complex/sub/{name}", seventhGet);
 
         // subsub/{name}
-        ResourceMethod seventhGetWithQuery = ResourceMethodBuilder.withMethod(HttpMethod.GET).andPathParam("name", "java.lang.String")
-                .andQueryParam("query", "java.lang.String").andResponse(200, ResponseBuilder.withResponseBody(new TypeRepresentation("java.lang.String"))
-                        .build()).build();
-        addMethods(resources, "subsub/{name}", seventhGetWithQuery);
+        addMethods(resources, "subsub/{name}", seventhGet);
 
         // complex/anotherSub
-        ResourceMethod thirdPost = ResourceMethodBuilder.withMethod(HttpMethod.POST).andRequestBodyType("java.lang.String")
+        ResourceMethod thirdPost = ResourceMethodBuilder.withMethod(HttpMethod.POST).andRequestBodyType("java.lang.String").andQueryParam("query", "java.lang.String")
                 .andResponse(202, ResponseBuilder.newBuilder().andHeaders("X-Info").build()).build();
         addMethods(resources, "complex/anotherSub", thirdPost);
 
         // complex/anotherSub/{name}
-        ResourceMethod tenthGet = ResourceMethodBuilder.withMethod(HttpMethod.GET).andPathParam("name", "java.lang.String")
+        ResourceMethod tenthGet = ResourceMethodBuilder.withMethod(HttpMethod.GET).andPathParam("name", "java.lang.String").andQueryParam("query", "java.lang.String")
                 .andResponse(200, ResponseBuilder.withResponseBody(new TypeRepresentation("java.lang.String")).build()).build();
         addMethods(resources, "complex/anotherSub/{name}", tenthGet);
 
         // complex/anotherSubres
-        ResourceMethod fourthPost = ResourceMethodBuilder.withMethod(HttpMethod.POST).andRequestBodyType("java.lang.String")
+        ResourceMethod fourthPost = ResourceMethodBuilder.withMethod(HttpMethod.POST).andRequestBodyType("java.lang.String").andQueryParam("query", "java.lang.String")
                 .andResponse(202, ResponseBuilder.newBuilder().andHeaders("X-Info").build()).build();
         addMethods(resources, "complex/anotherSubres", fourthPost);
 
         // complex/anotherSubres/{name}
-        ResourceMethod eleventhGet = ResourceMethodBuilder.withMethod(HttpMethod.GET).andPathParam("name", "java.lang.String")
+        ResourceMethod eleventhGet = ResourceMethodBuilder.withMethod(HttpMethod.GET).andPathParam("name", "java.lang.String").andQueryParam("query", "java.lang.String")
                 .andResponse(200, ResponseBuilder.withResponseBody(new TypeRepresentation("java.lang.String")).build()).build();
         addMethods(resources, "complex/anotherSubres/{name}", eleventhGet);
 

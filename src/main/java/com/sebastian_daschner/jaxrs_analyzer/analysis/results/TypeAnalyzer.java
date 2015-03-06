@@ -194,7 +194,7 @@ class TypeAnalyzer {
     private static Pair<String, String> mapField(final CtField field) {
         try {
             final String sig = field.getGenericSignature() != null ? field.getGenericSignature() : field.getSignature();
-            final String fieldType = JavaUtils.getType(SignatureAttribute.toFieldSignature(sig));
+            final String fieldType = JavaUtils.getType(SignatureAttribute.toTypeSignature(sig));
             return Pair.of(field.getName(), fieldType);
         } catch (BadBytecode e) {
             LogProvider.getLogger().accept("Could not analyze field: " + field);
