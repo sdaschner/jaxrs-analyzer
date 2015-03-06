@@ -16,10 +16,7 @@
 
 package com.sebastian_daschner.jaxrs_test;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 
 /**
@@ -29,6 +26,9 @@ import javax.ws.rs.core.Response;
 public class SubResources implements SomeSubResource {
 
     private final String name;
+
+    @QueryParam("query")
+    private String query;
 
     public SubResources(final String name) {
         this.name = name;
@@ -42,7 +42,7 @@ public class SubResources implements SomeSubResource {
 
     @POST
     public Response postSub(final String entity) {
-        System.out.println("posted new: " + entity);
+        System.out.println("posted new: " + entity + " q: " + query);
         return Response.accepted().header("X-Info", "Added " + entity).build();
     }
 

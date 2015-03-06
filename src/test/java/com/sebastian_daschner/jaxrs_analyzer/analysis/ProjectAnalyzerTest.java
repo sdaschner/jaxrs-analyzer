@@ -160,7 +160,9 @@ public class ProjectAnalyzerTest {
         addMethods(resources, "complex/sub", secondPost);
 
         // subsub
-        addMethods(resources, "subsub", secondPost);
+        ResourceMethod secondPostWithQuery = ResourceMethodBuilder.withMethod(HttpMethod.POST).andRequestBodyType("java.lang.String")
+                .andQueryParam("query", "java.lang.String").andResponse(202, ResponseBuilder.newBuilder().andHeaders("X-Info").build()).build();
+        addMethods(resources, "subsub", secondPostWithQuery);
 
         // complex/sub/{name}
         ResourceMethod seventhGet = ResourceMethodBuilder.withMethod(HttpMethod.GET).andPathParam("name", "java.lang.String")
@@ -168,7 +170,10 @@ public class ProjectAnalyzerTest {
         addMethods(resources, "complex/sub/{name}", seventhGet);
 
         // subsub/{name}
-        addMethods(resources, "subsub/{name}", seventhGet);
+        ResourceMethod seventhGetWithQuery = ResourceMethodBuilder.withMethod(HttpMethod.GET).andPathParam("name", "java.lang.String")
+                .andQueryParam("query", "java.lang.String").andResponse(200, ResponseBuilder.withResponseBody(new TypeRepresentation("java.lang.String"))
+                        .build()).build();
+        addMethods(resources, "subsub/{name}", seventhGetWithQuery);
 
         // complex/anotherSub
         ResourceMethod thirdPost = ResourceMethodBuilder.withMethod(HttpMethod.POST).andRequestBodyType("java.lang.String")

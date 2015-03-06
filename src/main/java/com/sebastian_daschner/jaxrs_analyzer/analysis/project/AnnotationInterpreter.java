@@ -21,6 +21,7 @@ import com.sebastian_daschner.jaxrs_analyzer.model.results.MethodResult;
 
 import javax.ws.rs.*;
 import java.util.Arrays;
+import java.util.Set;
 import java.util.function.Consumer;
 
 /**
@@ -95,6 +96,27 @@ public final class AnnotationInterpreter {
         consumeIfMatches(annotation, HeaderParam.class, m -> result.getMethodParameters().getHeaderParams().put(m.value(), annotatedType));
 
         consumeIfMatches(annotation, FormParam.class, m -> result.getMethodParameters().getFormParams().put(m.value(), annotatedType));
+    }
+
+    /**
+     * Interprets the given annotation of a field and adds corresponding information to all method results.
+     *
+     * @param annotation    The annotation to analyze
+     * @param annotatedType The type of the annotated parameter
+     * @param results        The method results
+     */
+    public static void interpretFieldAnnotation(final Object annotation, final String annotatedType, final Set<MethodResult> results) {
+        consumeIfMatches(annotation, MatrixParam.class, m -> results.stream().forEach(r -> r.getMethodParameters().getMatrixParams().put(m.value(), annotatedType)));
+
+        consumeIfMatches(annotation, QueryParam.class, m -> results.stream().forEach(r -> r.getMethodParameters().getQueryParams().put(m.value(), annotatedType)));
+
+        consumeIfMatches(annotation, PathParam.class, m -> results.stream().forEach(r -> r.getMethodParameters().getPathParams().put(m.value(), annotatedType)));
+
+        consumeIfMatches(annotation, CookieParam.class, m -> results.stream().forEach(r -> r.getMethodParameters().getCookieParams().put(m.value(), annotatedType)));
+
+        consumeIfMatches(annotation, HeaderParam.class, m -> results.stream().forEach(r -> r.getMethodParameters().getHeaderParams().put(m.value(), annotatedType)));
+
+        consumeIfMatches(annotation, FormParam.class, m -> results.stream().forEach(r -> r.getMethodParameters().getFormParams().put(m.value(), annotatedType)));
     }
 
     /**

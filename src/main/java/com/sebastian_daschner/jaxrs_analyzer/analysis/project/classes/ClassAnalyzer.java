@@ -16,10 +16,13 @@
 
 package com.sebastian_daschner.jaxrs_analyzer.analysis.project.classes;
 
+import com.sebastian_daschner.jaxrs_analyzer.LogProvider;
+import com.sebastian_daschner.jaxrs_analyzer.analysis.project.AnnotationInterpreter;
 import com.sebastian_daschner.jaxrs_analyzer.analysis.project.methods.MethodAnalyzer;
 import com.sebastian_daschner.jaxrs_analyzer.model.results.ClassResult;
-import com.sebastian_daschner.jaxrs_analyzer.analysis.project.AnnotationInterpreter;
 import javassist.CtClass;
+import javassist.CtField;
+import javassist.NotFoundException;
 
 import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.Path;
@@ -89,6 +92,17 @@ public class ClassAnalyzer {
     }
 
     /**
+     * Analyzes the class annotations.
+     *
+     * @param classResult The class result
+     */
+    private void analyzeAnnotations(final ClassResult classResult) {
+        for (final Object annotation : ctClass.getAvailableAnnotations()) {
+            AnnotationInterpreter.interpretClassAnnotation(annotation, classResult);
+        }
+    }
+
+    /**
      * Analyzes the current class by searching for JAX-RS relevant information (in both the annotations and the byte code of methods).
      *
      * @param classResult The class result to update
@@ -104,6 +118,8 @@ public class ClassAnalyzer {
         Stream.of(ctClass.getMethods())
                 .map(methodAnalyzer::analyze).filter(Objects::nonNull)
                 .forEach(classResult::add);
+
+        analyzeFields(classResult);
     }
 
     /**
@@ -121,13 +137,19 @@ public class ClassAnalyzer {
     }
 
     /**
-     * Analyzes the class annotations.
+     * Analyzes the annotated JAX-RS fields on this class. Inherits the fields to all method results.
      *
-     * @param classResult The class result
+     * @param classResult The class result to update
      */
-    private void analyzeAnnotations(final ClassResult classResult) {
-        for (final Object annotation : ctClass.getAvailableAnnotations()) {
-            AnnotationInterpreter.interpretClassAnnotation(annotation, classResult);
+    private void analyzeFields(final ClassResult classResult) {
+        for (CtField ctField : ctClass.getDeclaredFields()) {
+            try {
+                final String fieldType = ctField.getType().getName();
+                Stream.of(ctField.getAnnotations()).forEach(a -> AnnotationInterpreter.interpretFieldAnnotation(a, fieldType, classResult.getMethods()));
+
+            } catch (ClassNotFoundException | NotFoundException e) {
+                LogProvider.getLogger().accept("Could not analyze class field " + e.getMessage());
+            }
         }
     }
 
