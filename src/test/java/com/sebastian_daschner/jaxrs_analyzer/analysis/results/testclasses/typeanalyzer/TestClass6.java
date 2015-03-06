@@ -20,8 +20,7 @@ import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeRepresentation;
 
 import javax.json.Json;
 import javax.json.JsonObject;
-import java.util.List;
-import java.util.Set;
+import javax.xml.bind.annotation.XmlElement;
 
 /**
  * @author Sebastian Daschner
@@ -39,16 +38,23 @@ public class TestClass6 {
         return second;
     }
 
-    public void getFake() {}
+    // not taken, wrong return type
+    public void getFake() {
+    }
 
     public String isFake() {
+        return second;
+    }
+
+    @XmlElement
+    private String getThird() {
         return second;
     }
 
     public static TypeRepresentation getResult() {
         final TypeRepresentation representation = new TypeRepresentation(TestClass6.class.getName());
 
-        final JsonObject jsonObject = Json.createObjectBuilder().add("first", false).add("second", "string").build();
+        final JsonObject jsonObject = Json.createObjectBuilder().add("first", false).add("second", "string").add("third", "string").build();
 
         representation.getRepresentations().put("application/json", jsonObject);
         return representation;

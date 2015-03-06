@@ -20,24 +20,29 @@ import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeRepresentation;
 
 import javax.json.Json;
 import javax.json.JsonObject;
+import javax.xml.bind.annotation.*;
 import java.util.List;
 import java.util.Set;
 
 /**
  * @author Sebastian Daschner
  */
+@XmlRootElement
+@XmlAccessorType(XmlAccessType.FIELD)
 public class TestClass5 {
 
     private List<String> first;
+    private transient String third;
+    @XmlTransient
+    private String fourth;
 
-    private Set<String> second;
-
-    public List<String> getFirst() {
+    public List<String> getIgnored() {
         return first;
     }
 
+    @XmlElement
     public Set<String> getSecond() {
-        return second;
+        return null;
     }
 
     public static TypeRepresentation getResult() {

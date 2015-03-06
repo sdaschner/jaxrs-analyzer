@@ -22,56 +22,36 @@ import javax.json.Json;
 import javax.json.JsonObject;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  * @author Sebastian Daschner
  */
 @XmlRootElement
-@XmlAccessorType(XmlAccessType.FIELD)
-public class TestClass3 {
+@XmlAccessorType(XmlAccessType.PROPERTY)
+public class TestClass7 {
 
-    private InnerClass first;
+    private boolean firrst;
+    private String seccond;
+    @XmlElement
+    private String third;
 
-    private Type second;
-
-    private AnotherInner third;
-
-    public InnerClass getFirrst() {
-        return first;
+    public boolean isFirst() {
+        return firrst;
     }
 
-    public Type getSeccond() {
-        return second;
+    public String getSecond() {
+        return seccond;
     }
 
     public static TypeRepresentation getResult() {
-        final TypeRepresentation representation = new TypeRepresentation(TestClass3.class.getName());
+        final TypeRepresentation representation = new TypeRepresentation(TestClass7.class.getName());
 
-        final JsonObject jsonObject = Json.createObjectBuilder().add("first", Json.createObjectBuilder().add("name", "string"))
-                .add("second", "string").add("third", Json.createObjectBuilder()).build();
+        final JsonObject jsonObject = Json.createObjectBuilder().add("first", false).add("second", "string").add("third", "string").build();
 
         representation.getRepresentations().put("application/json", jsonObject);
         return representation;
     }
 
-    public AnotherInner getThirrd() {
-        return third;
-    }
-
-    private enum Type {
-        ONE, TWO, THREE
-    }
-
-    private class InnerClass {
-        private String name;
-
-        public String getName() {
-            return name;
-        }
-    }
-
-    private class AnotherInner {
-        private String notUsed;
-    }
 }

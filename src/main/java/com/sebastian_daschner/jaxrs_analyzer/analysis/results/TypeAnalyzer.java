@@ -26,6 +26,9 @@ import javassist.bytecode.SignatureAttribute;
 
 import javax.json.*;
 import javax.ws.rs.core.MediaType;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlTransient;
 import java.lang.reflect.Modifier;
 import java.util.List;
@@ -103,32 +106,53 @@ class TypeAnalyzer {
             return arrayBuilder.build();
         }
 
-        final CtClass ctClass;
         try {
-            ctClass = ClassPool.getDefault().get(type);
-        } catch (NotFoundException e) {
+            final CtClass ctClass = ClassPool.getDefault().get(type);
+
+            return analyzeClass(ctClass);
+
+        } catch (NotFoundException | ClassNotFoundException e) {
+            LogProvider.getLogger().accept("Could not analyze class for type analysis: " + e.getMessage());
             return Json.createObjectBuilder().build();
         }
+    }
 
+    private static JsonValue analyzeClass(final CtClass ctClass) throws ClassNotFoundException {
         if (ctClass.isEnum())
             return EMPTY_JSON_STRING;
 
-        // TODO analyze other XMLAccessorTypes -> assuming PUBLIC_MEMBER
-        // analyze superclasses for JAXB annotations
+        // TODO analyze & test inheritance
 
-        final List<CtField> publicFields = Stream.of(ctClass.getFields()).filter(TypeAnalyzer::isRelevant).collect(Collectors.toList());
-        final List<CtMethod> publicGetters = Stream.of(ctClass.getMethods()).filter(TypeAnalyzer::isRelevant).collect(Collectors.toList());
+        final XmlAccessType value;
+        if (ctClass.hasAnnotation(XmlAccessorType.class))
+            value = ((XmlAccessorType) ctClass.getAnnotation(XmlAccessorType.class)).value();
+        else
+            value = XmlAccessType.PUBLIC_MEMBER;
+
+        final List<CtField> relevantFields = Stream.of(ctClass.getDeclaredFields()).filter(f -> isRelevant(f, value)).collect(Collectors.toList());
+        final List<CtMethod> relevantGetters = Stream.of(ctClass.getDeclaredMethods()).filter(m -> isRelevant(m, value)).collect(Collectors.toList());
 
         final JsonObjectBuilder builder = Json.createObjectBuilder();
 
-        publicFields.stream().map(TypeAnalyzer::mapField).filter(Objects::nonNull).forEach(p -> addToObject(builder, p.getLeft(), p.getRight()));
-        publicGetters.stream().map(TypeAnalyzer::mapGetter).filter(Objects::nonNull).forEach(p -> addToObject(builder, p.getLeft(), p.getRight()));
+        relevantFields.stream().map(TypeAnalyzer::mapField).filter(Objects::nonNull).forEach(p -> addToObject(builder, p.getLeft(), p.getRight()));
+        relevantGetters.stream().map(TypeAnalyzer::mapGetter).filter(Objects::nonNull).forEach(p -> addToObject(builder, p.getLeft(), p.getRight()));
 
         return builder.build();
     }
 
-    private static boolean isRelevant(final CtField field) {
-        return Modifier.isPublic(field.getModifiers()) && !Modifier.isStatic(field.getModifiers()) && !field.hasAnnotation(XmlTransient.class);
+    private static boolean isRelevant(final CtField field, final XmlAccessType accessType) {
+        final int modifiers = field.getModifiers();
+        if (field.hasAnnotation(XmlElement.class))
+            return true;
+
+        if (accessType == XmlAccessType.FIELD)
+            // always take, unless static or transient
+            return !Modifier.isTransient(modifiers) && !Modifier.isStatic(modifiers) && !field.hasAnnotation(XmlTransient.class);
+        else if (accessType == XmlAccessType.PUBLIC_MEMBER)
+            // only for public, non-static
+            return Modifier.isPublic(modifiers) && !Modifier.isStatic(modifiers) && !field.hasAnnotation(XmlTransient.class);
+
+        return false;
     }
 
     /**
@@ -138,8 +162,23 @@ class TypeAnalyzer {
      * @param method The method
      * @return {@code true} if the method should be analyzed further
      */
-    private static boolean isRelevant(final CtMethod method) {
-        if (!Modifier.isPublic(method.getModifiers()) || Modifier.isStatic(method.getModifiers()) || method.hasAnnotation(XmlTransient.class))
+    private static boolean isRelevant(final CtMethod method, final XmlAccessType accessType) {
+        if (!isGetter(method))
+            return false;
+
+        if (method.hasAnnotation(XmlElement.class))
+            return true;
+
+        if (accessType == XmlAccessType.PROPERTY)
+            return !method.hasAnnotation(XmlTransient.class);
+        else if (accessType == XmlAccessType.PUBLIC_MEMBER)
+            return Modifier.isPublic(method.getModifiers()) && !method.hasAnnotation(XmlTransient.class);
+
+        return false;
+    }
+
+    private static boolean isGetter(final CtMethod method) {
+        if (Modifier.isStatic(method.getModifiers()))
             return false;
 
         final String name = method.getName();
