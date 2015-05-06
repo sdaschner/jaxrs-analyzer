@@ -40,6 +40,8 @@ public class TestClass6 {
         instructions.add(new SizeChangingInstruction("monitorenter", 0, 1));
         instructions.add(new LoadInstruction(2, "java.lang.Object", "variable$2"));
         instructions.add(new SizeChangingInstruction("monitorexit", 0, 1));
+        instructions.add(new ExceptionHandlerInstruction());
+        instructions.add(new StoreInstruction(3, "java.lang.Object", "variable$3"));
         instructions.add(new PushInstruction(6));
         instructions.add(new LoadInstruction(1, "int", "number"));
         instructions.add(new SizeChangingInstruction("idiv", 1, 2));
@@ -48,6 +50,8 @@ public class TestClass6 {
         instructions.add(new LoadInstruction(2, "java.lang.Object", "variable$2"));
         instructions.add(new SizeChangingInstruction("monitorexit", 0, 1));
         instructions.add(new ReturnInstruction());
+        instructions.add(new LoadInstruction(3, "java.lang.Object", "variable$3"));
+        instructions.add(new ThrowInstruction());
 
         return instructions;
     }

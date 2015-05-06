@@ -19,6 +19,7 @@ package com.sebastian_daschner.jaxrs_analyzer.analysis.bytecode.simulation;
 import com.sebastian_daschner.jaxrs_analyzer.LogProvider;
 import com.sebastian_daschner.jaxrs_analyzer.analysis.utils.JavaUtils;
 import com.sebastian_daschner.jaxrs_analyzer.model.elements.Element;
+import com.sebastian_daschner.jaxrs_analyzer.model.elements.HttpResponse;
 import com.sebastian_daschner.jaxrs_analyzer.model.elements.MethodHandle;
 import com.sebastian_daschner.jaxrs_analyzer.model.instructions.*;
 import com.sebastian_daschner.jaxrs_analyzer.model.methods.Method;
@@ -122,6 +123,7 @@ public class MethodSimulator {
             case RETURN:
                 mergeReturnElement(runtimeStack.pop());
             case THROW:
+                mergePossibleResponse();
                 // stack has to be empty for further analysis
                 runtimeStack.clear();
                 break;
@@ -228,6 +230,15 @@ public class MethodSimulator {
      */
     private void mergeMethodHandleStore(final int index, final MethodHandle methodHandle) {
         localVariables.merge(index, new MethodHandle(methodHandle), Element::merge);
+    }
+
+    /**
+     * Checks if the current stack element is eligible for being merged with the returned element.
+     */
+    private void mergePossibleResponse() {
+        if (!runtimeStack.isEmpty() && HttpResponse.class.getName().equals(runtimeStack.peek().getType())) {
+            mergeReturnElement(runtimeStack.peek());
+        }
     }
 
     /**

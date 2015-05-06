@@ -72,7 +72,7 @@ class ResourceMethodContentAnalyzer extends MethodContentAnalyzer {
                     .collect(Collectors.toSet());
 
             // for non-Response methods add a default if there are non-Response objects or none objects at all
-            if (!Response.class.getName().equals(returnType) && (!possibleObjects.isEmpty() || returnedElement.getPossibleValues().isEmpty())) {
+            if (!Response.class.getName().equals(returnType)) {
                 final HttpResponse defaultResponse = new HttpResponse();
                 defaultResponse.getEntityTypes().add((Object.class.getName().equals(returnType)) ? returnedElement.getType() : returnType);
                 possibleObjects.stream().filter(o -> o instanceof JsonValue).map(o -> (JsonValue) o).forEach(defaultResponse.getInlineEntities()::add);

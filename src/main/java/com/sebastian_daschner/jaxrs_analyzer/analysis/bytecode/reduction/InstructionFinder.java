@@ -16,9 +16,9 @@
 
 package com.sebastian_daschner.jaxrs_analyzer.analysis.bytecode.reduction;
 
-import com.sebastian_daschner.jaxrs_analyzer.model.instructions.LoadStoreInstruction;
 import com.sebastian_daschner.jaxrs_analyzer.model.instructions.Instruction;
 import com.sebastian_daschner.jaxrs_analyzer.model.instructions.LoadInstruction;
+import com.sebastian_daschner.jaxrs_analyzer.model.instructions.LoadStoreInstruction;
 
 import java.util.HashSet;
 import java.util.List;
@@ -69,8 +69,8 @@ final class InstructionFinder {
      * @param instructions The instructions where to search
      * @return The positions of all found return instructions
      */
-    static Set<Integer> findReturns(final List<Instruction> instructions) {
-        return find(instruction -> instruction.getType() == Instruction.Type.RETURN, instructions);
+    static Set<Integer> findReturnsAndThrows(final List<Instruction> instructions) {
+        return find(instruction -> instruction.getType() == Instruction.Type.RETURN || instruction.getType() == Instruction.Type.THROW, instructions);
     }
 
     /**

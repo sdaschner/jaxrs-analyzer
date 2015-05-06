@@ -201,6 +201,7 @@ public class ProjectAnalyzerTest {
         thirdResponseBody.getRepresentations().put("application/json", Json.createArrayBuilder().add("string").add(0).build());
         ResourceMethod fifthPost = ResourceMethodBuilder.withMethod(HttpMethod.POST)
                 .andResponse(202, ResponseBuilder.withResponseBody(secondResponseBody).build())
+                .andResponse(500, ResponseBuilder.newBuilder().build())
                 .andResponse(200, ResponseBuilder.withResponseBody(thirdResponseBody).build()).build();
 
         addMethods(resources, "json_tests", twelfthGet, fifthPost);

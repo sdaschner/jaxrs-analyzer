@@ -21,6 +21,7 @@ import javax.json.JsonObject;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 
 /**
@@ -38,6 +39,8 @@ public class JsonResources {
     public Response post() {
         if ("".equals(""))
             return Response.accepted(Json.createObjectBuilder().add("key", "value").build()).build();
+        if ("a".equals("b"))
+            throw new WebApplicationException(Response.Status.INTERNAL_SERVER_ERROR);
         return Response.ok(Json.createArrayBuilder().add("duke").add(42).build()).build();
     }
 

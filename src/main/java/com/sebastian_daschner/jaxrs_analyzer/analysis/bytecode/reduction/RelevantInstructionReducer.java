@@ -70,7 +70,7 @@ public class RelevantInstructionReducer {
         final List<Instruction> visitedInstructions = new LinkedList<>();
         final Set<Integer> visitedInstructionPositions = new HashSet<>();
         final Set<Integer> handledLoadIndexes = new HashSet<>();
-        final Set<Integer> backtrackPositions = new LinkedHashSet<>(findSortedReturns());
+        final Set<Integer> backtrackPositions = new LinkedHashSet<>(findSortedBacktrackPositions());
 
         while (!visitedInstructionPositions.containsAll(backtrackPositions)) {
 
@@ -101,12 +101,12 @@ public class RelevantInstructionReducer {
         return visitedInstructions;
     }
 
-    private List<Integer> findSortedReturns() {
-        final List<Integer> returnPositions = new LinkedList<>(InstructionFinder.findReturns(instructions));
+    private List<Integer> findSortedBacktrackPositions() {
+        final List<Integer> startPositions = new LinkedList<>(InstructionFinder.findReturnsAndThrows(instructions));
 
         // start with last return
-        Collections.sort(returnPositions, Comparator.reverseOrder());
-        return returnPositions;
+        Collections.sort(startPositions, Comparator.reverseOrder());
+        return startPositions;
     }
 
 

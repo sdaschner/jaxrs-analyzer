@@ -25,6 +25,7 @@ import com.sebastian_daschner.jaxrs_analyzer.model.methods.IdentifiableMethod;
 import com.sebastian_daschner.jaxrs_analyzer.model.methods.Method;
 import com.sebastian_daschner.jaxrs_analyzer.model.methods.MethodIdentifier;
 
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.container.ResourceContext;
 import javax.ws.rs.core.*;
 import java.lang.annotation.Annotation;
@@ -251,6 +252,13 @@ enum KnownResponseResultMethod implements IdentifiableMethod {
     }),
 
     // other methods --------------------------
+
+    WEB_APPLICATION_EXCEPTION(ofNonStatic(WebApplicationException.class.getName(), "<init>", null, RESPONSE_STATUS), (notAvailable, arguments) -> {
+        final Element object = new Element(HTTP_RESPONSE, new HttpResponse());
+        arguments.get(0).getPossibleValues().stream()
+                .map(status -> ((Response.Status) status).getStatusCode()).forEach(s -> addStatus(object, s));
+        return object;
+    }),
 
     RESOURCE_CONTEXT_INIT(ofNonStatic(RESOURCE_CONTEXT, "getResource", OBJECT, "java.lang.Class"),
             (object, arguments) -> new Element(arguments.get(0).getPossibleValues().stream()
