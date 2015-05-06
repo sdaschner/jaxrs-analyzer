@@ -11,9 +11,7 @@ public class TestClass3 {
     }
 
     public static String getResult() {
-        // TODO uncomment
-//        return "com.sebastian_daschner.jaxrs_analyzer.analysis.project.methods.testclasses.subresource.TestClass3$SubResource";
-        return "java.lang.Object";
+        return "com.sebastian_daschner.jaxrs_analyzer.analysis.project.methods.testclasses.subresource.TestClass3$SubResource";
     }
 
     private class SubResource {

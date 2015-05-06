@@ -17,11 +17,12 @@
 package com.sebastian_daschner.jaxrs_analyzer.analysis.bytecode.simulation;
 
 import com.sebastian_daschner.jaxrs_analyzer.LogProvider;
-import com.sebastian_daschner.jaxrs_analyzer.model.instructions.*;
-import com.sebastian_daschner.jaxrs_analyzer.model.methods.MethodIdentifier;
+import com.sebastian_daschner.jaxrs_analyzer.analysis.utils.JavaUtils;
 import com.sebastian_daschner.jaxrs_analyzer.model.elements.Element;
 import com.sebastian_daschner.jaxrs_analyzer.model.elements.MethodHandle;
+import com.sebastian_daschner.jaxrs_analyzer.model.instructions.*;
 import com.sebastian_daschner.jaxrs_analyzer.model.methods.Method;
+import com.sebastian_daschner.jaxrs_analyzer.model.methods.MethodIdentifier;
 
 import java.lang.reflect.Field;
 import java.util.*;
@@ -214,7 +215,7 @@ public class MethodSimulator {
      * @param element      The element to merge
      */
     private void mergeElementStore(final int index, final String variableType, final Element element) {
-        final Element created = new Element(variableType);
+        final Element created = new Element(JavaUtils.determineMoreSpecificType(element.getType(), variableType));
         created.merge(element);
         localVariables.merge(index, created, Element::merge);
     }

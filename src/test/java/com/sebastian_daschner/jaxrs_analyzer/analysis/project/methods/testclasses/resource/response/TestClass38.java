@@ -16,8 +16,8 @@
 
 package com.sebastian_daschner.jaxrs_analyzer.analysis.project.methods.testclasses.resource.response;
 
-import com.sebastian_daschner.jaxrs_analyzer.model.elements.HttpResponse;
 import com.sebastian_daschner.jaxrs_analyzer.model.elements.Element;
+import com.sebastian_daschner.jaxrs_analyzer.model.elements.HttpResponse;
 import com.sebastian_daschner.jaxrs_analyzer.model.elements.JsonArray;
 import com.sebastian_daschner.jaxrs_analyzer.model.elements.JsonObject;
 
@@ -40,7 +40,9 @@ public class TestClass38 {
         final HttpResponse result = new HttpResponse();
 
         result.getStatuses().add(200);
-        result.getEntityTypes().add("javax.json.JsonStructure");
+//        result.getEntityTypes().add("javax.json.JsonStructure");
+        // TODO expect several types
+        result.getEntityTypes().add("javax.json.JsonArray");
 
         final JsonObject jsonObject = new JsonObject();
         jsonObject.getStructure().put("key", new Element("java.lang.String", "value"));

@@ -157,4 +157,49 @@ public final class JavaUtils {
         return type;
     }
 
+    /**
+     * Determines the type which is more "specific" (i. e. parameterized types are more "specific" than generic types,
+     * types which are not {@link Object} are less specific). If no exact statement can be made, the first type is chosen.
+     *
+     * @param firstType  The first type
+     * @param secondType The second type
+     * @return The more "specific" type
+     */
+    public static String determineMoreSpecificType(final String firstType, final String secondType) {
+        // return fast
+        if (OBJECT.equals(secondType) || firstType.equals(secondType)) {
+            return firstType;
+        }
+
+        final boolean firstTypeParameterized = firstType.contains("<");
+        final boolean secondTypeParameterized = secondType.contains("<");
+
+        if (firstTypeParameterized || secondTypeParameterized) {
+            if (firstTypeParameterized && !secondTypeParameterized) {
+                return firstType;
+            }
+
+            if (!firstTypeParameterized) {
+                return secondType;
+            }
+
+            return firstType.length() >= secondType.length() ? firstType : secondType;
+        }
+
+        final boolean firstTypeArray = firstType.contains("[");
+        final boolean secondTypeArray = secondType.contains("[");
+
+        if (firstTypeArray || secondTypeArray) {
+            if (firstTypeArray && !secondTypeArray) {
+                return firstType;
+            }
+
+            if (!firstTypeArray) {
+                return secondType;
+            }
+        }
+
+        return firstType;
+    }
+
 }
