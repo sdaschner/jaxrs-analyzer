@@ -38,7 +38,7 @@ public final class JavaUtils {
     private static final String OBJECT = Object.class.getName();
     private static final String LIST = List.class.getName();
     private static final String LIST_SEARCH = "List<";
-    private static final String SET= Set.class.getName();
+    private static final String SET = Set.class.getName();
     private static final String SET_SEARCH = "Set<";
 
     private JavaUtils() {
@@ -74,7 +74,7 @@ public final class JavaUtils {
      * Returns the return type of the method signature.
      *
      * @param signature The method signature
-     * @return The return type
+     * @return The return type ({@code null} for void)
      * @throws BadBytecode If the bytecode could not be analyzed
      */
     public static String getMethodReturnType(final SignatureAttribute.MethodSignature signature) throws BadBytecode {

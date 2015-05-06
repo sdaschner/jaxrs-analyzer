@@ -50,7 +50,6 @@ public class SwaggerBackendTest {
         final String actualOutput = cut.render(resources);
 
         assertEquals(expectedOutput, actualOutput);
-//        System.out.println(expectedOutput);
     }
 
     @Parameterized.Parameters

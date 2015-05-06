@@ -17,25 +17,22 @@
 package com.sebastian_daschner.jaxrs_analyzer.analysis.project.methods;
 
 import com.sebastian_daschner.jaxrs_analyzer.LogProvider;
-import com.sebastian_daschner.jaxrs_analyzer.analysis.utils.JavaUtils;
-import com.sebastian_daschner.jaxrs_analyzer.model.elements.HttpResponse;
-import com.sebastian_daschner.jaxrs_analyzer.model.results.ClassResult;
 import com.sebastian_daschner.jaxrs_analyzer.analysis.project.AnnotationInterpreter;
+import com.sebastian_daschner.jaxrs_analyzer.analysis.utils.JavaUtils;
+import com.sebastian_daschner.jaxrs_analyzer.model.results.ClassResult;
 import com.sebastian_daschner.jaxrs_analyzer.model.results.MethodResult;
 import javassist.CtClass;
 import javassist.CtMethod;
 import javassist.NotFoundException;
 import javassist.bytecode.BadBytecode;
-import javassist.bytecode.SignatureAttribute;
 
-import javax.json.JsonArray;
 import javax.json.JsonObject;
-import javax.json.JsonStructure;
-import javax.json.JsonValue;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
-import java.util.*;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Queue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -53,9 +50,8 @@ public class MethodAnalyzer {
             HeaderParam.class, FormParam.class, Context.class};
 
     private final Lock lock = new ReentrantLock();
-    private final ResponseMethodAnalyzer responseMethodAnalyzer = new ResponseMethodAnalyzer();
-    private final SubResourceLocatorMethodAnalyzer subResourceLocatorMethodAnalyzer = new SubResourceLocatorMethodAnalyzer();
-    private final JsonResponseMethodAnalyzer jsonResponseMethodAnalyzer = new JsonResponseMethodAnalyzer();
+    private final ResourceMethodContentAnalyzer resourceMethodAnalyzer = new ResourceMethodContentAnalyzer();
+    private final SubResourceLocatorMethodContentAnalyzer subResourceLocatorMethodAnalyzer = new SubResourceLocatorMethodContentAnalyzer();
     private List<CtClass> superClasses;
     private CtMethod annotatedSuperMethod;
     private CtMethod method;
@@ -63,7 +59,7 @@ public class MethodAnalyzer {
     /**
      * Analyzes the given method by searching for JAX-RS relevant information.
      *
-     * @return The method result or {@code null} if the method is not relevant
+     * @return The method result or {@code null} if the method is not relevant or could not be analyzed
      */
     public MethodResult analyze(final CtMethod ctMethod) {
         lock.lock();
@@ -151,7 +147,7 @@ public class MethodAnalyzer {
             return methodResult;
         }
 
-        analyzeReturnTypes(methodResult);
+        analyzeMethodContent(methodResult);
 
         return methodResult;
     }
@@ -220,33 +216,9 @@ public class MethodAnalyzer {
      * Analyzes the method return type and gathers further information for known return types (e.g. {@link Response} or {@link JsonObject}).
      *
      * @param methodResult The method result
-     * @throws BadBytecode If the content could not be analyzed
      */
-    private void analyzeReturnTypes(final MethodResult methodResult) throws BadBytecode {
-        final Set<Class<?>> jsonClasses = new HashSet<>(Arrays.asList(JsonObject.class, JsonStructure.class, JsonArray.class, JsonValue.class));
-
-        final String returnType = determineReturnType();
-
-        if (Response.class.getName().equals(returnType)) {
-            responseMethodAnalyzer.analyze(method, methodResult);
-        } else if (jsonClasses.stream().map(Class::getName).anyMatch(c -> c.equals(returnType))) {
-            jsonResponseMethodAnalyzer.analyze(method, methodResult);
-        } else {
-            final HttpResponse response = new HttpResponse();
-            response.getEntityTypes().add(returnType);
-            methodResult.getResponses().add(response);
-        }
-    }
-
-    /**
-     * Returns the return type of the method. The parameterized type is taken, if generics are used.
-     *
-     * @return The return type
-     * @throws BadBytecode If the method signature could not be analyzed
-     */
-    private String determineReturnType() throws BadBytecode {
-        final String sig = method.getGenericSignature() != null ? method.getGenericSignature() : method.getSignature();
-        return SignatureAttribute.toMethodSignature(sig).getReturnType().toString();
+    private void analyzeMethodContent(final MethodResult methodResult) {
+        resourceMethodAnalyzer.analyze(method, methodResult);
     }
 
     /**

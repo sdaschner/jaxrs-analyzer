@@ -140,8 +140,7 @@ public class ProjectAnalyzerTest {
 
         // complex/string
         ResourceMethod ninthGet = ResourceMethodBuilder.withMethod(HttpMethod.GET).andResponseMediaTypes("application/json")
-                // TODO change representation to String
-                .andResponse(200, ResponseBuilder.withResponseBody(new TypeRepresentation("java.lang.Object")).build()).build();
+                .andResponse(200, ResponseBuilder.withResponseBody(new TypeRepresentation("java.lang.String")).build()).build();
         addMethods(resources, "complex/string", ninthGet);
 
         // complex/status
