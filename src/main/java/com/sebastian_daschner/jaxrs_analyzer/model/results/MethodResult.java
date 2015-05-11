@@ -30,7 +30,7 @@ import java.util.Set;
  */
 public class MethodResult {
 
-    private final Set<String> acceptMediaTypes = new HashSet<>();
+    private final Set<String> requestMediaTypes = new HashSet<>();
     private final Set<String> responseMediaTypes = new HashSet<>();
     private final MethodParameters methodParameters = new MethodParameters();
     private final Set<HttpResponse> responses = new HashSet<>();
@@ -40,8 +40,8 @@ public class MethodResult {
     private ClassResult subResource;
     private ClassResult parentResource;
 
-    public Set<String> getAcceptMediaTypes() {
-        return acceptMediaTypes;
+    public Set<String> getRequestMediaTypes() {
+        return requestMediaTypes;
     }
 
     public Set<String> getResponseMediaTypes() {
@@ -104,7 +104,7 @@ public class MethodResult {
 
         final MethodResult that = (MethodResult) o;
 
-        if (!acceptMediaTypes.equals(that.acceptMediaTypes)) return false;
+        if (!requestMediaTypes.equals(that.requestMediaTypes)) return false;
         if (!responseMediaTypes.equals(that.responseMediaTypes)) return false;
         if (!methodParameters.equals(that.methodParameters)) return false;
         if (!responses.equals(that.responses)) return false;
@@ -118,7 +118,7 @@ public class MethodResult {
 
     @Override
     public int hashCode() {
-        int result = acceptMediaTypes.hashCode();
+        int result = requestMediaTypes.hashCode();
         result = 31 * result + responseMediaTypes.hashCode();
         result = 31 * result + methodParameters.hashCode();
         result = 31 * result + responses.hashCode();
@@ -132,7 +132,7 @@ public class MethodResult {
     @Override
     public String toString() {
         return "MethodResult{" +
-                "acceptMediaTypes=" + acceptMediaTypes +
+                "requestMediaTypes=" + requestMediaTypes +
                 ", responseMediaTypes=" + responseMediaTypes +
                 ", methodParameters=" + methodParameters +
                 ", responses=" + responses +

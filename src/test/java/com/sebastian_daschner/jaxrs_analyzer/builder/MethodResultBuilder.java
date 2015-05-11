@@ -51,8 +51,8 @@ public class MethodResultBuilder {
         return this;
     }
 
-    public MethodResultBuilder andAcceptMediaTypes(final String... mediaTypes) {
-        methodResult.getAcceptMediaTypes().addAll(Arrays.asList(mediaTypes));
+    public MethodResultBuilder andRequestMediaTypes(final String... mediaTypes) {
+        methodResult.getRequestMediaTypes().addAll(Arrays.asList(mediaTypes));
         return this;
     }
 

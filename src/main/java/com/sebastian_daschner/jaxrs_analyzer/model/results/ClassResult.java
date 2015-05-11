@@ -30,7 +30,7 @@ public class ClassResult {
     private String applicationPath;
     private String resourcePath;
     private final Set<MethodResult> methods = new HashSet<>();
-    private final Set<String> acceptMediaTypes = new HashSet<>();
+    private final Set<String> requestMediaTypes = new HashSet<>();
     private final Set<String> responseMediaTypes = new HashSet<>();
     private MethodResult parentSubResourceLocator;
 
@@ -59,8 +59,8 @@ public class ClassResult {
         methodResult.setParentResource(this);
     }
 
-    public Set<String> getAcceptMediaTypes() {
-        return acceptMediaTypes;
+    public Set<String> getRequestMediaTypes() {
+        return requestMediaTypes;
     }
 
     public Set<String> getResponseMediaTypes() {
@@ -82,7 +82,7 @@ public class ClassResult {
 
         final ClassResult that = (ClassResult) o;
 
-        if (!acceptMediaTypes.equals(that.acceptMediaTypes)) return false;
+        if (!requestMediaTypes.equals(that.requestMediaTypes)) return false;
         if (applicationPath != null ? !applicationPath.equals(that.applicationPath) : that.applicationPath != null)
             return false;
         if (!methods.equals(that.methods)) return false;
@@ -95,7 +95,7 @@ public class ClassResult {
         int result = applicationPath != null ? applicationPath.hashCode() : 0;
         result = 31 * result + (resourcePath != null ? resourcePath.hashCode() : 0);
         result = 31 * result + methods.hashCode();
-        result = 31 * result + acceptMediaTypes.hashCode();
+        result = 31 * result + requestMediaTypes.hashCode();
         result = 31 * result + responseMediaTypes.hashCode();
         return result;
     }
@@ -106,7 +106,7 @@ public class ClassResult {
                 "applicationPath='" + applicationPath + '\'' +
                 ", resourcePath='" + resourcePath + '\'' +
                 ", methods=" + methods +
-                ", acceptMediaTypes=" + acceptMediaTypes +
+                ", requestMediaTypes=" + requestMediaTypes +
                 ", responseMediaTypes=" + responseMediaTypes +
                 ", parentSubResourceLocator=" + (parentSubResourceLocator == null ? "null" : "notNull") +
                 '}';

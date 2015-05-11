@@ -153,9 +153,9 @@ public class ResultInterpreter {
      */
     private void addMediaTypes(final MethodResult methodResult, final ClassResult classResult, final ResourceMethod resourceMethod) {
         // accept media types -> inherit
-        resourceMethod.getAcceptMediaTypes().addAll(methodResult.getAcceptMediaTypes());
-        if (resourceMethod.getAcceptMediaTypes().isEmpty()) {
-            resourceMethod.getAcceptMediaTypes().addAll(classResult.getAcceptMediaTypes());
+        resourceMethod.getRequestMediaTypes().addAll(methodResult.getRequestMediaTypes());
+        if (resourceMethod.getRequestMediaTypes().isEmpty()) {
+            resourceMethod.getRequestMediaTypes().addAll(classResult.getRequestMediaTypes());
         }
 
         // response media types -> use annotations if not yet present

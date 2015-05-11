@@ -46,7 +46,7 @@ public final class AnnotationInterpreter {
 
         consumeIfMatches(annotation, Path.class, path -> result.setResourcePath(path.value()));
 
-        consumeIfMatches(annotation, Consumes.class, consumes -> result.getAcceptMediaTypes().addAll(Arrays.asList(consumes.value())));
+        consumeIfMatches(annotation, Consumes.class, consumes -> result.getRequestMediaTypes().addAll(Arrays.asList(consumes.value())));
 
         consumeIfMatches(annotation, Produces.class, produces -> result.getResponseMediaTypes().addAll(Arrays.asList(produces.value())));
     }
@@ -72,7 +72,7 @@ public final class AnnotationInterpreter {
 
         consumeIfMatches(annotation, OPTIONS.class, m -> result.setHttpMethod(com.sebastian_daschner.jaxrs_analyzer.model.rest.HttpMethod.OPTIONS));
 
-        consumeIfMatches(annotation, Consumes.class, consumes -> result.getAcceptMediaTypes().addAll(Arrays.asList(consumes.value())));
+        consumeIfMatches(annotation, Consumes.class, consumes -> result.getRequestMediaTypes().addAll(Arrays.asList(consumes.value())));
 
         consumeIfMatches(annotation, Produces.class, produces -> result.getResponseMediaTypes().addAll(Arrays.asList(produces.value())));
     }

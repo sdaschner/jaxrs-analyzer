@@ -18,6 +18,7 @@ package com.sebastian_daschner.jaxrs_analyzer;
 
 import com.sebastian_daschner.jaxrs_analyzer.analysis.ProjectAnalyzer;
 import com.sebastian_daschner.jaxrs_analyzer.backend.Backend;
+import com.sebastian_daschner.jaxrs_analyzer.backend.asciidoc.AsciiDocBackend;
 import com.sebastian_daschner.jaxrs_analyzer.backend.plaintext.PlainTextBackend;
 import com.sebastian_daschner.jaxrs_analyzer.backend.swagger.SwaggerBackend;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.Resources;
@@ -55,10 +56,22 @@ public class Main {
 
         final Resources resources = new ProjectAnalyzer().analyze(projectLocation);
 
-        final Backend backend = args.length >= 2 && "plaintext".equals(args[1]) ? new PlainTextBackend() : new SwaggerBackend();
+        final Backend backend = chooseBackend(args.length >= 2 ? args[1] : null);
 
         final String output = backend.render(resources);
         System.out.println(output);
+    }
+
+    private static Backend chooseBackend(final String backendName) {
+        switch (backendName) {
+            case "plaintext":
+                return new PlainTextBackend();
+            case "asciidoc":
+                return new AsciiDocBackend();
+            case "swagger":
+            default:
+                return new SwaggerBackend();
+        }
     }
 
 }

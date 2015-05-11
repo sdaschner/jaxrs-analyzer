@@ -25,7 +25,7 @@ import java.util.*;
  */
 public class ResourceMethod {
 
-    private final Set<String> acceptMediaTypes = new HashSet<>();
+    private final Set<String> requestMediaTypes = new HashSet<>();
     private final Set<String> responseMediaTypes = new HashSet<>();
     private final Map<Integer, Response> responses = new HashMap<>();
 
@@ -46,8 +46,8 @@ public class ResourceMethod {
         this.methodParameters = methodParameters;
     }
 
-    public Set<String> getAcceptMediaTypes() {
-        return acceptMediaTypes;
+    public Set<String> getRequestMediaTypes() {
+        return requestMediaTypes;
     }
 
     public Set<String> getResponseMediaTypes() {
@@ -81,7 +81,7 @@ public class ResourceMethod {
 
         final ResourceMethod that = (ResourceMethod) o;
 
-        if (!acceptMediaTypes.equals(that.acceptMediaTypes)) return false;
+        if (!requestMediaTypes.equals(that.requestMediaTypes)) return false;
         if (!responseMediaTypes.equals(that.responseMediaTypes)) return false;
         if (!responses.equals(that.responses)) return false;
         if (!methodParameters.equals(that.methodParameters)) return false;
@@ -91,7 +91,7 @@ public class ResourceMethod {
 
     @Override
     public int hashCode() {
-        int result = acceptMediaTypes.hashCode();
+        int result = requestMediaTypes.hashCode();
         result = 31 * result + responseMediaTypes.hashCode();
         result = 31 * result + responses.hashCode();
         result = 31 * result + methodParameters.hashCode();
@@ -103,7 +103,7 @@ public class ResourceMethod {
     @Override
     public String toString() {
         return "ResourceMethod{" +
-                "acceptMediaTypes=" + acceptMediaTypes +
+                "requestMediaTypes=" + requestMediaTypes +
                 ", responseMediaTypes=" + responseMediaTypes +
                 ", responses=" + responses +
                 ", methodParameters=" + methodParameters +

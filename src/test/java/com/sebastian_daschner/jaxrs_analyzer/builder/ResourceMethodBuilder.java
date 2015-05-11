@@ -51,7 +51,7 @@ public class ResourceMethodBuilder {
     }
 
     public ResourceMethodBuilder andAcceptMediaTypes(final String... mediaTypes) {
-        method.getAcceptMediaTypes().addAll(Arrays.asList(mediaTypes));
+        method.getRequestMediaTypes().addAll(Arrays.asList(mediaTypes));
         return this;
     }
 

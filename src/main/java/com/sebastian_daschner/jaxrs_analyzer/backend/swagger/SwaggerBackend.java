@@ -92,7 +92,7 @@ public class SwaggerBackend implements Backend {
 
     private JsonObjectBuilder buildForMethod(final ResourceMethod method) {
         final JsonArrayBuilder consumes = Json.createArrayBuilder();
-        method.getAcceptMediaTypes().stream().forEach(consumes::add);
+        method.getRequestMediaTypes().stream().forEach(consumes::add);
 
         final JsonArrayBuilder produces = Json.createArrayBuilder();
         method.getResponseMediaTypes().stream().forEach(produces::add);

@@ -1,20 +1,4 @@
-/*
- * Copyright (C) 2015 Sebastian Daschner, sebastian-daschner.com
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-package com.sebastian_daschner.jaxrs_analyzer.backend.plaintext;
+package com.sebastian_daschner.jaxrs_analyzer.backend.asciidoc;
 
 import com.sebastian_daschner.jaxrs_analyzer.analysis.utils.StringUtils;
 import com.sebastian_daschner.jaxrs_analyzer.backend.Backend;
@@ -32,14 +16,14 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
 
 /**
- * A thread-safe backend which produces a plain text representation of the JAX-RS analysis.
+ * A backend implementation which produces an AsciiDoc representation of the JAX-RS project.
  *
  * @author Sebastian Daschner
  */
-public class PlainTextBackend implements Backend {
+public class AsciiDocBackend implements Backend {
 
-    private static final String REST_HEADER = "REST resources:\n\n";
-    private static final String TYPE_WILDCARD = "*/*";
+    private static final String DOCUMENT_TITLE = "= REST resources\n";
+    private static final String TYPE_WILDCARD = "\\*/*";
 
     private final Lock lock = new ReentrantLock();
     private StringBuilder builder;
@@ -68,7 +52,9 @@ public class PlainTextBackend implements Backend {
     }
 
     private void appendHeader() {
-        builder.append(REST_HEADER);
+        builder.append(DOCUMENT_TITLE);
+        // TODO take correct version
+        builder.append("v0.1\n\n");
     }
 
     private void appendResource(final String resource) {
@@ -78,40 +64,39 @@ public class PlainTextBackend implements Backend {
                     appendMethod(resources.getBasePath(), resource, resourceMethod);
                     appendRequest(resourceMethod);
                     appendResponse(resourceMethod);
-                    appendResourceEnd();
                 });
     }
 
     private void appendMethod(final String baseUri, final String resource, final ResourceMethod resourceMethod) {
-        builder.append(resourceMethod.getMethod()).append(' ');
+        builder.append("== `").append(resourceMethod.getMethod()).append(' ');
         if (!StringUtils.isBlank(baseUri))
             builder.append(baseUri).append('/');
-        builder.append(resource).append(":\n");
+        builder.append(resource).append("`\n\n");
     }
 
     private void appendRequest(final ResourceMethod resourceMethod) {
-        builder.append(" Request:\n");
+        builder.append("=== Request\n");
 
         if (resourceMethod.getRequestBody() != null) {
-            builder.append("  Content-Type: ");
+            builder.append("*Content-Type*: `");
             builder.append(resourceMethod.getRequestMediaTypes().isEmpty() ? TYPE_WILDCARD : toString(resourceMethod.getRequestMediaTypes()));
-            builder.append('\n');
+            builder.append("` + \n");
 
-            builder.append("  Request Body: ").append(resourceMethod.getRequestBody().getType()).append('\n');
+            builder.append("*Request Body*: (`").append(resourceMethod.getRequestBody().getType()).append("`) + \n");
             resourceMethod.getRequestBody().getRepresentations().entrySet().stream()
-                    .forEach(e -> builder.append("   ").append(e.getKey()).append(": ").append(e.getValue()).append('\n'));
+                    .forEach(e -> builder.append('`').append(e.getKey()).append("`: `").append(e.getValue()).append("` + \n"));
         } else {
-            builder.append("  No body\n");
+            builder.append("_No body_ + \n");
         }
 
         final MethodParameters parameters = resourceMethod.getMethodParameters();
 
-        appendParams("  Path Param: ", parameters.getPathParams());
-        appendParams("  Query Param: ", parameters.getQueryParams());
-        appendParams("  Form Param: ", parameters.getFormParams());
-        appendParams("  Header Param: ", parameters.getHeaderParams());
-        appendParams("  Cookie Param: ", parameters.getCookieParams());
-        appendParams("  Matrix Param: ", parameters.getMatrixParams());
+        appendParams("*Path Param*: ", parameters.getPathParams());
+        appendParams("*Query Param*: ", parameters.getQueryParams());
+        appendParams("*Form Param*: ", parameters.getFormParams());
+        appendParams("*Header Param*: ", parameters.getHeaderParams());
+        appendParams("*Cookie Param*: ", parameters.getCookieParams());
+        appendParams("*Matrix Param*: ", parameters.getMatrixParams());
 
         builder.append('\n');
     }
@@ -122,38 +107,32 @@ public class PlainTextBackend implements Backend {
             builder.append(entry.getKey());
             builder.append(", ");
             builder.append(entry.getValue());
-            builder.append('\n');
+            builder.append(" + \n");
         }
     }
 
     private void appendResponse(final ResourceMethod resourceMethod) {
-        builder.append(" Response:\n");
+        builder.append("=== Response\n");
 
-        builder.append("  Content-Type: ");
+        builder.append("*Content-Type*: `");
         builder.append(resourceMethod.getResponseMediaTypes().isEmpty() ? TYPE_WILDCARD : toString(resourceMethod.getResponseMediaTypes()));
-        builder.append('\n');
+        builder.append("`\n\n");
 
         resourceMethod.getResponses().entrySet().stream().forEach(e -> {
-            builder.append("  Status Codes: ").append(e.getKey()).append('\n');
+            builder.append("==== `").append(e.getKey()).append(' ')
+                    .append(javax.ws.rs.core.Response.Status.fromStatusCode(e.getKey()).getReasonPhrase()).append("`\n");
             final Response response = e.getValue();
-            if (!response.getHeaders().isEmpty()) {
-                builder.append("   Header: ").append(response.getHeaders().stream().collect(Collectors.joining(", ")));
-                builder.append('\n');
-            }
+            response.getHeaders().forEach(h -> builder.append("*Header*: `").append(h).append("` + \n"));
+
             if (response.getResponseBody() != null) {
-                builder.append("   Response Body: ").append(response.getResponseBody().getType());
+                builder.append("*Response Body*: ").append("(`").append(response.getResponseBody().getType()).append("`) + \n");
                 // TODO remove JSON filtering
                 response.getResponseBody().getRepresentations().entrySet().stream().filter(r -> r.getValue() instanceof JsonValue)
-                        .forEach(r -> builder.append(" (").append(r.getKey()).append("): \n").append(r.getValue()));
-                builder.append('\n');
+                        .forEach(r -> builder.append('`').append(r.getKey()).append("`: `").append(r.getValue()).append("` + \n"));
             }
 
             builder.append('\n');
         });
-    }
-
-    private void appendResourceEnd() {
-        builder.append("\n");
     }
 
     private static String toString(final Set<?> set) {

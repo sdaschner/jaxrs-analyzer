@@ -48,7 +48,7 @@ public class ClassResultBuilder {
     }
 
     public ClassResultBuilder andAcceptMediaTypes(final String... mediaType) {
-        classResult.getAcceptMediaTypes().addAll(Arrays.asList(mediaType));
+        classResult.getRequestMediaTypes().addAll(Arrays.asList(mediaType));
         return this;
     }
 
