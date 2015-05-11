@@ -227,12 +227,17 @@ class TypeAnalyzer {
     }
 
     private static void addToObject(final JsonObjectBuilder builder, final String key, final String type) {
+        // default for all JSR-310 classes
+        if (type.startsWith("java.time")) {
+            builder.add(key, "date");
+            return;
+        }
+
         switch (type) {
             case "java.lang.String":
                 builder.add(key, "string");
                 break;
             case "java.util.Date":
-            case "java.time.LocalDate":
                 builder.add(key, "date");
                 break;
             case "java.lang.Integer":
