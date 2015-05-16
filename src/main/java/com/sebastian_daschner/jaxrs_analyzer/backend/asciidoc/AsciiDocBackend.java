@@ -2,10 +2,7 @@ package com.sebastian_daschner.jaxrs_analyzer.backend.asciidoc;
 
 import com.sebastian_daschner.jaxrs_analyzer.analysis.utils.StringUtils;
 import com.sebastian_daschner.jaxrs_analyzer.backend.Backend;
-import com.sebastian_daschner.jaxrs_analyzer.model.rest.MethodParameters;
-import com.sebastian_daschner.jaxrs_analyzer.model.rest.ResourceMethod;
-import com.sebastian_daschner.jaxrs_analyzer.model.rest.Resources;
-import com.sebastian_daschner.jaxrs_analyzer.model.rest.Response;
+import com.sebastian_daschner.jaxrs_analyzer.model.rest.*;
 
 import javax.json.JsonValue;
 import java.util.Comparator;
@@ -22,20 +19,24 @@ import java.util.stream.Collectors;
  */
 public class AsciiDocBackend implements Backend {
 
-    private static final String DOCUMENT_TITLE = "= REST resources\n";
+    private static final String DOCUMENT_TITLE = "= REST resources of ";
     private static final String TYPE_WILDCARD = "\\*/*";
 
     private final Lock lock = new ReentrantLock();
     private StringBuilder builder;
     private Resources resources;
+    private String projectName;
+    private String projectVersion;
 
     @Override
-    public String render(final Resources resources) {
+    public String render(final Project project) {
         lock.lock();
         try {
             // initialize fields
             builder = new StringBuilder();
-            this.resources = resources;
+            resources = project.getResources();
+            projectName = project.getName();
+            projectVersion = project.getVersion();
 
             return renderInternal();
         } finally {
@@ -52,9 +53,8 @@ public class AsciiDocBackend implements Backend {
     }
 
     private void appendHeader() {
-        builder.append(DOCUMENT_TITLE);
-        // TODO take correct version
-        builder.append("v0.1\n\n");
+        builder.append(DOCUMENT_TITLE).append(projectName).append('\n')
+                .append(projectVersion).append("\n\n");
     }
 
     private void appendResource(final String resource) {

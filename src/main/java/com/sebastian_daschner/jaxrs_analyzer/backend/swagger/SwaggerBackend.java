@@ -18,6 +18,7 @@ package com.sebastian_daschner.jaxrs_analyzer.backend.swagger;
 
 import com.sebastian_daschner.jaxrs_analyzer.backend.Backend;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.MethodParameters;
+import com.sebastian_daschner.jaxrs_analyzer.model.rest.Project;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.ResourceMethod;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.Resources;
 
@@ -38,22 +39,26 @@ import java.util.concurrent.locks.ReentrantLock;
 public class SwaggerBackend implements Backend {
 
     private static final String SWAGGER_VERSION = "2.0";
-    private static final String HOST = "example.com";
 
     private final Lock lock = new ReentrantLock();
     private Resources resources;
     private JsonObjectBuilder builder;
     private SchemaBuilder schemaBuilder;
+    private String projectName;
+    private String projectVersion;
+    private String projectDomain;
 
     @Override
-    public String render(final Resources resources) {
+    public String render(final Project project) {
         lock.lock();
         try {
             // initialize fields
             builder = Json.createObjectBuilder();
             schemaBuilder = new SchemaBuilder();
-            this.resources = resources;
-            // TODO take project name and version from Maven process
+            resources = project.getResources();
+            projectName = project.getName();
+            projectVersion = project.getVersion();
+            projectDomain = project.getDomain();
 
             return renderInternal();
         } finally {
@@ -70,12 +75,9 @@ public class SwaggerBackend implements Backend {
     }
 
     private void appendHeader() {
-        final String projectVersion = "0.1-SNAPSHOT";
-        final String projectName = "project";
-
         builder.add("swagger", SWAGGER_VERSION).add("info", Json.createObjectBuilder()
                 .add("version", projectVersion).add("title", projectName))
-                .add("host", HOST).add("basePath", '/' + resources.getBasePath()).add("schemas", Json.createArrayBuilder().add("http"));
+                .add("host", projectDomain).add("basePath", '/' + resources.getBasePath()).add("schemas", Json.createArrayBuilder().add("http"));
     }
 
     private void appendPaths() {

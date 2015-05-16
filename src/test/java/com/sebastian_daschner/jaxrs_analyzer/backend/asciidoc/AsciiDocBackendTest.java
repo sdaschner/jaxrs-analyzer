@@ -4,6 +4,7 @@ import com.sebastian_daschner.jaxrs_analyzer.builder.ResourceMethodBuilder;
 import com.sebastian_daschner.jaxrs_analyzer.builder.ResourcesBuilder;
 import com.sebastian_daschner.jaxrs_analyzer.builder.ResponseBuilder;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.HttpMethod;
+import com.sebastian_daschner.jaxrs_analyzer.model.rest.Project;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.Resources;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeRepresentation;
 import junit.framework.TestCase;
@@ -30,7 +31,8 @@ public class AsciiDocBackendTest extends TestCase {
 
     @Test
     public void test() {
-        final String actualOutput = cut.render(resources);
+        final Project project = new Project("project name", "1.0", "domain.tld", resources);
+        final String actualOutput = cut.render(project);
 
         assertEquals(expectedOutput, actualOutput);
     }
@@ -43,8 +45,8 @@ public class AsciiDocBackendTest extends TestCase {
 
         add(data, ResourcesBuilder.withBase("rest").andResource("res1", ResourceMethodBuilder.withMethod(HttpMethod.GET)
                         .andResponse(200, ResponseBuilder.withResponseBody(new TypeRepresentation("java.lang.String")).andHeaders("Location").build()).build()).build(),
-                "= REST resources\n" +
-                        "v0.1\n" +
+                "= REST resources of project name\n" +
+                        "1.0\n" +
                         "\n" +
                         "== `GET rest/res1`\n" +
                         "\n" +
@@ -63,8 +65,8 @@ public class AsciiDocBackendTest extends TestCase {
         add(data, ResourcesBuilder.withBase("rest")
                         .andResource("res1", ResourceMethodBuilder.withMethod(HttpMethod.GET)
                                 .andResponse(200, ResponseBuilder.withResponseBody(representation).build()).build()).build(),
-                "= REST resources\n" +
-                        "v0.1\n" +
+                "= REST resources of project name\n" +
+                        "1.0\n" +
                         "\n" +
                         "== `GET rest/res1`\n" +
                         "\n" +
@@ -83,8 +85,8 @@ public class AsciiDocBackendTest extends TestCase {
         add(data, ResourcesBuilder.withBase("rest")
                         .andResource("res1", ResourceMethodBuilder.withMethod(HttpMethod.GET)
                                 .andResponse(200, ResponseBuilder.withResponseBody(representation).build()).build()).build(),
-                "= REST resources\n" +
-                        "v0.1\n" +
+                "= REST resources of project name\n" +
+                        "1.0\n" +
                         "\n" +
                         "== `GET rest/res1`\n" +
                         "\n" +
@@ -104,8 +106,8 @@ public class AsciiDocBackendTest extends TestCase {
         add(data, ResourcesBuilder.withBase("rest")
                         .andResource("res1", ResourceMethodBuilder.withMethod(HttpMethod.GET)
                                 .andResponse(200, ResponseBuilder.withResponseBody(representation).build()).build()).build(),
-                "= REST resources\n" +
-                        "v0.1\n" +
+                "= REST resources of project name\n" +
+                        "1.0\n" +
                         "\n" +
                         "== `GET rest/res1`\n" +
                         "\n" +
@@ -125,8 +127,8 @@ public class AsciiDocBackendTest extends TestCase {
         add(data, ResourcesBuilder.withBase("rest")
                         .andResource("res1", ResourceMethodBuilder.withMethod(HttpMethod.GET)
                                 .andResponse(200, ResponseBuilder.withResponseBody(representation).build()).build()).build(),
-                "= REST resources\n" +
-                        "v0.1\n" +
+                "= REST resources of project name\n" +
+                        "1.0\n" +
                         "\n" +
                         "== `GET rest/res1`\n" +
                         "\n" +
@@ -145,8 +147,8 @@ public class AsciiDocBackendTest extends TestCase {
         add(data, ResourcesBuilder.withBase("rest")
                         .andResource("res1", ResourceMethodBuilder.withMethod(HttpMethod.GET)
                                 .andResponse(200, ResponseBuilder.withResponseBody(representation).build()).build()).build(),
-                "= REST resources\n" +
-                        "v0.1\n" +
+                "= REST resources of project name\n" +
+                        "1.0\n" +
                         "\n" +
                         "== `GET rest/res1`\n" +
                         "\n" +
@@ -165,8 +167,8 @@ public class AsciiDocBackendTest extends TestCase {
         add(data, ResourcesBuilder.withBase("rest")
                         .andResource("res1", ResourceMethodBuilder.withMethod(HttpMethod.POST).andRequestBodyType(representation).andAcceptMediaTypes("application/json")
                                 .andResponse(201, ResponseBuilder.newBuilder().andHeaders("Location").build()).build()).build(),
-                "= REST resources\n" +
-                        "v0.1\n" +
+                "= REST resources of project name\n" +
+                        "1.0\n" +
                         "\n" +
                         "== `POST rest/res1`\n" +
                         "\n" +
@@ -185,8 +187,8 @@ public class AsciiDocBackendTest extends TestCase {
                         .andResource("res1", ResourceMethodBuilder.withMethod(HttpMethod.POST).andRequestBodyType(representation).andAcceptMediaTypes("application/json")
                                 .andResponse(201, ResponseBuilder.newBuilder().andHeaders("Location").build()).build())
                         .andResource("res2", ResourceMethodBuilder.withMethod(HttpMethod.GET).andResponse(200, ResponseBuilder.newBuilder().build()).build()).build(),
-                "= REST resources\n" +
-                        "v0.1\n" +
+                "= REST resources of project name\n" +
+                        "1.0\n" +
                         "\n" +
                         "== `POST rest/res1`\n" +
                         "\n" +

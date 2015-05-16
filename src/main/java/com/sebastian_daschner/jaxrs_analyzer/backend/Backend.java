@@ -16,7 +16,7 @@
 
 package com.sebastian_daschner.jaxrs_analyzer.backend;
 
-import com.sebastian_daschner.jaxrs_analyzer.model.rest.Resources;
+import com.sebastian_daschner.jaxrs_analyzer.model.rest.Project;
 
 /**
  * Renders the analyzed JAX-RS resources into a String representation.
@@ -26,11 +26,11 @@ import com.sebastian_daschner.jaxrs_analyzer.model.rest.Resources;
 public interface Backend {
 
     /**
-     * Renders the content representation for the given resources.
+     * Renders the REST resources of the given project.
      *
-     * @param resources The resources to render
+     * @param project The project to render including all information and resources
      * @return The String representation
      */
-    String render(Resources resources);
+    String render(Project project);
 
 }

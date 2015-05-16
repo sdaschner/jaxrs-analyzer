@@ -21,6 +21,7 @@ import com.sebastian_daschner.jaxrs_analyzer.backend.Backend;
 import com.sebastian_daschner.jaxrs_analyzer.backend.asciidoc.AsciiDocBackend;
 import com.sebastian_daschner.jaxrs_analyzer.backend.plaintext.PlainTextBackend;
 import com.sebastian_daschner.jaxrs_analyzer.backend.swagger.SwaggerBackend;
+import com.sebastian_daschner.jaxrs_analyzer.model.rest.Project;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.Resources;
 
 import java.nio.file.Path;
@@ -33,16 +34,23 @@ import java.nio.file.Paths;
  */
 public class Main {
 
+    private static final String DEFAULT_NAME = "project";
+    private static final String DEFAULT_VERSION = "0.1-SNAPSHOT";
+    private static final String DEFAULT_DOMAIN = "example.com";
+
     /**
      * Inspects the JAX-RS test project and prints the gathered information as swagger JSON.
      *
      * @param args The arguments
      *             0: Path of the analyzed project
      *             1: Backend (swagger (default), plaintext)
+     *             2: Name of the project
+     *             3: Version of the project
+     *             4: Domain of the deployed project
      */
     public static void main(final String... args) {
         if (args.length < 1) {
-            System.err.println("Usage: java -jar rest-documentation-analyzer.jar <projectPath> [<backend>]");
+            System.err.println("Usage: java -jar rest-documentation-analyzer.jar <projectPath> [<backend>] [<project name>] [<project version>] [<project domain>]");
             System.err.println("Backends: swagger (default), plaintext");
             System.exit(1);
         }
@@ -54,11 +62,14 @@ public class Main {
             System.exit(1);
         }
 
+        final String name = args.length >= 3 ? args[2] : DEFAULT_NAME;
+        final String version = args.length >= 4 ? args[3] : DEFAULT_VERSION;
+        final String domain = args.length >= 5 ? args[4] : DEFAULT_DOMAIN;
+
         final Resources resources = new ProjectAnalyzer().analyze(projectLocation);
+        final Project project = new Project(name, version, domain, resources);
 
-        final Backend backend = chooseBackend(args.length >= 2 ? args[1] : null);
-
-        final String output = backend.render(resources);
+        final String output = chooseBackend(args.length >= 2 ? args[1] : null).render(project);
         System.out.println(output);
     }
 
