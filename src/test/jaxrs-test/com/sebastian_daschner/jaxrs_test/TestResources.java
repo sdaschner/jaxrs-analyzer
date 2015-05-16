@@ -66,6 +66,12 @@ public class TestResources {
         return Response.accepted().build();
     }
 
+    @DELETE
+    @Path("{foobar}")
+    public void deleteTest(@PathParam("foobar") final String foobar) {
+        Logger.getLogger("").info("deleted " + foobar);
+    }
+
     @GET
     @Path("{id}")
     public Model getModel(@PathParam("id") final String id) {

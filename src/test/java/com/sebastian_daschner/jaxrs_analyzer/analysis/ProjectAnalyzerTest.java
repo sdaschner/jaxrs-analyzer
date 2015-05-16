@@ -107,7 +107,16 @@ public class ProjectAnalyzerTest {
         ResourceMethod firstPut = ResourceMethodBuilder.withMethod(HttpMethod.PUT).andRequestBodyType(modelRepresentation)
                 .andAcceptMediaTypes("application/json").andResponseMediaTypes("application/json")
                 .andResponse(202, ResponseBuilder.newBuilder().build()).build();
-        addMethods(resources, "test", firstGet, firstPost, firstPut);
+//        ResourceMethod firstDelete = ResourceMethodBuilder.withMethod(HttpMethod.DELETE)
+//                .andAcceptMediaTypes("application/json").andResponseMediaTypes("application/json")
+//                .andResponse(204, ResponseBuilder.newBuilder().build()).build();
+        addMethods(resources, "test", firstGet, firstPost, firstPut);//, firstDelete);
+
+        // test/{foobar}
+        ResourceMethod firstDelete = ResourceMethodBuilder.withMethod(HttpMethod.DELETE).andPathParam("foobar", "java.lang.String")
+                .andAcceptMediaTypes("application/json").andResponseMediaTypes("application/json")
+                .andResponse(204, ResponseBuilder.newBuilder().build()).build();
+        addMethods(resources, "test/{foobar}", firstDelete);
 
         // test/{id}
         ResourceMethod secondGet = ResourceMethodBuilder.withMethod(HttpMethod.GET)

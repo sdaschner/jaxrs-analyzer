@@ -64,9 +64,13 @@ class ResourceMethodContentAnalyzer extends MethodContentAnalyzer {
             // add project methods to global method pool
             projectMethods.stream().forEach(MethodPool.getInstance()::addProjectMethod);
 
-            // TODO handle void resource methods
             final Element returnedElement = methodSimulator.simulate(visitedInstructions);
             final String returnType = determineReturnType(method);
+
+            // void resource methods are interpreted later
+            if (returnedElement == null) {
+                return;
+            }
 
             final Set<Object> possibleObjects = returnedElement.getPossibleValues().stream().filter(o -> !(o instanceof HttpResponse))
                     .collect(Collectors.toSet());
