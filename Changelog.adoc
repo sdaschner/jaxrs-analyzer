@@ -3,6 +3,13 @@ Sebastian Daschner
 
 // new versions are placed on the top
 
+== v0.4
+- Added AsciiDoc backend
+- Improved variable type resolution
+- Added WebApplicationException handling (thrown WAE's in the code are recognized for the result)
+- Improved `void` method analysis
+- Added project information (name, version, etc.) to backends
+
 == v0.3
 - Improved POJO getter analysis for return types (e.g. isXY() -> boolean, etc.)
 - Added JDK 1.8 Streams as known methods (analysis will notice and simulate these)

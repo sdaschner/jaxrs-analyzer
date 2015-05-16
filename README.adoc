@@ -21,8 +21,9 @@ One of the output formats of the REST documentation is the heavily used Swagger 
 == Standalone
 
 Instead of using the Maven plugin, the tool can also run directly from the jar file. Therefore this project needs to be build with `mvn clean install`.
-The executable jar file resides under `target/jaxrs-analyzer.jar`. Run it with `java -jar jaxrs-analyzer.jar <basePathToYourCompiledClasses> [<backend>]`,
-e.g. `java -jar jaxrs-analyzer.jar ../yourProject/target/classes swagger`. Currently supported backends are `plaintext` (default) and `swagger`.
+The executable jar file resides under `target/jaxrs-analyzer.jar`.
+Run it with `java -jar jaxrs-analyzer.jar <basePathToYourCompiledClasses> [<backend>] [<projectName>] [<projectVersion>] [<deployedDomain>]`, e.g. `java -jar jaxrs-analyzer.jar ../yourProject/target/classes swagger`.
+Currently supported backends are `swagger` (default), `asciidoc` and `plaintext`.
 
 Feedback, bug reports and ideas for improvement are very welcome! Feel free to fork, comment, file an issue, etc. ;-)
 
