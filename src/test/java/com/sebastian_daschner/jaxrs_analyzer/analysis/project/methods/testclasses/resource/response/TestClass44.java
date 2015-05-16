@@ -18,36 +18,32 @@ package com.sebastian_daschner.jaxrs_analyzer.analysis.project.methods.testclass
 
 import com.sebastian_daschner.jaxrs_analyzer.model.elements.HttpResponse;
 
-import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
-import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 
-public class TestClass14 {
+public class TestClass44 {
 
-    public Response method(final String id) {
-        final int status = getStatus();
+    private List<Object> tasks;
 
-        if ("".equals(""))
-            throw new WebApplicationException(String.valueOf(status), Response.Status.BAD_REQUEST);
-
-        return Response.status(status).build();
-    }
-
-    private int getStatus() {
-        return 201;
+    public Response method() {
+        List<User> users = new LinkedList<>();
+        return Response.ok(users).build();
     }
 
     public static Set<HttpResponse> getResult() {
-        final HttpResponse firstResponse = new HttpResponse();
-        firstResponse.getStatuses().add(201);
+        final HttpResponse result = new HttpResponse();
 
-        final HttpResponse secondResponse = new HttpResponse();
-        secondResponse.getStatuses().add(400);
+        result.getStatuses().add(200);
+        result.getEntityTypes().add("java.util.List<com.sebastian_daschner.jaxrs_analyzer.analysis.project.methods.testclasses.resource.response.TestClass44.User>");
 
-        return new HashSet<>(Arrays.asList(firstResponse, secondResponse));
+        return Collections.singleton(result);
+    }
+
+    private static class User {
+        private String name;
     }
 
 }

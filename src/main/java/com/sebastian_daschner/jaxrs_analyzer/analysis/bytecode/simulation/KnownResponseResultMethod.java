@@ -16,7 +16,6 @@
 
 package com.sebastian_daschner.jaxrs_analyzer.analysis.bytecode.simulation;
 
-import com.sebastian_daschner.jaxrs_analyzer.analysis.utils.JavaUtils;
 import com.sebastian_daschner.jaxrs_analyzer.model.elements.Element;
 import com.sebastian_daschner.jaxrs_analyzer.model.elements.HttpResponse;
 import com.sebastian_daschner.jaxrs_analyzer.model.elements.JsonValue;
@@ -34,6 +33,8 @@ import java.util.function.*;
 import java.util.stream.Stream;
 
 import static com.sebastian_daschner.jaxrs_analyzer.analysis.bytecode.simulation.KnownResponseResultMethod.KnownNames.*;
+import static com.sebastian_daschner.jaxrs_analyzer.analysis.utils.JavaUtils.INITIALIZER_NAME;
+import static com.sebastian_daschner.jaxrs_analyzer.analysis.utils.JavaUtils.trimCollection;
 import static com.sebastian_daschner.jaxrs_analyzer.model.methods.MethodIdentifier.ofNonStatic;
 import static com.sebastian_daschner.jaxrs_analyzer.model.methods.MethodIdentifier.ofStatic;
 
@@ -251,14 +252,97 @@ enum KnownResponseResultMethod implements IdentifiableMethod {
         return addStatus(object, Response.Status.INTERNAL_SERVER_ERROR.getStatusCode());
     }),
 
-    // other methods --------------------------
+    // WebApplicationExceptions --------------------------
 
-    WEB_APPLICATION_EXCEPTION(ofNonStatic(WebApplicationException.class.getName(), "<init>", null, RESPONSE_STATUS), (notAvailable, arguments) -> {
+    WEB_APPLICATION_EXCEPTION_EMPTY(ofNonStatic(WEB_APPLICATION_EXCEPTION, INITIALIZER_NAME, null), (notAvailable, arguments) -> {
+        final Element object = new Element(HTTP_RESPONSE, new HttpResponse());
+        return addStatus(object, Response.Status.INTERNAL_SERVER_ERROR.getStatusCode());
+    }),
+
+    WEB_APPLICATION_EXCEPTION_MESSAGE(ofNonStatic(WEB_APPLICATION_EXCEPTION, INITIALIZER_NAME, null, STRING), (notAvailable, arguments) -> {
+        final Element object = new Element(HTTP_RESPONSE, new HttpResponse());
+        return addStatus(object, Response.Status.INTERNAL_SERVER_ERROR.getStatusCode());
+    }),
+
+    WEB_APPLICATION_EXCEPTION_RESPONSE(ofNonStatic(WEB_APPLICATION_EXCEPTION, INITIALIZER_NAME, null, RESPONSE), (notAvailable, arguments) -> arguments.get(0)),
+
+    WEB_APPLICATION_EXCEPTION_MESSAGE_RESPONSE(ofNonStatic(WEB_APPLICATION_EXCEPTION, INITIALIZER_NAME, null, STRING, RESPONSE),
+            (notAvailable, arguments) -> arguments.get(1)),
+
+    WEB_APPLICATION_EXCEPTION_STATUS(ofNonStatic(WEB_APPLICATION_EXCEPTION, INITIALIZER_NAME, null, "int"), (notAvailable, arguments) -> {
+        final Element object = new Element(HTTP_RESPONSE, new HttpResponse());
+        arguments.get(0).getPossibleValues().stream()
+                .map(status -> (int) status).forEach(s -> addStatus(object, s));
+        return object;
+    }),
+
+    WEB_APPLICATION_EXCEPTION_MESSAGE_STATUS(ofNonStatic(WEB_APPLICATION_EXCEPTION, INITIALIZER_NAME, null, STRING, "int"), (notAvailable, arguments) -> {
+        final Element object = new Element(HTTP_RESPONSE, new HttpResponse());
+        arguments.get(1).getPossibleValues().stream()
+                .map(status -> (int) status).forEach(s -> addStatus(object, s));
+        return object;
+    }),
+
+    WEB_APPLICATION_EXCEPTION_RESPONSE_STATUS(ofNonStatic(WEB_APPLICATION_EXCEPTION, INITIALIZER_NAME, null, RESPONSE_STATUS), (notAvailable, arguments) -> {
         final Element object = new Element(HTTP_RESPONSE, new HttpResponse());
         arguments.get(0).getPossibleValues().stream()
                 .map(status -> ((Response.Status) status).getStatusCode()).forEach(s -> addStatus(object, s));
         return object;
     }),
+
+    WEB_APPLICATION_EXCEPTION_MESSAGE_RESPONSE_STATUS(ofNonStatic(WEB_APPLICATION_EXCEPTION, INITIALIZER_NAME, null, STRING, RESPONSE_STATUS), (notAvailable, arguments) -> {
+        final Element object = new Element(HTTP_RESPONSE, new HttpResponse());
+        arguments.get(1).getPossibleValues().stream()
+                .map(status -> ((Response.Status) status).getStatusCode()).forEach(s -> addStatus(object, s));
+        return object;
+    }),
+
+    WEB_APPLICATION_EXCEPTION_CAUSE(ofNonStatic(WEB_APPLICATION_EXCEPTION, INITIALIZER_NAME, null, THROWABLE), (notAvailable, arguments) -> {
+        final Element object = new Element(HTTP_RESPONSE, new HttpResponse());
+        return addStatus(object, Response.Status.INTERNAL_SERVER_ERROR.getStatusCode());
+    }),
+
+    WEB_APPLICATION_EXCEPTION_MESSAGE_CAUSE(ofNonStatic(WEB_APPLICATION_EXCEPTION, INITIALIZER_NAME, null, STRING, THROWABLE), (notAvailable, arguments) -> {
+        final Element object = new Element(HTTP_RESPONSE, new HttpResponse());
+        return addStatus(object, Response.Status.INTERNAL_SERVER_ERROR.getStatusCode());
+    }),
+
+    WEB_APPLICATION_EXCEPTION_CAUSE_RESPONSE(ofNonStatic(WEB_APPLICATION_EXCEPTION, INITIALIZER_NAME, null, THROWABLE, RESPONSE),
+            (notAvailable, arguments) -> arguments.get(1)),
+
+    WEB_APPLICATION_EXCEPTION_MESSAGE_CAUSE_RESPONSE(ofNonStatic(WEB_APPLICATION_EXCEPTION, INITIALIZER_NAME, null, STRING, THROWABLE, RESPONSE),
+            (notAvailable, arguments) -> arguments.get(2)),
+
+    WEB_APPLICATION_EXCEPTION_CAUSE_STATUS(ofNonStatic(WEB_APPLICATION_EXCEPTION, INITIALIZER_NAME, null, THROWABLE, "int"), (notAvailable, arguments) -> {
+        final Element object = new Element(HTTP_RESPONSE, new HttpResponse());
+        arguments.get(1).getPossibleValues().stream()
+                .map(status -> (int) status).forEach(s -> addStatus(object, s));
+        return object;
+    }),
+
+    WEB_APPLICATION_EXCEPTION_MESSAGE_CAUSE_STATUS(ofNonStatic(WEB_APPLICATION_EXCEPTION, INITIALIZER_NAME, null, STRING, THROWABLE, "int"), (notAvailable, arguments) -> {
+        final Element object = new Element(HTTP_RESPONSE, new HttpResponse());
+        arguments.get(2).getPossibleValues().stream()
+                .map(status -> (int) status).forEach(s -> addStatus(object, s));
+        return object;
+    }),
+
+    WEB_APPLICATION_EXCEPTION_CAUSE_RESPONSE_STATUS(ofNonStatic(WEB_APPLICATION_EXCEPTION, INITIALIZER_NAME, null, THROWABLE, RESPONSE_STATUS), (notAvailable, arguments) -> {
+        final Element object = new Element(HTTP_RESPONSE, new HttpResponse());
+        arguments.get(1).getPossibleValues().stream()
+                .map(status -> ((Response.Status) status).getStatusCode()).forEach(s -> addStatus(object, s));
+        return object;
+    }),
+
+    WEB_APPLICATION_EXCEPTION_MESSAGE_CAUSE_RESPONSE_STATUS(ofNonStatic(WEB_APPLICATION_EXCEPTION, INITIALIZER_NAME, null, STRING, THROWABLE, RESPONSE_STATUS),
+            (notAvailable, arguments) -> {
+                final Element object = new Element(HTTP_RESPONSE, new HttpResponse());
+                arguments.get(2).getPossibleValues().stream()
+                        .map(status -> ((Response.Status) status).getStatusCode()).forEach(s -> addStatus(object, s));
+                return object;
+            }),
+
+    // other methods --------------------------
 
     RESOURCE_CONTEXT_INIT(ofNonStatic(RESOURCE_CONTEXT, "getResource", OBJECT, "java.lang.Class"),
             (object, arguments) -> new Element(arguments.get(0).getPossibleValues().stream()
@@ -274,10 +358,10 @@ enum KnownResponseResultMethod implements IdentifiableMethod {
     // stream related methods --------------------------
 
     LIST_STREAM(ofNonStatic(List.class.getName(), "stream", STREAM),
-            (object, arguments) -> new Element(JavaUtils.trimCollection(object.getType()))),
+            (object, arguments) -> new Element(trimCollection(object.getType()))),
 
     SET_STREAM(ofNonStatic(Set.class.getName(), "stream", STREAM),
-            (object, arguments) -> new Element(JavaUtils.trimCollection(object.getType()))),
+            (object, arguments) -> new Element(trimCollection(object.getType()))),
 
     STREAM_COLLECT(ofNonStatic(STREAM, "collect", OBJECT, SUPPLIER, BI_CONSUMER, BI_CONSUMER),
             (object, arguments) -> {
@@ -370,6 +454,8 @@ enum KnownResponseResultMethod implements IdentifiableMethod {
         static final String SUPPLIER = Supplier.class.getName();
         static final String BI_CONSUMER = BiConsumer.class.getName();
         static final String CONSUMER = Consumer.class.getName();
+        static final String WEB_APPLICATION_EXCEPTION = WebApplicationException.class.getName();
+        static final String THROWABLE = Throwable.class.getName();
 
     }
 
