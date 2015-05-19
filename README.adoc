@@ -28,3 +28,5 @@ Currently supported backends are `swagger` (default), `asciidoc` and `plaintext`
 Feedback, bug reports and ideas for improvement are very welcome! Feel free to fork, comment, file an issue, etc. ;-)
 
 For a current feature list see http://blog.sebastian-daschner.com/entries/jaxrs_analyzer_v0.2_feature_list[Feature list of JAX-RS Analyzer (v0.2)], http://blog.sebastian-daschner.com/entries/released_jaxrs_analyzer_v0.3[Released JAX-RS Analyzer v0.3] and http://blog.sebastian-daschner.com/entries/released_jaxrs_analyzer_v0.4[Released JAX-RS Analyzer v0.4].
+
+For an introductional video see http://blog.sebastian-daschner.com/entries/jaxrs_analyzer_explained_video[JAX-RS Analyzer explained (Video)].
