@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.sebastian_daschner.jaxrs_analyzer;
 
 import com.sebastian_daschner.jaxrs_analyzer.analysis.ProjectAnalyzer;
@@ -23,7 +22,10 @@ import com.sebastian_daschner.jaxrs_analyzer.backend.plaintext.PlainTextBackend;
 import com.sebastian_daschner.jaxrs_analyzer.backend.swagger.SwaggerBackend;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.Project;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.Resources;
-
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.Writer;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
@@ -47,10 +49,11 @@ public class Main {
      *             2: Name of the project
      *             3: Version of the project
      *             4: Domain of the deployed project
+     *             5: Path of output
      */
     public static void main(final String... args) {
         if (args.length < 1) {
-            System.err.println("Usage: java -jar rest-documentation-analyzer.jar <projectPath> [<backend>] [<project name>] [<project version>] [<project domain>]");
+            System.err.println("Usage: java -jar jaxrs-analyzer.jar <projectPath> [<backend>] [<project name>] [<project version>] [<project domain>] [<outputPath>]");
             System.err.println("Backends: swagger (default), plaintext");
             System.exit(1);
         }
@@ -70,7 +73,20 @@ public class Main {
         final Project project = new Project(name, version, domain, resources);
 
         final String output = chooseBackend(args.length >= 2 ? args[1] : null).render(project);
-        System.out.println(output);
+
+        if (args.length >= 6) {
+            final Path outputLocation = Paths.get(args[5]);
+            try (Writer writer = new BufferedWriter(new FileWriter(outputLocation.toFile()))) {
+                writer.write(output);
+                writer.flush();
+            } catch (SecurityException ex) {
+                System.err.println("Error writing to the specified output directory. Access denied!");
+            } catch (IOException ex) {
+                System.err.println("Please provide a valid file path for output! " + ex.getMessage());
+            }
+        } else {
+            System.out.println(output);
+        }
     }
 
     private static Backend chooseBackend(final String backendName) {
@@ -84,5 +100,4 @@ public class Main {
                 return new SwaggerBackend();
         }
     }
-
 }
