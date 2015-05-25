@@ -26,11 +26,17 @@ import javassist.CtClass;
 import javassist.NotFoundException;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.Enumeration;
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -42,32 +48,27 @@ import java.util.stream.Stream;
 public class ProjectAnalyzer {
 
     private final Lock lock = new ReentrantLock();
+    private final Set<CtClass> classes = new HashSet<>();
     private final ClassAnalyzer classAnalyzer = new ClassAnalyzer();
     private final ResultInterpreter resultInterpreter = new ResultInterpreter();
 
     /**
-     * Creates a project analyzer with given dependency locations. The locations are included in the classpath.
+     * Creates a project analyzer with given locations where to search for classes.
      *
-     * @param dependencyLocations The locations of additional project dependencies
+     * @param classPaths The locations of additional class paths (can be directories or jar-files)
      */
-    public ProjectAnalyzer(final Path... dependencyLocations) {
-        Stream.of(dependencyLocations).forEach(ProjectAnalyzer::addToClassPool);
+    public ProjectAnalyzer(final Path... classPaths) {
+        Stream.of(classPaths).forEach(this::addToClassPool);
     }
 
     /**
      * Analyzes all classes in the given project location.
      *
-     * @param projectLocation The valid project root location
      * @return The REST resource representations
      */
-    public Resources analyze(final Path projectLocation) {
+    public Resources analyze() {
         lock.lock();
         try {
-            addToClassPool(projectLocation);
-
-            // load classes
-            final Set<CtClass> classes = getClasses(projectLocation.toString());
-
             // analyze relevant classes
             final Set<ClassResult> classResults = classes.stream()
                     .map(classAnalyzer::analyze)
@@ -84,7 +85,7 @@ public class ProjectAnalyzer {
      *
      * @param location The location of a jar file or a directory
      */
-    private static void addToClassPool(final Path location) {
+    private void addToClassPool(final Path location) {
         if (!location.toFile().exists())
             throw new IllegalArgumentException("The location '" + location + "' does not exist!");
         try {
@@ -92,50 +93,68 @@ public class ProjectAnalyzer {
         } catch (NotFoundException e) {
             throw new IllegalArgumentException("The location '" + location + "' could not be loaded!", e);
         }
+
+        if (location.toFile().isFile() && location.toString().endsWith(".jar")) {
+            addJarClasses(location);
+        } else if (location.toFile().isDirectory()) {
+            addDirectoryClasses(location, Paths.get(""));
+        } else {
+            throw new IllegalArgumentException("The location '" + location + "' must be a jar file or a directory");
+        }
     }
 
     /**
-     * Returns all classes in the given location and sub-locations recursively.
+     * Adds all classes in the given jar-file location to the set of known classes.
      *
-     * @param projectLocation The project location where to search
-     * @param packages        Each hierarchical packages of the current location
-     * @return All found classes
+     * @param location The location of the jar-file
      */
-    private static Set<CtClass> getClasses(final String projectLocation, final String... packages) {
-        final Set<CtClass> classes = new HashSet<>();
-        final List<String> packageNames = Arrays.asList(packages);
+    private void addJarClasses(final Path location) {
+        try (final JarFile jarFile = new JarFile(location.toFile())) {
+            final Enumeration<JarEntry> entries = jarFile.entries();
+            while (entries.hasMoreElements()) {
+                final String entryName = entries.nextElement().getName();
+                if (entryName.endsWith(".class"))
+                    try {
+                        classes.add(ClassPool.getDefault().getCtClass(convertToQualifiedName(entryName)));
+                    } catch (NotFoundException e) {
+                        LogProvider.getLogger().accept("Could not load class file " + entryName);
+                    }
+            }
+        } catch (IOException e) {
+            throw new IllegalArgumentException("Could not read jar-file '" + location + "', reason: " + e.getMessage());
+        }
+    }
 
-        final Path projectPath = Paths.get(projectLocation);
-        final Path currentPath = Paths.get(projectLocation, packages);
-
-        final String packageName = Stream.of(packages).collect(Collectors.joining("."));
-
-        final File[] classFiles = currentPath.toFile().listFiles((dir, name) -> name.endsWith("class"));
-
-        for (final File classFile : classFiles) {
-            // load test class
-            final String classFileName = classFile.getName();
-            final String className = classFileName.substring(0, classFileName.length() - ".class".length());
-
-            try {
-                final CtClass clazz = ClassPool.getDefault().getCtClass(packageName + '.' + className);
-                classes.add(clazz);
-            } catch (NotFoundException e) {
-                LogProvider.getLogger().accept("Class " + className + " could not be loaded");
-                // continue
+    /**
+     * Adds all classes in the given directory location to the set of known classes.
+     *
+     * @param location The location of the current directory
+     * @param subPath  The sub-path which is relevant for the package names or {@code null} if currently in the root directory
+     */
+    private void addDirectoryClasses(final Path location, final Path subPath) {
+        for (final File file : location.toFile().listFiles()) {
+            if (file.isDirectory())
+                addDirectoryClasses(location.resolve(file.getPath()), subPath.resolve(file.getName()));
+            else if (file.isFile() && file.getName().endsWith(".class")) {
+                final String classFileName = subPath.resolve(file.getName()).toString();
+                try {
+                    classes.add(ClassPool.getDefault().getCtClass(convertToQualifiedName(classFileName)));
+                } catch (NotFoundException e) {
+                    LogProvider.getLogger().accept("Could not load class file " + classFileName);
+                }
             }
         }
+    }
 
-        final File[] directories = currentPath.toFile().listFiles((dir, name) -> Paths.get(dir + "/" + name).toFile().isDirectory());
-
-        for (final File directory : directories) {
-            final List<String> newPackageNames = new ArrayList<>();
-            newPackageNames.addAll(packageNames);
-            newPackageNames.add(directory.getName());
-            classes.addAll(getClasses(projectPath.toString(), newPackageNames.toArray(new String[newPackageNames.size()])));
-        }
-
-        return classes;
+    /**
+     * Converts the given file name of a class-file to the fully-qualified class name.
+     *
+     * @param fileName The file name (e.g. a/package/AClass.class)
+     * @return The fully-qualified class name (e.g. a.package.AClass)
+     */
+    private static String convertToQualifiedName(final String fileName) {
+        final String replacedSeparators = fileName.replace('/', '.');
+        return replacedSeparators.substring(0, replacedSeparators.length() - ".class".length());
     }
 
 }

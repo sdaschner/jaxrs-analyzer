@@ -66,7 +66,7 @@ public class Main {
         final String version = args.length >= 4 ? args[3] : DEFAULT_VERSION;
         final String domain = args.length >= 5 ? args[4] : DEFAULT_DOMAIN;
 
-        final Resources resources = new ProjectAnalyzer().analyze(projectLocation);
+        final Resources resources = new ProjectAnalyzer(projectLocation).analyze();
         final Project project = new Project(name, version, domain, resources);
 
         final String output = chooseBackend(args.length >= 2 ? args[1] : null).render(project);
