@@ -15,19 +15,12 @@
  */
 package com.sebastian_daschner.jaxrs_analyzer;
 
-import com.sebastian_daschner.jaxrs_analyzer.analysis.ProjectAnalyzer;
-import com.sebastian_daschner.jaxrs_analyzer.backend.Backend;
-import com.sebastian_daschner.jaxrs_analyzer.backend.asciidoc.AsciiDocBackend;
-import com.sebastian_daschner.jaxrs_analyzer.backend.plaintext.PlainTextBackend;
-import com.sebastian_daschner.jaxrs_analyzer.backend.swagger.SwaggerBackend;
-import com.sebastian_daschner.jaxrs_analyzer.model.rest.Project;
-import com.sebastian_daschner.jaxrs_analyzer.model.rest.Resources;
-import java.io.BufferedWriter;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.Writer;
+import com.sebastian_daschner.jaxrs_analyzer.backend.BackendType;
+
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Inspects the information of JAX-RS classes via bytecode analysis.
@@ -36,68 +29,97 @@ import java.nio.file.Paths;
  */
 public class Main {
 
-    private static final String DEFAULT_NAME = "project";
-    private static final String DEFAULT_VERSION = "0.1-SNAPSHOT";
-    private static final String DEFAULT_DOMAIN = "example.com";
-
     /**
-     * Inspects the JAX-RS test project and prints the gathered information as swagger JSON.
+     * Inspects JAX-RS projects and outputs the gathered information.
+     * <p>
+     * Argument usage: {@code [options] classPath [classPaths...]}
+     * <p>
+     * The {@code classPath} entries may be directories or jar-files containing the classes to be analyzed
+     * <p>
+     * Following available options:
+     * <ul>
+     * <li>{@code -b <backend>} The backend to choose: {@code swagger} (default), {@code plaintext}, {@code asciidoc}</li>
+     * <li>{@code -n <project name>} The name of the project</li>
+     * <li>{@code -v <project version>} The version of the project</li>
+     * <li>{@code -d <project domain>} The domain of the project</li>
+     * <li>{@code -o <output file>} The location of the analysis output (will be printed to standard out if omitted)</li>
+     * </ul>
      *
      * @param args The arguments
-     *             0: Path of the analyzed project
-     *             1: Backend (swagger (default), plaintext)
-     *             2: Name of the project
-     *             3: Version of the project
-     *             4: Domain of the deployed project
-     *             5: Path of output
      */
     public static void main(final String... args) {
         if (args.length < 1) {
-            System.err.println("Usage: java -jar jaxrs-analyzer.jar <projectPath> [<backend>] [<project name>] [<project version>] [<project domain>] [<outputPath>]");
-            System.err.println("Backends: swagger (default), plaintext");
-            System.exit(1);
+            printUsageAndExit();
         }
 
-        final Path projectLocation = Paths.get(args[0]);
+        final Set<Path> classPaths = new HashSet<>();
+        BackendType backendType = null;
+        String name = null;
+        String version = null;
+        String domain = null;
+        Path outputFileLocation = null;
 
-        if (!projectLocation.toFile().exists() || !projectLocation.toFile().isDirectory()) {
-            System.err.println("Please provide a valid directory!");
-            System.exit(1);
-        }
-
-        final String name = args.length >= 3 ? args[2] : DEFAULT_NAME;
-        final String version = args.length >= 4 ? args[3] : DEFAULT_VERSION;
-        final String domain = args.length >= 5 ? args[4] : DEFAULT_DOMAIN;
-
-        final Resources resources = new ProjectAnalyzer(projectLocation).analyze();
-        final Project project = new Project(name, version, domain, resources);
-
-        final String output = chooseBackend(args.length >= 2 ? args[1] : null).render(project);
-
-        if (args.length >= 6) {
-            final Path outputLocation = Paths.get(args[5]);
-            try (Writer writer = new BufferedWriter(new FileWriter(outputLocation.toFile()))) {
-                writer.write(output);
-                writer.flush();
-            } catch (SecurityException ex) {
-                System.err.println("Error writing to the specified output directory. Access denied!");
-            } catch (IOException ex) {
-                System.err.println("Please provide a valid file path for output! " + ex.getMessage());
+        try {
+            for (int i = 0; i < args.length; i++) {
+                if (args[i].startsWith("-")) {
+                    switch (args[i]) {
+                        case "-b":
+                            backendType = BackendType.getByNameIgnoreCase(args[++i]);
+                            if (backendType == null) {
+                                System.err.println("Unknown backend " + args[i - 1] + '\n');
+                                printUsageAndExit();
+                            }
+                            break;
+                        case "-n":
+                            name = args[++i];
+                            break;
+                        case "-v":
+                            version = args[++i];
+                            break;
+                        case "-d":
+                            domain = args[++i];
+                            break;
+                        case "-o":
+                            outputFileLocation = Paths.get(args[++i]);
+                            break;
+                        default:
+                            System.err.print("Unknown option " + args[i] + '\n');
+                            printUsageAndExit();
+                    }
+                } else {
+                    final Path path = Paths.get(args[i]);
+                    if (!path.toFile().exists()) {
+                        System.err.println("Location " + path + " doesn't exist\n");
+                        printUsageAndExit();
+                    }
+                    classPaths.add(path);
+                }
             }
-        } else {
-            System.out.println(output);
+        } catch (IndexOutOfBoundsException e) {
+            System.err.println("Please provide valid number of arguments\n");
+            printUsageAndExit();
         }
+
+        if (classPaths.isEmpty()) {
+            System.err.println("Please provide at least one classPath\n");
+            printUsageAndExit();
+        }
+
+        final JAXRSAnalyzer jaxrsAnalyzer = new JAXRSAnalyzer(classPaths, backendType, name, version, domain, outputFileLocation);
+        jaxrsAnalyzer.analyze();
     }
 
-    private static Backend chooseBackend(final String backendName) {
-        switch (backendName) {
-            case "plaintext":
-                return new PlainTextBackend();
-            case "asciidoc":
-                return new AsciiDocBackend();
-            case "swagger":
-            default:
-                return new SwaggerBackend();
-        }
+    private static void printUsageAndExit() {
+        System.err.println("Usage: java -jar jaxrs-analyzer.jar [options] classPath [classPaths...]");
+        System.err.println("The classPath entries may be directories or jar-files containing the classes to be analyzed\n");
+        System.err.println("Following available options:\n");
+        System.err.println(" -b <backend> The backend to choose: swagger (default), plaintext, asciidoc");
+        System.err.println(" -n <project name> The name of the project");
+        System.err.println(" -v <project version> The version of the project");
+        System.err.println(" -d <project domain> The domain of the project");
+        System.err.println(" -o <output file> The location of the analysis output (will be printed to standard out if omitted)");
+        System.err.println("\nExample: java -jar jaxrs-analyzer.jar -b swagger -n \"My Project\" ~/project/target/classes");
+        System.exit(1);
     }
+
 }
