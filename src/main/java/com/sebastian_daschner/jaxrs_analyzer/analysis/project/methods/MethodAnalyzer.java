@@ -19,17 +19,20 @@ package com.sebastian_daschner.jaxrs_analyzer.analysis.project.methods;
 import com.sebastian_daschner.jaxrs_analyzer.LogProvider;
 import com.sebastian_daschner.jaxrs_analyzer.analysis.project.AnnotationInterpreter;
 import com.sebastian_daschner.jaxrs_analyzer.analysis.utils.JavaUtils;
+import com.sebastian_daschner.jaxrs_analyzer.model.elements.HttpResponse;
 import com.sebastian_daschner.jaxrs_analyzer.model.results.ClassResult;
 import com.sebastian_daschner.jaxrs_analyzer.model.results.MethodResult;
 import javassist.CtClass;
 import javassist.CtMethod;
 import javassist.NotFoundException;
 import javassist.bytecode.BadBytecode;
+import javassist.bytecode.SignatureAttribute;
 
 import javax.json.JsonObject;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
+import java.lang.reflect.Modifier;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
@@ -74,6 +77,7 @@ public class MethodAnalyzer {
             return analyzeInternal();
         } catch (Exception e) {
             LogProvider.getLogger().accept("Could not analyze the method: " + method);
+            e.printStackTrace();
             return null;
         } finally {
             lock.unlock();
@@ -147,7 +151,20 @@ public class MethodAnalyzer {
             return methodResult;
         }
 
-        analyzeMethodContent(methodResult);
+        final int modifiers = method.getModifiers();
+        if (!Modifier.isNative(modifiers) && !Modifier.isAbstract(modifiers))
+            analyzeMethodContent(methodResult);
+        else {
+            // build empty response with return type
+            // TODO refactor Java types & method return type analysis
+            final String sig = method.getGenericSignature() != null ? method.getGenericSignature() : method.getSignature();
+            final String returnType = SignatureAttribute.toMethodSignature(sig).getReturnType().toString();
+            if (!Response.class.getName().equals(returnType) && !"void".equals(returnType)) {
+                final HttpResponse emptyResponse = new HttpResponse();
+                emptyResponse.getEntityTypes().add(returnType);
+                methodResult.getResponses().add(emptyResponse);
+            }
+        }
 
         return methodResult;
     }
