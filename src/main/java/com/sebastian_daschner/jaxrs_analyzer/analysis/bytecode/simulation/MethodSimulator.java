@@ -189,7 +189,8 @@ public class MethodSimulator {
             final Field field = Class.forName(instruction.getClassName()).getField(instruction.getPropertyName());
             runtimeStack.push(new Element(field.getType().getCanonicalName(), field.get(null)));
         } catch (ReflectiveOperationException e) {
-            LogProvider.getLogger().accept("Could not access static property, reason: " + e.getMessage());
+            LogProvider.error("Could not access static property, reason: " + e.getMessage());
+            LogProvider.debug(e);
             runtimeStack.push(Element.EMPTY);
         }
     }

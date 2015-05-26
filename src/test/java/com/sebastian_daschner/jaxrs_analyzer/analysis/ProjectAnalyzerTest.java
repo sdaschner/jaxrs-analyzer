@@ -46,6 +46,7 @@ import static org.junit.Assert.assertTrue;
 public class ProjectAnalyzerTest {
 
     private ProjectAnalyzer classUnderTest;
+    private Path path;
 
     @Before
     public void setUp() throws MalformedURLException, NotFoundException {
@@ -60,14 +61,14 @@ public class ProjectAnalyzerTest {
         final JavaCompiler.CompilationTask compilationTask = compiler.getTask(null, null, null, null, null, compilationUnits);
         assertTrue("Could not compile test project", compilationTask.call());
 
-        final Path path = Paths.get(testClassPath).toAbsolutePath();
+        path = Paths.get(testClassPath).toAbsolutePath();
         classUnderTest = new ProjectAnalyzer(path);
     }
 
     @Test
     public void test() {
         final long startTime = System.currentTimeMillis();
-        final Resources actualResources = classUnderTest.analyze();
+        final Resources actualResources = classUnderTest.analyze(path);
         System.out.println("Project analysis took " + (System.currentTimeMillis() - startTime) + " ms");
         final Resources expectedResources = getResources();
 

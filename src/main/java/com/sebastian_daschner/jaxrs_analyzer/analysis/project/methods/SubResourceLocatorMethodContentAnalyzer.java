@@ -60,7 +60,8 @@ class SubResourceLocatorMethodContentAnalyzer extends MethodContentAnalyzer {
             final CtClass subResource = ClassPool.getDefault().get(returnType);
             classAnalyzer.analyzeSubResource(subResource, classResult);
         } catch (NotFoundException e) {
-            LogProvider.getLogger().accept("Could not load analyze sub-resource class ");
+            LogProvider.error("Could not load analyze sub-resource class ");
+            LogProvider.debug(e);
         } finally {
             lock.unlock();
         }

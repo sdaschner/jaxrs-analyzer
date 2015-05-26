@@ -53,7 +53,7 @@ public class ProjectAnalyzer {
     private final ResultInterpreter resultInterpreter = new ResultInterpreter();
 
     /**
-     * Creates a project analyzer with given locations where to search for classes.
+     * Creates a project analyzer with given class path locations where to search for classes.
      *
      * @param classPaths The locations of additional class paths (can be directories or jar-files)
      */
@@ -62,13 +62,16 @@ public class ProjectAnalyzer {
     }
 
     /**
-     * Analyzes all classes in the given project location.
+     * Analyzes all classes in the given project path.
      *
+     * @param projectPaths The project paths
      * @return The REST resource representations
      */
-    public Resources analyze() {
+    public Resources analyze(final Path... projectPaths) {
         lock.lock();
         try {
+            Stream.of(projectPaths).forEach(this::addProjectPath);
+
             // analyze relevant classes
             final Set<ClassResult> classResults = classes.stream()
                     .map(classAnalyzer::analyze)
@@ -94,12 +97,22 @@ public class ProjectAnalyzer {
             throw new IllegalArgumentException("The location '" + location + "' could not be loaded!", e);
         }
 
-        if (location.toFile().isFile() && location.toString().endsWith(".jar")) {
-            addJarClasses(location);
-        } else if (location.toFile().isDirectory()) {
-            addDirectoryClasses(location, Paths.get(""));
+    }
+
+    /**
+     * Adds the project paths and loads all classes.
+     *
+     * @param path The project path
+     */
+    private void addProjectPath(final Path path) {
+        addToClassPool(path);
+
+        if (path.toFile().isFile() && path.toString().endsWith(".jar")) {
+            addJarClasses(path);
+        } else if (path.toFile().isDirectory()) {
+            addDirectoryClasses(path, Paths.get(""));
         } else {
-            throw new IllegalArgumentException("The location '" + location + "' must be a jar file or a directory");
+            throw new IllegalArgumentException("The project path '" + path + "' must be a jar file or a directory");
         }
     }
 
@@ -117,7 +130,8 @@ public class ProjectAnalyzer {
                     try {
                         classes.add(ClassPool.getDefault().getCtClass(convertToQualifiedName(entryName)));
                     } catch (NotFoundException e) {
-                        LogProvider.getLogger().accept("Could not load class file " + entryName);
+                        LogProvider.error("Could not load class file " + entryName);
+                        LogProvider.debug(e);
                     }
             }
         } catch (IOException e) {
@@ -140,7 +154,8 @@ public class ProjectAnalyzer {
                 try {
                     classes.add(ClassPool.getDefault().getCtClass(convertToQualifiedName(classFileName)));
                 } catch (NotFoundException e) {
-                    LogProvider.getLogger().accept("Could not load class file " + classFileName);
+                    LogProvider.error("Could not load class file " + classFileName);
+                    LogProvider.debug(e);
                 }
             }
         }

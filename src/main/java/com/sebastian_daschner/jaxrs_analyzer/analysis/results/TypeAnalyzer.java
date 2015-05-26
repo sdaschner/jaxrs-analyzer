@@ -112,7 +112,8 @@ class TypeAnalyzer {
             return analyzeClass(ctClass);
 
         } catch (NotFoundException | ClassNotFoundException e) {
-            LogProvider.getLogger().accept("Could not analyze class for type analysis: " + e.getMessage());
+            LogProvider.error("Could not analyze class for type analysis: " + e.getMessage());
+            LogProvider.debug(e);
             return Json.createObjectBuilder().build();
         }
     }
@@ -197,7 +198,8 @@ class TypeAnalyzer {
             final String fieldType = JavaUtils.getType(SignatureAttribute.toTypeSignature(sig));
             return Pair.of(field.getName(), fieldType);
         } catch (BadBytecode e) {
-            LogProvider.getLogger().accept("Could not analyze field: " + field);
+            LogProvider.error("Could not analyze field: " + field);
+            LogProvider.debug(e);
             return null;
         }
     }
@@ -208,7 +210,8 @@ class TypeAnalyzer {
             final String returnType = JavaUtils.getType(SignatureAttribute.toMethodSignature(sig).getReturnType());
             return Pair.of(normalizeGetter(method.getName()), returnType);
         } catch (BadBytecode e) {
-            LogProvider.getLogger().accept("Could not analyze method: " + method);
+            LogProvider.error("Could not analyze method: " + method);
+            LogProvider.debug(e);
             return null;
         }
     }

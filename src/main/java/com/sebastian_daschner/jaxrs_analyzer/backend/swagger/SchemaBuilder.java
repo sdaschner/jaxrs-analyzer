@@ -86,7 +86,7 @@ class SchemaBuilder {
             case OBJECT:
                 return buildForObject((JsonObject) value);
             default:
-                LogProvider.getLogger().accept("Unknown Swagger type occurred: " + type);
+                LogProvider.error("Unknown Swagger type occurred: " + type);
                 return Json.createObjectBuilder().build();
         }
     }

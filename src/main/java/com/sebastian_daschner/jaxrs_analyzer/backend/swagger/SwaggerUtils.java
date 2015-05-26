@@ -80,9 +80,8 @@ final class SwaggerUtils {
             case FALSE:
                 return BOOLEAN;
             case NULL:
-                return NULL;
             default:
-                return null;
+                return NULL;
         }
     }
 

@@ -16,11 +16,11 @@
 
 package com.sebastian_daschner.jaxrs_analyzer.analysis.results;
 
-import com.sebastian_daschner.jaxrs_analyzer.model.elements.HttpResponse;
-import com.sebastian_daschner.jaxrs_analyzer.model.rest.Response;
 import com.sebastian_daschner.jaxrs_analyzer.LogProvider;
+import com.sebastian_daschner.jaxrs_analyzer.model.elements.HttpResponse;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.ResourceMethod;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.Resources;
+import com.sebastian_daschner.jaxrs_analyzer.model.rest.Response;
 import com.sebastian_daschner.jaxrs_analyzer.model.results.ClassResult;
 import com.sebastian_daschner.jaxrs_analyzer.model.results.MethodResult;
 
@@ -136,9 +136,9 @@ public class ResultInterpreter {
 
             // warn if several types for this status exist
             if (httpResponse.getEntityTypes().size() > 1)
-                LogProvider.getLogger().accept("Several entity types for status " + s + " exist.");
+                LogProvider.debug("Several entity types for status " + s + " exist.");
             if (httpResponse.getInlineEntities().size() > 1)
-                LogProvider.getLogger().accept("Several inline entities for status " + s + " exist.");
+                LogProvider.debug("Several inline entities for status " + s + " exist.");
 
             method.getResponses().put(s, response);
         });

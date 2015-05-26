@@ -148,7 +148,8 @@ public class ClassAnalyzer {
                 Stream.of(ctField.getAnnotations()).forEach(a -> AnnotationInterpreter.interpretFieldAnnotation(a, fieldType, classResult.getMethods()));
 
             } catch (ClassNotFoundException | NotFoundException e) {
-                LogProvider.getLogger().accept("Could not analyze class field " + e.getMessage());
+                LogProvider.error("Could not analyze class field " + e.getMessage());
+                LogProvider.debug(e);
             }
         }
     }

@@ -17,12 +17,12 @@
 package com.sebastian_daschner.jaxrs_analyzer.analysis.project.methods;
 
 import com.sebastian_daschner.jaxrs_analyzer.LogProvider;
+import com.sebastian_daschner.jaxrs_analyzer.analysis.bytecode.collection.ByteCodeCollector;
+import com.sebastian_daschner.jaxrs_analyzer.analysis.bytecode.reduction.RelevantInstructionReducer;
 import com.sebastian_daschner.jaxrs_analyzer.analysis.utils.JavaUtils;
 import com.sebastian_daschner.jaxrs_analyzer.model.instructions.Instruction;
 import com.sebastian_daschner.jaxrs_analyzer.model.instructions.InvokeInstruction;
 import com.sebastian_daschner.jaxrs_analyzer.model.methods.MethodIdentifier;
-import com.sebastian_daschner.jaxrs_analyzer.analysis.bytecode.collection.ByteCodeCollector;
-import com.sebastian_daschner.jaxrs_analyzer.analysis.bytecode.reduction.RelevantInstructionReducer;
 import com.sebastian_daschner.jaxrs_analyzer.model.methods.ProjectMethod;
 import javassist.*;
 
@@ -103,7 +103,8 @@ abstract class MethodContentAnalyzer {
             try {
                 nestedMethodInstructions = getRelevantInstructions(identifier);
             } catch (NotFoundException e) {
-                LogProvider.getLogger().accept("Could not interpret project method: " + identifier);
+                LogProvider.error("Could not interpret project method: " + identifier);
+                LogProvider.debug(e);
                 continue;
             }
             projectMethods.add(new ProjectMethod(identifier, nestedMethodInstructions));

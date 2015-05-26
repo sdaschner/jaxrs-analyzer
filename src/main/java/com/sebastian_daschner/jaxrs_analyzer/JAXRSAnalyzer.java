@@ -27,6 +27,7 @@ public class JAXRSAnalyzer {
     private static final String DEFAULT_DOMAIN = "example.com";
     private static final BackendType DEFAULT_BACKEND = BackendType.SWAGGER;
 
+    private final Set<Path> projectPaths = new HashSet<>();
     private final Set<Path> classPaths = new HashSet<>();
     private final BackendType backendType;
     private final String projectName;
@@ -37,19 +38,22 @@ public class JAXRSAnalyzer {
     /**
      * Constructs a JAX-RS Analyzer.
      *
-     * @param classPaths     The class paths (can either be directories or jar-files, at least one is mandatory)
+     * @param projectPaths   The paths of the projects to be analyzed (can either be directories or jar-files, at least one is mandatory)
+     * @param classPaths     The additional class paths (can either be directories or jar-files)
      * @param backendType    The backend type (can be {@code null})
      * @param projectName    The project name (can be {@code null})
      * @param projectVersion The project version (can be {@code null})
      * @param domain         The domain (can be {@code null})
      * @param outputLocation The location of the output file (output will be printed to standard out if {@code null})
      */
-    public JAXRSAnalyzer(final Set<Path> classPaths, final BackendType backendType, final String projectName, final String projectVersion, final String domain,
-                         final Path outputLocation) {
+    public JAXRSAnalyzer(final Set<Path> projectPaths, final Set<Path> classPaths, final BackendType backendType, final String projectName,
+                         final String projectVersion, final String domain, final Path outputLocation) {
+        Objects.requireNonNull(projectPaths);
         Objects.requireNonNull(classPaths);
-        if (classPaths.isEmpty())
-            throw new IllegalArgumentException("At least one class path is mandatory");
+        if (projectPaths.isEmpty())
+            throw new IllegalArgumentException("At least one project path is mandatory");
 
+        this.projectPaths.addAll(projectPaths);
         this.classPaths.addAll(classPaths);
         this.projectName = Optional.ofNullable(projectName).orElse(DEFAULT_NAME);
         this.projectVersion = Optional.ofNullable(projectVersion).orElse(DEFAULT_VERSION);
@@ -62,11 +66,11 @@ public class JAXRSAnalyzer {
      * Analyzes the JAX-RS project at the class path and produces the output as configured.
      */
     public void analyze() {
-        final Resources resources = new ProjectAnalyzer(classPaths.toArray(new Path[classPaths.size()])).analyze();
+        final Resources resources = new ProjectAnalyzer(classPaths.toArray(new Path[classPaths.size()])).analyze(projectPaths.toArray(new Path[projectPaths.size()]));
         final Project project = new Project(projectName, projectVersion, domain, resources);
 
         if (isEmpty(resources)) {
-            LogProvider.getLogger().accept("Empty JAX-RS analysis result, omitting output");
+            LogProvider.info("Empty JAX-RS analysis result, omitting output");
             return;
         }
 
@@ -87,8 +91,9 @@ public class JAXRSAnalyzer {
         try (final Writer writer = new BufferedWriter(new FileWriter(outputLocation.toFile()))) {
             writer.write(output);
             writer.flush();
-        } catch (IOException ex) {
-            System.err.println("Could not write to the specified output location, reason: " + ex.getMessage());
+        } catch (IOException e) {
+            LogProvider.error("Could not write to the specified output location, reason: " + e.getMessage());
+            LogProvider.debug(e);
         }
     }
 

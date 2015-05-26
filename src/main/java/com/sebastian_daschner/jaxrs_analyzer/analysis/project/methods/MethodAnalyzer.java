@@ -76,8 +76,8 @@ public class MethodAnalyzer {
 
             return analyzeInternal();
         } catch (Exception e) {
-            LogProvider.getLogger().accept("Could not analyze the method: " + method);
-            e.printStackTrace();
+            LogProvider.error("Could not analyze the method: " + method);
+            LogProvider.debug(e);
             return null;
         } finally {
             lock.unlock();
@@ -92,7 +92,8 @@ public class MethodAnalyzer {
         try {
             determineSuperDeclarations();
         } catch (NotFoundException e) {
-            LogProvider.getLogger().accept("Could not determine super classes");
+            LogProvider.error("Could not determine super classes");
+            LogProvider.debug(e);
             // ignore
         }
         annotatedSuperMethod = MethodFinder.findFirstMethod(superClasses, method.getSignature(), MethodAnalyzer::hasJaxRsAnnotations);

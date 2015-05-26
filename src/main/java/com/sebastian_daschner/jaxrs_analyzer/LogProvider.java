@@ -16,6 +16,8 @@
 
 package com.sebastian_daschner.jaxrs_analyzer;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.function.Consumer;
 
 /**
@@ -25,24 +27,79 @@ import java.util.function.Consumer;
  */
 public final class LogProvider {
 
-    private static Consumer<String> logger = System.err::println;
+    private static Consumer<String> infoLogger = System.err::println;
+    private static Consumer<String> debugLogger = s -> {
+        // do nothing
+    };
+    private static Consumer<String> errorLogger = System.err::println;
 
-    /**
-     * Injects an own logger functionality. Overwrites the previously associated logger.
-     *
-     * @param logger The new logger
-     */
-    public static void injectLogger(final Consumer<String> logger) {
-        LogProvider.logger = logger;
+    private LogProvider() {
+        throw new UnsupportedOperationException();
     }
 
     /**
-     * Returns the associated logger. Defaults to {@code System.err.println()}.
+     * Injects an own info logger functionality. Overwrites the previously associated info logger.
      *
-     * @return The logger
+     * @param logger The new info logger
      */
-    public static Consumer<String> getLogger() {
-        return logger;
+    public static void injectInfoLogger(final Consumer<String> logger) {
+        LogProvider.infoLogger = logger;
+    }
+
+    /**
+     * Injects an own debug logger functionality. Overwrites the previously associated debug logger.
+     *
+     * @param logger The new debug logger
+     */
+    public static void injectDebugLogger(final Consumer<String> logger) {
+        LogProvider.debugLogger = logger;
+    }
+
+    /**
+     * Injects an own error logger functionality. Overwrites the previously associated error logger.
+     *
+     * @param logger The new error logger
+     */
+    public static void injectErrorLogger(final Consumer<String> logger) {
+        LogProvider.errorLogger = logger;
+    }
+
+    /**
+     * Logs a message to the configured info logger.
+     *
+     * @param message The message to log
+     */
+    public static void info(final String message) {
+        infoLogger.accept(message);
+    }
+
+    /**
+     * Logs a message to the configured debug logger.
+     *
+     * @param message The message to log
+     */
+    public static void debug(final String message) {
+        debugLogger.accept(message);
+    }
+
+    /**
+     * Logs the stacktrace of the throwable to the debug logger.
+     *
+     * @param throwable The throwable to log
+     */
+    public static void debug(final Throwable throwable) {
+        final StringWriter errors = new StringWriter();
+        throwable.printStackTrace(new PrintWriter(errors));
+        debugLogger.accept(errors.toString());
+    }
+
+    /**
+     * Logs a message to the configured error logger.
+     *
+     * @param message The message to log
+     */
+    public static void error(final String message) {
+        errorLogger.accept(message);
     }
 
 }
