@@ -3,6 +3,12 @@ Sebastian Daschner
 
 // new versions are placed on the top
 
+== v0.5
+- Improved handling of abstract JAX-RS methods
+- Added more functionality to the CLI tool (e.g. ability to specify several class paths)
+- Changed CLI tool interface to convenient Unix-style parameters
+- Added more log information -- especially on debug level
+
 == v0.4
 - Added AsciiDoc backend
 - Improved variable type resolution
