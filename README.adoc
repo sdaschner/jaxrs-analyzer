@@ -22,8 +22,19 @@ One of the output formats of the REST documentation is the heavily used Swagger 
 
 Instead of using the Maven plugin, the tool can also run directly from the jar file. Therefore this project needs to be build with `mvn clean install`.
 The executable jar file resides under `target/jaxrs-analyzer.jar`.
-Run it with `java -jar jaxrs-analyzer.jar <basePathToYourCompiledClasses> [<backend>] [<projectName>] [<projectVersion>] [<deployedDomain>]`, e.g. `java -jar jaxrs-analyzer.jar ../yourProject/target/classes swagger`.
-Currently supported backends are `swagger` (default), `asciidoc` and `plaintext`.
+Run it with `java -jar jaxrs-analyzer.jar [options] <projectPathToCompiledClasses> [projectPathToCompiledClasses...]`, e.g. `java -jar jaxrs-analyzer.jar -b swagger ../yourProject/target/classes`.
+
+The `projectPath` entries may be directories or jar-files containing the classes to be analyzed.
+
+Following available options:
+
+* `-b <backend>` The backend to choose: `swagger` (default), `plaintext`, `asciidoc`
+* `-cp <class path>[:class paths...]` The additional class paths containing classes which are used in the project (separated by colon)
+* `-X` Debug enabled (prints error debugging information on Standard error out)
+* `-n <project name>` The name of the project
+* `-v <project version>` The version of the project
+* `-d <project domain>` The domain of the project
+* `-o <output file>` The location of the analysis output (will be printed to standard out if omitted)
 
 Feedback, bug reports and ideas for improvement are very welcome! Feel free to fork, comment, file an issue, etc. ;-)
 
