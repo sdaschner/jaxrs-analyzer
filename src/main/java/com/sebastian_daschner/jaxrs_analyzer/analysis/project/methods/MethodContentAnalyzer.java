@@ -95,18 +95,23 @@ abstract class MethodContentAnalyzer {
      * @param projectMethods All found project methods
      */
     private void addProjectMethods(final List<Instruction> instructions, final Set<ProjectMethod> projectMethods) {
-
         Set<MethodIdentifier> projectMethodIdentifiers = findUnhandledProjectMethodIdentifiers(instructions, projectMethods);
 
         for (MethodIdentifier identifier : projectMethodIdentifiers) {
-            final List<Instruction> nestedMethodInstructions;
+            final CtBehavior method;
             try {
-                nestedMethodInstructions = getRelevantInstructions(identifier);
+                method = getMethod(identifier);
             } catch (NotFoundException e) {
                 LogProvider.error("Could not interpret project method: " + identifier);
                 LogProvider.debug(e);
                 continue;
             }
+
+            final int modifiers = method.getModifiers();
+            if (Modifier.isNative(modifiers) || Modifier.isAbstract(modifiers))
+                continue;
+
+            final List<Instruction> nestedMethodInstructions = interpretRelevantInstructions(method);
             projectMethods.add(new ProjectMethod(identifier, nestedMethodInstructions));
             addProjectMethods(nestedMethodInstructions, projectMethods);
         }
@@ -128,24 +133,21 @@ abstract class MethodContentAnalyzer {
     }
 
     /**
-     * Returns the relevant instructions for the given {@code identifier}.
+     * Returns the method (Javassist {@link CtBehavior}) for the given method or constructor identifier.
      *
      * @param identifier The method identifier
-     * @return The relevant instructions of the invoked method.
+     * @return The Javassist behavior
      * @throws NotFoundException If the method could not be analyzed
      */
-    private List<Instruction> getRelevantInstructions(final MethodIdentifier identifier) throws NotFoundException {
+    // TODO refactor to central utils
+    private CtBehavior getMethod(final MethodIdentifier identifier) throws NotFoundException {
         final CtClass[] parameterClasses = JavaUtils.getParameterClasses(identifier);
         final CtClass ctClass = ClassPool.getDefault().get(identifier.getClassName());
 
-        final CtBehavior method;
         if (JavaUtils.isInitializerName(identifier.getMethodName())) {
-            method = ctClass.getDeclaredConstructor(parameterClasses);
-        } else {
-            method = ctClass.getDeclaredMethod(identifier.getMethodName(), parameterClasses);
+            return ctClass.getDeclaredConstructor(parameterClasses);
         }
-
-        return interpretRelevantInstructions(method);
+        return ctClass.getDeclaredMethod(identifier.getMethodName(), parameterClasses);
     }
 
     /**
