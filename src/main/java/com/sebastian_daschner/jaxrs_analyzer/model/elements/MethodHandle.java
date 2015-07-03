@@ -17,6 +17,7 @@
 package com.sebastian_daschner.jaxrs_analyzer.model.elements;
 
 import com.sebastian_daschner.jaxrs_analyzer.analysis.bytecode.simulation.MethodPool;
+import com.sebastian_daschner.jaxrs_analyzer.analysis.utils.JavaUtils;
 import com.sebastian_daschner.jaxrs_analyzer.model.methods.Method;
 import com.sebastian_daschner.jaxrs_analyzer.model.methods.MethodIdentifier;
 
@@ -72,7 +73,10 @@ public class MethodHandle extends Element implements Method {
                     final Method method = MethodPool.getInstance().get(i);
                     if (!i.isStaticMethod()) {
                         final List<Element> actualArguments = new ArrayList<>(combinedArguments);
-                        final Element object = actualArguments.remove(0);
+                        final Element object = actualArguments.isEmpty() ? Element.EMPTY : actualArguments.remove(0);
+                        if (JavaUtils.isInitializerName(i.getMethodName())) {
+                            return new Element(i.getClassName());
+                        }
                         return method.invoke(object, actualArguments);
                     }
                     return method.invoke(null, combinedArguments);

@@ -367,7 +367,8 @@ enum KnownResponseResultMethod implements IdentifiableMethod {
             (object, arguments) -> {
                 if (arguments.get(0) instanceof MethodHandle && arguments.get(1) instanceof MethodHandle) {
                     final Element collectionElement = ((Method) arguments.get(0)).invoke(null, Collections.emptyList());
-                    return ((Method) arguments.get(1)).invoke(null, Arrays.asList(collectionElement, object));
+                    ((Method) arguments.get(1)).invoke(null, Arrays.asList(collectionElement, object));
+                    return collectionElement;
                 }
                 return Element.EMPTY;
             }),
