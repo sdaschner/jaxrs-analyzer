@@ -236,6 +236,13 @@ class TypeAnalyzer {
             return;
         }
 
+        // workaround for Map's
+        // TODO improve Java type representation
+        if (type.startsWith("java.util") && type.contains("Map")) {
+            builder.add(key, Json.createObjectBuilder().build());
+            return;
+        }
+
         switch (type) {
             case "java.lang.String":
                 builder.add(key, "string");
