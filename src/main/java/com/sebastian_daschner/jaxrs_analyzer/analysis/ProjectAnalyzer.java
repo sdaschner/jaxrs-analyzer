@@ -168,7 +168,7 @@ public class ProjectAnalyzer {
      * @return The fully-qualified class name (e.g. a.package.AClass)
      */
     private static String convertToQualifiedName(final String fileName) {
-        final String replacedSeparators = fileName.replace('/', '.');
+        final String replacedSeparators = fileName.replace(File.separatorChar, '.');
         return replacedSeparators.substring(0, replacedSeparators.length() - ".class".length());
     }
 
