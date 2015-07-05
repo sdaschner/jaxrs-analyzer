@@ -16,9 +16,11 @@
 
 package com.sebastian_daschner.jaxrs_analyzer.backend.swagger;
 
+import com.sebastian_daschner.jaxrs_analyzer.model.types.Type;
+
 import javax.json.JsonValue;
 
-import static com.sebastian_daschner.jaxrs_analyzer.backend.swagger.SwaggerType.*;
+import static com.sebastian_daschner.jaxrs_analyzer.model.types.Types.*;
 
 /**
  * Contains Swagger JSON type functionality.
@@ -37,27 +39,23 @@ final class SwaggerUtils {
      * @param type The Java type definition
      * @return The Swagger type
      */
-    static SwaggerType toSwaggerType(final String type) {
-        switch (type) {
-            case "java.lang.Integer":
-            case "int":
-            case "java.lang.Long":
-            case "long":
-                return INTEGER;
-            case "java.lang.Double":
-            case "double":
-            case "java.lang.Float":
-            case "float":
-                return NUMBER;
-            case "java.lang.Boolean":
-            case "boolean":
-                return BOOLEAN;
-            case "java.lang.String":
-                return STRING;
-        }
-        if (type.contains("["))
-            return ARRAY;
-        return OBJECT;
+    static SwaggerType toSwaggerType(final Type type) {
+        if (STRING.equals(type))
+            return SwaggerType.STRING;
+
+        if (BOOLEAN.equals(type) || PRIMITIVE_BOOLEAN.equals(type))
+            return SwaggerType.BOOLEAN;
+
+        if (INTEGER_TYPES.contains(type))
+            return SwaggerType.INTEGER;
+
+        if (DOUBLE_TYPES.contains(type))
+            return SwaggerType.NUMBER;
+
+        if (type.getCtClass().isArray())
+            return SwaggerType.ARRAY;
+
+        return SwaggerType.OBJECT;
     }
 
     /**
@@ -69,19 +67,19 @@ final class SwaggerUtils {
     static SwaggerType toSwaggerType(final JsonValue.ValueType type) {
         switch (type) {
             case ARRAY:
-                return ARRAY;
+                return SwaggerType.ARRAY;
             case OBJECT:
-                return OBJECT;
+                return SwaggerType.OBJECT;
             case STRING:
-                return STRING;
+                return SwaggerType.STRING;
             case NUMBER:
-                return NUMBER;
+                return SwaggerType.NUMBER;
             case TRUE:
             case FALSE:
-                return BOOLEAN;
+                return SwaggerType.BOOLEAN;
             case NULL:
             default:
-                return NULL;
+                return SwaggerType.NULL;
         }
     }
 

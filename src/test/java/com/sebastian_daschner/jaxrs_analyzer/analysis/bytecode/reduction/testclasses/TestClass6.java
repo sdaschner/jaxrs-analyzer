@@ -18,6 +18,8 @@ package com.sebastian_daschner.jaxrs_analyzer.analysis.bytecode.reduction.testcl
 
 import com.sebastian_daschner.jaxrs_analyzer.model.instructions.*;
 import com.sebastian_daschner.jaxrs_analyzer.model.methods.MethodIdentifier;
+import com.sebastian_daschner.jaxrs_analyzer.model.types.Types;
+import com.sebastian_daschner.jaxrs_analyzer.model.types.Type;
 
 import javax.ws.rs.core.Response;
 import java.util.LinkedList;
@@ -34,23 +36,23 @@ public class TestClass6 {
     public static List<Instruction> instructions() {
         final List<Instruction> instructions = new LinkedList<>();
 
-        instructions.add(new LoadInstruction(0, TestClass6.class.getCanonicalName(), "this"));
+        instructions.add(new LoadInstruction(0, new Type(TestClass6.class.getCanonicalName()), "this"));
         instructions.add(new DupInstruction());
-        instructions.add(new StoreInstruction(2, "java.lang.Object", "variable$2"));
+        instructions.add(new StoreInstruction(2, Types.OBJECT, "variable$2"));
         instructions.add(new SizeChangingInstruction("monitorenter", 0, 1));
-        instructions.add(new LoadInstruction(2, "java.lang.Object", "variable$2"));
+        instructions.add(new LoadInstruction(2, Types.OBJECT, "variable$2"));
         instructions.add(new SizeChangingInstruction("monitorexit", 0, 1));
         instructions.add(new ExceptionHandlerInstruction());
-        instructions.add(new StoreInstruction(3, "java.lang.Object", "variable$3"));
+        instructions.add(new StoreInstruction(3, Types.OBJECT, "variable$3"));
         instructions.add(new PushInstruction(6));
-        instructions.add(new LoadInstruction(1, "int", "number"));
+        instructions.add(new LoadInstruction(1, Types.PRIMITIVE_INT, "number"));
         instructions.add(new SizeChangingInstruction("idiv", 1, 2));
-        instructions.add(new InvokeInstruction(MethodIdentifier.ofStatic("javax.ws.rs.core.Response", "status", "javax.ws.rs.core.Response$ResponseBuilder", "int")));
-        instructions.add(new InvokeInstruction(MethodIdentifier.ofNonStatic("javax.ws.rs.core.Response$ResponseBuilder", "build", "javax.ws.rs.core.Response")));
-        instructions.add(new LoadInstruction(2, "java.lang.Object", "variable$2"));
+        instructions.add(new InvokeInstruction(MethodIdentifier.ofStatic(Types.RESPONSE, "status", Types.RESPONSE_BUILDER, Types.PRIMITIVE_INT)));
+        instructions.add(new InvokeInstruction(MethodIdentifier.ofNonStatic(Types.RESPONSE_BUILDER, "build", Types.RESPONSE)));
+        instructions.add(new LoadInstruction(2, Types.OBJECT, "variable$2"));
         instructions.add(new SizeChangingInstruction("monitorexit", 0, 1));
         instructions.add(new ReturnInstruction());
-        instructions.add(new LoadInstruction(3, "java.lang.Object", "variable$3"));
+        instructions.add(new LoadInstruction(3, Types.OBJECT, "variable$3"));
         instructions.add(new ThrowInstruction());
 
         return instructions;

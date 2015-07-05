@@ -64,7 +64,7 @@ class StackSizeSimulator {
      * @return {@code true} if the stack will be cleared
      */
     private static boolean isStackCleared(final Instruction instruction) {
-        return instruction.getType() == Instruction.Type.RETURN || instruction.getType() == Instruction.Type.THROW;
+        return instruction.getType() == Instruction.InstructionType.RETURN || instruction.getType() == Instruction.InstructionType.THROW;
     }
 
     /**

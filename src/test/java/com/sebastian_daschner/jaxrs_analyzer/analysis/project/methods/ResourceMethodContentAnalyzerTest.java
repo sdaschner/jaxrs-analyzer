@@ -86,8 +86,8 @@ public class ResourceMethodContentAnalyzerTest {
         final MethodResult result = new MethodResult();
         try {
             classUnderTest.analyze(method, result);
-        } catch (Exception e) {
-            System.err.println("failed for " + testClassName);
+        } catch (Throwable e) {
+            System.err.println("exception in " + testClassName);
             throw e;
         }
         final Set<HttpResponse> actualResult = result.getResponses();

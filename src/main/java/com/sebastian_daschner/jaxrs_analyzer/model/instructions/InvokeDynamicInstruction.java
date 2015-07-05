@@ -17,6 +17,7 @@
 package com.sebastian_daschner.jaxrs_analyzer.model.instructions;
 
 import com.sebastian_daschner.jaxrs_analyzer.model.methods.MethodIdentifier;
+import com.sebastian_daschner.jaxrs_analyzer.model.types.Type;
 
 import java.util.Objects;
 
@@ -40,7 +41,7 @@ public class InvokeDynamicInstruction extends InvokeInstruction {
         // the method handle will be pushed on the stack
         int difference = 1;
 
-        for (final String parameterType : dynamicIdentifier.getParameterTypes())
+        for (final Type parameterType : dynamicIdentifier.getParameters())
             difference--;
 
         return difference;
@@ -51,8 +52,8 @@ public class InvokeDynamicInstruction extends InvokeInstruction {
     }
 
     @Override
-    public Type getType() {
-        return Type.METHOD_HANDLE;
+    public InstructionType getType() {
+        return InstructionType.METHOD_HANDLE;
     }
 
     @Override

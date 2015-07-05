@@ -16,7 +16,8 @@
 
 package com.sebastian_daschner.jaxrs_analyzer.analysis.results;
 
-import com.sebastian_daschner.jaxrs_analyzer.analysis.utils.JavaUtils;
+import com.sebastian_daschner.jaxrs_analyzer.model.types.Types;
+import com.sebastian_daschner.jaxrs_analyzer.model.types.Type;
 
 import javax.ws.rs.core.GenericEntity;
 
@@ -27,7 +28,6 @@ import javax.ws.rs.core.GenericEntity;
  */
 final class ResponseTypeNormalizer {
 
-    private final static String GENERIC_ENTITY = GenericEntity.class.getName();
     private ResponseTypeNormalizer() {
         throw new UnsupportedOperationException();
     }
@@ -38,16 +38,32 @@ final class ResponseTypeNormalizer {
      * @param type The type
      * @return The fully normalized type
      */
-    public static String normalize(final String type) {
-        String currentType = type;
-        String lastType;
+    static Type normalize(final Type type) {
+        Type currentType = type;
+        Type lastType;
         do {
             lastType = currentType;
-            currentType = JavaUtils.trimCollection(currentType);
-            currentType = normalizeWrapper(currentType);
+            currentType = normalizeCollection(currentType);
+            currentType = normalizeResponseWrapper(currentType);
         } while (!lastType.equals(currentType));
 
         return currentType;
+    }
+
+    /**
+     * Normalizes the contained collection type.
+     *
+     * @param type The type
+     * @return The normalized type
+     */
+    static Type normalizeCollection(final Type type) {
+        if (type.isAssignableTo(Types.COLLECTION)) {
+            if (!type.getTypeParameters().isEmpty()) {
+                return type.getTypeParameters().get(0);
+            }
+            return Types.OBJECT;
+        }
+        return type;
     }
 
     /**
@@ -56,13 +72,10 @@ final class ResponseTypeNormalizer {
      * @param type The type
      * @return The normalized type
      */
-    public static String normalizeWrapper(final String type) {
-        if (type.startsWith(GENERIC_ENTITY + '<'))
-            return type.substring(GENERIC_ENTITY.length() + 1, type.length() - 1);
-
+    static Type normalizeResponseWrapper(final Type type) {
+        if (!type.getTypeParameters().isEmpty() && type.isAssignableTo(Types.GENERIC_ENTITY))
+            return type.getTypeParameters().get(0);
         return type;
     }
-
-
 
 }

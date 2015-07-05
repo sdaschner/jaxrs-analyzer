@@ -17,6 +17,8 @@
 package com.sebastian_daschner.jaxrs_analyzer.model.instructions;
 
 import com.sebastian_daschner.jaxrs_analyzer.model.methods.MethodIdentifier;
+import com.sebastian_daschner.jaxrs_analyzer.model.types.Types;
+import com.sebastian_daschner.jaxrs_analyzer.model.types.Type;
 
 /**
  * Represents an INVOKE_XYZ instruction.
@@ -33,12 +35,12 @@ public class InvokeInstruction implements Instruction {
 
     @Override
     public int getStackSizeDifference() {
-        int difference = identifier.getReturnType() == null ? -1 : 0;
+        int difference = Types.PRIMITIVE_VOID.equals(identifier.getReturnType()) ? -1 : 0;
 
         if (identifier.isStaticMethod())
             difference++;
 
-        for (final String parameterType : identifier.getParameterTypes()) {
+        for (final Type parameterType : identifier.getParameters()) {
             difference--;
         }
 
@@ -46,8 +48,8 @@ public class InvokeInstruction implements Instruction {
     }
 
     @Override
-    public Type getType() {
-        return Type.INVOKE;
+    public InstructionType getType() {
+        return InstructionType.INVOKE;
     }
 
     public MethodIdentifier getIdentifier() {

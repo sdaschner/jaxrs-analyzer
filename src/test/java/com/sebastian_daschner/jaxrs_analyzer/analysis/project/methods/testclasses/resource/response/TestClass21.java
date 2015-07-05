@@ -17,6 +17,7 @@
 package com.sebastian_daschner.jaxrs_analyzer.analysis.project.methods.testclasses.resource.response;
 
 import com.sebastian_daschner.jaxrs_analyzer.model.elements.HttpResponse;
+import com.sebastian_daschner.jaxrs_analyzer.model.types.Type;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -47,11 +48,11 @@ public class TestClass21 {
 
         secondResult.getStatuses().add(200);
         secondResult.getContentTypes().add("application/json");
-        secondResult.getEntityTypes().add("java.lang.Double");
+        secondResult.getEntityTypes().add(new Type("java.lang.Double"));
 
         thirdResult.getStatuses().add(200);
         thirdResult.getHeaders().addAll(Arrays.asList("Content-Language", "Content-Encoding"));
-        thirdResult.getEntityTypes().add("java.lang.Long");
+        thirdResult.getEntityTypes().add(new Type("java.lang.Long"));
 
         return new HashSet<>(Arrays.asList(firstResult, secondResult, thirdResult));
     }

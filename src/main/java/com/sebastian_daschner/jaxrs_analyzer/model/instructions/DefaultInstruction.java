@@ -31,8 +31,8 @@ public class DefaultInstruction implements Instruction {
     }
 
     @Override
-    public Type getType() {
-        return Type.OTHER;
+    public InstructionType getType() {
+        return InstructionType.OTHER;
     }
 
     @Override

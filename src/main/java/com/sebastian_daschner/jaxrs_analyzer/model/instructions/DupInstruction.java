@@ -29,8 +29,8 @@ public class DupInstruction implements Instruction {
     }
 
     @Override
-    public Type getType() {
-        return Type.DUP;
+    public InstructionType getType() {
+        return InstructionType.DUP;
     }
 
     @Override

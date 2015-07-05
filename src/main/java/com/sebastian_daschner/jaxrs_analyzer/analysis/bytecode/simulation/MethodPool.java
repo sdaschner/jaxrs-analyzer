@@ -16,11 +16,12 @@
 
 package com.sebastian_daschner.jaxrs_analyzer.analysis.bytecode.simulation;
 
-import com.sebastian_daschner.jaxrs_analyzer.model.methods.MethodIdentifier;
 import com.sebastian_daschner.jaxrs_analyzer.model.elements.Element;
 import com.sebastian_daschner.jaxrs_analyzer.model.methods.IdentifiableMethod;
 import com.sebastian_daschner.jaxrs_analyzer.model.methods.Method;
+import com.sebastian_daschner.jaxrs_analyzer.model.methods.MethodIdentifier;
 import com.sebastian_daschner.jaxrs_analyzer.model.methods.ProjectMethod;
+import com.sebastian_daschner.jaxrs_analyzer.model.types.Types;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -42,7 +43,7 @@ public class MethodPool {
      */
     private static final MethodPool INSTANCE = new MethodPool();
     private static final Function<MethodIdentifier, Method> DEFAULT_METHOD = identifier -> (object, arguments) -> {
-        if (identifier.getReturnType() != null)
+        if (!Types.PRIMITIVE_VOID.equals(identifier.getReturnType()))
             return new Element(identifier.getReturnType());
         return null;
     };

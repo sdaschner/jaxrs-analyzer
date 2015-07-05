@@ -17,6 +17,9 @@
 package com.sebastian_daschner.jaxrs_analyzer.model.instructions;
 
 import com.sebastian_daschner.jaxrs_analyzer.analysis.utils.StringUtils;
+import com.sebastian_daschner.jaxrs_analyzer.model.types.Type;
+
+import java.util.Objects;
 
 /**
  * Represents any LOAD or STORE instruction.
@@ -26,11 +29,11 @@ import com.sebastian_daschner.jaxrs_analyzer.analysis.utils.StringUtils;
 public abstract class LoadStoreInstruction implements Instruction {
 
     private final int number;
-    private final String variableType;
+    private final Type variableType;
     private final String name;
 
-    protected LoadStoreInstruction(final int number, final String variableType, final String name) {
-        StringUtils.requireNonBlank(variableType);
+    protected LoadStoreInstruction(final int number, final Type variableType, final String name) {
+        Objects.requireNonNull(variableType);
         StringUtils.requireNonBlank(name);
 
         this.number = number;
@@ -42,7 +45,7 @@ public abstract class LoadStoreInstruction implements Instruction {
         return number;
     }
 
-    public String getVariableType() {
+    public Type getVariableType() {
         return variableType;
     }
 

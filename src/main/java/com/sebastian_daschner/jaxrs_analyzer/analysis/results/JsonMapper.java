@@ -16,15 +16,19 @@
 
 package com.sebastian_daschner.jaxrs_analyzer.analysis.results;
 
-import com.sebastian_daschner.jaxrs_analyzer.model.elements.JsonArray;
-import com.sebastian_daschner.jaxrs_analyzer.model.elements.JsonValue;
 import com.sebastian_daschner.jaxrs_analyzer.model.elements.Element;
+import com.sebastian_daschner.jaxrs_analyzer.model.elements.JsonArray;
 import com.sebastian_daschner.jaxrs_analyzer.model.elements.JsonObject;
+import com.sebastian_daschner.jaxrs_analyzer.model.elements.JsonValue;
+import com.sebastian_daschner.jaxrs_analyzer.model.types.Type;
 
 import javax.json.Json;
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonObjectBuilder;
-import java.util.stream.Stream;
+import java.util.Set;
+import java.util.function.Function;
+
+import static com.sebastian_daschner.jaxrs_analyzer.model.types.Types.*;
 
 /**
  * Creates JSON-P Json objects from the internal {@link JsonValue}s and maps JSON types.
@@ -33,6 +37,7 @@ import java.util.stream.Stream;
  * @author Sebastian Daschner
  */
 final class JsonMapper {
+
 
     private JsonMapper() {
         throw new UnsupportedOperationException();
@@ -57,34 +62,20 @@ final class JsonMapper {
     }
 
     private static void addToArray(final JsonArrayBuilder builder, final Element value) {
-        switch (value.getType()) {
-            case "java.lang.String":
-                builder.add("string");
-                break;
-            case "java.lang.Integer":
-            case "int":
-            case "java.math.BigInteger":
-            case "java.math.BigDecimal":
-            case "java.lang.Long":
-            case "long":
-                builder.add(0);
-                break;
-            case "java.lang.Double":
-            case "double":
-                builder.add(0.0);
-                break;
-            case "java.lang.Boolean":
-            case "boolean":
-                builder.add(false);
-                break;
-            case "javax.json.JsonValue":
-            case "javax.json.JsonArray":
-            case "javax.json.JsonObject":
-                value.getPossibleValues().stream().filter(v -> v instanceof JsonValue).findFirst().ifPresent(v -> builder.add(map((JsonValue) v)));
-                break;
-            default:
-                builder.addNull();
-        }
+        if (value.getTypes().contains(STRING))
+            builder.add("string");
+
+        if (value.getTypes().stream().anyMatch(INTEGER_TYPES::contains))
+            builder.add(0);
+
+        if (value.getTypes().stream().anyMatch(DOUBLE_TYPES::contains))
+            builder.add(0.0);
+
+        if (value.getTypes().contains(BOOLEAN) || value.getTypes().contains(PRIMITIVE_BOOLEAN))
+            builder.add(false);
+
+        if (value.getTypes().stream().anyMatch(JSON_TYPES::contains))
+            value.getPossibleValues().stream().filter(v -> v instanceof JsonValue).findFirst().ifPresent(v -> builder.add(map((JsonValue) v)));
     }
 
     private static javax.json.JsonObject map(final JsonObject jsonObject) {
@@ -95,46 +86,86 @@ final class JsonMapper {
 
     private static void addToObject(final JsonObjectBuilder builder, final String key, final Element value) {
         // handle nested JSON
-        final String jsonTypes[] = {"javax.json.JsonValue", "javax.json.JsonArray", "javax.json.JsonObject"};
-        if (Stream.of(jsonTypes).anyMatch(t -> t.equals(value.getType()))) {
+        if (value.getTypes().stream().anyMatch(JSON_TYPES::contains)) {
             value.getPossibleValues().stream().filter(v -> v instanceof JsonValue).findFirst().ifPresent(v -> builder.add(key, map((JsonValue) v)));
             return;
         }
 
-        addToObject(builder, key, value.getType());
+        addToObject(builder, key, value.getTypes());
     }
 
-    /**
-     * Adds a value to the JSON builder under the given key, depending on the type of the value.
-     *
-     * @param builder The JSON builder
-     * @param key     The key of the field
-     * @param type    The type to add
-     */
-    static void addToObject(final JsonObjectBuilder builder, final String key, final String type) {
-        switch (type) {
-            case "java.lang.String":
-                builder.add(key, "string");
-                break;
-            case "java.lang.Integer":
-            case "int":
-            case "java.lang.Long":
-            case "long":
-            case "java.math.BigInteger":
-                builder.add(key, 0);
-                break;
-            case "java.lang.Double":
-            case "double":
-            case "java.math.BigDecimal":
-                builder.add(key, 0.0);
-                break;
-            case "java.lang.Boolean":
-            case "boolean":
-                builder.add(key, false);
-                break;
-            default:
-                builder.addNull(key);
+    private static void addToObject(final JsonObjectBuilder builder, final String key, final Set<Type> types) {
+        if (types.contains(STRING))
+            builder.add(key, "string");
+
+        if (types.stream().anyMatch(INTEGER_TYPES::contains))
+            builder.add(key, 0);
+
+        if (types.stream().anyMatch(DOUBLE_TYPES::contains))
+            builder.add(key, 0.0);
+
+        if (types.contains(BOOLEAN) || types.contains(PRIMITIVE_BOOLEAN))
+            builder.add(key, false);
+    }
+
+    static void addToObject(final JsonObjectBuilder builder, final String key, final Type type, final Function<Type, javax.json.JsonValue> defaultBehavior) {
+        if (STRING.equals(type)) {
+            builder.add(key, "string");
+            return;
         }
+
+        if (BOOLEAN.equals(type) || PRIMITIVE_BOOLEAN.equals(type)) {
+            builder.add(key, false);
+            return;
+        }
+
+        if (INTEGER_TYPES.contains(type)) {
+            builder.add(key, 0);
+            return;
+        }
+
+        if (DOUBLE_TYPES.contains(type)) {
+            builder.add(key, 0.0);
+            return;
+        }
+
+        // plain-old date and JSR-310
+        if (type.isAssignableTo(DATE) || type.isAssignableTo(TEMPORAL_ACCESSOR)) {
+            builder.add(key, "date");
+            return;
+        }
+
+        if (type.isAssignableTo(MAP)) {
+            builder.add(key, Json.createObjectBuilder().build());
+            return;
+        }
+
+        // fall-back
+        builder.add(key, defaultBehavior.apply(type));
+    }
+
+    static void addToArray(final JsonArrayBuilder builder, final Type type, final Function<Type, javax.json.JsonValue> defaultBehavior) {
+        if (STRING.equals(type)) {
+            builder.add("string");
+            return;
+        }
+
+        if (BOOLEAN.equals(type) || PRIMITIVE_BOOLEAN.equals(type)) {
+            builder.add(false);
+            return;
+        }
+
+        if (INTEGER_TYPES.contains(type)) {
+            builder.add(0);
+            return;
+        }
+
+        if (DOUBLE_TYPES.contains(type)) {
+            builder.add(0.0);
+            return;
+        }
+
+        builder.add(defaultBehavior.apply(type));
     }
 
 }

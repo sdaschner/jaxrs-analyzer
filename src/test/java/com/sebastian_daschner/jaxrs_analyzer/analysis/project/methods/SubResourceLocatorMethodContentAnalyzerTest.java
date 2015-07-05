@@ -18,25 +18,25 @@ import java.lang.reflect.Field;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 @RunWith(Parameterized.class)
 public class SubResourceLocatorMethodContentAnalyzerTest {
 
     private final SubResourceLocatorMethodContentAnalyzer classUnderTest;
     private final String testClassName;
-    private final String expectedClassName;
+    private final Set<String> expectedClassNames;
     private final CtMethod method;
     private final ClassAnalyzer classAnalyzer;
 
-    public SubResourceLocatorMethodContentAnalyzerTest(final String testClassName, final CtMethod method, final String expectedClassName)
+    public SubResourceLocatorMethodContentAnalyzerTest(final String testClassName, final CtMethod method, final Set<String> expectedClassNames)
             throws ReflectiveOperationException {
         this.testClassName = testClassName;
         this.method = method;
-        this.expectedClassName = expectedClassName;
+        this.expectedClassNames = expectedClassNames;
         classAnalyzer = mock(ClassAnalyzer.class);
         this.classUnderTest = new SubResourceLocatorMethodContentAnalyzer();
         final Field field = SubResourceLocatorMethodContentAnalyzer.class.getDeclaredField("classAnalyzer");
@@ -84,9 +84,10 @@ public class SubResourceLocatorMethodContentAnalyzerTest {
         }
 
         final ArgumentCaptor<CtClass> captor = ArgumentCaptor.forClass(CtClass.class);
-        verify(classAnalyzer).analyzeSubResource(captor.capture(), any());
+        verify(classAnalyzer, atLeastOnce()).analyzeSubResource(captor.capture(), any());
 
-        Assert.assertEquals("failed for " + testClassName, expectedClassName, captor.getValue().getName());
+        Assert.assertEquals("failed for " + testClassName, expectedClassNames, captor.getAllValues().stream().map(CtClass::getName).collect(Collectors.toSet()));
+        verify(classAnalyzer, times(expectedClassNames.size())).analyzeSubResource(any(), any());
     }
 
 }

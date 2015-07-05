@@ -16,9 +16,12 @@
 
 package com.sebastian_daschner.jaxrs_analyzer.analysis.bytecode.collection;
 
+import com.sebastian_daschner.jaxrs_analyzer.LogProvider;
 import com.sebastian_daschner.jaxrs_analyzer.model.instructions.LoadInstruction;
 import com.sebastian_daschner.jaxrs_analyzer.model.instructions.LoadStoreInstruction;
 import com.sebastian_daschner.jaxrs_analyzer.model.instructions.StoreInstruction;
+import com.sebastian_daschner.jaxrs_analyzer.model.types.Type;
+import com.sebastian_daschner.jaxrs_analyzer.model.types.Types;
 import javassist.bytecode.*;
 
 import java.util.Collections;
@@ -38,7 +41,7 @@ class LoadStoreInstructionBuilder {
      */
     private static final String UNKNOWN_VARIABLE_NAME_PREFIX = "variable$";
     private final Map<Integer, String> variableNames;
-    private final Map<Integer, String> variableTypes;
+    private final Map<Integer, Type> variableTypes;
 
     LoadStoreInstructionBuilder(final CodeAttribute codeAttribute) {
         final LocalVariableAttribute localVariableAttribute = (LocalVariableAttribute) codeAttribute.getAttribute(LocalVariableAttribute.tag);
@@ -70,35 +73,19 @@ class LoadStoreInstructionBuilder {
      * @param variableTypeAttribute The localVariableTypeTable attribute
      * @return The variable types for the variable indexes
      */
-    private Map<Integer, String> buildVariableTypes(final LocalVariableAttribute variableAttribute,
-                                                    final LocalVariableTypeAttribute variableTypeAttribute) {
-        final Map<Integer, String> types = new HashMap<>();
+    private Map<Integer, Type> buildVariableTypes(final LocalVariableAttribute variableAttribute,
+                                                  final LocalVariableTypeAttribute variableTypeAttribute) {
+        final Map<Integer, Type> types = new HashMap<>();
 
         if (variableAttribute != null)
             IntStream.range(0, variableAttribute.tableLength())
-                    .forEach(i -> types.put(variableAttribute.index(i), getType(variableAttribute, i)));
+                    .forEach(i -> types.put(variableAttribute.index(i), getType(variableAttribute.signature(i))));
 
         if (variableTypeAttribute != null)
             IntStream.range(0, variableTypeAttribute.tableLength())
-                    .forEach(i -> types.put(variableTypeAttribute.index(i), getType(variableTypeAttribute, i)));
+                    .forEach(i -> types.put(variableTypeAttribute.index(i), getType(variableTypeAttribute.signature(i))));
 
         return types;
-    }
-
-    /**
-     * Returns the variable type for the given index in the given table.
-     *
-     * @param variableAttribute The table attribute to use
-     * @param index             The variable index
-     * @return The type
-     */
-    private String getType(final LocalVariableAttribute variableAttribute, final int index) {
-        final String signature = variableAttribute.signature(index);
-        try {
-            return SignatureAttribute.toTypeSignature(signature).toString();
-        } catch (BadBytecode e) {
-            throw new IllegalStateException("Could not analyze bytecode", e);
-        }
     }
 
     /**
@@ -108,7 +95,7 @@ class LoadStoreInstructionBuilder {
      * @return The instruction
      */
     LoadInstruction buildLoad(final int index) {
-        final String type = variableTypes.getOrDefault(index, Object.class.getCanonicalName());
+        final Type type = variableTypes.getOrDefault(index, Types.OBJECT);
         final String name = variableNames.getOrDefault(index, UNKNOWN_VARIABLE_NAME_PREFIX + index);
         return new LoadInstruction(index, type, name);
     }
@@ -120,9 +107,19 @@ class LoadStoreInstructionBuilder {
      * @return The instruction
      */
     StoreInstruction buildStore(final int index) {
-        final String type = variableTypes.getOrDefault(index, Object.class.getCanonicalName());
+        final Type type = variableTypes.getOrDefault(index, Types.OBJECT);
         final String name = variableNames.getOrDefault(index, UNKNOWN_VARIABLE_NAME_PREFIX + index);
         return new StoreInstruction(index, type, name);
+    }
+
+    private Type getType(final String signature) {
+        try {
+            return new Type(SignatureAttribute.toTypeSignature(signature));
+        } catch (BadBytecode e) {
+            LogProvider.error("Could not analyze type for signature: " + signature + ", reason: " + e.getMessage());
+            LogProvider.debug(e);
+            return null;
+        }
     }
 
 }

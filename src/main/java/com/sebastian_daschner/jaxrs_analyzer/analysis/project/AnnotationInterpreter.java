@@ -18,6 +18,7 @@ package com.sebastian_daschner.jaxrs_analyzer.analysis.project;
 
 import com.sebastian_daschner.jaxrs_analyzer.model.results.ClassResult;
 import com.sebastian_daschner.jaxrs_analyzer.model.results.MethodResult;
+import com.sebastian_daschner.jaxrs_analyzer.model.types.Type;
 
 import javax.ws.rs.*;
 import java.util.Arrays;
@@ -84,7 +85,7 @@ public final class AnnotationInterpreter {
      * @param annotatedType The type of the annotated parameter
      * @param result        The method result
      */
-    public static void interpretMethodParameterAnnotation(final Object annotation, final String annotatedType, final MethodResult result) {
+    public static void interpretMethodParameterAnnotation(final Object annotation, final Type annotatedType, final MethodResult result) {
         consumeIfMatches(annotation, MatrixParam.class, m -> result.getMethodParameters().getMatrixParams().put(m.value(), annotatedType));
 
         consumeIfMatches(annotation, QueryParam.class, m -> result.getMethodParameters().getQueryParams().put(m.value(), annotatedType));
@@ -103,9 +104,9 @@ public final class AnnotationInterpreter {
      *
      * @param annotation    The annotation to analyze
      * @param annotatedType The type of the annotated parameter
-     * @param results        The method results
+     * @param results       The method results
      */
-    public static void interpretFieldAnnotation(final Object annotation, final String annotatedType, final Set<MethodResult> results) {
+    public static void interpretFieldAnnotation(final Object annotation, final Type annotatedType, final Set<MethodResult> results) {
         consumeIfMatches(annotation, MatrixParam.class, m -> results.stream().forEach(r -> r.getMethodParameters().getMatrixParams().put(m.value(), annotatedType)));
 
         consumeIfMatches(annotation, QueryParam.class, m -> results.stream().forEach(r -> r.getMethodParameters().getQueryParams().put(m.value(), annotatedType)));

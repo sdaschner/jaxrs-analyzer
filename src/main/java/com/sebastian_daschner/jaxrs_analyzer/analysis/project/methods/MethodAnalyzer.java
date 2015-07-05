@@ -22,6 +22,8 @@ import com.sebastian_daschner.jaxrs_analyzer.analysis.utils.JavaUtils;
 import com.sebastian_daschner.jaxrs_analyzer.model.elements.HttpResponse;
 import com.sebastian_daschner.jaxrs_analyzer.model.results.ClassResult;
 import com.sebastian_daschner.jaxrs_analyzer.model.results.MethodResult;
+import com.sebastian_daschner.jaxrs_analyzer.model.types.Type;
+import com.sebastian_daschner.jaxrs_analyzer.model.types.Types;
 import javassist.CtClass;
 import javassist.CtMethod;
 import javassist.NotFoundException;
@@ -77,6 +79,8 @@ public class MethodAnalyzer {
             return analyzeInternal();
         } catch (Exception e) {
             LogProvider.error("Could not analyze the method: " + method);
+            // TODO remove
+            e.printStackTrace();
             LogProvider.debug(e);
             return null;
         } finally {
@@ -157,10 +161,9 @@ public class MethodAnalyzer {
             analyzeMethodContent(methodResult);
         else {
             // build empty response with return type
-            // TODO refactor Java types & method return type analysis
             final String sig = method.getGenericSignature() != null ? method.getGenericSignature() : method.getSignature();
-            final String returnType = SignatureAttribute.toMethodSignature(sig).getReturnType().toString();
-            if (!Response.class.getName().equals(returnType) && !"void".equals(returnType)) {
+            final Type returnType = new Type(SignatureAttribute.toMethodSignature(sig).getReturnType());
+            if (!Types.RESPONSE.equals(returnType) && !Types.PRIMITIVE_VOID.equals(returnType)) {
                 final HttpResponse emptyResponse = new HttpResponse();
                 emptyResponse.getEntityTypes().add(returnType);
                 methodResult.getResponses().add(emptyResponse);
@@ -204,16 +207,16 @@ public class MethodAnalyzer {
         final CtClass[] parameterTypes = ctMethod.getParameterTypes();
 
         for (int index = 0; index < parameterTypes.length; index++) {
-            final CtClass parameterType = parameterTypes[index];
+            final Type parameterType = new Type(parameterTypes[index]);
             final Object[][] parameterAnnotations = ctMethod.getAvailableParameterAnnotations();
 
             if (isEntityParameter(ctMethod, index)) {
-                methodResult.setRequestBodyType(parameterType.getName());
+                methodResult.setRequestBodyType(parameterType);
                 continue;
             }
 
             for (final Object annotation : parameterAnnotations[index]) {
-                AnnotationInterpreter.interpretMethodParameterAnnotation(annotation, parameterType.getName(), methodResult);
+                AnnotationInterpreter.interpretMethodParameterAnnotation(annotation, parameterType, methodResult);
             }
 
         }

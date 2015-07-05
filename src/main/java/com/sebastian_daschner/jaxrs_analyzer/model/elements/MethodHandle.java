@@ -18,6 +18,7 @@ package com.sebastian_daschner.jaxrs_analyzer.model.elements;
 
 import com.sebastian_daschner.jaxrs_analyzer.analysis.bytecode.simulation.MethodPool;
 import com.sebastian_daschner.jaxrs_analyzer.analysis.utils.JavaUtils;
+import com.sebastian_daschner.jaxrs_analyzer.model.types.Type;
 import com.sebastian_daschner.jaxrs_analyzer.model.methods.Method;
 import com.sebastian_daschner.jaxrs_analyzer.model.methods.MethodIdentifier;
 
@@ -44,14 +45,14 @@ public class MethodHandle extends Element implements Method {
      */
     private final List<Element> transferredArguments = new LinkedList<>();
 
-    public MethodHandle(final String returnType, final MethodIdentifier handleIdentifier, final List<Element> transferredArguments) {
+    public MethodHandle(final Type returnType, final MethodIdentifier handleIdentifier, final List<Element> transferredArguments) {
         super(returnType);
         this.possibleIdentifiers.add(handleIdentifier);
         this.transferredArguments.addAll(transferredArguments);
     }
 
     public MethodHandle(final MethodHandle methodHandle) {
-        super(methodHandle.getType());
+        super(methodHandle.getTypes());
         this.possibleIdentifiers.addAll(methodHandle.possibleIdentifiers);
         this.transferredArguments.addAll(methodHandle.transferredArguments);
     }
@@ -75,7 +76,7 @@ public class MethodHandle extends Element implements Method {
                         final List<Element> actualArguments = new ArrayList<>(combinedArguments);
                         final Element object = actualArguments.isEmpty() ? Element.EMPTY : actualArguments.remove(0);
                         if (JavaUtils.isInitializerName(i.getMethodName())) {
-                            return new Element(i.getClassName());
+                            return new Element(i.getContainingClass());
                         }
                         return method.invoke(object, actualArguments);
                     }
@@ -105,7 +106,7 @@ public class MethodHandle extends Element implements Method {
         return "MethodHandle{" +
                 "possibleIdentifiers=" + possibleIdentifiers +
                 "transferredArguments=" + transferredArguments +
-                ", type='" + getType() + '\'' +
+                ", type='" + getTypes() + '\'' +
                 '}';
     }
 }

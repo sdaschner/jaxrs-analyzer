@@ -34,8 +34,8 @@ public class PushInstruction implements Instruction {
     }
 
     @Override
-    public Type getType() {
-        return Type.PUSH;
+    public InstructionType getType() {
+        return InstructionType.PUSH;
     }
 
     @Override

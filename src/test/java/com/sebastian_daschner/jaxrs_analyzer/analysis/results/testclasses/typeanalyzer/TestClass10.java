@@ -17,6 +17,7 @@
 package com.sebastian_daschner.jaxrs_analyzer.analysis.results.testclasses.typeanalyzer;
 
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeRepresentation;
+import com.sebastian_daschner.jaxrs_analyzer.model.types.Type;
 
 import javax.json.Json;
 import javax.json.JsonObject;
@@ -40,7 +41,7 @@ public class TestClass10 {
     }
 
     public static TypeRepresentation getResult() {
-        final TypeRepresentation representation = new TypeRepresentation(TestClass10.class.getName());
+        final TypeRepresentation representation = new TypeRepresentation(new Type(TestClass10.class.getName()));
 
         final JsonObject emptyObject = Json.createObjectBuilder().build();
         final JsonObject jsonObject = Json.createObjectBuilder().add("first", false).add("second", emptyObject).add("third", emptyObject).build();

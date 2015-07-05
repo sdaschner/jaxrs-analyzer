@@ -16,6 +16,8 @@
 
 package com.sebastian_daschner.jaxrs_analyzer.model.rest;
 
+import com.sebastian_daschner.jaxrs_analyzer.model.types.Type;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -27,22 +29,19 @@ import java.util.Objects;
  */
 public class TypeRepresentation {
 
-    /**
-     * The type name (e.g. Java class name).
-     */
-    private final String type;
+    private final Type type;
 
     /**
      * The different media type representations (e.g. application/json -> object representation).
      */
     private final Map<String, Object> representations = new HashMap<>();
 
-    public TypeRepresentation(final String type) {
+    public TypeRepresentation(final Type type) {
         Objects.requireNonNull(type);
         this.type = type;
     }
 
-    public String getType() {
+    public Type getType() {
         return type;
     }
 

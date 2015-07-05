@@ -17,11 +17,12 @@
 package com.sebastian_daschner.jaxrs_analyzer.analysis.results;
 
 import com.sebastian_daschner.jaxrs_analyzer.LogProvider;
-import com.sebastian_daschner.jaxrs_analyzer.analysis.utils.JavaUtils;
 import com.sebastian_daschner.jaxrs_analyzer.analysis.utils.Pair;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeRepresentation;
-import javassist.*;
-import javassist.bytecode.BadBytecode;
+import com.sebastian_daschner.jaxrs_analyzer.model.types.Type;
+import javassist.CtClass;
+import javassist.CtField;
+import javassist.CtMethod;
 import javassist.bytecode.SignatureAttribute;
 
 import javax.json.*;
@@ -37,6 +38,8 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import static com.sebastian_daschner.jaxrs_analyzer.model.types.Types.COLLECTION;
 
 /**
  * Analyzes a class (usually a POJO) for it's properties and methods.
@@ -67,8 +70,7 @@ class TypeAnalyzer {
     };
 
     private final Lock lock = new ReentrantLock();
-    private String type;
-    private boolean collection;
+    private Type type;
 
     /**
      * Analyzes the given type. Resolves known generics and creates a representation of the contained class.
@@ -76,13 +78,14 @@ class TypeAnalyzer {
      * @param type The type to analyze
      * @return The type representation of the class (currently just for application/json)
      */
-    TypeRepresentation analyze(final String type) {
+    // TODO save already analyzed types -> prevent endless loops for recursive-nested types
+    TypeRepresentation analyze(final Type type) {
         lock.lock();
         try {
-            collection = JavaUtils.isCollection(type);
-            this.type = ResponseTypeNormalizer.normalizeWrapper(type);
+            this.type = ResponseTypeNormalizer.normalizeResponseWrapper(type);
+            final boolean collection = this.type.isAssignableTo(COLLECTION);
 
-            if (!isRelevant())
+            if (!collection && isJDKType())
                 return new TypeRepresentation(this.type);
 
             // TODO analyze XML as well
@@ -94,31 +97,29 @@ class TypeAnalyzer {
         }
     }
 
-    private boolean isRelevant() {
+    private boolean isJDKType() {
         // exclude java, javax, etc. packages
-        return collection || !type.startsWith("java");
+        return type.toString().startsWith("java");
     }
 
-    private static JsonValue analyzeInternal(final String type) {
-        if (JavaUtils.isCollection(type)) {
+    private static JsonValue analyzeInternal(final Type type) {
+        if (type.isAssignableTo(COLLECTION)) {
             final JsonArrayBuilder arrayBuilder = Json.createArrayBuilder();
-            addToArray(arrayBuilder, JavaUtils.trimCollection(type));
+            JsonMapper.addToArray(arrayBuilder, ResponseTypeNormalizer.normalizeCollection(type), TypeAnalyzer::analyzeInternal);
             return arrayBuilder.build();
         }
 
         try {
-            final CtClass ctClass = ClassPool.getDefault().get(type);
-
-            return analyzeClass(ctClass);
-
-        } catch (NotFoundException | ClassNotFoundException e) {
+            return analyzeClass(type);
+        } catch (Exception e) {
             LogProvider.error("Could not analyze class for type analysis: " + e.getMessage());
             LogProvider.debug(e);
             return Json.createObjectBuilder().build();
         }
     }
 
-    private static JsonValue analyzeClass(final CtClass ctClass) throws ClassNotFoundException {
+    private static JsonValue analyzeClass(final Type type) throws ClassNotFoundException {
+        final CtClass ctClass = type.getCtClass();
         if (ctClass.isEnum())
             return EMPTY_JSON_STRING;
 
@@ -135,8 +136,11 @@ class TypeAnalyzer {
 
         final JsonObjectBuilder builder = Json.createObjectBuilder();
 
-        relevantFields.stream().map(TypeAnalyzer::mapField).filter(Objects::nonNull).forEach(p -> addToObject(builder, p.getLeft(), p.getRight()));
-        relevantGetters.stream().map(TypeAnalyzer::mapGetter).filter(Objects::nonNull).forEach(p -> addToObject(builder, p.getLeft(), p.getRight()));
+        relevantFields.stream().map(TypeAnalyzer::mapField).filter(Objects::nonNull)
+                .forEach(p -> JsonMapper.addToObject(builder, p.getLeft(), p.getRight(), TypeAnalyzer::analyzeInternal));
+
+        relevantGetters.stream().map(TypeAnalyzer::mapGetter).filter(Objects::nonNull)
+                .forEach(p -> JsonMapper.addToObject(builder, p.getLeft(), p.getRight(), TypeAnalyzer::analyzeInternal));
 
         return builder.build();
     }
@@ -192,24 +196,24 @@ class TypeAnalyzer {
         return name.startsWith("is") && name.length() > 2 && method.getSignature().endsWith(")Z");
     }
 
-    private static Pair<String, String> mapField(final CtField field) {
+    private static Pair<String, Type> mapField(final CtField field) {
         try {
             final String sig = field.getGenericSignature() != null ? field.getGenericSignature() : field.getSignature();
-            final String fieldType = JavaUtils.getType(SignatureAttribute.toTypeSignature(sig));
+            final Type fieldType = new Type(SignatureAttribute.toTypeSignature(sig));
             return Pair.of(field.getName(), fieldType);
-        } catch (BadBytecode e) {
+        } catch (Exception e) {
             LogProvider.error("Could not analyze field: " + field);
             LogProvider.debug(e);
             return null;
         }
     }
 
-    private static Pair<String, String> mapGetter(final CtMethod method) {
+    private static Pair<String, Type> mapGetter(final CtMethod method) {
         try {
             final String sig = method.getGenericSignature() != null ? method.getGenericSignature() : method.getSignature();
-            final String returnType = JavaUtils.getType(SignatureAttribute.toMethodSignature(sig).getReturnType());
+            final Type returnType = new Type(SignatureAttribute.toMethodSignature(sig).getReturnType());
             return Pair.of(normalizeGetter(method.getName()), returnType);
-        } catch (BadBytecode e) {
+        } catch (Exception e) {
             LogProvider.error("Could not analyze method: " + method);
             LogProvider.debug(e);
             return null;
@@ -219,7 +223,7 @@ class TypeAnalyzer {
     /**
      * Converts a getter name to the property name (without the "get" or "is" and lowercase).
      *
-     * @param name The name of the method (MUST match "get[A-Z]+|is[A-Z]+")
+     * @param name The name of the method (MUST match "get[A-Z][A-Za-z]*|is[A-Z][A-Za-z]*")
      * @return The name of the property
      */
     private static String normalizeGetter(final String name) {
@@ -227,74 +231,6 @@ class TypeAnalyzer {
         final char chars[] = name.substring(size).toCharArray();
         chars[0] = Character.toLowerCase(chars[0]);
         return new String(chars);
-    }
-
-    private static void addToObject(final JsonObjectBuilder builder, final String key, final String type) {
-        // default for all JSR-310 classes
-        if (type.startsWith("java.time")) {
-            builder.add(key, "date");
-            return;
-        }
-
-        // workaround for Map's
-        // TODO improve Java type representation
-        if (type.startsWith("java.util") && type.contains("Map")) {
-            builder.add(key, Json.createObjectBuilder().build());
-            return;
-        }
-
-        switch (type) {
-            case "java.lang.String":
-                builder.add(key, "string");
-                break;
-            case "java.util.Date":
-                builder.add(key, "date");
-                break;
-            case "java.lang.Integer":
-            case "int":
-            case "java.lang.Long":
-            case "long":
-            case "java.math.BigInteger":
-                builder.add(key, 0);
-                break;
-            case "java.lang.Double":
-            case "double":
-            case "java.math.BigDecimal":
-                builder.add(key, 0.0);
-                break;
-            case "java.lang.Boolean":
-            case "boolean":
-                builder.add(key, false);
-                break;
-            default:
-                builder.add(key, analyzeInternal(type));
-        }
-    }
-
-    private static void addToArray(final JsonArrayBuilder builder, final String type) {
-        switch (type) {
-            case "java.lang.String":
-                builder.add("string");
-                break;
-            case "java.lang.Integer":
-            case "int":
-            case "java.lang.Long":
-            case "long":
-            case "java.math.BigInteger":
-                builder.add(0);
-                break;
-            case "java.lang.Double":
-            case "double":
-            case "java.math.BigDecimal":
-                builder.add(0.0);
-                break;
-            case "java.lang.Boolean":
-            case "boolean":
-                builder.add(false);
-                break;
-            default:
-                builder.add(analyzeInternal(type));
-        }
     }
 
 }

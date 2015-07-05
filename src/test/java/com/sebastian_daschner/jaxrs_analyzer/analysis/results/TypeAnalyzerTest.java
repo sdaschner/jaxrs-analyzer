@@ -18,6 +18,7 @@ package com.sebastian_daschner.jaxrs_analyzer.analysis.results;
 
 import com.sebastian_daschner.jaxrs_analyzer.analysis.utils.TestClassUtils;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeRepresentation;
+import com.sebastian_daschner.jaxrs_analyzer.model.types.Type;
 import javassist.NotFoundException;
 import org.junit.Assert;
 import org.junit.Test;
@@ -69,7 +70,7 @@ public class TypeAnalyzerTest {
     public void test() {
         final TypeRepresentation actualResult;
         try {
-            actualResult = classUnderTest.analyze(clazz.getName());
+            actualResult = classUnderTest.analyze(new Type(clazz.getName()));
         } catch (Exception e) {
             System.err.println("failed for " + clazz.getSimpleName());
             throw e;

@@ -7,6 +7,8 @@ import com.sebastian_daschner.jaxrs_analyzer.model.rest.HttpMethod;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.Project;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.Resources;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeRepresentation;
+import com.sebastian_daschner.jaxrs_analyzer.model.types.Types;
+import com.sebastian_daschner.jaxrs_analyzer.model.types.Type;
 import junit.framework.TestCase;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -44,7 +46,7 @@ public class AsciiDocBackendTest extends TestCase {
         TypeRepresentation representation;
 
         add(data, ResourcesBuilder.withBase("rest").andResource("res1", ResourceMethodBuilder.withMethod(HttpMethod.GET)
-                        .andResponse(200, ResponseBuilder.withResponseBody(new TypeRepresentation("java.lang.String")).andHeaders("Location").build()).build()).build(),
+                        .andResponse(200, ResponseBuilder.withResponseBody(new TypeRepresentation(Types.STRING)).andHeaders("Location").build()).build()).build(),
                 "= REST resources of project name\n" +
                         "1.0\n" +
                         "\n" +
@@ -60,7 +62,7 @@ public class AsciiDocBackendTest extends TestCase {
                         "*Header*: `Location` + \n" +
                         "*Response Body*: (`java.lang.String`) + \n\n");
 
-        representation = new TypeRepresentation("javax.json.JsonObject");
+        representation = new TypeRepresentation(Types.JSON_OBJECT);
         representation.getRepresentations().put("application/json", Json.createObjectBuilder().add("key", "string").add("another", 0).build());
         add(data, ResourcesBuilder.withBase("rest")
                         .andResource("res1", ResourceMethodBuilder.withMethod(HttpMethod.GET)
@@ -80,7 +82,7 @@ public class AsciiDocBackendTest extends TestCase {
                         "*Response Body*: (`javax.json.JsonObject`) + \n" +
                         "`application/json`: `{\"key\":\"string\",\"another\":0}` + \n\n");
 
-        representation = new TypeRepresentation("javax.json.JsonObject");
+        representation = new TypeRepresentation(Types.JSON_OBJECT);
         representation.getRepresentations().put("application/json", Json.createArrayBuilder().add(Json.createObjectBuilder().add("key", "string").add("another", 0)).build());
         add(data, ResourcesBuilder.withBase("rest")
                         .andResource("res1", ResourceMethodBuilder.withMethod(HttpMethod.GET)
@@ -100,7 +102,7 @@ public class AsciiDocBackendTest extends TestCase {
                         "*Response Body*: (`javax.json.JsonObject`) + \n" +
                         "`application/json`: `[{\"key\":\"string\",\"another\":0}]` + \n\n");
 
-        representation = new TypeRepresentation("javax.json.JsonArray");
+        representation = new TypeRepresentation(Types.JSON_ARRAY);
         representation.getRepresentations().put("application/json", Json.createArrayBuilder().add("string").add(0).build());
         representation.getRepresentations().put("application/xml", Json.createArrayBuilder().add("string").add(0).build());
         add(data, ResourcesBuilder.withBase("rest")
@@ -122,7 +124,7 @@ public class AsciiDocBackendTest extends TestCase {
                         "`application/xml`: `[\"string\",0]` + \n" +
                         "`application/json`: `[\"string\",0]` + \n\n");
 
-        representation = new TypeRepresentation("javax.json.JsonArray");
+        representation = new TypeRepresentation(Types.JSON_ARRAY);
         representation.getRepresentations().put("application/json", Json.createArrayBuilder().add(Json.createObjectBuilder().add("key", "string")).add(Json.createObjectBuilder().add("key", "string")).build());
         add(data, ResourcesBuilder.withBase("rest")
                         .andResource("res1", ResourceMethodBuilder.withMethod(HttpMethod.GET)
@@ -142,7 +144,7 @@ public class AsciiDocBackendTest extends TestCase {
                         "*Response Body*: (`javax.json.JsonArray`) + \n" +
                         "`application/json`: `[{\"key\":\"string\"},{\"key\":\"string\"}]` + \n\n");
 
-        representation = new TypeRepresentation("de.sebastian_daschner.test.Model");
+        representation = new TypeRepresentation(new Type("com.sebastian_daschner.test.Model"));
         representation.getRepresentations().put("application/json", Json.createObjectBuilder().add("name", "string").add("value", 0).build());
         add(data, ResourcesBuilder.withBase("rest")
                         .andResource("res1", ResourceMethodBuilder.withMethod(HttpMethod.GET)
@@ -159,10 +161,10 @@ public class AsciiDocBackendTest extends TestCase {
                         "*Content-Type*: `\\*/*`\n" +
                         "\n" +
                         "==== `200 OK`\n" +
-                        "*Response Body*: (`de.sebastian_daschner.test.Model`) + \n" +
+                        "*Response Body*: (`com.sebastian_daschner.test.Model`) + \n" +
                         "`application/json`: `{\"name\":\"string\",\"value\":0}` + \n\n");
 
-        representation = new TypeRepresentation("de.sebastian_daschner.test.Model");
+        representation = new TypeRepresentation(new Type("com.sebastian_daschner.test.Model"));
         representation.getRepresentations().put("application/json", Json.createArrayBuilder().add(Json.createObjectBuilder().add("name", "string").add("value", 0)).build());
         add(data, ResourcesBuilder.withBase("rest")
                         .andResource("res1", ResourceMethodBuilder.withMethod(HttpMethod.POST).andRequestBodyType(representation).andAcceptMediaTypes("application/json")
@@ -174,7 +176,7 @@ public class AsciiDocBackendTest extends TestCase {
                         "\n" +
                         "=== Request\n" +
                         "*Content-Type*: `application/json` + \n" +
-                        "*Request Body*: (`de.sebastian_daschner.test.Model`) + \n" +
+                        "*Request Body*: (`com.sebastian_daschner.test.Model`) + \n" +
                         "`application/json`: `[{\"name\":\"string\",\"value\":0}]` + \n" +
                         "\n" +
                         "=== Response\n" +
@@ -194,7 +196,7 @@ public class AsciiDocBackendTest extends TestCase {
                         "\n" +
                         "=== Request\n" +
                         "*Content-Type*: `application/json` + \n" +
-                        "*Request Body*: (`de.sebastian_daschner.test.Model`) + \n" +
+                        "*Request Body*: (`com.sebastian_daschner.test.Model`) + \n" +
                         "`application/json`: `[{\"name\":\"string\",\"value\":0}]` + \n" +
                         "\n" +
                         "=== Response\n" +

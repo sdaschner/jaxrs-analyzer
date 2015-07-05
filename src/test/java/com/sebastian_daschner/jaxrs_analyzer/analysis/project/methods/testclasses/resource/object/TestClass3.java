@@ -1,6 +1,7 @@
 package com.sebastian_daschner.jaxrs_analyzer.analysis.project.methods.testclasses.resource.object;
 
 import com.sebastian_daschner.jaxrs_analyzer.model.elements.HttpResponse;
+import com.sebastian_daschner.jaxrs_analyzer.model.types.Type;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -17,7 +18,7 @@ public class TestClass3 {
 
     public static Set<HttpResponse> getResult() {
         final HttpResponse result = new HttpResponse();
-        result.getEntityTypes().add("java.util.List<java.lang.String>");
+        result.getEntityTypes().add(new Type("java.util.List<java.lang.String>"));
 
         return Collections.singleton(result);
     }

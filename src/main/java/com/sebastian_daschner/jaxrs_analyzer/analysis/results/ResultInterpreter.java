@@ -17,12 +17,14 @@
 package com.sebastian_daschner.jaxrs_analyzer.analysis.results;
 
 import com.sebastian_daschner.jaxrs_analyzer.LogProvider;
+import com.sebastian_daschner.jaxrs_analyzer.analysis.utils.JavaUtils;
 import com.sebastian_daschner.jaxrs_analyzer.model.elements.HttpResponse;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.ResourceMethod;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.Resources;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.Response;
 import com.sebastian_daschner.jaxrs_analyzer.model.results.ClassResult;
 import com.sebastian_daschner.jaxrs_analyzer.model.results.MethodResult;
+import com.sebastian_daschner.jaxrs_analyzer.model.types.Type;
 
 import javax.ws.rs.core.MediaType;
 import java.util.Set;
@@ -128,7 +130,7 @@ public class ResultInterpreter {
         method.getResponseMediaTypes().addAll(httpResponse.getContentTypes());
         httpResponse.getStatuses().stream().forEach(s -> {
             final Response response = httpResponse.getEntityTypes().isEmpty() ? new Response() :
-                    new Response(typeAnalyzer.analyze(httpResponse.getEntityTypes().iterator().next()));
+                    new Response(typeAnalyzer.analyze(JavaUtils.determineMostSpecificType(httpResponse.getEntityTypes().stream().toArray(Type[]::new))));
 
             response.getHeaders().addAll(httpResponse.getHeaders());
             httpResponse.getInlineEntities().stream().map(JsonMapper::map)

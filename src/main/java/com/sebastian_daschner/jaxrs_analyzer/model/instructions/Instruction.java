@@ -28,19 +28,19 @@ public interface Instruction {
      *
      * @return The stack size difference
      */
-    public abstract int getStackSizeDifference();
+    int getStackSizeDifference();
 
     /**
      * Returns the instruction type.
      *
      * @return The type
      */
-    public abstract Type getType();
+    InstructionType getType();
 
     /**
      * Represents the available types of {@link Instruction}s.
      */
-    public enum Type {
+    enum InstructionType {
 
         PUSH, LOAD, STORE, INVOKE, RETURN, SIZE_CHANGE, GET_FIELD, GET_STATIC, NEW, DUP, THROW, METHOD_HANDLE, OTHER
 

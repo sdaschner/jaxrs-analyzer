@@ -16,12 +16,13 @@
 
 package com.sebastian_daschner.jaxrs_analyzer.analysis.project.classes.testclasses;
 
-import com.sebastian_daschner.jaxrs_analyzer.builder.HttpResponseBuilder;
-import com.sebastian_daschner.jaxrs_analyzer.model.rest.HttpMethod;
 import com.sebastian_daschner.jaxrs_analyzer.builder.ClassResultBuilder;
+import com.sebastian_daschner.jaxrs_analyzer.builder.HttpResponseBuilder;
 import com.sebastian_daschner.jaxrs_analyzer.builder.MethodResultBuilder;
+import com.sebastian_daschner.jaxrs_analyzer.model.rest.HttpMethod;
 import com.sebastian_daschner.jaxrs_analyzer.model.results.ClassResult;
 import com.sebastian_daschner.jaxrs_analyzer.model.results.MethodResult;
+import com.sebastian_daschner.jaxrs_analyzer.model.types.Types;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -38,7 +39,7 @@ public class TestClass4 {
 
     public static ClassResult getResult() {
         final MethodResult method = MethodResultBuilder.withResponses(HttpResponseBuilder.withStatues(200).andHeaders("X-Info").build()).andPath("{info}")
-                .andMethod(HttpMethod.GET).andRequestBodyType("java.lang.String").build();
+                .andMethod(HttpMethod.GET).andRequestBodyType(Types.STRING).build();
         return ClassResultBuilder.withResourcePath("test").andMethods(method).build();
     }
 

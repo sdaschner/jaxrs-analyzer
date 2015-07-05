@@ -20,9 +20,9 @@ import com.sebastian_daschner.jaxrs_analyzer.LogProvider;
 import com.sebastian_daschner.jaxrs_analyzer.analysis.project.AnnotationInterpreter;
 import com.sebastian_daschner.jaxrs_analyzer.analysis.project.methods.MethodAnalyzer;
 import com.sebastian_daschner.jaxrs_analyzer.model.results.ClassResult;
+import com.sebastian_daschner.jaxrs_analyzer.model.types.Type;
 import javassist.CtClass;
 import javassist.CtField;
-import javassist.NotFoundException;
 
 import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.Path;
@@ -144,10 +144,10 @@ public class ClassAnalyzer {
     private void analyzeFields(final ClassResult classResult) {
         for (CtField ctField : ctClass.getDeclaredFields()) {
             try {
-                final String fieldType = ctField.getType().getName();
+                final Type fieldType = new Type(ctField.getType());
                 Stream.of(ctField.getAnnotations()).forEach(a -> AnnotationInterpreter.interpretFieldAnnotation(a, fieldType, classResult.getMethods()));
 
-            } catch (ClassNotFoundException | NotFoundException e) {
+            } catch (Exception e) {
                 LogProvider.error("Could not analyze class field " + e.getMessage());
                 LogProvider.debug(e);
             }

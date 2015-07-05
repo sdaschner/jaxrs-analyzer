@@ -16,6 +16,9 @@
 
 package com.sebastian_daschner.jaxrs_analyzer.model.elements;
 
+import com.sebastian_daschner.jaxrs_analyzer.model.types.Types;
+import com.sebastian_daschner.jaxrs_analyzer.model.types.Type;
+
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Objects;
@@ -31,15 +34,19 @@ public class Element {
     /**
      * Unmodifiable placeholder for an empty element.
      */
-    public static final Element EMPTY = new UnmodifiableElement(Object.class.getName());
+    public static final Element EMPTY = new UnmodifiableElement(Types.OBJECT);
 
     private final Set<Object> possibleValues;
-    private final String type;
+    private final Set<Type> types;
 
-    public Element(final String type, final Object... values) {
-        Objects.requireNonNull(type);
+    public Element(final Type type, final Object... values) {
+        this(Collections.singleton(type), values);
+    }
 
-        this.type = type;
+    public Element(final Set<Type> types, final Object... values) {
+        Objects.requireNonNull(types);
+
+        this.types = new HashSet<>(types);
         possibleValues = new HashSet<>();
 
         // allow null as vararg argument
@@ -56,6 +63,7 @@ public class Element {
      * @return This element (needed as BinaryOperator)
      */
     public Element merge(final Element element) {
+        types.addAll(element.types);
         possibleValues.addAll(element.possibleValues);
         return this;
     }
@@ -64,8 +72,8 @@ public class Element {
         return possibleValues;
     }
 
-    public String getType() {
-        return type;
+    public Set<Type> getTypes() {
+        return types;
     }
 
     @Override
@@ -76,13 +84,13 @@ public class Element {
         final Element element = (Element) o;
 
         if (!possibleValues.equals(element.possibleValues)) return false;
-        return type.equals(element.type);
+        return types.equals(element.types);
     }
 
     @Override
     public int hashCode() {
         int result = possibleValues.hashCode();
-        result = 31 * result + type.hashCode();
+        result = 31 * result + types.hashCode();
         return result;
     }
 
@@ -90,7 +98,7 @@ public class Element {
     public String toString() {
         return "Element{" +
                 "possibleValues=" + possibleValues +
-                ", type='" + type + '\'' +
+                ", types='" + types + '\'' +
                 '}';
     }
 
@@ -99,7 +107,7 @@ public class Element {
      */
     private static class UnmodifiableElement extends Element {
 
-        public UnmodifiableElement(final String type) {
+        public UnmodifiableElement(final Type type) {
             super(type);
         }
 
@@ -108,6 +116,10 @@ public class Element {
             return Collections.unmodifiableSet(super.getPossibleValues());
         }
 
+        @Override
+        public Set<Type> getTypes() {
+            return Collections.unmodifiableSet(super.getTypes());
+        }
     }
 
 }

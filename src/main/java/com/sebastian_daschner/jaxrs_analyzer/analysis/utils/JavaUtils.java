@@ -17,14 +17,16 @@
 package com.sebastian_daschner.jaxrs_analyzer.analysis.utils;
 
 import com.sebastian_daschner.jaxrs_analyzer.model.methods.MethodIdentifier;
-import javassist.ClassPool;
+import com.sebastian_daschner.jaxrs_analyzer.model.types.Type;
+import com.sebastian_daschner.jaxrs_analyzer.model.types.Types;
+import javassist.CtBehavior;
 import javassist.CtClass;
 import javassist.NotFoundException;
-import javassist.bytecode.BadBytecode;
-import javassist.bytecode.SignatureAttribute;
 
+import java.util.Collections;
 import java.util.List;
-import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Contains Java and Javassist utility functionality.
@@ -35,11 +37,6 @@ public final class JavaUtils {
 
     public static final String INITIALIZER_NAME = "<init>";
     public static final String BOOTSTRAP_ATTRIBUTE_NAME = "BootstrapMethods";
-    private static final String OBJECT = Object.class.getName();
-    private static final String LIST = List.class.getName();
-    private static final String LIST_SEARCH = "List<";
-    private static final String SET = Set.class.getName();
-    private static final String SET_SEARCH = "Set<";
 
     private JavaUtils() {
         throw new UnsupportedOperationException();
@@ -56,123 +53,36 @@ public final class JavaUtils {
     }
 
     /**
-     * Returns the parameter classes of a method identifier. These are needed for retrieving a method with Javassist.
-     *
-     * @param identifier The method identifier
-     * @return The parameter classes of the method
-     * @throws NotFoundException If some parameter classes could not be found
-     */
-    public static CtClass[] getParameterClasses(final MethodIdentifier identifier) throws NotFoundException {
-        final CtClass[] parameterClasses = new CtClass[identifier.getParameterTypes().length];
-        for (int i = 0; i < parameterClasses.length; i++) {
-            parameterClasses[i] = ClassPool.getDefault().get(identifier.getParameterTypes()[i]);
-        }
-        return parameterClasses;
-    }
-
-    /**
-     * Returns the return type of the method signature.
-     *
-     * @param signature The method signature
-     * @return The return type ({@code null} for void)
-     * @throws BadBytecode If the bytecode could not be analyzed
-     */
-    public static String getMethodReturnType(final SignatureAttribute.MethodSignature signature) throws BadBytecode {
-        final String type = getType(signature.getReturnType());
-
-        if ("void".equals(type)) {
-            return null;
-        }
-        return type;
-    }
-
-    /**
-     * Returns the method parameters of the method signature.
-     *
-     * @param signature The method signature
-     * @return The method parameter types
-     * @throws BadBytecode If the bytecode could not be analyzed
-     */
-    public static String[] getMethodParameters(final SignatureAttribute.MethodSignature signature) throws BadBytecode {
-        final SignatureAttribute.Type[] parameterTypes = signature.getParameterTypes();
-
-        final String[] parameters = new String[parameterTypes.length];
-
-        int index = 0;
-        for (SignatureAttribute.Type type : parameterTypes) {
-            parameters[index++] = getType(type);
-        }
-
-        return parameters;
-    }
-
-    /**
-     * Returns the Java type representation (including {@code $} as inner class separator) of the given {@link SignatureAttribute.Type}.
-     *
-     * @param type The Javassist type
-     * @return The Java type representation
-     */
-    public static String getType(final SignatureAttribute.Type type) {
-        if (type instanceof SignatureAttribute.NestedClassType) {
-            final SignatureAttribute.NestedClassType nestedClassType = (SignatureAttribute.NestedClassType) type;
-            return nestedClassType.getDeclaringClass().getName() + '$' + nestedClassType.getName();
-        }
-        return type.toString();
-    }
-
-    /**
-     * Checks if the given type is a collection type (e.g. {@code java.util.List<java.lang.String>} or {@code java.util.List}).
-     *
-     * @param type The type to check
-     * @return {@code true} if the generic or parameterized type is a collection
-     */
-    public static boolean isCollection(final String type) {
-        return type.contains(LIST_SEARCH) || type.contains(SET_SEARCH) || LIST.equals(type) || SET.equals(type);
-    }
-
-    /**
-     * Removes one nested collection from the type.
-     *
-     * @param type The collection type
-     * @return The normalized type
-     */
-    public static String trimCollection(final String type) {
-        int foundIndex = type.indexOf(LIST_SEARCH);
-        if (foundIndex != -1) {
-            final int startIndex = foundIndex + LIST_SEARCH.length();
-            final int occurrences = (int) type.substring(0, startIndex).chars().filter(c -> c == '<').count();
-            return type.substring(startIndex, type.length() - occurrences);
-        }
-
-        foundIndex = type.indexOf(SET_SEARCH);
-        if (foundIndex != -1) {
-            final int startIndex = foundIndex + SET_SEARCH.length();
-            final int occurrences = (int) type.substring(0, startIndex).chars().filter(c -> c == '<').count();
-            return type.substring(startIndex, type.length() - occurrences);
-        }
-
-        if (LIST.equals(type) || SET.equals(type))
-            return OBJECT;
-
-        return type;
-    }
-
-    /**
-     * Determines the type which is more "specific" (i. e. parameterized types are more "specific" than generic types,
+     * Determines the type which is most "specific" (i. e. parameterized types are more "specific" than generic types,
      * types which are not {@link Object} are less specific). If no exact statement can be made, the first type is chosen.
      *
-     * @param firstType  The first type
-     * @param secondType The second type
-     * @return The more "specific" type
+     * @param types The types
+     * @return The most "specific" type
      */
-    public static String determineMoreSpecificType(final String firstType, final String secondType) {
-        // return fast
-        if (OBJECT.equals(secondType) || firstType.equals(secondType)) {
+    public static Type determineMostSpecificType(final Type... types) {
+        switch (types.length) {
+            case 0:
+                throw new IllegalArgumentException("At lease one type has to be provided");
+            case 1:
+                return types[0];
+            case 2:
+                return determineMostSpecific(types[0], types[1]);
+            default:
+                Type currentMostSpecific = determineMostSpecific(types[0], types[1]);
+                for (int i = 2; i < types.length; i++) {
+                    currentMostSpecific = determineMostSpecific(currentMostSpecific, types[i]);
+                }
+                return currentMostSpecific;
+        }
+    }
+
+    private static Type determineMostSpecific(final Type firstType, final Type secondType) {
+        if (Types.OBJECT.equals(secondType) || firstType.equals(secondType)) {
             return firstType;
         }
 
-        final boolean firstTypeParameterized = firstType.contains("<");
-        final boolean secondTypeParameterized = secondType.contains("<");
+        final boolean firstTypeParameterized = !firstType.getTypeParameters().isEmpty();
+        final boolean secondTypeParameterized = !secondType.getTypeParameters().isEmpty();
 
         if (firstTypeParameterized || secondTypeParameterized) {
             if (firstTypeParameterized && !secondTypeParameterized) {
@@ -183,11 +93,30 @@ public final class JavaUtils {
                 return secondType;
             }
 
-            return firstType.length() >= secondType.length() ? firstType : secondType;
+            if (firstType.getTypeParameters().size() != secondType.getTypeParameters().size())
+                // types parameters are not compatible, no statement can be made
+                return firstType;
+
+            for (int i = 0; i < firstType.getTypeParameters().size(); i++) {
+                final Type firstInner = firstType.getTypeParameters().get(i);
+                final Type secondInner = secondType.getTypeParameters().get(i);
+
+                if (firstInner.equals(secondInner)) continue;
+
+                if (firstInner == determineMostSpecific(firstInner, secondInner))
+                    return firstType;
+                return secondType;
+            }
         }
 
-        final boolean firstTypeArray = firstType.contains("[");
-        final boolean secondTypeArray = secondType.contains("[");
+        // check if one type is inherited from other
+        if (firstType.isAssignableTo(secondType)) return firstType;
+        if (secondType.isAssignableTo(firstType)) return secondType;
+
+        // TODO handle arrays correctly
+
+        final boolean firstTypeArray = firstType.toString().contains("[");
+        final boolean secondTypeArray = secondType.toString().contains("[");
 
         if (firstTypeArray || secondTypeArray) {
             if (firstTypeArray && !secondTypeArray) {
@@ -200,6 +129,32 @@ public final class JavaUtils {
         }
 
         return firstType;
+    }
+
+    /**
+     * Returns the method (Javassist {@link CtBehavior}) for the given method or constructor identifier.
+     *
+     * @param identifier The method identifier
+     * @return The Javassist behavior or {@code null} if not found
+     */
+    public static CtBehavior getMethod(final MethodIdentifier identifier) {
+        final CtClass ctClass = identifier.getContainingClass().getCtClass();
+
+        if (JavaUtils.isInitializerName(identifier.getMethodName())) {
+            return Stream.of(ctClass.getDeclaredConstructors()).filter(b -> identifier.getParameters().equals(getParameterTypes(b))).findAny().orElse(null);
+        }
+        return Stream.of(ctClass.getDeclaredMethods())
+                .filter(b -> identifier.getMethodName().equals(b.getName()))
+                .filter(b -> identifier.getParameters().equals(getParameterTypes(b))).findAny().orElse(null);
+    }
+
+    private static List<Type> getParameterTypes(final CtBehavior behavior) {
+        try {
+            return Stream.of(behavior.getParameterTypes()).map(Type::new).collect(Collectors.toList());
+        } catch (NotFoundException e) {
+            // ignore
+            return Collections.emptyList();
+        }
     }
 
 }

@@ -18,6 +18,8 @@ package com.sebastian_daschner.jaxrs_analyzer.analysis.bytecode.collection.testc
 
 import com.sebastian_daschner.jaxrs_analyzer.model.instructions.*;
 import com.sebastian_daschner.jaxrs_analyzer.model.methods.MethodIdentifier;
+import com.sebastian_daschner.jaxrs_analyzer.model.types.Types;
+import com.sebastian_daschner.jaxrs_analyzer.model.types.Type;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -35,17 +37,18 @@ public class TestClass3 {
 
     public static List<Instruction> getResult() {
         final List<Instruction> instructions = new LinkedList<>();
+        final Type arithmeticException = new Type(ArithmeticException.class.getName());
 
         // constant folding
         instructions.add(new PushInstruction(6));
-        instructions.add(new LoadInstruction(1, "int", "number"));
+        instructions.add(new LoadInstruction(1, Types.PRIMITIVE_INT, "number"));
         instructions.add(new SizeChangingInstruction("idiv", 1, 2));
         instructions.add(new ReturnInstruction());
 
         instructions.add(new ExceptionHandlerInstruction());
-        instructions.add(new StoreInstruction(2, "java.lang.ArithmeticException", "e"));
-        instructions.add(new LoadInstruction(2, "java.lang.ArithmeticException", "e"));
-        instructions.add(new InvokeInstruction(MethodIdentifier.ofNonStatic("java.lang.ArithmeticException", "printStackTrace", null)));
+        instructions.add(new StoreInstruction(2, arithmeticException, "e"));
+        instructions.add(new LoadInstruction(2, arithmeticException, "e"));
+        instructions.add(new InvokeInstruction(MethodIdentifier.ofNonStatic(arithmeticException, "printStackTrace", Types.PRIMITIVE_VOID)));
         instructions.add(new PushInstruction(0));
         instructions.add(new ReturnInstruction());
 

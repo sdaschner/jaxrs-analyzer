@@ -46,8 +46,8 @@ public class SizeChangingInstruction extends DefaultInstruction {
     }
 
     @Override
-    public Type getType() {
-        return Type.SIZE_CHANGE;
+    public InstructionType getType() {
+        return InstructionType.SIZE_CHANGE;
     }
 
     @Override

@@ -16,6 +16,8 @@
 
 package com.sebastian_daschner.jaxrs_analyzer.model.instructions;
 
+import com.sebastian_daschner.jaxrs_analyzer.model.types.Type;
+
 /**
  * Represents a GET_FIELD/STATIC instruction.
  *
@@ -23,26 +25,26 @@ package com.sebastian_daschner.jaxrs_analyzer.model.instructions;
  */
 public abstract class GetPropertyInstruction implements Instruction {
 
-    private final String className;
+    private final Type containingClass;
     private final String propertyName;
     // TODO check if parameterized types are used
-    private final String propertyType;
+    private final Type propertyType;
 
-    protected GetPropertyInstruction(final String className, final String propertyName, final String propertyType) {
-        this.className = className;
+    protected GetPropertyInstruction(final Type containingClass, final String propertyName, final Type propertyType) {
+        this.containingClass = containingClass;
         this.propertyName = propertyName;
         this.propertyType = propertyType;
     }
 
-    public String getClassName() {
-        return className;
+    public Type getContainingClass() {
+        return containingClass;
     }
 
     public String getPropertyName() {
         return propertyName;
     }
 
-    public String getPropertyType() {
+    public Type getPropertyType() {
         return propertyType;
     }
 
@@ -53,7 +55,8 @@ public abstract class GetPropertyInstruction implements Instruction {
 
         final GetPropertyInstruction that = (GetPropertyInstruction) o;
 
-        if (className != null ? !className.equals(that.className) : that.className != null) return false;
+        if (containingClass != null ? !containingClass.equals(that.containingClass) : that.containingClass != null)
+            return false;
         if (propertyName != null ? !propertyName.equals(that.propertyName) : that.propertyName != null) return false;
         if (propertyType != null ? !propertyType.equals(that.propertyType) : that.propertyType != null) return false;
         if (getStackSizeDifference() != that.getStackSizeDifference()) return false;
@@ -63,7 +66,7 @@ public abstract class GetPropertyInstruction implements Instruction {
 
     @Override
     public int hashCode() {
-        int result = className != null ? className.hashCode() : 0;
+        int result = containingClass != null ? containingClass.hashCode() : 0;
         result = 31 * result + getStackSizeDifference();
         result = 31 * result + (getType() != null ? getType().ordinal() : 0);
         result = 31 * result + (propertyName != null ? propertyName.hashCode() : 0);
@@ -75,7 +78,7 @@ public abstract class GetPropertyInstruction implements Instruction {
     public String toString() {
         return "GetPropertyInstruction{" +
                 "type='" + getType() + '\'' +
-                ", className='" + className + '\'' +
+                ", containingClass='" + containingClass + '\'' +
                 ", propertyName='" + propertyName + '\'' +
                 ", propertyType='" + propertyType + '\'' +
                 '}';

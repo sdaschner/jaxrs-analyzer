@@ -17,6 +17,7 @@
 package com.sebastian_daschner.jaxrs_analyzer.analysis.project.methods.testclasses.resource.response;
 
 import com.sebastian_daschner.jaxrs_analyzer.model.elements.HttpResponse;
+import com.sebastian_daschner.jaxrs_analyzer.model.types.Types;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -65,7 +66,7 @@ public class TestClass19 {
         ninthResult.getStatuses().add(500);
         tenthResult.getStatuses().add(307);
 
-        seventhResult.getEntityTypes().add("java.lang.Long");
+        seventhResult.getEntityTypes().add(Types.LONG);
 
         secondResult.getHeaders().add("Location");
         fourthResult.getHeaders().add("Vary");

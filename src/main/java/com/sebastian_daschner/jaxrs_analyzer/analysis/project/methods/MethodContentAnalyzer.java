@@ -24,7 +24,9 @@ import com.sebastian_daschner.jaxrs_analyzer.model.instructions.Instruction;
 import com.sebastian_daschner.jaxrs_analyzer.model.instructions.InvokeInstruction;
 import com.sebastian_daschner.jaxrs_analyzer.model.methods.MethodIdentifier;
 import com.sebastian_daschner.jaxrs_analyzer.model.methods.ProjectMethod;
-import javassist.*;
+import javassist.CtBehavior;
+import javassist.CtMethod;
+import javassist.Modifier;
 
 import java.util.HashSet;
 import java.util.List;
@@ -98,12 +100,9 @@ abstract class MethodContentAnalyzer {
         Set<MethodIdentifier> projectMethodIdentifiers = findUnhandledProjectMethodIdentifiers(instructions, projectMethods);
 
         for (MethodIdentifier identifier : projectMethodIdentifiers) {
-            final CtBehavior method;
-            try {
-                method = getMethod(identifier);
-            } catch (NotFoundException e) {
-                LogProvider.error("Could not interpret project method: " + identifier);
-                LogProvider.debug(e);
+            final CtBehavior method = JavaUtils.getMethod(identifier);
+            if (method == null) {
+                LogProvider.error("Could not find project method: " + identifier);
                 continue;
             }
 
@@ -126,28 +125,10 @@ abstract class MethodContentAnalyzer {
      */
     private Set<MethodIdentifier> findUnhandledProjectMethodIdentifiers(final List<Instruction> instructions, final Set<ProjectMethod> projectMethods) {
         // find own methods
-        return instructions.stream().filter(i -> i.getType() == Instruction.Type.INVOKE || i.getType() == Instruction.Type.METHOD_HANDLE)
+        return instructions.stream().filter(i -> i.getType() == Instruction.InstructionType.INVOKE || i.getType() == Instruction.InstructionType.METHOD_HANDLE)
                 .map(i -> (InvokeInstruction) i).filter(this::isProjectMethod).map(InvokeInstruction::getIdentifier)
                 .filter(i -> projectMethods.stream().noneMatch(m -> m.matches(i)))
                 .collect(Collectors.toSet());
-    }
-
-    /**
-     * Returns the method (Javassist {@link CtBehavior}) for the given method or constructor identifier.
-     *
-     * @param identifier The method identifier
-     * @return The Javassist behavior
-     * @throws NotFoundException If the method could not be analyzed
-     */
-    // TODO refactor to central utils
-    private CtBehavior getMethod(final MethodIdentifier identifier) throws NotFoundException {
-        final CtClass[] parameterClasses = JavaUtils.getParameterClasses(identifier);
-        final CtClass ctClass = ClassPool.getDefault().get(identifier.getClassName());
-
-        if (JavaUtils.isInitializerName(identifier.getMethodName())) {
-            return ctClass.getDeclaredConstructor(parameterClasses);
-        }
-        return ctClass.getDeclaredMethod(identifier.getMethodName(), parameterClasses);
     }
 
     /**
@@ -160,7 +141,7 @@ abstract class MethodContentAnalyzer {
         final MethodIdentifier identifier = instruction.getIdentifier();
 
         // check if method is in own package
-        return identifier.getClassName().startsWith(projectPackagePrefix);
+        return identifier.getContainingClass().toString().startsWith(projectPackagePrefix);
     }
 
 }

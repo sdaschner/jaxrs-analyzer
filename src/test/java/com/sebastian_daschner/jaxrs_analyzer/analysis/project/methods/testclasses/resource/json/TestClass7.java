@@ -20,10 +20,14 @@ import com.sebastian_daschner.jaxrs_analyzer.model.elements.Element;
 import com.sebastian_daschner.jaxrs_analyzer.model.elements.HttpResponse;
 import com.sebastian_daschner.jaxrs_analyzer.model.elements.JsonArray;
 import com.sebastian_daschner.jaxrs_analyzer.model.elements.JsonObject;
+import com.sebastian_daschner.jaxrs_analyzer.model.types.Types;
+import com.sebastian_daschner.jaxrs_analyzer.model.types.Type;
 
 import javax.json.Json;
 import javax.json.JsonStructure;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Set;
 
 public class TestClass7 {
@@ -39,13 +43,13 @@ public class TestClass7 {
 
         final JsonObject jsonObject = new JsonObject();
         final JsonArray jsonArray = new JsonArray();
-        jsonArray.getElements().add(new Element("java.lang.Boolean", 1));
-        jsonArray.getElements().add(new Element("java.lang.String", "duke"));
-        jsonObject.getStructure().put("key", new Element("java.lang.String", "value"));
+        jsonArray.getElements().add(new Element(new HashSet<>(Arrays.asList(Types.PRIMITIVE_BOOLEAN, Types.INTEGER)), 1));
+        jsonArray.getElements().add(new Element(new Type("java.lang.String"), "duke"));
+        jsonObject.getStructure().put("key", new Element(new Type("java.lang.String"), "value"));
 
 
         final HttpResponse httpResponse = new HttpResponse();
-        httpResponse.getEntityTypes().add(JsonStructure.class.getName());
+        httpResponse.getEntityTypes().add(new Type(JsonStructure.class.getName()));
         httpResponse.getInlineEntities().add(jsonObject);
         httpResponse.getInlineEntities().add(jsonArray);
 

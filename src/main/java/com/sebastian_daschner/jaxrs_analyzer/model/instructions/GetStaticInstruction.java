@@ -16,6 +16,8 @@
 
 package com.sebastian_daschner.jaxrs_analyzer.model.instructions;
 
+import com.sebastian_daschner.jaxrs_analyzer.model.types.Type;
+
 /**
  * Represents a GET_STATIC instruction.
  *
@@ -23,13 +25,13 @@ package com.sebastian_daschner.jaxrs_analyzer.model.instructions;
  */
 public class GetStaticInstruction extends GetPropertyInstruction {
 
-    public GetStaticInstruction(final String className, final String fieldName, final String fieldType) {
-        super(className, fieldName, fieldType);
+    public GetStaticInstruction(final Type containingClass, final String fieldName, final Type fieldType) {
+        super(containingClass, fieldName, fieldType);
     }
 
     @Override
-    public Type getType() {
-        return Type.GET_STATIC;
+    public InstructionType getType() {
+        return InstructionType.GET_STATIC;
     }
 
     @Override

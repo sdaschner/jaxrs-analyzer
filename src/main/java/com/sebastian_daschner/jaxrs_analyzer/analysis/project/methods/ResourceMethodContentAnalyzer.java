@@ -16,6 +16,7 @@
 
 package com.sebastian_daschner.jaxrs_analyzer.analysis.project.methods;
 
+import com.sebastian_daschner.jaxrs_analyzer.LogProvider;
 import com.sebastian_daschner.jaxrs_analyzer.analysis.bytecode.simulation.MethodPool;
 import com.sebastian_daschner.jaxrs_analyzer.analysis.bytecode.simulation.MethodSimulator;
 import com.sebastian_daschner.jaxrs_analyzer.model.elements.Element;
@@ -24,11 +25,12 @@ import com.sebastian_daschner.jaxrs_analyzer.model.elements.JsonValue;
 import com.sebastian_daschner.jaxrs_analyzer.model.instructions.Instruction;
 import com.sebastian_daschner.jaxrs_analyzer.model.methods.ProjectMethod;
 import com.sebastian_daschner.jaxrs_analyzer.model.results.MethodResult;
+import com.sebastian_daschner.jaxrs_analyzer.model.types.Type;
+import com.sebastian_daschner.jaxrs_analyzer.model.types.Types;
 import javassist.CtMethod;
 import javassist.bytecode.BadBytecode;
 import javassist.bytecode.SignatureAttribute;
 
-import javax.ws.rs.core.Response;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.locks.Lock;
@@ -65,10 +67,22 @@ class ResourceMethodContentAnalyzer extends MethodContentAnalyzer {
             projectMethods.stream().forEach(MethodPool.getInstance()::addProjectMethod);
 
             final Element returnedElement = methodSimulator.simulate(visitedInstructions);
-            final String returnType = determineReturnType(method);
+            final String signature = method.getGenericSignature() != null ? method.getGenericSignature() : method.getSignature();
+            final Type returnType;
+            try {
+                returnType = new Type(SignatureAttribute.toMethodSignature(signature).getReturnType());
+            } catch (BadBytecode e) {
+                throw new RuntimeException(e);
+            }
 
             // void resource methods are interpreted later
+            if (Types.PRIMITIVE_VOID.equals(returnType)) {
+                return;
+            }
+
+            // TODO remove, test purposes
             if (returnedElement == null) {
+                LogProvider.debug("Non-void method, but no return element returned after analysis");
                 return;
             }
 
@@ -76,34 +90,24 @@ class ResourceMethodContentAnalyzer extends MethodContentAnalyzer {
                     .collect(Collectors.toSet());
 
             // for non-Response methods add a default if there are non-Response objects or none objects at all
-            if (!Response.class.getName().equals(returnType)) {
+            if (!Types.RESPONSE.equals(returnType)) {
                 final HttpResponse defaultResponse = new HttpResponse();
-                defaultResponse.getEntityTypes().add((Object.class.getName().equals(returnType)) ? returnedElement.getType() : returnType);
+
+                if (Types.OBJECT.equals(returnType))
+                    defaultResponse.getEntityTypes().addAll(returnedElement.getTypes());
+                else
+                    defaultResponse.getEntityTypes().add(returnType);
+
                 possibleObjects.stream().filter(o -> o instanceof JsonValue).map(o -> (JsonValue) o).forEach(defaultResponse.getInlineEntities()::add);
 
                 result.getResponses().add(defaultResponse);
             }
 
+            // add Response results as well
             returnedElement.getPossibleValues().stream().filter(o -> o instanceof HttpResponse).map(o -> (HttpResponse) o)
                     .forEach(result.getResponses()::add);
         } finally {
             lock.unlock();
-        }
-    }
-
-    /**
-     * Returns the return type of the method. The parameterized type is taken, if generics are used.
-     *
-     * @param method The method
-     * @return The return type
-     * @throws IllegalArgumentException If the method signature could not be analyzed
-     */
-    private static String determineReturnType(final CtMethod method) {
-        try {
-            final String sig = method.getGenericSignature() != null ? method.getGenericSignature() : method.getSignature();
-            return SignatureAttribute.toMethodSignature(sig).getReturnType().toString();
-        } catch (BadBytecode e) {
-            throw new IllegalArgumentException(e);
         }
     }
 

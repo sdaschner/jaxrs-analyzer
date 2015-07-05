@@ -19,6 +19,7 @@ package com.sebastian_daschner.jaxrs_analyzer.backend.plaintext;
 import com.sebastian_daschner.jaxrs_analyzer.analysis.utils.StringUtils;
 import com.sebastian_daschner.jaxrs_analyzer.backend.Backend;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.*;
+import com.sebastian_daschner.jaxrs_analyzer.model.types.Type;
 
 import javax.json.JsonValue;
 import java.util.Comparator;
@@ -118,8 +119,8 @@ public class PlainTextBackend implements Backend {
         builder.append('\n');
     }
 
-    private void appendParams(final String name, final Map<String, String> parameters) {
-        for (final Map.Entry<String, String> entry : parameters.entrySet()) {
+    private void appendParams(final String name, final Map<String, Type> parameters) {
+        for (final Map.Entry<String, Type> entry : parameters.entrySet()) {
             builder.append(name);
             builder.append(entry.getKey());
             builder.append(", ");

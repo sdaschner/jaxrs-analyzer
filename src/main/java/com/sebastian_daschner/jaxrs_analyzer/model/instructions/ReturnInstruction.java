@@ -24,8 +24,8 @@ package com.sebastian_daschner.jaxrs_analyzer.model.instructions;
 public class ReturnInstruction implements Instruction {
 
     @Override
-    public Type getType() {
-        return Type.RETURN;
+    public InstructionType getType() {
+        return InstructionType.RETURN;
     }
 
     @Override

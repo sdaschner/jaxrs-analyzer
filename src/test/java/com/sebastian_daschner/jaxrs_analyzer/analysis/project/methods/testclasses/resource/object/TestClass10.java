@@ -2,6 +2,7 @@ package com.sebastian_daschner.jaxrs_analyzer.analysis.project.methods.testclass
 
 import com.sebastian_daschner.jaxrs_analyzer.builder.HttpResponseBuilder;
 import com.sebastian_daschner.jaxrs_analyzer.model.elements.HttpResponse;
+import com.sebastian_daschner.jaxrs_analyzer.model.types.Types;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -41,7 +42,7 @@ public class TestClass10 {
     }
 
     public static Set<HttpResponse> getResult() {
-        return Collections.singleton(HttpResponseBuilder.newBuilder().andEntityTypes("java.lang.String").build());
+        return Collections.singleton(HttpResponseBuilder.newBuilder().andEntityTypes(Types.STRING).build());
     }
 
 }

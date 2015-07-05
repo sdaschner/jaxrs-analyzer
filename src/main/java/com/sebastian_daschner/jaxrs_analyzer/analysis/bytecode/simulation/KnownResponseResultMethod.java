@@ -23,20 +23,22 @@ import com.sebastian_daschner.jaxrs_analyzer.model.elements.MethodHandle;
 import com.sebastian_daschner.jaxrs_analyzer.model.methods.IdentifiableMethod;
 import com.sebastian_daschner.jaxrs_analyzer.model.methods.Method;
 import com.sebastian_daschner.jaxrs_analyzer.model.methods.MethodIdentifier;
+import com.sebastian_daschner.jaxrs_analyzer.model.types.Type;
 
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.container.ResourceContext;
 import javax.ws.rs.core.*;
 import java.lang.annotation.Annotation;
-import java.util.*;
-import java.util.function.*;
-import java.util.stream.Stream;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Locale;
+import java.util.function.BiFunction;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
-import static com.sebastian_daschner.jaxrs_analyzer.analysis.bytecode.simulation.KnownResponseResultMethod.KnownNames.*;
 import static com.sebastian_daschner.jaxrs_analyzer.analysis.utils.JavaUtils.INITIALIZER_NAME;
-import static com.sebastian_daschner.jaxrs_analyzer.analysis.utils.JavaUtils.trimCollection;
 import static com.sebastian_daschner.jaxrs_analyzer.model.methods.MethodIdentifier.ofNonStatic;
 import static com.sebastian_daschner.jaxrs_analyzer.model.methods.MethodIdentifier.ofStatic;
+import static com.sebastian_daschner.jaxrs_analyzer.model.types.Types.*;
 
 /**
  * Known methods which apply logic to the result or to the return element.
@@ -49,13 +51,13 @@ enum KnownResponseResultMethod implements IdentifiableMethod {
 
     RESPONSE_BUILDER_BUILD(ofNonStatic(RESPONSE_BUILDER, "build", RESPONSE), (object, arguments) -> object),
 
-    RESPONSE_BUILDER_CACHE_CONTROL(ofNonStatic(RESPONSE_BUILDER, "cacheControl", RESPONSE_BUILDER, CacheControl.class.getName()), (object, arguments) ->
+    RESPONSE_BUILDER_CACHE_CONTROL(ofNonStatic(RESPONSE_BUILDER, "cacheControl", RESPONSE_BUILDER, new Type(CacheControl.class.getName())), (object, arguments) ->
             addHeader(object, HttpHeaders.CACHE_CONTROL)),
 
     RESPONSE_BUILDER_CONTENT_LOCATION(ofNonStatic(RESPONSE_BUILDER, "contentLocation", RESPONSE_BUILDER, URI), (object, arguments) ->
             addHeader(object, HttpHeaders.CONTENT_LOCATION)),
 
-    RESPONSE_BUILDER_COOKIE(ofNonStatic(RESPONSE_BUILDER, "cookie", RESPONSE_BUILDER, NewCookie.class.getName() + "[]"), (object, arguments) ->
+    RESPONSE_BUILDER_COOKIE(ofNonStatic(RESPONSE_BUILDER, "cookie", RESPONSE_BUILDER, new Type(NewCookie[].class.getName())), (object, arguments) ->
             addHeader(object, HttpHeaders.SET_COOKIE)),
 
     RESPONSE_BUILDER_ENCODING(ofNonStatic(RESPONSE_BUILDER, "encoding", RESPONSE_BUILDER, STRING), (object, arguments) ->
@@ -64,7 +66,7 @@ enum KnownResponseResultMethod implements IdentifiableMethod {
     RESPONSE_BUILDER_ENTITY(ofNonStatic(RESPONSE_BUILDER, "entity", RESPONSE_BUILDER, OBJECT), (object, arguments) ->
             addEntity(object, arguments.get(0))),
 
-    RESPONSE_BUILDER_ENTITY_ANNOTATION(ofNonStatic(RESPONSE_BUILDER, "entity", RESPONSE_BUILDER, OBJECT, Annotation.class.getName() + "[]"), (object, arguments) ->
+    RESPONSE_BUILDER_ENTITY_ANNOTATION(ofNonStatic(RESPONSE_BUILDER, "entity", RESPONSE_BUILDER, OBJECT, new Type(Annotation[].class.getName())), (object, arguments) ->
             addEntity(object, arguments.get(0))),
 
     RESPONSE_BUILDER_EXPIRES(ofNonStatic(RESPONSE_BUILDER, "expires", RESPONSE_BUILDER, DATE), (object, arguments) ->
@@ -76,7 +78,7 @@ enum KnownResponseResultMethod implements IdentifiableMethod {
         return object;
     }),
 
-    RESPONSE_BUILDER_LANGUAGE_LOCALE(ofNonStatic(RESPONSE_BUILDER, "language", RESPONSE_BUILDER, Locale.class.getName()), (object, arguments) ->
+    RESPONSE_BUILDER_LANGUAGE_LOCALE(ofNonStatic(RESPONSE_BUILDER, "language", RESPONSE_BUILDER, new Type(Locale.class.getName())), (object, arguments) ->
             addHeader(object, HttpHeaders.CONTENT_LANGUAGE)),
 
     RESPONSE_BUILDER_LANGUAGE_STRING(ofNonStatic(RESPONSE_BUILDER, "language", RESPONSE_BUILDER, STRING), (object, arguments) ->
@@ -91,7 +93,7 @@ enum KnownResponseResultMethod implements IdentifiableMethod {
     RESPONSE_BUILDER_LINK_STRING(ofNonStatic(RESPONSE_BUILDER, "link", RESPONSE_BUILDER, STRING, STRING), (object, arguments) ->
             addHeader(object, HttpHeaders.LINK)),
 
-    RESPONSE_BUILDER_LINKS(ofNonStatic(RESPONSE_BUILDER, "links", RESPONSE_BUILDER, Link.class.getName() + "[]"), (object, arguments) ->
+    RESPONSE_BUILDER_LINKS(ofNonStatic(RESPONSE_BUILDER, "links", RESPONSE_BUILDER, new Type(Link[].class.getName())), (object, arguments) ->
             addHeader(object, HttpHeaders.LINK)),
 
     RESPONSE_BUILDER_LOCATION(ofNonStatic(RESPONSE_BUILDER, "location", RESPONSE_BUILDER, URI), (object, arguments) ->
@@ -103,19 +105,19 @@ enum KnownResponseResultMethod implements IdentifiableMethod {
         return object;
     }),
 
-    RESPONSE_BUILDER_STATUS_INT(ofNonStatic(RESPONSE_BUILDER, "status", RESPONSE_BUILDER, "int"), (object, arguments) -> {
+    RESPONSE_BUILDER_STATUS_INT(ofNonStatic(RESPONSE_BUILDER, "status", RESPONSE_BUILDER, PRIMITIVE_INT), (object, arguments) -> {
         arguments.get(0).getPossibleValues().stream()
                 .map(status -> (int) status).forEach(s -> addStatus(object, s));
         return object;
     }),
 
-    RESPONSE_BUILDER_TAG_ENTITY(ofNonStatic(RESPONSE_BUILDER, "tag", RESPONSE_BUILDER, EntityTag.class.getName()), (object, arguments) ->
+    RESPONSE_BUILDER_TAG_ENTITY(ofNonStatic(RESPONSE_BUILDER, "tag", RESPONSE_BUILDER, ENTITY_TAG), (object, arguments) ->
             addHeader(object, HttpHeaders.ETAG)),
 
     RESPONSE_BUILDER_TAG_STRING(ofNonStatic(RESPONSE_BUILDER, "tag", RESPONSE_BUILDER, STRING), (object, arguments) ->
             addHeader(object, HttpHeaders.ETAG)),
 
-    RESPONSE_BUILDER_TYPE(ofNonStatic(RESPONSE_BUILDER, "type", RESPONSE_BUILDER, MediaType.class.getName()), (object, arguments) -> {
+    RESPONSE_BUILDER_TYPE(ofNonStatic(RESPONSE_BUILDER, "type", RESPONSE_BUILDER, new Type(MediaType.class.getName())), (object, arguments) -> {
         arguments.get(0).getPossibleValues().stream()
                 .map(m -> (MediaType) m).map(m -> m.getType() + '/' + m.getSubtype()).forEach(t -> addContentType(object, t));
         return object;
@@ -133,10 +135,10 @@ enum KnownResponseResultMethod implements IdentifiableMethod {
         return object;
     }),
 
-    RESPONSE_BUILDER_VARIANTS_LIST(ofNonStatic(RESPONSE_BUILDER, "variants", RESPONSE_BUILDER, List.class.getName()), (object, arguments) ->
+    RESPONSE_BUILDER_VARIANTS_LIST(ofNonStatic(RESPONSE_BUILDER, "variants", RESPONSE_BUILDER, LIST), (object, arguments) ->
             addHeader(object, HttpHeaders.VARY)),
 
-    RESPONSE_BUILDER_VARIANTS_ARRAY(ofNonStatic(RESPONSE_BUILDER, "variants", RESPONSE_BUILDER, VARIANT + "[]"), (object, arguments) ->
+    RESPONSE_BUILDER_VARIANTS_ARRAY(ofNonStatic(RESPONSE_BUILDER, "variants", RESPONSE_BUILDER, new Type(Variant[].class.getName())), (object, arguments) ->
             addHeader(object, HttpHeaders.VARY)),
 
     // static methods in Response --------------------------
@@ -148,7 +150,7 @@ enum KnownResponseResultMethod implements IdentifiableMethod {
         return object;
     }),
 
-    RESPONSE_STATUS_INT(ofStatic(RESPONSE, "status", RESPONSE_BUILDER, "int"), (notAvailable, arguments) -> {
+    RESPONSE_STATUS_INT(ofStatic(RESPONSE, "status", RESPONSE_BUILDER, PRIMITIVE_INT), (notAvailable, arguments) -> {
         final Element object = new Element(HTTP_RESPONSE, new HttpResponse());
         arguments.get(0).getPossibleValues().stream()
                 .map(status -> (int) status).forEach(s -> addStatus(object, s));
@@ -174,7 +176,7 @@ enum KnownResponseResultMethod implements IdentifiableMethod {
         return addHeader(object, HttpHeaders.CONTENT_ENCODING);
     }),
 
-    RESPONSE_OK_MEDIATYPE(ofStatic(RESPONSE, "ok", RESPONSE_BUILDER, OBJECT, MediaType.class.getName()), (notAvailable, arguments) -> {
+    RESPONSE_OK_MEDIATYPE(ofStatic(RESPONSE, "ok", RESPONSE_BUILDER, OBJECT, new Type(MediaType.class.getName())), (notAvailable, arguments) -> {
         final Element object = new Element(HTTP_RESPONSE, new HttpResponse());
         addStatus(object, Response.Status.OK.getStatusCode());
         arguments.get(1).getPossibleValues().stream().map(m -> (MediaType) m)
@@ -212,7 +214,7 @@ enum KnownResponseResultMethod implements IdentifiableMethod {
         return addStatus(object, Response.Status.NO_CONTENT.getStatusCode());
     }),
 
-    RESPONSE_NOT_ACCEPTABLE(ofStatic(RESPONSE, "notAcceptable", RESPONSE_BUILDER, "java.util.List"), (notAvailable, arguments) -> {
+    RESPONSE_NOT_ACCEPTABLE(ofStatic(RESPONSE, "notAcceptable", RESPONSE_BUILDER, LIST), (notAvailable, arguments) -> {
         final Element object = new Element(HTTP_RESPONSE, new HttpResponse());
         addStatus(object, Response.Status.NOT_ACCEPTABLE.getStatusCode());
         return addHeader(object, HttpHeaders.VARY);
@@ -223,7 +225,7 @@ enum KnownResponseResultMethod implements IdentifiableMethod {
         return addStatus(object, Response.Status.NOT_MODIFIED.getStatusCode());
     }),
 
-    RESPONSE_NOT_MODIFIED_ENTITYTAG(ofStatic(RESPONSE, "notModified", RESPONSE_BUILDER, EntityTag.class.getName()), (notAvailable, arguments) -> {
+    RESPONSE_NOT_MODIFIED_ENTITYTAG(ofStatic(RESPONSE, "notModified", RESPONSE_BUILDER, ENTITY_TAG), (notAvailable, arguments) -> {
         final Element object = new Element(HTTP_RESPONSE, new HttpResponse());
         addStatus(object, Response.Status.NOT_MODIFIED.getStatusCode());
         return addHeader(object, HttpHeaders.ETAG);
@@ -254,87 +256,87 @@ enum KnownResponseResultMethod implements IdentifiableMethod {
 
     // WebApplicationExceptions --------------------------
 
-    WEB_APPLICATION_EXCEPTION_EMPTY(ofNonStatic(WEB_APPLICATION_EXCEPTION, INITIALIZER_NAME, null), (notAvailable, arguments) -> {
+    WEB_APPLICATION_EXCEPTION_EMPTY(ofNonStatic(WEB_APPLICATION_EXCEPTION, INITIALIZER_NAME, PRIMITIVE_VOID), (notAvailable, arguments) -> {
         final Element object = new Element(HTTP_RESPONSE, new HttpResponse());
         return addStatus(object, Response.Status.INTERNAL_SERVER_ERROR.getStatusCode());
     }),
 
-    WEB_APPLICATION_EXCEPTION_MESSAGE(ofNonStatic(WEB_APPLICATION_EXCEPTION, INITIALIZER_NAME, null, STRING), (notAvailable, arguments) -> {
+    WEB_APPLICATION_EXCEPTION_MESSAGE(ofNonStatic(WEB_APPLICATION_EXCEPTION, INITIALIZER_NAME, PRIMITIVE_VOID, STRING), (notAvailable, arguments) -> {
         final Element object = new Element(HTTP_RESPONSE, new HttpResponse());
         return addStatus(object, Response.Status.INTERNAL_SERVER_ERROR.getStatusCode());
     }),
 
-    WEB_APPLICATION_EXCEPTION_RESPONSE(ofNonStatic(WEB_APPLICATION_EXCEPTION, INITIALIZER_NAME, null, RESPONSE), (notAvailable, arguments) -> arguments.get(0)),
+    WEB_APPLICATION_EXCEPTION_RESPONSE(ofNonStatic(WEB_APPLICATION_EXCEPTION, INITIALIZER_NAME, PRIMITIVE_VOID, RESPONSE), (notAvailable, arguments) -> arguments.get(0)),
 
-    WEB_APPLICATION_EXCEPTION_MESSAGE_RESPONSE(ofNonStatic(WEB_APPLICATION_EXCEPTION, INITIALIZER_NAME, null, STRING, RESPONSE),
+    WEB_APPLICATION_EXCEPTION_MESSAGE_RESPONSE(ofNonStatic(WEB_APPLICATION_EXCEPTION, INITIALIZER_NAME, PRIMITIVE_VOID, STRING, RESPONSE),
             (notAvailable, arguments) -> arguments.get(1)),
 
-    WEB_APPLICATION_EXCEPTION_STATUS(ofNonStatic(WEB_APPLICATION_EXCEPTION, INITIALIZER_NAME, null, "int"), (notAvailable, arguments) -> {
+    WEB_APPLICATION_EXCEPTION_STATUS(ofNonStatic(WEB_APPLICATION_EXCEPTION, INITIALIZER_NAME, PRIMITIVE_VOID, PRIMITIVE_INT), (notAvailable, arguments) -> {
         final Element object = new Element(HTTP_RESPONSE, new HttpResponse());
         arguments.get(0).getPossibleValues().stream()
                 .map(status -> (int) status).forEach(s -> addStatus(object, s));
         return object;
     }),
 
-    WEB_APPLICATION_EXCEPTION_MESSAGE_STATUS(ofNonStatic(WEB_APPLICATION_EXCEPTION, INITIALIZER_NAME, null, STRING, "int"), (notAvailable, arguments) -> {
+    WEB_APPLICATION_EXCEPTION_MESSAGE_STATUS(ofNonStatic(WEB_APPLICATION_EXCEPTION, INITIALIZER_NAME, PRIMITIVE_VOID, STRING, PRIMITIVE_INT), (notAvailable, arguments) -> {
         final Element object = new Element(HTTP_RESPONSE, new HttpResponse());
         arguments.get(1).getPossibleValues().stream()
                 .map(status -> (int) status).forEach(s -> addStatus(object, s));
         return object;
     }),
 
-    WEB_APPLICATION_EXCEPTION_RESPONSE_STATUS(ofNonStatic(WEB_APPLICATION_EXCEPTION, INITIALIZER_NAME, null, RESPONSE_STATUS), (notAvailable, arguments) -> {
+    WEB_APPLICATION_EXCEPTION_RESPONSE_STATUS(ofNonStatic(WEB_APPLICATION_EXCEPTION, INITIALIZER_NAME, PRIMITIVE_VOID, RESPONSE_STATUS), (notAvailable, arguments) -> {
         final Element object = new Element(HTTP_RESPONSE, new HttpResponse());
         arguments.get(0).getPossibleValues().stream()
                 .map(status -> ((Response.Status) status).getStatusCode()).forEach(s -> addStatus(object, s));
         return object;
     }),
 
-    WEB_APPLICATION_EXCEPTION_MESSAGE_RESPONSE_STATUS(ofNonStatic(WEB_APPLICATION_EXCEPTION, INITIALIZER_NAME, null, STRING, RESPONSE_STATUS), (notAvailable, arguments) -> {
+    WEB_APPLICATION_EXCEPTION_MESSAGE_RESPONSE_STATUS(ofNonStatic(WEB_APPLICATION_EXCEPTION, INITIALIZER_NAME, PRIMITIVE_VOID, STRING, RESPONSE_STATUS), (notAvailable, arguments) -> {
         final Element object = new Element(HTTP_RESPONSE, new HttpResponse());
         arguments.get(1).getPossibleValues().stream()
                 .map(status -> ((Response.Status) status).getStatusCode()).forEach(s -> addStatus(object, s));
         return object;
     }),
 
-    WEB_APPLICATION_EXCEPTION_CAUSE(ofNonStatic(WEB_APPLICATION_EXCEPTION, INITIALIZER_NAME, null, THROWABLE), (notAvailable, arguments) -> {
+    WEB_APPLICATION_EXCEPTION_CAUSE(ofNonStatic(WEB_APPLICATION_EXCEPTION, INITIALIZER_NAME, PRIMITIVE_VOID, THROWABLE), (notAvailable, arguments) -> {
         final Element object = new Element(HTTP_RESPONSE, new HttpResponse());
         return addStatus(object, Response.Status.INTERNAL_SERVER_ERROR.getStatusCode());
     }),
 
-    WEB_APPLICATION_EXCEPTION_MESSAGE_CAUSE(ofNonStatic(WEB_APPLICATION_EXCEPTION, INITIALIZER_NAME, null, STRING, THROWABLE), (notAvailable, arguments) -> {
+    WEB_APPLICATION_EXCEPTION_MESSAGE_CAUSE(ofNonStatic(WEB_APPLICATION_EXCEPTION, INITIALIZER_NAME, PRIMITIVE_VOID, STRING, THROWABLE), (notAvailable, arguments) -> {
         final Element object = new Element(HTTP_RESPONSE, new HttpResponse());
         return addStatus(object, Response.Status.INTERNAL_SERVER_ERROR.getStatusCode());
     }),
 
-    WEB_APPLICATION_EXCEPTION_CAUSE_RESPONSE(ofNonStatic(WEB_APPLICATION_EXCEPTION, INITIALIZER_NAME, null, THROWABLE, RESPONSE),
+    WEB_APPLICATION_EXCEPTION_CAUSE_RESPONSE(ofNonStatic(WEB_APPLICATION_EXCEPTION, INITIALIZER_NAME, PRIMITIVE_VOID, THROWABLE, RESPONSE),
             (notAvailable, arguments) -> arguments.get(1)),
 
-    WEB_APPLICATION_EXCEPTION_MESSAGE_CAUSE_RESPONSE(ofNonStatic(WEB_APPLICATION_EXCEPTION, INITIALIZER_NAME, null, STRING, THROWABLE, RESPONSE),
+    WEB_APPLICATION_EXCEPTION_MESSAGE_CAUSE_RESPONSE(ofNonStatic(WEB_APPLICATION_EXCEPTION, INITIALIZER_NAME, PRIMITIVE_VOID, STRING, THROWABLE, RESPONSE),
             (notAvailable, arguments) -> arguments.get(2)),
 
-    WEB_APPLICATION_EXCEPTION_CAUSE_STATUS(ofNonStatic(WEB_APPLICATION_EXCEPTION, INITIALIZER_NAME, null, THROWABLE, "int"), (notAvailable, arguments) -> {
+    WEB_APPLICATION_EXCEPTION_CAUSE_STATUS(ofNonStatic(WEB_APPLICATION_EXCEPTION, INITIALIZER_NAME, PRIMITIVE_VOID, THROWABLE, PRIMITIVE_INT), (notAvailable, arguments) -> {
         final Element object = new Element(HTTP_RESPONSE, new HttpResponse());
         arguments.get(1).getPossibleValues().stream()
                 .map(status -> (int) status).forEach(s -> addStatus(object, s));
         return object;
     }),
 
-    WEB_APPLICATION_EXCEPTION_MESSAGE_CAUSE_STATUS(ofNonStatic(WEB_APPLICATION_EXCEPTION, INITIALIZER_NAME, null, STRING, THROWABLE, "int"), (notAvailable, arguments) -> {
+    WEB_APPLICATION_EXCEPTION_MESSAGE_CAUSE_STATUS(ofNonStatic(WEB_APPLICATION_EXCEPTION, INITIALIZER_NAME, PRIMITIVE_VOID, STRING, THROWABLE, PRIMITIVE_INT), (notAvailable, arguments) -> {
         final Element object = new Element(HTTP_RESPONSE, new HttpResponse());
         arguments.get(2).getPossibleValues().stream()
                 .map(status -> (int) status).forEach(s -> addStatus(object, s));
         return object;
     }),
 
-    WEB_APPLICATION_EXCEPTION_CAUSE_RESPONSE_STATUS(ofNonStatic(WEB_APPLICATION_EXCEPTION, INITIALIZER_NAME, null, THROWABLE, RESPONSE_STATUS), (notAvailable, arguments) -> {
+    WEB_APPLICATION_EXCEPTION_CAUSE_RESPONSE_STATUS(ofNonStatic(WEB_APPLICATION_EXCEPTION, INITIALIZER_NAME, PRIMITIVE_VOID, THROWABLE, RESPONSE_STATUS), (notAvailable, arguments) -> {
         final Element object = new Element(HTTP_RESPONSE, new HttpResponse());
         arguments.get(1).getPossibleValues().stream()
                 .map(status -> ((Response.Status) status).getStatusCode()).forEach(s -> addStatus(object, s));
         return object;
     }),
 
-    WEB_APPLICATION_EXCEPTION_MESSAGE_CAUSE_RESPONSE_STATUS(ofNonStatic(WEB_APPLICATION_EXCEPTION, INITIALIZER_NAME, null, STRING, THROWABLE, RESPONSE_STATUS),
+    WEB_APPLICATION_EXCEPTION_MESSAGE_CAUSE_RESPONSE_STATUS(ofNonStatic(WEB_APPLICATION_EXCEPTION, INITIALIZER_NAME, PRIMITIVE_VOID, STRING, THROWABLE, RESPONSE_STATUS),
             (notAvailable, arguments) -> {
                 final Element object = new Element(HTTP_RESPONSE, new HttpResponse());
                 arguments.get(2).getPossibleValues().stream()
@@ -344,24 +346,24 @@ enum KnownResponseResultMethod implements IdentifiableMethod {
 
     // other methods --------------------------
 
-    RESOURCE_CONTEXT_INIT(ofNonStatic(RESOURCE_CONTEXT, "getResource", OBJECT, "java.lang.Class"),
+    RESOURCE_CONTEXT_INIT(ofNonStatic(RESOURCE_CONTEXT, "getResource", OBJECT, new Type(Class.class.getName())),
             (object, arguments) -> new Element(arguments.get(0).getPossibleValues().stream()
-                    .map(c -> (String) c).findFirst().orElse(OBJECT))
+                    .filter(s -> s instanceof String).map(s -> new Type((String) s)).collect(Collectors.toSet()))
     ),
 
     RESOURCE_CONTEXT_GET(ofNonStatic(RESOURCE_CONTEXT, "initResource", OBJECT, OBJECT),
-            (object, arguments) -> new Element(arguments.get(0).getType())),
+            (object, arguments) -> new Element(arguments.get(0).getTypes())),
 
-    INTEGER_VALUE_OF(ofStatic(INTEGER, "valueOf", INTEGER, "int"),
-            (object, arguments) -> new Element(int.class.getCanonicalName(), arguments.get(0).getPossibleValues().toArray())),
+    INTEGER_VALUE_OF(ofStatic(INTEGER, "valueOf", PRIMITIVE_INT, INTEGER),
+            (object, arguments) -> new Element(INTEGER, arguments.get(0).getPossibleValues().toArray())),
 
     // stream related methods --------------------------
 
-    LIST_STREAM(ofNonStatic(List.class.getName(), "stream", STREAM),
-            (object, arguments) -> new Element(trimCollection(object.getType()))),
+    LIST_STREAM(ofNonStatic(LIST, "stream", STREAM),
+            (object, arguments) -> new Element(object.getTypes())),
 
-    SET_STREAM(ofNonStatic(Set.class.getName(), "stream", STREAM),
-            (object, arguments) -> new Element(trimCollection(object.getType()))),
+    SET_STREAM(ofNonStatic(SET, "stream", STREAM),
+            (object, arguments) -> new Element(object.getTypes())),
 
     STREAM_COLLECT(ofNonStatic(STREAM, "collect", OBJECT, SUPPLIER, BI_CONSUMER, BI_CONSUMER),
             (object, arguments) -> {
@@ -373,13 +375,13 @@ enum KnownResponseResultMethod implements IdentifiableMethod {
                 return Element.EMPTY;
             }),
 
-    STREAM_FOR_EACH(ofNonStatic(STREAM, "forEach", null, CONSUMER), (object, arguments) -> {
+    STREAM_FOR_EACH(ofNonStatic(STREAM, "forEach", PRIMITIVE_VOID, CONSUMER), (object, arguments) -> {
         if (arguments.get(0) instanceof MethodHandle)
             ((Method) arguments.get(0)).invoke(null, Collections.singletonList(object));
         return null;
     }),
 
-    STREAM_MAP(ofNonStatic(STREAM, "map", STREAM, Function.class.getName()), (object, arguments) -> {
+    STREAM_MAP(ofNonStatic(STREAM, "map", STREAM, new Type(Function.class.getName())), (object, arguments) -> {
         if (arguments.get(0) instanceof MethodHandle) {
             return ((MethodHandle) arguments.get(0)).invoke(null, Collections.singletonList(object));
         }
@@ -398,7 +400,7 @@ enum KnownResponseResultMethod implements IdentifiableMethod {
 
     @Override
     public Element invoke(final Element object, final List<Element> arguments) {
-        if (arguments.size() != identifier.getParameterTypes().length)
+        if (arguments.size() != identifier.getParameters().size())
             throw new IllegalArgumentException("Method arguments do not match expected signature!");
 
         return function.apply(object, arguments);
@@ -417,7 +419,7 @@ enum KnownResponseResultMethod implements IdentifiableMethod {
     private static Element addEntity(final Element object, final Element argument) {
         object.getPossibleValues().stream().filter(r -> r instanceof HttpResponse).map(r -> (HttpResponse) r)
                 .forEach(r -> {
-                    r.getEntityTypes().add(argument.getType());
+                    r.getEntityTypes().addAll(argument.getTypes());
                     argument.getPossibleValues().stream().filter(j -> j instanceof JsonValue).map(j -> (JsonValue) j).forEach(j -> r.getInlineEntities().add(j));
                 });
         return object;
@@ -431,33 +433,6 @@ enum KnownResponseResultMethod implements IdentifiableMethod {
     private static Element addContentType(final Element object, final String type) {
         object.getPossibleValues().stream().filter(r -> r instanceof HttpResponse).map(r -> (HttpResponse) r).forEach(r -> r.getContentTypes().add(type));
         return object;
-    }
-
-    /**
-     * Contains known JAX-RS names.
-     *
-     * @author Sebastian Daschner
-     */
-    static class KnownNames {
-
-        static final String HTTP_RESPONSE = HttpResponse.class.getName();
-        static final String RESPONSE_BUILDER = Response.ResponseBuilder.class.getName();
-        static final String RESPONSE = Response.class.getName();
-        static final String RESPONSE_STATUS = Response.Status.class.getName();
-        static final String RESOURCE_CONTEXT = ResourceContext.class.getName();
-        static final String OBJECT = Object.class.getName();
-        static final String STRING = String.class.getName();
-        static final String INTEGER = Integer.class.getName();
-        static final String URI = java.net.URI.class.getName();
-        static final String DATE = Date.class.getName();
-        static final String VARIANT = Variant.class.getName();
-        static final String STREAM = Stream.class.getName();
-        static final String SUPPLIER = Supplier.class.getName();
-        static final String BI_CONSUMER = BiConsumer.class.getName();
-        static final String CONSUMER = Consumer.class.getName();
-        static final String WEB_APPLICATION_EXCEPTION = WebApplicationException.class.getName();
-        static final String THROWABLE = Throwable.class.getName();
-
     }
 
 }

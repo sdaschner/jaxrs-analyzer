@@ -16,9 +16,10 @@
 
 package com.sebastian_daschner.jaxrs_analyzer.analysis.project.methods.testclasses.resource.response;
 
-import com.sebastian_daschner.jaxrs_analyzer.model.elements.HttpResponse;
 import com.sebastian_daschner.jaxrs_analyzer.model.elements.Element;
+import com.sebastian_daschner.jaxrs_analyzer.model.elements.HttpResponse;
 import com.sebastian_daschner.jaxrs_analyzer.model.elements.JsonArray;
+import com.sebastian_daschner.jaxrs_analyzer.model.types.Type;
 
 import javax.json.Json;
 import javax.json.JsonArrayBuilder;
@@ -47,10 +48,10 @@ public class TestClass39 {
         final HttpResponse result = new HttpResponse();
 
         result.getStatuses().add(200);
-        result.getEntityTypes().add("javax.json.JsonArray");
+        result.getEntityTypes().add(new Type("javax.json.JsonArray"));
 
         final JsonArray jsonArray = new JsonArray();
-        jsonArray.getElements().add(new Element("java.lang.String"));
+        jsonArray.getElements().add(new Element(new Type("java.lang.String")));
 
         // TODO un-comment
 //        result.getInlineEntities().add(jsonArray);

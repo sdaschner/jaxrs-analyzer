@@ -46,7 +46,7 @@ final class InstructionFinder {
      * @return All found LOAD indexes
      */
     static Set<Integer> findLoadIndexes(final List<Instruction> instructions, final Predicate<LoadInstruction> isLoadIgnored) {
-        return instructions.stream().filter(i -> i.getType() == Instruction.Type.LOAD).map(i -> (LoadInstruction) i)
+        return instructions.stream().filter(i -> i.getType() == Instruction.InstructionType.LOAD).map(i -> (LoadInstruction) i)
                 .filter(i -> !isLoadIgnored.test(i)).map(LoadInstruction::getNumber).collect(TreeSet::new, Set::add, Set::addAll);
     }
 
@@ -58,8 +58,8 @@ final class InstructionFinder {
      * @return The positions of all found LOAD_{@code index} / STORE_{@code index}
      */
     static Set<Integer> findLoadStores(final int index, final List<Instruction> instructions) {
-        final Predicate<Instruction> loadStoreType = instruction -> instruction.getType() == Instruction.Type.LOAD
-                || instruction.getType() == Instruction.Type.STORE;
+        final Predicate<Instruction> loadStoreType = instruction -> instruction.getType() == Instruction.InstructionType.LOAD
+                || instruction.getType() == Instruction.InstructionType.STORE;
         return find(loadStoreType.and(instruction -> ((LoadStoreInstruction) instruction).getNumber() == index), instructions);
     }
 
@@ -70,7 +70,7 @@ final class InstructionFinder {
      * @return The positions of all found return instructions
      */
     static Set<Integer> findReturnsAndThrows(final List<Instruction> instructions) {
-        return find(instruction -> instruction.getType() == Instruction.Type.RETURN || instruction.getType() == Instruction.Type.THROW, instructions);
+        return find(instruction -> instruction.getType() == Instruction.InstructionType.RETURN || instruction.getType() == Instruction.InstructionType.THROW, instructions);
     }
 
     /**

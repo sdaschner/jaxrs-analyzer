@@ -17,6 +17,7 @@
 package com.sebastian_daschner.jaxrs_analyzer.analysis.bytecode.collection.testclasses;
 
 import com.sebastian_daschner.jaxrs_analyzer.model.instructions.*;
+import com.sebastian_daschner.jaxrs_analyzer.model.types.Types;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -32,7 +33,7 @@ public class TestClass6 {
 
         // constant folding
         instructions.add(new PushInstruction(6));
-        instructions.add(new LoadInstruction(1, "int", "number"));
+        instructions.add(new LoadInstruction(1, Types.PRIMITIVE_INT, "number"));
         instructions.add(new SizeChangingInstruction("idiv", 1, 2));
         instructions.add(new ReturnInstruction());
 

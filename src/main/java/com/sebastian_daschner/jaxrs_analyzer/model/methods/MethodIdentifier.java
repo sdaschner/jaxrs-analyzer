@@ -16,9 +16,12 @@
 
 package com.sebastian_daschner.jaxrs_analyzer.model.methods;
 
-import com.sebastian_daschner.jaxrs_analyzer.analysis.utils.StringUtils;
+import com.sebastian_daschner.jaxrs_analyzer.model.types.Type;
 
-import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Stream;
 
 /**
  * The method type signature with which a method can be identified.
@@ -27,35 +30,37 @@ import java.util.Arrays;
  */
 public class MethodIdentifier {
 
-    private final String className;
+    private final Type containingClass;
     private final String methodName;
-    private final String returnType;
+    private final Type returnType;
     private final boolean staticMethod;
-    private final String[] parameterTypes;
+    private final List<Type> parameters;
 
-    private MethodIdentifier(final String className, final String methodName, final String returnType, final boolean staticMethod, final String[] parameterTypes) {
-        StringUtils.requireNonBlank(className);
-        StringUtils.requireNonBlank(methodName);
-        for (final String parameterType : parameterTypes) {
-            StringUtils.requireNonBlank(parameterType);
+    private MethodIdentifier(final Type containingClass, final String methodName, final Type returnType, final boolean staticMethod,
+                             final List<Type> parameters) {
+        Objects.requireNonNull(containingClass);
+        Objects.requireNonNull(methodName);
+        Objects.requireNonNull(returnType);
+        for (final Type parameterType : parameters) {
+            Objects.requireNonNull(parameterType);
         }
 
-        this.className = className;
+        this.containingClass = containingClass;
         this.methodName = methodName;
         this.returnType = returnType;
         this.staticMethod = staticMethod;
-        this.parameterTypes = parameterTypes;
+        this.parameters = parameters;
     }
 
-    public String getClassName() {
-        return className;
+    public Type getContainingClass() {
+        return containingClass;
     }
 
     public String getMethodName() {
         return methodName;
     }
 
-    public String getReturnType() {
+    public Type getReturnType() {
         return returnType;
     }
 
@@ -63,8 +68,8 @@ public class MethodIdentifier {
         return staticMethod;
     }
 
-    public String[] getParameterTypes() {
-        return parameterTypes;
+    public List<Type> getParameters() {
+        return parameters;
     }
 
     @Override
@@ -74,74 +79,82 @@ public class MethodIdentifier {
 
         final MethodIdentifier that = (MethodIdentifier) o;
 
-        if (!className.equals(that.className)) return false;
+        if (staticMethod != that.staticMethod) return false;
+        if (!containingClass.equals(that.containingClass)) return false;
         if (!methodName.equals(that.methodName)) return false;
-        if (returnType != null ? !returnType.equals(that.returnType) : that.returnType != null) return false;
-        if (staticMethod ^ that.staticMethod) return false;
-
-        return Arrays.equals(parameterTypes, that.parameterTypes);
+        if (!returnType.equals(that.returnType)) return false;
+        return parameters.equals(that.parameters);
     }
 
     @Override
     public int hashCode() {
-        int result = className.hashCode();
+        int result = containingClass.hashCode();
         result = 31 * result + methodName.hashCode();
-        result = 31 * result + (returnType != null ? returnType.hashCode() : 0);
+        result = 31 * result + returnType.hashCode();
         result = 31 * result + (staticMethod ? 1 : 0);
-        result = 31 * result + Arrays.hashCode(parameterTypes);
+        result = 31 * result + parameters.hashCode();
         return result;
     }
 
     @Override
     public String toString() {
-        return "{" +
-                "className='" + className + '\'' +
+        return "MethodIdentifier{" +
+                "containingClass=" + containingClass +
                 ", methodName='" + methodName + '\'' +
-                ", returnType='" + returnType + '\'' +
-                ", staticMethod='" + staticMethod + '\'' +
-                ", parameterTypes=" + Arrays.toString(parameterTypes) +
+                ", returnType=" + returnType +
+                ", staticMethod=" + staticMethod +
+                ", parameters=" + parameters +
                 '}';
     }
 
     /**
      * Creates an identifier of the given parameters.
      *
-     * @param className      The class name
-     * @param methodName     The method name
-     * @param returnType     The return type
-     * @param staticMethod   If the method is static
-     * @param parameterTypes The parameter types
+     * @param containingClass The class name
+     * @param methodName      The method name
+     * @param returnType      The return type
+     * @param staticMethod    If the method is static
+     * @param parameterTypes  The parameter types
      * @return The method identifier
      */
-    public static MethodIdentifier of(final String className, final String methodName, final String returnType,
-                                      final boolean staticMethod, final String... parameterTypes) {
-        return new MethodIdentifier(className, methodName, returnType, staticMethod, parameterTypes);
+    public static MethodIdentifier of(final Type containingClass, final String methodName, final Type returnType,
+                                      final boolean staticMethod, final Type... parameterTypes) {
+        final List<Type> parameters = new LinkedList<>();
+        if (parameterTypes != null && parameterTypes.length > 0)
+            Stream.of(parameterTypes).forEach(parameters::add);
+        return new MethodIdentifier(containingClass, methodName, returnType, staticMethod, parameters);
     }
 
     /**
      * Creates an identifier of a non-static method.
      *
-     * @param className      The class name
-     * @param methodName     The method name
-     * @param returnType     The return type
-     * @param parameterTypes The parameter types
+     * @param containingClass The class name
+     * @param methodName      The method name
+     * @param returnType      The return type
+     * @param parameterTypes  The parameter types
      * @return The method identifier
      */
-    public static MethodIdentifier ofNonStatic(final String className, final String methodName, final String returnType, final String... parameterTypes) {
-        return new MethodIdentifier(className, methodName, returnType, false, parameterTypes);
+    public static MethodIdentifier ofNonStatic(final Type containingClass, final String methodName, final Type returnType, final Type... parameterTypes) {
+        final List<Type> parameters = new LinkedList<>();
+        if (parameterTypes != null && parameterTypes.length > 0)
+            Stream.of(parameterTypes).forEach(parameters::add);
+        return new MethodIdentifier(containingClass, methodName, returnType, false, parameters);
     }
 
     /**
      * Creates an identifier of a static method.
      *
-     * @param className      The class name
-     * @param methodName     The method name
-     * @param returnType     The return type
-     * @param parameterTypes The parameter types
+     * @param containingClass The class name
+     * @param methodName      The method name
+     * @param returnType      The return type
+     * @param parameterTypes  The parameter types
      * @return The method identifier
      */
-    public static MethodIdentifier ofStatic(final String className, final String methodName, final String returnType, final String... parameterTypes) {
-        return new MethodIdentifier(className, methodName, returnType, true, parameterTypes);
+    public static MethodIdentifier ofStatic(final Type containingClass, final String methodName, final Type returnType, final Type... parameterTypes) {
+        final List<Type> parameters = new LinkedList<>();
+        if (parameterTypes != null && parameterTypes.length > 0)
+            Stream.of(parameterTypes).forEach(parameters::add);
+        return new MethodIdentifier(containingClass, methodName, returnType, true, parameters);
     }
 
 }

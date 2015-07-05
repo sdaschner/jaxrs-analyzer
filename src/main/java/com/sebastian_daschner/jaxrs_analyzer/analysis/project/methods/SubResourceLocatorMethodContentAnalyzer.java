@@ -23,8 +23,7 @@ import com.sebastian_daschner.jaxrs_analyzer.analysis.project.classes.ClassAnaly
 import com.sebastian_daschner.jaxrs_analyzer.model.instructions.Instruction;
 import com.sebastian_daschner.jaxrs_analyzer.model.methods.ProjectMethod;
 import com.sebastian_daschner.jaxrs_analyzer.model.results.ClassResult;
-import javassist.ClassPool;
-import javassist.CtClass;
+import com.sebastian_daschner.jaxrs_analyzer.model.types.Type;
 import javassist.CtMethod;
 import javassist.NotFoundException;
 
@@ -55,12 +54,9 @@ class SubResourceLocatorMethodContentAnalyzer extends MethodContentAnalyzer {
         try {
             buildPackagePrefix(method);
 
-            final String returnType = determineReturnType(method);
-
-            final CtClass subResource = ClassPool.getDefault().get(returnType);
-            classAnalyzer.analyzeSubResource(subResource, classResult);
-        } catch (NotFoundException e) {
-            LogProvider.error("Could not load analyze sub-resource class ");
+            determineReturnTypes(method).stream().map(Type::getCtClass).forEach(c -> classAnalyzer.analyzeSubResource(c, classResult));
+        } catch (Exception e) {
+            LogProvider.error("Could not analyze sub-resource class ");
             LogProvider.debug(e);
         } finally {
             lock.unlock();
@@ -68,11 +64,12 @@ class SubResourceLocatorMethodContentAnalyzer extends MethodContentAnalyzer {
     }
 
     /**
-     * Determines the return type of the sub-resource-locator by analyzing the bytecode.
+     * Determines the possible return types of the sub-resource-locator by analyzing the bytecode.
+     * This will analyze the concrete returned types (which then are further analyzed).
      *
-     * @return The return type
+     * @return The return types
      */
-    private String determineReturnType(final CtMethod method) throws NotFoundException {
+    private Set<Type> determineReturnTypes(final CtMethod method) throws NotFoundException {
         final List<Instruction> visitedInstructions = interpretRelevantInstructions(method);
 
         // find project defined methods in invoke occurrences
@@ -81,7 +78,7 @@ class SubResourceLocatorMethodContentAnalyzer extends MethodContentAnalyzer {
         // add project methods to global method pool
         projectMethods.stream().forEach(MethodPool.getInstance()::addProjectMethod);
 
-        return simulator.simulate(visitedInstructions).getType();
+        return simulator.simulate(visitedInstructions).getTypes();
     }
 
 }

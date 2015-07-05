@@ -1,6 +1,9 @@
 package com.sebastian_daschner.jaxrs_analyzer.analysis.project.methods.testclasses.subresource;
 
 import javax.ws.rs.container.ResourceContext;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 public class TestClass3 {
 
@@ -10,8 +13,9 @@ public class TestClass3 {
         return resource;
     }
 
-    public static String getResult() {
-        return "com.sebastian_daschner.jaxrs_analyzer.analysis.project.methods.testclasses.subresource.TestClass3$SubResource";
+    public static Set<String> getResult() {
+        return new HashSet<>(Arrays.asList("com.sebastian_daschner.jaxrs_analyzer.analysis.project.methods.testclasses.subresource.TestClass3$SubResource",
+                "java.lang.Object"));
     }
 
     private class SubResource {

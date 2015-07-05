@@ -17,6 +17,7 @@
 package com.sebastian_daschner.jaxrs_analyzer.analysis.project.methods.testclasses.resource.response;
 
 import com.sebastian_daschner.jaxrs_analyzer.model.elements.HttpResponse;
+import com.sebastian_daschner.jaxrs_analyzer.model.types.Types;
 
 import javax.ws.rs.core.EntityTag;
 import javax.ws.rs.core.MediaType;
@@ -42,14 +43,14 @@ public class TestClass20 {
         final HttpResponse thirdResult = new HttpResponse();
 
         firstResult.getStatuses().add(202);
-        firstResult.getEntityTypes().add("java.lang.String");
+        firstResult.getEntityTypes().add(Types.STRING);
 
         secondResult.getStatuses().add(304);
         secondResult.getHeaders().add("ETag");
 
         thirdResult.getStatuses().add(200);
         thirdResult.getContentTypes().add("application/xml");
-        thirdResult.getEntityTypes().add("int");
+        thirdResult.getEntityTypes().add(Types.INTEGER);
 
         return new HashSet<>(Arrays.asList(firstResult, secondResult, thirdResult));
     }

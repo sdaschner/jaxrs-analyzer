@@ -20,6 +20,7 @@ import com.sebastian_daschner.jaxrs_analyzer.model.rest.HttpMethod;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.ResourceMethod;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.Response;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeRepresentation;
+import com.sebastian_daschner.jaxrs_analyzer.model.types.Type;
 
 import java.util.Arrays;
 
@@ -35,7 +36,7 @@ public class ResourceMethodBuilder {
         return new ResourceMethodBuilder(method);
     }
 
-    public ResourceMethodBuilder andRequestBodyType(final String type) {
+    public ResourceMethodBuilder andRequestBodyType(final Type type) {
         method.setRequestBody(new TypeRepresentation(type));
         return this;
     }
@@ -60,32 +61,32 @@ public class ResourceMethodBuilder {
         return this;
     }
 
-    public ResourceMethodBuilder andMatrixParam(final String name, final String type) {
+    public ResourceMethodBuilder andMatrixParam(final String name, final Type type) {
         method.getMethodParameters().getMatrixParams().put(name, type);
         return this;
     }
 
-    public ResourceMethodBuilder andQueryParam(final String name, final String type) {
+    public ResourceMethodBuilder andQueryParam(final String name, final Type type) {
         method.getMethodParameters().getQueryParams().put(name, type);
         return this;
     }
 
-    public ResourceMethodBuilder andPathParam(final String name, final String type) {
+    public ResourceMethodBuilder andPathParam(final String name, final Type type) {
         method.getMethodParameters().getPathParams().put(name, type);
         return this;
     }
 
-    public ResourceMethodBuilder andCookieParam(final String name, final String type) {
+    public ResourceMethodBuilder andCookieParam(final String name, final Type type) {
         method.getMethodParameters().getCookieParams().put(name, type);
         return this;
     }
 
-    public ResourceMethodBuilder andHeaderParam(final String name, final String type) {
+    public ResourceMethodBuilder andHeaderParam(final String name, final Type type) {
         method.getMethodParameters().getHeaderParams().put(name, type);
         return this;
     }
 
-    public ResourceMethodBuilder andFormParam(final String name, final String type) {
+    public ResourceMethodBuilder andFormParam(final String name, final Type type) {
         method.getMethodParameters().getFormParams().put(name, type);
         return this;
     }

@@ -17,6 +17,7 @@
 package com.sebastian_daschner.jaxrs_analyzer.analysis.project.methods.testclasses.resource.response;
 
 import com.sebastian_daschner.jaxrs_analyzer.model.elements.HttpResponse;
+import com.sebastian_daschner.jaxrs_analyzer.model.types.Types;
 
 import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.core.EntityTag;
@@ -53,7 +54,7 @@ public class TestClass22 {
         final HttpResponse result = new HttpResponse();
 
         result.getStatuses().addAll(Arrays.asList(200, 433));
-        result.getEntityTypes().addAll(Arrays.asList("java.lang.Double"));
+        result.getEntityTypes().add(Types.DOUBLE);
         result.getHeaders().addAll(Arrays.asList("X-Test", "Cache-Control", "Set-Cookie", "Expires", "Content-Language", "Content-Encoding",
                 "Last-Modified", "Link", "Location", "ETag", "Vary", "Content-Location"));
         result.getContentTypes().add("application/json");

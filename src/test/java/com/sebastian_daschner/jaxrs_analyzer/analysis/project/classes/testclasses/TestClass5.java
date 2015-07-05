@@ -21,6 +21,7 @@ import com.sebastian_daschner.jaxrs_analyzer.builder.MethodResultBuilder;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.HttpMethod;
 import com.sebastian_daschner.jaxrs_analyzer.model.results.ClassResult;
 import com.sebastian_daschner.jaxrs_analyzer.model.results.MethodResult;
+import com.sebastian_daschner.jaxrs_analyzer.model.types.Types;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -34,7 +35,7 @@ public abstract class TestClass5 {
     public abstract Response getInfo(final String info);
 
     public static ClassResult getResult() {
-        final MethodResult method = MethodResultBuilder.newBuilder().andPath("{info}").andMethod(HttpMethod.GET).andRequestBodyType("java.lang.String").build();
+        final MethodResult method = MethodResultBuilder.newBuilder().andPath("{info}").andMethod(HttpMethod.GET).andRequestBodyType(Types.STRING).build();
         return ClassResultBuilder.withResourcePath("test").andMethods(method).build();
     }
 

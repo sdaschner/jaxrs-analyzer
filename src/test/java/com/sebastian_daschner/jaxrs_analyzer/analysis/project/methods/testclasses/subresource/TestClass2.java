@@ -1,6 +1,8 @@
 package com.sebastian_daschner.jaxrs_analyzer.analysis.project.methods.testclasses.subresource;
 
 import javax.ws.rs.container.ResourceContext;
+import java.util.Collections;
+import java.util.Set;
 
 public class TestClass2 {
 
@@ -9,8 +11,8 @@ public class TestClass2 {
         return rc.getResource(SubResource.class);
     }
 
-    public static String getResult() {
-        return "com.sebastian_daschner.jaxrs_analyzer.analysis.project.methods.testclasses.subresource.TestClass2$SubResource";
+    public static Set<String> getResult() {
+        return Collections.singleton("com.sebastian_daschner.jaxrs_analyzer.analysis.project.methods.testclasses.subresource.TestClass2$SubResource");
     }
 
     private class SubResource {

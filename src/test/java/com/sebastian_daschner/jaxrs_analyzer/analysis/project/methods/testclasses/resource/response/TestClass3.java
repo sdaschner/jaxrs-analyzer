@@ -17,6 +17,7 @@
 package com.sebastian_daschner.jaxrs_analyzer.analysis.project.methods.testclasses.resource.response;
 
 import com.sebastian_daschner.jaxrs_analyzer.model.elements.HttpResponse;
+import com.sebastian_daschner.jaxrs_analyzer.model.types.Types;
 
 import javax.ws.rs.core.Response;
 import java.util.Collections;
@@ -36,7 +37,7 @@ public class TestClass3 {
     public static Set<HttpResponse> getResult() {
         final HttpResponse result = new HttpResponse();
 
-        result.getEntityTypes().add("int");
+        result.getEntityTypes().add(Types.INTEGER);
         result.getStatuses().add(200);
 
         return Collections.singleton(result);

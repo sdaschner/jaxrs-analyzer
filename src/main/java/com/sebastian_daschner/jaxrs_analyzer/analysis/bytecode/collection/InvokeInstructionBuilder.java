@@ -20,10 +20,13 @@ import com.sebastian_daschner.jaxrs_analyzer.analysis.utils.JavaUtils;
 import com.sebastian_daschner.jaxrs_analyzer.model.instructions.InvokeDynamicInstruction;
 import com.sebastian_daschner.jaxrs_analyzer.model.instructions.InvokeInstruction;
 import com.sebastian_daschner.jaxrs_analyzer.model.methods.MethodIdentifier;
+import com.sebastian_daschner.jaxrs_analyzer.model.types.Type;
 import javassist.ClassPool;
 import javassist.CtClass;
 import javassist.NotFoundException;
 import javassist.bytecode.*;
+
+import java.util.stream.Stream;
 
 /**
  * Creates the {@link InvokeInstruction} for a given byte code position.
@@ -79,10 +82,10 @@ class InvokeInstructionBuilder {
         final String lambdaSignature = pool.getUtf8Info(pool.getNameAndTypeDescriptor(lambdaIndex));
         final String lambdaMethodName = pool.getUtf8Info(pool.getNameAndTypeName(lambdaIndex));
         final SignatureAttribute.MethodSignature methodSignature = SignatureAttribute.toMethodSignature(lambdaSignature);
-        final String lambdaReturnType = JavaUtils.getMethodReturnType(methodSignature);
+        final Type lambdaReturnType = new Type(methodSignature.getReturnType());
+        final Type[] lambdaParameters = Stream.of(methodSignature.getParameterTypes()).map(Type::new).toArray(Type[]::new);
 
-        final MethodIdentifier dynamicIdentifier = MethodIdentifier.ofStatic(pool.getClassName(), lambdaMethodName, lambdaReturnType,
-                JavaUtils.getMethodParameters(methodSignature));
+        final MethodIdentifier dynamicIdentifier = MethodIdentifier.ofStatic(new Type(pool.getClassName()), lambdaMethodName, lambdaReturnType, lambdaParameters);
 
         final CtClass ctClass;
         try {
@@ -132,10 +135,10 @@ class InvokeInstructionBuilder {
     private static MethodIdentifier buildMethodIdentifier(final String className, final String methodName, final String poolMethodType,
                                                           final boolean staticMethod) throws BadBytecode {
         final SignatureAttribute.MethodSignature methodSignature = SignatureAttribute.toMethodSignature(poolMethodType);
-        final String returnType = JavaUtils.getMethodReturnType(methodSignature);
-        final String[] parameterTypes = JavaUtils.getMethodParameters(methodSignature);
+        final Type returnType = new Type(methodSignature.getReturnType());
+        final Type[] parameters = Stream.of(methodSignature.getParameterTypes()).map(Type::new).toArray(Type[]::new);
 
-        return MethodIdentifier.of(className, methodName, returnType, staticMethod, parameterTypes);
+        return MethodIdentifier.of(new Type(className), methodName, returnType, staticMethod, parameters);
     }
 
 

@@ -18,6 +18,7 @@ package com.sebastian_daschner.jaxrs_analyzer.builder;
 
 import com.sebastian_daschner.jaxrs_analyzer.model.elements.HttpResponse;
 import com.sebastian_daschner.jaxrs_analyzer.model.elements.JsonValue;
+import com.sebastian_daschner.jaxrs_analyzer.model.types.Type;
 
 import java.util.stream.Stream;
 
@@ -54,7 +55,7 @@ public class HttpResponseBuilder {
         return this;
     }
 
-    public HttpResponseBuilder andEntityTypes(final String... entityTypes) {
+    public HttpResponseBuilder andEntityTypes(final Type... entityTypes) {
         Stream.of(entityTypes).forEach(httpResponse.getEntityTypes()::add);
         return this;
     }

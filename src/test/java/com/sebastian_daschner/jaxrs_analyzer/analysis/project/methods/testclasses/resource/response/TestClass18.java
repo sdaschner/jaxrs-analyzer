@@ -17,6 +17,7 @@
 package com.sebastian_daschner.jaxrs_analyzer.analysis.project.methods.testclasses.resource.response;
 
 import com.sebastian_daschner.jaxrs_analyzer.model.elements.HttpResponse;
+import com.sebastian_daschner.jaxrs_analyzer.model.types.Type;
 
 import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.Response;
@@ -35,8 +36,9 @@ public class TestClass18 {
     public static Set<HttpResponse> getResult() {
         final HttpResponse result = new HttpResponse();
 
-        result.getStatuses().addAll(Arrays.asList(200));
-        result.getEntityTypes().addAll(Arrays.asList("javax.ws.rs.core.GenericEntity<java.util.Map<java.lang.String, java.lang.String>>"));
+        result.getStatuses().add(200);
+        result.getEntityTypes().add(new Type("javax.ws.rs.core.GenericEntity<java.util.Map<java.lang.String, java.lang.String>>"));
+        result.getEntityTypes().add(new Type("javax.ws.rs.core.GenericEntity"));
 
         return Collections.singleton(result);
     }

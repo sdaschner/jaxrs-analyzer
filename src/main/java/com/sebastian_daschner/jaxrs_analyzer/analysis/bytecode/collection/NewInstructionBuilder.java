@@ -17,6 +17,7 @@
 package com.sebastian_daschner.jaxrs_analyzer.analysis.bytecode.collection;
 
 import com.sebastian_daschner.jaxrs_analyzer.model.instructions.NewInstruction;
+import com.sebastian_daschner.jaxrs_analyzer.model.types.Type;
 import javassist.bytecode.CodeIterator;
 import javassist.bytecode.ConstPool;
 
@@ -43,9 +44,9 @@ class NewInstructionBuilder {
      */
     public NewInstruction build(final int position) {
         final int index = codeIterator.u16bitAt(position + 1);
-        final String type = pool.getClassInfo(index);
+        final String classInfo = pool.getClassInfo(index);
 
-        return new NewInstruction(type);
+        return new NewInstruction(new Type(classInfo));
     }
 
 }

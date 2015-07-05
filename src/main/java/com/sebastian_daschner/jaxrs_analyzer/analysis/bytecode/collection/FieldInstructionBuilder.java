@@ -19,6 +19,7 @@ package com.sebastian_daschner.jaxrs_analyzer.analysis.bytecode.collection;
 import com.sebastian_daschner.jaxrs_analyzer.model.instructions.GetFieldInstruction;
 import com.sebastian_daschner.jaxrs_analyzer.model.instructions.GetPropertyInstruction;
 import com.sebastian_daschner.jaxrs_analyzer.model.instructions.GetStaticInstruction;
+import com.sebastian_daschner.jaxrs_analyzer.model.types.Type;
 import javassist.bytecode.BadBytecode;
 import javassist.bytecode.CodeIterator;
 import javassist.bytecode.ConstPool;
@@ -49,11 +50,12 @@ class FieldInstructionBuilder {
     GetFieldInstruction buildGetField(final int position) throws BadBytecode {
         final int index = codeIterator.u16bitAt(position + 1);
 
-        final String className = pool.getFieldrefClassName(index);
+        final Type containingClass = new Type(pool.getFieldrefClassName(index));
         final String fieldName = pool.getFieldrefName(index);
-        final String fieldType = getFieldType(pool.getFieldrefType(index));
+        final String fieldrefType = pool.getFieldrefType(index);
+        final Type fieldType = new Type(SignatureAttribute.toTypeSignature(fieldrefType));
 
-        return new GetFieldInstruction(className, fieldName, fieldType);
+        return new GetFieldInstruction(containingClass, fieldName, fieldType);
     }
 
     /**
@@ -66,23 +68,12 @@ class FieldInstructionBuilder {
     GetStaticInstruction buildGetStatic(final int position) throws BadBytecode {
         final int index = codeIterator.u16bitAt(position + 1);
 
-        final String className = pool.getFieldrefClassName(index);
+        final Type containingClass = new Type(pool.getFieldrefClassName(index));
         final String fieldName = pool.getFieldrefName(index);
-        final String fieldType = getFieldType(pool.getFieldrefType(index));
+        final String fieldrefType = pool.getFieldrefType(index);
+        final Type fieldType = new Type(SignatureAttribute.toTypeSignature(fieldrefType));
 
-        return new GetStaticInstruction(className, fieldName, fieldType);
-    }
-
-    /**
-     * Returns the signature field type to a Java type.
-     *
-     * @param sigFieldType The field type
-     * @return The Java type
-     * @throws BadBytecode If the bytecode could not be analyzed
-     */
-    private String getFieldType(final String sigFieldType) throws BadBytecode {
-        final SignatureAttribute.Type type = SignatureAttribute.toTypeSignature(sigFieldType);
-        return type.toString();
+        return new GetStaticInstruction(containingClass, fieldName, fieldType);
     }
 
 }

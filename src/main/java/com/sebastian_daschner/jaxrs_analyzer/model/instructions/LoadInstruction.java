@@ -16,6 +16,8 @@
 
 package com.sebastian_daschner.jaxrs_analyzer.model.instructions;
 
+import com.sebastian_daschner.jaxrs_analyzer.model.types.Type;
+
 /**
  * Represents a XZY_LOAD_X instruction (for any number).
  *
@@ -23,7 +25,7 @@ package com.sebastian_daschner.jaxrs_analyzer.model.instructions;
  */
 public class LoadInstruction extends LoadStoreInstruction {
 
-    public LoadInstruction(final int number, final String type, final String name) {
+    public LoadInstruction(final int number, final Type type, final String name) {
         super(number, type, name);
     }
 
@@ -33,8 +35,8 @@ public class LoadInstruction extends LoadStoreInstruction {
     }
 
     @Override
-    public Type getType() {
-        return Type.LOAD;
+    public InstructionType getType() {
+        return InstructionType.LOAD;
     }
 
 }

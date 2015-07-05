@@ -18,12 +18,16 @@ package com.sebastian_daschner.jaxrs_analyzer.analysis.project.methods.testclass
 
 import com.sebastian_daschner.jaxrs_analyzer.model.elements.Element;
 import com.sebastian_daschner.jaxrs_analyzer.model.elements.HttpResponse;
+import com.sebastian_daschner.jaxrs_analyzer.model.types.Types;
+import com.sebastian_daschner.jaxrs_analyzer.model.types.Type;
 
 import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 import javax.json.JsonValue;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Set;
 
 public class TestClass5 {
@@ -40,12 +44,12 @@ public class TestClass5 {
 
     public static Set<HttpResponse> getResult() {
         final com.sebastian_daschner.jaxrs_analyzer.model.elements.JsonObject jsonObject = new com.sebastian_daschner.jaxrs_analyzer.model.elements.JsonObject();
-        jsonObject.getStructure().put("key", new Element("java.lang.Object", null));
-        jsonObject.getStructure().put("value", new Element("javax.json.JsonValue", JsonValue.FALSE));
-        jsonObject.getStructure().put("test", new Element("java.lang.Boolean", 1));
+        jsonObject.getStructure().put("key", new Element(new Type("java.lang.Object"), null));
+        jsonObject.getStructure().put("value", new Element(new Type("javax.json.JsonValue"), JsonValue.FALSE));
+        jsonObject.getStructure().put("test", new Element(new HashSet<>(Arrays.asList(Types.PRIMITIVE_BOOLEAN, Types.INTEGER)), 1));
 
         final HttpResponse httpResponse = new HttpResponse();
-        httpResponse.getEntityTypes().add(JsonObject.class.getName());
+        httpResponse.getEntityTypes().add(new Type(JsonObject.class.getName()));
         httpResponse.getInlineEntities().add(jsonObject);
 
         return Collections.singleton(httpResponse);

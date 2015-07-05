@@ -24,8 +24,8 @@ package com.sebastian_daschner.jaxrs_analyzer.model.instructions;
 public class ThrowInstruction implements Instruction {
 
     @Override
-    public Type getType() {
-        return Type.THROW;
+    public InstructionType getType() {
+        return InstructionType.THROW;
     }
 
     @Override

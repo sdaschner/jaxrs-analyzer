@@ -16,6 +16,7 @@
 
 package com.sebastian_daschner.jaxrs_analyzer.model.results;
 
+import com.sebastian_daschner.jaxrs_analyzer.model.types.Type;
 import com.sebastian_daschner.jaxrs_analyzer.model.elements.HttpResponse;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.HttpMethod;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.MethodParameters;
@@ -35,7 +36,7 @@ public class MethodResult {
     private final MethodParameters methodParameters = new MethodParameters();
     private final Set<HttpResponse> responses = new HashSet<>();
     private String path;
-    private String requestBodyType;
+    private Type requestBodyType;
     private HttpMethod httpMethod;
     private ClassResult subResource;
     private ClassResult parentResource;
@@ -64,11 +65,11 @@ public class MethodResult {
         this.path = path;
     }
 
-    public String getRequestBodyType() {
+    public Type getRequestBodyType() {
         return requestBodyType;
     }
 
-    public void setRequestBodyType(final String requestBodyType) {
+    public void setRequestBodyType(final Type requestBodyType) {
         this.requestBodyType = requestBodyType;
     }
 

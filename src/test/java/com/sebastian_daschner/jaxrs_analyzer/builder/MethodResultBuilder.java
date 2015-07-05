@@ -19,6 +19,7 @@ package com.sebastian_daschner.jaxrs_analyzer.builder;
 import com.sebastian_daschner.jaxrs_analyzer.model.elements.HttpResponse;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.HttpMethod;
 import com.sebastian_daschner.jaxrs_analyzer.model.results.MethodResult;
+import com.sebastian_daschner.jaxrs_analyzer.model.types.Type;
 
 import java.util.Arrays;
 import java.util.stream.Stream;
@@ -61,37 +62,37 @@ public class MethodResultBuilder {
         return this;
     }
 
-    public MethodResultBuilder andRequestBodyType(final String type) {
+    public MethodResultBuilder andRequestBodyType(final Type type) {
         methodResult.setRequestBodyType(type);
         return this;
     }
 
-    public MethodResultBuilder andMatrixParam(final String name, final String type) {
+    public MethodResultBuilder andMatrixParam(final String name, final Type type) {
         methodResult.getMethodParameters().getMatrixParams().put(name, type);
         return this;
     }
 
-    public MethodResultBuilder andQueryParam(final String name, final String type) {
+    public MethodResultBuilder andQueryParam(final String name, final Type type) {
         methodResult.getMethodParameters().getQueryParams().put(name, type);
         return this;
     }
 
-    public MethodResultBuilder andPathParam(final String name, final String type) {
+    public MethodResultBuilder andPathParam(final String name, final Type type) {
         methodResult.getMethodParameters().getPathParams().put(name, type);
         return this;
     }
 
-    public MethodResultBuilder andCookieParam(final String name, final String type) {
+    public MethodResultBuilder andCookieParam(final String name, final Type type) {
         methodResult.getMethodParameters().getCookieParams().put(name, type);
         return this;
     }
 
-    public MethodResultBuilder andHeaderParam(final String name, final String type) {
+    public MethodResultBuilder andHeaderParam(final String name, final Type type) {
         methodResult.getMethodParameters().getHeaderParams().put(name, type);
         return this;
     }
 
-    public MethodResultBuilder andFormParam(final String name, final String type) {
+    public MethodResultBuilder andFormParam(final String name, final Type type) {
         methodResult.getMethodParameters().getFormParams().put(name, type);
         return this;
     }

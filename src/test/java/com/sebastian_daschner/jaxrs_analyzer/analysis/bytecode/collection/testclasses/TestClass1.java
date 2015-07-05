@@ -17,6 +17,7 @@
 package com.sebastian_daschner.jaxrs_analyzer.analysis.bytecode.collection.testclasses;
 
 import com.sebastian_daschner.jaxrs_analyzer.model.instructions.*;
+import com.sebastian_daschner.jaxrs_analyzer.model.types.Types;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -33,13 +34,13 @@ public class TestClass1 {
         final List<Instruction> instructions = new LinkedList<>();
 
         instructions.add(new PushInstruction(200));
-        instructions.add(new StoreInstruction(1, "int", "status"));
+        instructions.add(new StoreInstruction(1, Types.PRIMITIVE_INT, "status"));
         instructions.add(new PushInstruction(100));
-        instructions.add(new StoreInstruction(2, "int", "anotherStatus"));
+        instructions.add(new StoreInstruction(2, Types.PRIMITIVE_INT, "anotherStatus"));
         instructions.add(new PushInstruction(300));
         instructions.add(new DupInstruction());
-        instructions.add(new StoreInstruction(2, "int", "anotherStatus"));
-        instructions.add(new StoreInstruction(1, "int", "status"));
+        instructions.add(new StoreInstruction(2, Types.PRIMITIVE_INT, "anotherStatus"));
+        instructions.add(new StoreInstruction(1, Types.PRIMITIVE_INT, "status"));
         instructions.add(new DefaultInstruction("return"));
 
         return instructions;

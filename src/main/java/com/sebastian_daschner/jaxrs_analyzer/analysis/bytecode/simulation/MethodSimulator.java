@@ -17,21 +17,19 @@
 package com.sebastian_daschner.jaxrs_analyzer.analysis.bytecode.simulation;
 
 import com.sebastian_daschner.jaxrs_analyzer.LogProvider;
-import com.sebastian_daschner.jaxrs_analyzer.analysis.utils.JavaUtils;
 import com.sebastian_daschner.jaxrs_analyzer.model.elements.Element;
-import com.sebastian_daschner.jaxrs_analyzer.model.elements.HttpResponse;
 import com.sebastian_daschner.jaxrs_analyzer.model.elements.MethodHandle;
 import com.sebastian_daschner.jaxrs_analyzer.model.instructions.*;
 import com.sebastian_daschner.jaxrs_analyzer.model.methods.Method;
 import com.sebastian_daschner.jaxrs_analyzer.model.methods.MethodIdentifier;
+import com.sebastian_daschner.jaxrs_analyzer.model.types.Types;
+import com.sebastian_daschner.jaxrs_analyzer.model.types.Type;
 
-import java.lang.reflect.Field;
 import java.util.*;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 /**
  * Simulates the instructions of a method. This class is thread-safe.
@@ -85,7 +83,7 @@ public class MethodSimulator {
         switch (instruction.getType()) {
             case PUSH:
                 final Object value = ((PushInstruction) instruction).getValue();
-                runtimeStack.push(new Element(value.getClass().getCanonicalName(), value));
+                runtimeStack.push(new Element(new Type(value.getClass().getCanonicalName()), value));
                 break;
             case METHOD_HANDLE:
                 simulateMethodHandle((InvokeDynamicInstruction) instruction);
@@ -138,8 +136,7 @@ public class MethodSimulator {
      * @param instruction The instruction to simulate
      */
     private void simulateMethodHandle(final InvokeDynamicInstruction instruction) {
-        final List<Element> arguments = Stream.of(instruction.getDynamicIdentifier().getParameterTypes())
-                .map(t -> runtimeStack.pop()).collect(Collectors.toList());
+        final List<Element> arguments = instruction.getDynamicIdentifier().getParameters().stream().map(t -> runtimeStack.pop()).collect(Collectors.toList());
         Collections.reverse(arguments);
 
         if (!instruction.getDynamicIdentifier().isStaticMethod())
@@ -159,7 +156,7 @@ public class MethodSimulator {
         final List<Element> arguments = new LinkedList<>();
         MethodIdentifier identifier = instruction.getIdentifier();
 
-        Stream.of(identifier.getParameterTypes()).forEachOrdered(t -> arguments.add(runtimeStack.pop()));
+        identifier.getParameters().forEach(t -> arguments.add(runtimeStack.pop()));
         Collections.reverse(arguments);
 
         Element object = null;
@@ -186,12 +183,13 @@ public class MethodSimulator {
      */
     private void simulateGetStatic(final GetStaticInstruction instruction) {
         try {
-            final Field field = Class.forName(instruction.getClassName()).getField(instruction.getPropertyName());
-            runtimeStack.push(new Element(field.getType().getCanonicalName(), field.get(null)));
+            // TODO test other get_static scenarios
+            final Object value = Class.forName(instruction.getContainingClass().toString()).getDeclaredField(instruction.getPropertyName()).get(null);
+            runtimeStack.push(new Element(instruction.getPropertyType(), value));
         } catch (ReflectiveOperationException e) {
             LogProvider.error("Could not access static property, reason: " + e.getMessage());
             LogProvider.debug(e);
-            runtimeStack.push(Element.EMPTY);
+            runtimeStack.push(new Element(instruction.getPropertyType()));
         }
     }
 
@@ -217,8 +215,8 @@ public class MethodSimulator {
      * @param variableType The type of the variable
      * @param element      The element to merge
      */
-    private void mergeElementStore(final int index, final String variableType, final Element element) {
-        final Element created = new Element(JavaUtils.determineMoreSpecificType(element.getType(), variableType));
+    private void mergeElementStore(final int index, final Type variableType, final Element element) {
+        final Element created = new Element(variableType);
         created.merge(element);
         localVariables.merge(index, created, Element::merge);
     }
@@ -237,7 +235,8 @@ public class MethodSimulator {
      * Checks if the current stack element is eligible for being merged with the returned element.
      */
     private void mergePossibleResponse() {
-        if (!runtimeStack.isEmpty() && HttpResponse.class.getName().equals(runtimeStack.peek().getType())) {
+        // TODO only HttpResponse element?
+        if (!runtimeStack.isEmpty() && runtimeStack.peek().getTypes().contains(Types.HTTP_RESPONSE)) {
             mergeReturnElement(runtimeStack.peek());
         }
     }

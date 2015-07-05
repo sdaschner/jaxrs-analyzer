@@ -16,6 +16,8 @@
 
 package com.sebastian_daschner.jaxrs_analyzer.model.elements;
 
+import com.sebastian_daschner.jaxrs_analyzer.model.types.Type;
+
 import java.util.HashSet;
 import java.util.Set;
 
@@ -27,7 +29,7 @@ public class HttpResponse {
     private final Set<Integer> statuses = new HashSet<>();
     private final Set<String> headers = new HashSet<>();
     private final Set<String> contentTypes = new HashSet<>();
-    private final Set<String> entityTypes = new HashSet<>();
+    private final Set<Type> entityTypes = new HashSet<>();
     private final Set<JsonValue> inlineEntities = new HashSet<>();
 
     public Set<Integer> getStatuses() {
@@ -42,7 +44,7 @@ public class HttpResponse {
         return contentTypes;
     }
 
-    public Set<String> getEntityTypes() {
+    public Set<Type> getEntityTypes() {
         return entityTypes;
     }
 
