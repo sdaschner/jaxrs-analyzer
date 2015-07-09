@@ -362,8 +362,20 @@ enum KnownResponseResultMethod implements IdentifiableMethod {
     LIST_STREAM(ofNonStatic(LIST, "stream", STREAM),
             (object, arguments) -> new Element(object.getTypes())),
 
+    LIST_FOR_EACH(ofNonStatic(LIST, "forEach", PRIMITIVE_VOID, CONSUMER), (object, arguments) -> {
+        if (arguments.get(0) instanceof MethodHandle)
+            ((Method) arguments.get(0)).invoke(null, Collections.singletonList(object));
+        return null;
+    }),
+
     SET_STREAM(ofNonStatic(SET, "stream", STREAM),
             (object, arguments) -> new Element(object.getTypes())),
+
+    SET_FOR_EACH(ofNonStatic(SET, "forEach", PRIMITIVE_VOID, CONSUMER), (object, arguments) -> {
+        if (arguments.get(0) instanceof MethodHandle)
+            ((Method) arguments.get(0)).invoke(null, Collections.singletonList(object));
+        return null;
+    }),
 
     STREAM_COLLECT(ofNonStatic(STREAM, "collect", OBJECT, SUPPLIER, BI_CONSUMER, BI_CONSUMER),
             (object, arguments) -> {

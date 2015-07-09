@@ -52,7 +52,7 @@ public class TestClass37 {
         jsonObject.getStructure().put("duke", new Element(new Type("java.lang.Integer"), 42));
 
         final JsonArray jsonArray = new JsonArray();
-        jsonArray.getElements().add(new Element(new HashSet<>(Arrays.asList(Types.PRIMITIVE_BOOLEAN, Types.INTEGER)), 1));
+        jsonArray.getElements().add(new Element(Types.PRIMITIVE_BOOLEAN, 1));
         jsonArray.getElements().add(new Element(new Type("java.lang.String"), "hello"));
 
         firstResult.getInlineEntities().add(jsonArray);

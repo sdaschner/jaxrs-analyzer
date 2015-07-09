@@ -37,21 +37,29 @@ enum KnownJsonResultMethod implements IdentifiableMethod {
 
     JSON_ARRAY_BUILDER_CREATE(MethodIdentifier.ofStatic(JSON, "createArrayBuilder", JSON_ARRAY_BUILDER), (object, arguments) -> new Element(JSON_ARRAY, new JsonArray())),
 
-    JSON_ARRAY_BUILDER_ADD_BIG_DECIMAL(MethodIdentifier.ofNonStatic(JSON_ARRAY_BUILDER, "add", JSON_ARRAY_BUILDER, BIG_DECIMAL), KnownJsonResultMethod::addToArray),
+    JSON_ARRAY_BUILDER_ADD_BIG_DECIMAL(MethodIdentifier.ofNonStatic(JSON_ARRAY_BUILDER, "add", JSON_ARRAY_BUILDER, BIG_DECIMAL),
+            (object, arguments) -> addToArray(object, arguments, BIG_DECIMAL)),
 
-    JSON_ARRAY_BUILDER_ADD_BIG_INTEGER(MethodIdentifier.ofNonStatic(JSON_ARRAY_BUILDER, "add", JSON_ARRAY_BUILDER, BIG_INTEGER), KnownJsonResultMethod::addToArray),
+    JSON_ARRAY_BUILDER_ADD_BIG_INTEGER(MethodIdentifier.ofNonStatic(JSON_ARRAY_BUILDER, "add", JSON_ARRAY_BUILDER, BIG_INTEGER),
+            (object, arguments) -> addToArray(object, arguments, BIG_INTEGER)),
 
-    JSON_ARRAY_BUILDER_ADD_STRING(MethodIdentifier.ofNonStatic(JSON_ARRAY_BUILDER, "add", JSON_ARRAY_BUILDER, STRING), KnownJsonResultMethod::addToArray),
+    JSON_ARRAY_BUILDER_ADD_STRING(MethodIdentifier.ofNonStatic(JSON_ARRAY_BUILDER, "add", JSON_ARRAY_BUILDER, STRING),
+            (object, arguments) -> addToArray(object, arguments, STRING)),
 
-    JSON_ARRAY_BUILDER_ADD_INT(MethodIdentifier.ofNonStatic(JSON_ARRAY_BUILDER, "add", JSON_ARRAY_BUILDER, PRIMITIVE_INT), KnownJsonResultMethod::addToArray),
+    JSON_ARRAY_BUILDER_ADD_INT(MethodIdentifier.ofNonStatic(JSON_ARRAY_BUILDER, "add", JSON_ARRAY_BUILDER, PRIMITIVE_INT),
+            (object, arguments) -> addToArray(object, arguments, INTEGER)),
 
-    JSON_ARRAY_BUILDER_ADD_LONG(MethodIdentifier.ofNonStatic(JSON_ARRAY_BUILDER, "add", JSON_ARRAY_BUILDER, PRIMITIVE_LONG), KnownJsonResultMethod::addToArray),
+    JSON_ARRAY_BUILDER_ADD_LONG(MethodIdentifier.ofNonStatic(JSON_ARRAY_BUILDER, "add", JSON_ARRAY_BUILDER, PRIMITIVE_LONG),
+            (object, arguments) -> addToArray(object, arguments, LONG)),
 
-    JSON_ARRAY_BUILDER_ADD_DOUBLE(MethodIdentifier.ofNonStatic(JSON_ARRAY_BUILDER, "add", JSON_ARRAY_BUILDER, PRIMITIVE_DOUBLE), KnownJsonResultMethod::addToArray),
+    JSON_ARRAY_BUILDER_ADD_DOUBLE(MethodIdentifier.ofNonStatic(JSON_ARRAY_BUILDER, "add", JSON_ARRAY_BUILDER, PRIMITIVE_DOUBLE),
+            (object, arguments) -> addToArray(object, arguments, DOUBLE)),
 
-    JSON_ARRAY_BUILDER_ADD_BOOLEAN(MethodIdentifier.ofNonStatic(JSON_ARRAY_BUILDER, "add", JSON_ARRAY_BUILDER, PRIMITIVE_BOOLEAN), (object, arguments) -> addToArray(object, arguments, PRIMITIVE_BOOLEAN)),
+    JSON_ARRAY_BUILDER_ADD_BOOLEAN(MethodIdentifier.ofNonStatic(JSON_ARRAY_BUILDER, "add", JSON_ARRAY_BUILDER, PRIMITIVE_BOOLEAN),
+            (object, arguments) -> addToArray(object, arguments, PRIMITIVE_BOOLEAN)),
 
-    JSON_ARRAY_BUILDER_ADD_JSON(MethodIdentifier.ofNonStatic(JSON_ARRAY_BUILDER, "add", JSON_ARRAY_BUILDER, JSON_VALUE), KnownJsonResultMethod::addToArray),
+    JSON_ARRAY_BUILDER_ADD_JSON(MethodIdentifier.ofNonStatic(JSON_ARRAY_BUILDER, "add", JSON_ARRAY_BUILDER, JSON_VALUE),
+            KnownJsonResultMethod::addToArray),
 
     JSON_ARRAY_BUILDER_ADD_JSON_OBJECT(MethodIdentifier.ofNonStatic(JSON_ARRAY_BUILDER, "add", JSON_ARRAY_BUILDER, JSON_OBJECT_BUILDER), (object, arguments) ->
             addToArray(object, arguments, JSON_OBJECT)),
@@ -75,23 +83,28 @@ enum KnownJsonResultMethod implements IdentifiableMethod {
     JSON_OBJECT_BUILDER_CREATE(MethodIdentifier.ofStatic(JSON, "createObjectBuilder", JSON_OBJECT_BUILDER), (object, arguments) -> new Element(JSON_OBJECT, new JsonObject())),
 
     JSON_OBJECT_BUILDER_ADD_BIG_DECIMAL(MethodIdentifier.ofNonStatic(JSON_OBJECT_BUILDER, "add", JSON_OBJECT_BUILDER, STRING, BIG_DECIMAL),
-            KnownJsonResultMethod::mergeJsonStructure),
+            (object, arguments) -> mergeJsonStructure(object, arguments, BIG_DECIMAL)),
 
     JSON_OBJECT_BUILDER_ADD_BIG_INTEGER(MethodIdentifier.ofNonStatic(JSON_OBJECT_BUILDER, "add", JSON_OBJECT_BUILDER, STRING, BIG_INTEGER),
-            KnownJsonResultMethod::mergeJsonStructure),
+            (object, arguments) -> mergeJsonStructure(object, arguments, BIG_INTEGER)),
 
-    JSON_OBJECT_BUILDER_ADD_STRING(MethodIdentifier.ofNonStatic(JSON_OBJECT_BUILDER, "add", JSON_OBJECT_BUILDER, STRING, STRING), KnownJsonResultMethod::mergeJsonStructure),
+    JSON_OBJECT_BUILDER_ADD_STRING(MethodIdentifier.ofNonStatic(JSON_OBJECT_BUILDER, "add", JSON_OBJECT_BUILDER, STRING, STRING),
+            (object, arguments) -> mergeJsonStructure(object, arguments, STRING)),
 
-    JSON_OBJECT_BUILDER_ADD_INT(MethodIdentifier.ofNonStatic(JSON_OBJECT_BUILDER, "add", JSON_OBJECT_BUILDER, STRING, PRIMITIVE_INT), KnownJsonResultMethod::mergeJsonStructure),
+    JSON_OBJECT_BUILDER_ADD_INT(MethodIdentifier.ofNonStatic(JSON_OBJECT_BUILDER, "add", JSON_OBJECT_BUILDER, STRING, PRIMITIVE_INT),
+            (object, arguments) -> mergeJsonStructure(object, arguments, INTEGER)),
 
-    JSON_OBJECT_BUILDER_ADD_LONG(MethodIdentifier.ofNonStatic(JSON_OBJECT_BUILDER, "add", JSON_OBJECT_BUILDER, STRING, PRIMITIVE_LONG), KnownJsonResultMethod::mergeJsonStructure),
+    JSON_OBJECT_BUILDER_ADD_LONG(MethodIdentifier.ofNonStatic(JSON_OBJECT_BUILDER, "add", JSON_OBJECT_BUILDER, STRING, PRIMITIVE_LONG),
+            (object, arguments) -> mergeJsonStructure(object, arguments, LONG)),
 
-    JSON_OBJECT_BUILDER_ADD_DOUBLE(MethodIdentifier.ofNonStatic(JSON_OBJECT_BUILDER, "add", JSON_OBJECT_BUILDER, STRING, PRIMITIVE_DOUBLE), KnownJsonResultMethod::mergeJsonStructure),
+    JSON_OBJECT_BUILDER_ADD_DOUBLE(MethodIdentifier.ofNonStatic(JSON_OBJECT_BUILDER, "add", JSON_OBJECT_BUILDER, STRING, PRIMITIVE_DOUBLE),
+            (object, arguments) -> mergeJsonStructure(object, arguments, DOUBLE)),
 
     JSON_OBJECT_BUILDER_ADD_BOOLEAN(MethodIdentifier.ofNonStatic(JSON_OBJECT_BUILDER, "add", JSON_OBJECT_BUILDER, STRING, PRIMITIVE_BOOLEAN),
             (object, arguments) -> mergeJsonStructure(object, arguments, PRIMITIVE_BOOLEAN)),
 
-    JSON_OBJECT_BUILDER_ADD_JSON(MethodIdentifier.ofNonStatic(JSON_OBJECT_BUILDER, "add", JSON_OBJECT_BUILDER, STRING, JSON_VALUE), KnownJsonResultMethod::mergeJsonStructure),
+    JSON_OBJECT_BUILDER_ADD_JSON(MethodIdentifier.ofNonStatic(JSON_OBJECT_BUILDER, "add", JSON_OBJECT_BUILDER, STRING, JSON_VALUE),
+            KnownJsonResultMethod::mergeJsonStructure),
 
     JSON_OBJECT_BUILDER_ADD_JSON_OBJECT(MethodIdentifier.ofNonStatic(JSON_OBJECT_BUILDER, "add", JSON_OBJECT_BUILDER, STRING, JSON_OBJECT_BUILDER), (object, arguments) ->
             mergeJsonStructure(object, arguments, JSON_OBJECT)),
@@ -151,7 +164,7 @@ enum KnownJsonResultMethod implements IdentifiableMethod {
 
     private static Element addToArray(final Element object, final List<Element> arguments, final Type typeOverride) {
         final Element element = new Element(typeOverride);
-        element.merge(arguments.get(0));
+        element.getPossibleValues().addAll(arguments.get(0).getPossibleValues());
         return addToArray(object, element);
     }
 
@@ -170,7 +183,7 @@ enum KnownJsonResultMethod implements IdentifiableMethod {
 
     private static Element mergeJsonStructure(final Element object, final List<Element> arguments, final Type typeOverride) {
         final Element element = new Element(typeOverride);
-        element.merge(arguments.get(1));
+        element.getPossibleValues().addAll(arguments.get(1).getPossibleValues());
         return mergeJsonStructure(object, arguments.get(0), element);
     }
 

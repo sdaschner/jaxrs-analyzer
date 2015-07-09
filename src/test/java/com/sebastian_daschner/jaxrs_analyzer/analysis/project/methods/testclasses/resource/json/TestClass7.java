@@ -20,14 +20,12 @@ import com.sebastian_daschner.jaxrs_analyzer.model.elements.Element;
 import com.sebastian_daschner.jaxrs_analyzer.model.elements.HttpResponse;
 import com.sebastian_daschner.jaxrs_analyzer.model.elements.JsonArray;
 import com.sebastian_daschner.jaxrs_analyzer.model.elements.JsonObject;
-import com.sebastian_daschner.jaxrs_analyzer.model.types.Types;
 import com.sebastian_daschner.jaxrs_analyzer.model.types.Type;
+import com.sebastian_daschner.jaxrs_analyzer.model.types.Types;
 
 import javax.json.Json;
 import javax.json.JsonStructure;
-import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Set;
 
 public class TestClass7 {
@@ -43,7 +41,7 @@ public class TestClass7 {
 
         final JsonObject jsonObject = new JsonObject();
         final JsonArray jsonArray = new JsonArray();
-        jsonArray.getElements().add(new Element(new HashSet<>(Arrays.asList(Types.PRIMITIVE_BOOLEAN, Types.INTEGER)), 1));
+        jsonArray.getElements().add(new Element(Types.PRIMITIVE_BOOLEAN, 1));
         jsonArray.getElements().add(new Element(new Type("java.lang.String"), "duke"));
         jsonObject.getStructure().put("key", new Element(new Type("java.lang.String"), "value"));
 

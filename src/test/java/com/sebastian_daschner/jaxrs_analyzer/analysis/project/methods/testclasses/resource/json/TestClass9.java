@@ -16,6 +16,7 @@
 
 package com.sebastian_daschner.jaxrs_analyzer.analysis.project.methods.testclasses.resource.json;
 
+import com.sebastian_daschner.jaxrs_analyzer.model.elements.Element;
 import com.sebastian_daschner.jaxrs_analyzer.model.elements.HttpResponse;
 import com.sebastian_daschner.jaxrs_analyzer.model.elements.JsonArray;
 import com.sebastian_daschner.jaxrs_analyzer.model.types.Types;
@@ -41,7 +42,7 @@ public class TestClass9 {
     public static Set<HttpResponse> getResult() {
         final JsonArray jsonArray = new JsonArray();
         // TODO un-comment
-//        jsonArray.getElements().add(new Element("java.lang.String"));
+        jsonArray.getElements().add(new Element(Types.STRING));
 
         final HttpResponse httpResponse = new HttpResponse();
         httpResponse.getEntityTypes().add(Types.JSON_ARRAY);

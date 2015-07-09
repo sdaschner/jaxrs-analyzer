@@ -24,9 +24,7 @@ import com.sebastian_daschner.jaxrs_analyzer.model.types.Types;
 import javax.json.Json;
 import javax.json.JsonArray;
 import javax.json.JsonObject;
-import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Set;
 
 public class TestClass6 {
@@ -50,11 +48,11 @@ public class TestClass6 {
 
         final com.sebastian_daschner.jaxrs_analyzer.model.elements.JsonObject jsonObject = new com.sebastian_daschner.jaxrs_analyzer.model.elements.JsonObject();
         final com.sebastian_daschner.jaxrs_analyzer.model.elements.JsonArray jsonArray = new com.sebastian_daschner.jaxrs_analyzer.model.elements.JsonArray();
-        jsonArray.getElements().add(new Element(new HashSet<>(Arrays.asList(Types.PRIMITIVE_BOOLEAN, Types.INTEGER)), 1));
+        jsonArray.getElements().add(new Element(Types.PRIMITIVE_BOOLEAN, 1));
         jsonArray.getElements().add(new Element(new Type("java.lang.String"), "duke"));
         jsonObject.getStructure().put("array", new Element(new Type("javax.json.JsonArray"), jsonArray));
         jsonObject.getStructure().put("int", new Element(new Type("java.lang.Integer"), 42));
-        jsonObject.getStructure().put("boolean", new Element(new HashSet<>(Arrays.asList(Types.PRIMITIVE_BOOLEAN, Types.INTEGER)), 1));
+        jsonObject.getStructure().put("boolean", new Element(Types.PRIMITIVE_BOOLEAN, 1));
         jsonObject.getStructure().put("long", new Element(new Type("java.lang.Long"), 100000000000000L));
         jsonObject.getStructure().put("double", new Element(new Type("java.lang.Double"), 1.2d));
 
