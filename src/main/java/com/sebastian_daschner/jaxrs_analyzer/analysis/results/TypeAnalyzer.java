@@ -17,6 +17,7 @@
 package com.sebastian_daschner.jaxrs_analyzer.analysis.results;
 
 import com.sebastian_daschner.jaxrs_analyzer.LogProvider;
+import com.sebastian_daschner.jaxrs_analyzer.analysis.utils.JavaUtils;
 import com.sebastian_daschner.jaxrs_analyzer.analysis.utils.Pair;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeRepresentation;
 import com.sebastian_daschner.jaxrs_analyzer.model.types.Type;
@@ -32,6 +33,7 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlTransient;
 import java.lang.reflect.Modifier;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.locks.Lock;
@@ -70,6 +72,7 @@ class TypeAnalyzer {
     };
 
     private final Lock lock = new ReentrantLock();
+    private final List<Type> typesPath = new LinkedList<>();
     private Type type;
 
     /**
@@ -78,10 +81,10 @@ class TypeAnalyzer {
      * @param type The type to analyze
      * @return The type representation of the class (currently just for application/json)
      */
-    // TODO save already analyzed types -> prevent endless loops for recursive-nested types
     TypeRepresentation analyze(final Type type) {
         lock.lock();
         try {
+            typesPath.clear();
             this.type = ResponseTypeNormalizer.normalizeResponseWrapper(type);
             final boolean collection = this.type.isAssignableTo(COLLECTION);
 
@@ -102,10 +105,16 @@ class TypeAnalyzer {
         return type.toString().startsWith("java");
     }
 
-    private static JsonValue analyzeInternal(final Type type) {
+    private JsonValue analyzeInternal(final Type type) {
+        // break recursion if type has already been included in that execution
+        if (typesPath.contains(type))
+            return Json.createObjectBuilder().build();
+
+        typesPath.add(type);
+
         if (type.isAssignableTo(COLLECTION)) {
             final JsonArrayBuilder arrayBuilder = Json.createArrayBuilder();
-            JsonMapper.addToArray(arrayBuilder, ResponseTypeNormalizer.normalizeCollection(type), TypeAnalyzer::analyzeInternal);
+            JsonMapper.addToArray(arrayBuilder, ResponseTypeNormalizer.normalizeCollection(type), this::analyzeInternal);
             return arrayBuilder.build();
         }
 
@@ -118,7 +127,7 @@ class TypeAnalyzer {
         }
     }
 
-    private static JsonValue analyzeClass(final Type type) throws ClassNotFoundException {
+    private JsonValue analyzeClass(final Type type) throws ClassNotFoundException {
         final CtClass ctClass = type.getCtClass();
         if (ctClass.isEnum())
             return EMPTY_JSON_STRING;
@@ -137,19 +146,22 @@ class TypeAnalyzer {
         final JsonObjectBuilder builder = Json.createObjectBuilder();
 
         relevantFields.stream().map(TypeAnalyzer::mapField).filter(Objects::nonNull)
-                .forEach(p -> JsonMapper.addToObject(builder, p.getLeft(), p.getRight(), TypeAnalyzer::analyzeInternal));
+                .forEach(p -> JsonMapper.addToObject(builder, p.getLeft(), p.getRight(), this::analyzeInternal));
 
         relevantGetters.stream().map(TypeAnalyzer::mapGetter).filter(Objects::nonNull)
-                .forEach(p -> JsonMapper.addToObject(builder, p.getLeft(), p.getRight(), TypeAnalyzer::analyzeInternal));
+                .forEach(p -> JsonMapper.addToObject(builder, p.getLeft(), p.getRight(), this::analyzeInternal));
 
         return builder.build();
     }
 
     private static boolean isRelevant(final CtField field, final XmlAccessType accessType) {
-        final int modifiers = field.getModifiers();
+        if (JavaUtils.isSynthetic(field))
+            return false;
+
         if (field.hasAnnotation(XmlElement.class))
             return true;
 
+        final int modifiers = field.getModifiers();
         if (accessType == XmlAccessType.FIELD)
             // always take, unless static or transient
             return !Modifier.isTransient(modifiers) && !Modifier.isStatic(modifiers) && !field.hasAnnotation(XmlTransient.class);
@@ -168,7 +180,7 @@ class TypeAnalyzer {
      * @return {@code true} if the method should be analyzed further
      */
     private static boolean isRelevant(final CtMethod method, final XmlAccessType accessType) {
-        if (!isGetter(method))
+        if (JavaUtils.isSynthetic(method) || !isGetter(method))
             return false;
 
         if (method.hasAnnotation(XmlElement.class))

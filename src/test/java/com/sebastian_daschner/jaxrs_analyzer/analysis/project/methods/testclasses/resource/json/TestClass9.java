@@ -41,7 +41,6 @@ public class TestClass9 {
 
     public static Set<HttpResponse> getResult() {
         final JsonArray jsonArray = new JsonArray();
-        // TODO un-comment
         jsonArray.getElements().add(new Element(Types.STRING));
 
         final HttpResponse httpResponse = new HttpResponse();

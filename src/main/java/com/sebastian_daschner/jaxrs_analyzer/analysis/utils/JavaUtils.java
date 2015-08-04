@@ -21,7 +21,9 @@ import com.sebastian_daschner.jaxrs_analyzer.model.types.Type;
 import com.sebastian_daschner.jaxrs_analyzer.model.types.Types;
 import javassist.CtBehavior;
 import javassist.CtClass;
+import javassist.CtMember;
 import javassist.NotFoundException;
+import javassist.bytecode.AccessFlag;
 
 import java.util.Collections;
 import java.util.List;
@@ -155,6 +157,18 @@ public final class JavaUtils {
             // ignore
             return Collections.emptyList();
         }
+    }
+
+    /**
+     * Checks if the given member has the Synthetic attribute (JVMS 4.7.8).
+     * <p>
+     * <b>NOTE: </b> This is currently not returned conveniently by Javassist.
+     *
+     * @param member The member
+     * @return {@code true} if member has Synthetic attribute.
+     */
+    public static boolean isSynthetic(final CtMember member) {
+        return (member.getModifiers() & AccessFlag.SYNTHETIC) != 0;
     }
 
 }

@@ -47,6 +47,12 @@ import java.util.stream.Stream;
  */
 public class ProjectAnalyzer {
 
+    // TODO test following scenario:
+    // 2 Maven modules -> a, b; a needs b
+    // b contains interface with @Path & resource methods
+    // a contains impl of iface without annotations
+    // b should have result
+
     private final Lock lock = new ReentrantLock();
     private final Set<CtClass> classes = new HashSet<>();
     private final ClassAnalyzer classAnalyzer = new ClassAnalyzer();

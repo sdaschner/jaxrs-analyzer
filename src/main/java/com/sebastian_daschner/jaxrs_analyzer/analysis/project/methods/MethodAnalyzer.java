@@ -79,8 +79,6 @@ public class MethodAnalyzer {
             return analyzeInternal();
         } catch (Exception e) {
             LogProvider.error("Could not analyze the method: " + method);
-            // TODO remove
-            e.printStackTrace();
             LogProvider.debug(e);
             return null;
         } finally {

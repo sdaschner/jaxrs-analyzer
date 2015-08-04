@@ -22,9 +22,10 @@ import com.sebastian_daschner.jaxrs_analyzer.model.elements.MethodHandle;
 import com.sebastian_daschner.jaxrs_analyzer.model.instructions.*;
 import com.sebastian_daschner.jaxrs_analyzer.model.methods.Method;
 import com.sebastian_daschner.jaxrs_analyzer.model.methods.MethodIdentifier;
-import com.sebastian_daschner.jaxrs_analyzer.model.types.Types;
 import com.sebastian_daschner.jaxrs_analyzer.model.types.Type;
+import com.sebastian_daschner.jaxrs_analyzer.model.types.Types;
 
+import java.lang.reflect.Field;
 import java.util.*;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -184,7 +185,9 @@ public class MethodSimulator {
     private void simulateGetStatic(final GetStaticInstruction instruction) {
         try {
             // TODO test other get_static scenarios
-            final Object value = Class.forName(instruction.getContainingClass().toString()).getDeclaredField(instruction.getPropertyName()).get(null);
+            final Field field = Class.forName(instruction.getContainingClass().toString()).getDeclaredField(instruction.getPropertyName());
+            field.setAccessible(true);
+            final Object value = field.get(null);
             runtimeStack.push(new Element(instruction.getPropertyType(), value));
         } catch (ReflectiveOperationException e) {
             LogProvider.error("Could not access static property, reason: " + e.getMessage());
