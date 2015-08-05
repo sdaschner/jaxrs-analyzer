@@ -20,6 +20,8 @@ import com.sebastian_daschner.jaxrs_analyzer.model.elements.Element;
 import com.sebastian_daschner.jaxrs_analyzer.model.instructions.Instruction;
 import com.sebastian_daschner.jaxrs_analyzer.model.methods.MethodIdentifier;
 
+import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -32,6 +34,11 @@ import java.util.stream.IntStream;
  */
 public class InjectableArgumentMethodSimulator extends MethodSimulator {
 
+    /**
+     * The called methods in a single recursive method simulation. Used to prevent infinite loops while analysing recursion.
+     */
+    private static final List<MethodIdentifier> EXECUTED_PATH_METHODS = Collections.synchronizedList(new LinkedList<>());
+
     private final Lock lock = new ReentrantLock();
 
     /**
@@ -43,12 +50,19 @@ public class InjectableArgumentMethodSimulator extends MethodSimulator {
      * @return The return value or {@code null} if return type is void
      */
     public Element simulate(final List<Element> arguments, final List<Instruction> instructions, final MethodIdentifier identifier) {
+        // prevent infinite loops on analysing recursion
+        if (EXECUTED_PATH_METHODS.contains(identifier))
+            return Element.EMPTY;
+
         lock.lock();
+        EXECUTED_PATH_METHODS.add(identifier);
         try {
+
             injectArguments(arguments, identifier);
 
             return simulateInternal(instructions);
         } finally {
+            EXECUTED_PATH_METHODS.remove(identifier);
             lock.unlock();
         }
     }

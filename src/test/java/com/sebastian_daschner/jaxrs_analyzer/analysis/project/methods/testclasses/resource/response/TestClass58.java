@@ -22,21 +22,32 @@ import javax.ws.rs.core.Response;
 import java.util.Collections;
 import java.util.Set;
 
-public class TestClass57 {
+public class TestClass58 {
 
     public Response method(final String id) {
         return Response.status(save(id)).build();
     }
 
     private int save(final String id) {
-        if ("".equals(id))
-            return save(id);
+        return saveInternal(id);
+    }
+
+    private int saveInternal(final String id) {
+        if ("".equals(""))
+            return saveInternal2(id + 1);
         return 200;
+    }
+
+    private int saveInternal2(final String s) {
+        if ("".equals(""))
+            return saveInternal(s + 2);
+        return 201;
     }
 
     public static Set<HttpResponse> getResult() {
         final HttpResponse response = new HttpResponse();
         response.getStatuses().add(200);
+        response.getStatuses().add(201);
 
         return Collections.singleton(response);
     }
