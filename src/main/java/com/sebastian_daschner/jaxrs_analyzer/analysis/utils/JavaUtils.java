@@ -83,6 +83,9 @@ public final class JavaUtils {
             return firstType;
         }
 
+        if (Types.OBJECT.equals(firstType))
+            return secondType;
+
         final boolean firstTypeParameterized = !firstType.getTypeParameters().isEmpty();
         final boolean secondTypeParameterized = !secondType.getTypeParameters().isEmpty();
 

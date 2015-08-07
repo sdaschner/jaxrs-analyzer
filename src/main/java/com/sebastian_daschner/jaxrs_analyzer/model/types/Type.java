@@ -6,6 +6,7 @@ import javassist.NotFoundException;
 import javassist.bytecode.SignatureAttribute;
 
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -67,7 +68,18 @@ public class Type {
             final StringBuilder builder = new StringBuilder();
             if (type instanceof SignatureAttribute.NestedClassType) {
                 final SignatureAttribute.NestedClassType nestedClassType = (SignatureAttribute.NestedClassType) type;
-                builder.append(nestedClassType.getDeclaringClass().getName()).append('$').append(nestedClassType.getName());
+
+                // declaring class can be nested as well
+                final List<SignatureAttribute.ClassType> declaringClasses = new LinkedList<>();
+                SignatureAttribute.ClassType declaringClass = nestedClassType.getDeclaringClass();
+                while (declaringClass != null) {
+                    declaringClasses.add(declaringClass);
+                    declaringClass = declaringClass.getDeclaringClass();
+                }
+                Collections.reverse(declaringClasses);
+
+                declaringClasses.forEach(c -> builder.append(c.getName()).append('$'));
+                builder.append(nestedClassType.getName());
             } else
                 builder.append(((SignatureAttribute.ClassType) type).getName());
 
@@ -124,8 +136,8 @@ public class Type {
 
         try {
             final CtClass superclass = ctClass.getSuperclass();
-            if (superclass != null && !Types.OBJECT.ctClass.equals(superclass)) {
-                return new Type(superclass).isAssignableTo(type);
+            if (superclass != null && !Types.OBJECT.ctClass.equals(superclass) && new Type(superclass).isAssignableTo(type)) {
+                return true;
             }
 
             return Stream.of(ctClass.getInterfaces()).anyMatch(i -> new Type(i).isAssignableTo(type));

@@ -110,4 +110,19 @@ public class TypeTest {
         assertTrue(!type.equals(Types.STRING));
     }
 
+    @Test
+    public void testPrivateInterface() {
+        final Type type = new Type("com.sebastian_daschner.jaxrs_analyzer.model.types.TypeTest$ConfigurationManager$Configuration");
+        assertThat(type.getCtClass().getName(), is("com.sebastian_daschner.jaxrs_analyzer.model.types.TypeTest$ConfigurationManager$Configuration"));
+        assertThat(type.toString(), is("com.sebastian_daschner.jaxrs_analyzer.model.types.TypeTest$ConfigurationManager$Configuration"));
+        assertThat(type.getTypeParameters().size(), is(0));
+    }
+
+    private interface ConfigurationManager {
+        Configuration getConfiguration(String name);
+
+        class Configuration {
+        }
+    }
+
 }

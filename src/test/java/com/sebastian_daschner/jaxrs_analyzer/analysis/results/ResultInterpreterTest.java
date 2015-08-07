@@ -23,16 +23,19 @@ import com.sebastian_daschner.jaxrs_analyzer.model.rest.Resources;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeRepresentation;
 import com.sebastian_daschner.jaxrs_analyzer.model.results.ClassResult;
 import com.sebastian_daschner.jaxrs_analyzer.model.results.MethodResult;
-import com.sebastian_daschner.jaxrs_analyzer.model.types.Types;
 import com.sebastian_daschner.jaxrs_analyzer.model.types.Type;
-import org.junit.Assert;
+import com.sebastian_daschner.jaxrs_analyzer.model.types.Types;
 import org.junit.Before;
 import org.junit.Test;
 
 import javax.json.Json;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
+
+import static org.junit.Assert.assertEquals;
 
 public class ResultInterpreterTest {
 
@@ -61,7 +64,7 @@ public class ResultInterpreterTest {
 
         final Resources actualResult = classUnderTest.interpret(results);
 
-        Assert.assertEquals(expectedResult, actualResult);
+        assertEquals(expectedResult, actualResult);
     }
 
     @Test
@@ -88,7 +91,7 @@ public class ResultInterpreterTest {
 
         final Resources actualResult = classUnderTest.interpret(results);
 
-        Assert.assertEquals(expectedResult, actualResult);
+        assertEquals(expectedResult, actualResult);
     }
 
     @Test
@@ -113,7 +116,7 @@ public class ResultInterpreterTest {
 
         final Resources actualResult = classUnderTest.interpret(results);
 
-        Assert.assertEquals(expectedResult, actualResult);
+        assertEquals(expectedResult, actualResult);
     }
 
     @Test
@@ -137,7 +140,7 @@ public class ResultInterpreterTest {
 
         final Resources actualResult = classUnderTest.interpret(results);
 
-        Assert.assertEquals(expectedResult, actualResult);
+        assertEquals(expectedResult, actualResult);
     }
 
     @Test
@@ -158,7 +161,7 @@ public class ResultInterpreterTest {
 
         final Resources actualResult = classUnderTest.interpret(results);
 
-        Assert.assertEquals(expectedResult, actualResult);
+        assertEquals(expectedResult, actualResult);
     }
 
     @Test
@@ -180,7 +183,7 @@ public class ResultInterpreterTest {
 
         final Resources actualResult = classUnderTest.interpret(results);
 
-        Assert.assertEquals(expectedResult, actualResult);
+        assertEquals(expectedResult, actualResult);
     }
 
     @Test
@@ -201,7 +204,7 @@ public class ResultInterpreterTest {
 
         final Resources actualResult = classUnderTest.interpret(results);
 
-        Assert.assertEquals(expectedResult, actualResult);
+        assertEquals(expectedResult, actualResult);
     }
 
     @Test
@@ -226,7 +229,7 @@ public class ResultInterpreterTest {
 
         final Resources actualResult = classUnderTest.interpret(results);
 
-        Assert.assertEquals(expectedResult, actualResult);
+        assertEquals(expectedResult, actualResult);
     }
 
     @Test
@@ -251,7 +254,43 @@ public class ResultInterpreterTest {
 
         final Resources actualResult = classUnderTest.interpret(results);
 
-        Assert.assertEquals(expectedResult, actualResult);
+        assertEquals(expectedResult, actualResult);
+    }
+
+    @Test
+    public void testAmbiguousEntityTypes() {
+        final Type configurationType = new Type("com.sebastian_daschner.jaxrs_analyzer.analysis.results.ResultInterpreterTest$ConfigurationManager$Configuration");
+
+        final Resources expectedResult = new Resources();
+        expectedResult.setBasePath("path");
+        final TypeRepresentation representation = new TypeRepresentation(configurationType);
+        representation.getRepresentations().put("application/json", Json.createObjectBuilder().add("name", "string").build());
+
+        final ResourceMethod resourceGetMethod = ResourceMethodBuilder.withMethod(HttpMethod.GET)
+                .andResponse(200, ResponseBuilder.withResponseBody(representation).build())
+                .andResponse(204, ResponseBuilder.newBuilder().build())
+                .build();
+        expectedResult.addMethod("test", resourceGetMethod);
+
+        final ClassResult appPathResult = ClassResultBuilder.withApplicationPath("path").build();
+        final MethodResult method = MethodResultBuilder
+                .withResponses(HttpResponseBuilder.withStatues(200).andEntityTypes(Types.OBJECT, configurationType).build(),
+                        HttpResponseBuilder.withStatues(204).build())
+                .andMethod(HttpMethod.GET).build();
+        final ClassResult resClassResult = ClassResultBuilder.withResourcePath("test").andMethods(method).build();
+
+        final Set<ClassResult> results = new HashSet<>(Arrays.asList(appPathResult, resClassResult));
+
+        final Resources actualResult = classUnderTest.interpret(results);
+
+        assertEquals(expectedResult, actualResult);
+    }
+
+    private interface ConfigurationManager {
+        @XmlAccessorType(XmlAccessType.FIELD)
+        class Configuration {
+            private String name;
+        }
     }
 
 }

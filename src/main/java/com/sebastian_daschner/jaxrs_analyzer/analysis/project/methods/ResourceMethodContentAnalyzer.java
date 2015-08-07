@@ -104,8 +104,7 @@ class ResourceMethodContentAnalyzer extends MethodContentAnalyzer {
             }
 
             // add Response results as well
-            returnedElement.getPossibleValues().stream().filter(o -> o instanceof HttpResponse).map(o -> (HttpResponse) o)
-                    .forEach(result.getResponses()::add);
+            returnedElement.getPossibleValues().stream().filter(o -> o instanceof HttpResponse).map(o -> (HttpResponse) o).forEach(result.getResponses()::add);
         } finally {
             lock.unlock();
         }

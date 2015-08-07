@@ -16,7 +16,6 @@
 
 package com.sebastian_daschner.jaxrs_analyzer.analysis.results;
 
-import com.sebastian_daschner.jaxrs_analyzer.LogProvider;
 import com.sebastian_daschner.jaxrs_analyzer.analysis.utils.JavaUtils;
 import com.sebastian_daschner.jaxrs_analyzer.model.elements.HttpResponse;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.ResourceMethod;
@@ -135,12 +134,6 @@ public class ResultInterpreter {
             response.getHeaders().addAll(httpResponse.getHeaders());
             httpResponse.getInlineEntities().stream().map(JsonMapper::map)
                     .forEach(j -> response.getResponseBody().getRepresentations().put(MediaType.APPLICATION_JSON, j));
-
-            // warn if several types for this status exist
-            if (httpResponse.getEntityTypes().size() > 1)
-                LogProvider.debug("Several entity types for status " + s + " exist.");
-            if (httpResponse.getInlineEntities().size() > 1)
-                LogProvider.debug("Several inline entities for status " + s + " exist.");
 
             method.getResponses().put(s, response);
         });
