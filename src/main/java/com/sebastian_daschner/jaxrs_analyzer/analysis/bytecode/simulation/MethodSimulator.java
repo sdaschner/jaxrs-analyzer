@@ -239,7 +239,7 @@ public class MethodSimulator {
      */
     private void mergePossibleResponse() {
         // TODO only HttpResponse element?
-        if (!runtimeStack.isEmpty() && runtimeStack.peek().getTypes().contains(Types.HTTP_RESPONSE)) {
+        if (!runtimeStack.isEmpty() && runtimeStack.peek().getTypes().contains(Types.RESPONSE)) {
             mergeReturnElement(runtimeStack.peek());
         }
     }

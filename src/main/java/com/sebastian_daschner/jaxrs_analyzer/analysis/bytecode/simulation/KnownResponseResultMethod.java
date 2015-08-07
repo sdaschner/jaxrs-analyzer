@@ -144,32 +144,32 @@ enum KnownResponseResultMethod implements IdentifiableMethod {
     // static methods in Response --------------------------
 
     RESPONSE_STATUS_ENUM(ofStatic(RESPONSE, "status", RESPONSE_BUILDER, RESPONSE_STATUS), (notAvailable, arguments) -> {
-        final Element object = new Element(HTTP_RESPONSE, new HttpResponse());
+        final Element object = new Element(RESPONSE, new HttpResponse());
         arguments.get(0).getPossibleValues().stream()
                 .map(status -> ((Response.Status) status).getStatusCode()).forEach(s -> addStatus(object, s));
         return object;
     }),
 
     RESPONSE_STATUS_INT(ofStatic(RESPONSE, "status", RESPONSE_BUILDER, PRIMITIVE_INT), (notAvailable, arguments) -> {
-        final Element object = new Element(HTTP_RESPONSE, new HttpResponse());
+        final Element object = new Element(RESPONSE, new HttpResponse());
         arguments.get(0).getPossibleValues().stream()
                 .map(status -> (int) status).forEach(s -> addStatus(object, s));
         return object;
     }),
 
     RESPONSE_OK(ofStatic(RESPONSE, "ok", RESPONSE_BUILDER), (notAvailable, arguments) -> {
-        final Element object = new Element(HTTP_RESPONSE, new HttpResponse());
+        final Element object = new Element(RESPONSE, new HttpResponse());
         return addStatus(object, Response.Status.OK.getStatusCode());
     }),
 
     RESPONSE_OK_ENTITY(ofStatic(RESPONSE, "ok", RESPONSE_BUILDER, OBJECT), (notAvailable, arguments) -> {
-        final Element object = new Element(HTTP_RESPONSE, new HttpResponse());
+        final Element object = new Element(RESPONSE, new HttpResponse());
         addStatus(object, Response.Status.OK.getStatusCode());
         return addEntity(object, arguments.get(0));
     }),
 
     RESPONSE_OK_VARIANT(ofStatic(RESPONSE, "ok", RESPONSE_BUILDER, OBJECT, VARIANT), (notAvailable, arguments) -> {
-        final Element object = new Element(HTTP_RESPONSE, new HttpResponse());
+        final Element object = new Element(RESPONSE, new HttpResponse());
         addStatus(object, Response.Status.OK.getStatusCode());
         addEntity(object, arguments.get(0));
         addHeader(object, HttpHeaders.CONTENT_LANGUAGE);
@@ -177,7 +177,7 @@ enum KnownResponseResultMethod implements IdentifiableMethod {
     }),
 
     RESPONSE_OK_MEDIATYPE(ofStatic(RESPONSE, "ok", RESPONSE_BUILDER, OBJECT, new Type(MediaType.class.getName())), (notAvailable, arguments) -> {
-        final Element object = new Element(HTTP_RESPONSE, new HttpResponse());
+        final Element object = new Element(RESPONSE, new HttpResponse());
         addStatus(object, Response.Status.OK.getStatusCode());
         arguments.get(1).getPossibleValues().stream().map(m -> (MediaType) m)
                 .map(m -> m.getType() + '/' + m.getSubtype()).forEach(t -> addContentType(object, t));
@@ -185,7 +185,7 @@ enum KnownResponseResultMethod implements IdentifiableMethod {
     }),
 
     RESPONSE_OK_MEDIATYPE_STRING(ofStatic(RESPONSE, "ok", RESPONSE_BUILDER, OBJECT, STRING), (notAvailable, arguments) -> {
-        final Element object = new Element(HTTP_RESPONSE, new HttpResponse());
+        final Element object = new Element(RESPONSE, new HttpResponse());
         addStatus(object, Response.Status.OK.getStatusCode());
         arguments.get(1).getPossibleValues().stream()
                 .map(t -> (String) t).forEach(t -> addContentType(object, t));
@@ -193,76 +193,76 @@ enum KnownResponseResultMethod implements IdentifiableMethod {
     }),
 
     RESPONSE_ACCEPTED(ofStatic(RESPONSE, "accepted", RESPONSE_BUILDER), (notAvailable, arguments) -> {
-        final Element object = new Element(HTTP_RESPONSE, new HttpResponse());
+        final Element object = new Element(RESPONSE, new HttpResponse());
         return addStatus(object, Response.Status.ACCEPTED.getStatusCode());
     }),
 
     RESPONSE_ACCEPTED_ENTITY(ofStatic(RESPONSE, "accepted", RESPONSE_BUILDER, OBJECT), (notAvailable, arguments) -> {
-        final Element object = new Element(HTTP_RESPONSE, new HttpResponse());
+        final Element object = new Element(RESPONSE, new HttpResponse());
         addStatus(object, Response.Status.ACCEPTED.getStatusCode());
         return addEntity(object, arguments.get(0));
     }),
 
     RESPONSE_CREATED(ofStatic(RESPONSE, "created", RESPONSE_BUILDER, URI), (notAvailable, arguments) -> {
-        final Element object = new Element(HTTP_RESPONSE, new HttpResponse());
+        final Element object = new Element(RESPONSE, new HttpResponse());
         addStatus(object, Response.Status.CREATED.getStatusCode());
         return addHeader(object, HttpHeaders.LOCATION);
     }),
 
     RESPONSE_NO_CONTENT(ofStatic(RESPONSE, "noContent", RESPONSE_BUILDER), (notAvailable, arguments) -> {
-        final Element object = new Element(HTTP_RESPONSE, new HttpResponse());
+        final Element object = new Element(RESPONSE, new HttpResponse());
         return addStatus(object, Response.Status.NO_CONTENT.getStatusCode());
     }),
 
     RESPONSE_NOT_ACCEPTABLE(ofStatic(RESPONSE, "notAcceptable", RESPONSE_BUILDER, LIST), (notAvailable, arguments) -> {
-        final Element object = new Element(HTTP_RESPONSE, new HttpResponse());
+        final Element object = new Element(RESPONSE, new HttpResponse());
         addStatus(object, Response.Status.NOT_ACCEPTABLE.getStatusCode());
         return addHeader(object, HttpHeaders.VARY);
     }),
 
     RESPONSE_NOT_MODIFIED(ofStatic(RESPONSE, "notModified", RESPONSE_BUILDER), (notAvailable, arguments) -> {
-        final Element object = new Element(HTTP_RESPONSE, new HttpResponse());
+        final Element object = new Element(RESPONSE, new HttpResponse());
         return addStatus(object, Response.Status.NOT_MODIFIED.getStatusCode());
     }),
 
     RESPONSE_NOT_MODIFIED_ENTITYTAG(ofStatic(RESPONSE, "notModified", RESPONSE_BUILDER, ENTITY_TAG), (notAvailable, arguments) -> {
-        final Element object = new Element(HTTP_RESPONSE, new HttpResponse());
+        final Element object = new Element(RESPONSE, new HttpResponse());
         addStatus(object, Response.Status.NOT_MODIFIED.getStatusCode());
         return addHeader(object, HttpHeaders.ETAG);
     }),
 
     RESPONSE_NOT_MODIFIED_ENTITYTAG_STRING(ofStatic(RESPONSE, "notModified", RESPONSE_BUILDER, STRING), (notAvailable, arguments) -> {
-        final Element object = new Element(HTTP_RESPONSE, new HttpResponse());
+        final Element object = new Element(RESPONSE, new HttpResponse());
         addStatus(object, Response.Status.NOT_MODIFIED.getStatusCode());
         return addHeader(object, HttpHeaders.ETAG);
     }),
 
     RESPONSE_SEE_OTHER(ofStatic(RESPONSE, "seeOther", RESPONSE_BUILDER, URI), (notAvailable, arguments) -> {
-        final Element object = new Element(HTTP_RESPONSE, new HttpResponse());
+        final Element object = new Element(RESPONSE, new HttpResponse());
         addStatus(object, Response.Status.SEE_OTHER.getStatusCode());
         return addHeader(object, HttpHeaders.LOCATION);
     }),
 
     RESPONSE_TEMPORARY_REDIRECT(ofStatic(RESPONSE, "temporaryRedirect", RESPONSE_BUILDER, URI), (notAvailable, arguments) -> {
-        final Element object = new Element(HTTP_RESPONSE, new HttpResponse());
+        final Element object = new Element(RESPONSE, new HttpResponse());
         addStatus(object, Response.Status.TEMPORARY_REDIRECT.getStatusCode());
         return addHeader(object, HttpHeaders.LOCATION);
     }),
 
     RESPONSE_SERVER_ERROR(ofStatic(RESPONSE, "serverError", RESPONSE_BUILDER), (notAvailable, arguments) -> {
-        final Element object = new Element(HTTP_RESPONSE, new HttpResponse());
+        final Element object = new Element(RESPONSE, new HttpResponse());
         return addStatus(object, Response.Status.INTERNAL_SERVER_ERROR.getStatusCode());
     }),
 
     // WebApplicationExceptions --------------------------
 
     WEB_APPLICATION_EXCEPTION_EMPTY(ofNonStatic(WEB_APPLICATION_EXCEPTION, INITIALIZER_NAME, PRIMITIVE_VOID), (notAvailable, arguments) -> {
-        final Element object = new Element(HTTP_RESPONSE, new HttpResponse());
+        final Element object = new Element(RESPONSE, new HttpResponse());
         return addStatus(object, Response.Status.INTERNAL_SERVER_ERROR.getStatusCode());
     }),
 
     WEB_APPLICATION_EXCEPTION_MESSAGE(ofNonStatic(WEB_APPLICATION_EXCEPTION, INITIALIZER_NAME, PRIMITIVE_VOID, STRING), (notAvailable, arguments) -> {
-        final Element object = new Element(HTTP_RESPONSE, new HttpResponse());
+        final Element object = new Element(RESPONSE, new HttpResponse());
         return addStatus(object, Response.Status.INTERNAL_SERVER_ERROR.getStatusCode());
     }),
 
@@ -272,40 +272,40 @@ enum KnownResponseResultMethod implements IdentifiableMethod {
             (notAvailable, arguments) -> arguments.get(1)),
 
     WEB_APPLICATION_EXCEPTION_STATUS(ofNonStatic(WEB_APPLICATION_EXCEPTION, INITIALIZER_NAME, PRIMITIVE_VOID, PRIMITIVE_INT), (notAvailable, arguments) -> {
-        final Element object = new Element(HTTP_RESPONSE, new HttpResponse());
+        final Element object = new Element(RESPONSE, new HttpResponse());
         arguments.get(0).getPossibleValues().stream()
                 .map(status -> (int) status).forEach(s -> addStatus(object, s));
         return object;
     }),
 
     WEB_APPLICATION_EXCEPTION_MESSAGE_STATUS(ofNonStatic(WEB_APPLICATION_EXCEPTION, INITIALIZER_NAME, PRIMITIVE_VOID, STRING, PRIMITIVE_INT), (notAvailable, arguments) -> {
-        final Element object = new Element(HTTP_RESPONSE, new HttpResponse());
+        final Element object = new Element(RESPONSE, new HttpResponse());
         arguments.get(1).getPossibleValues().stream()
                 .map(status -> (int) status).forEach(s -> addStatus(object, s));
         return object;
     }),
 
     WEB_APPLICATION_EXCEPTION_RESPONSE_STATUS(ofNonStatic(WEB_APPLICATION_EXCEPTION, INITIALIZER_NAME, PRIMITIVE_VOID, RESPONSE_STATUS), (notAvailable, arguments) -> {
-        final Element object = new Element(HTTP_RESPONSE, new HttpResponse());
+        final Element object = new Element(RESPONSE, new HttpResponse());
         arguments.get(0).getPossibleValues().stream()
                 .map(status -> ((Response.Status) status).getStatusCode()).forEach(s -> addStatus(object, s));
         return object;
     }),
 
     WEB_APPLICATION_EXCEPTION_MESSAGE_RESPONSE_STATUS(ofNonStatic(WEB_APPLICATION_EXCEPTION, INITIALIZER_NAME, PRIMITIVE_VOID, STRING, RESPONSE_STATUS), (notAvailable, arguments) -> {
-        final Element object = new Element(HTTP_RESPONSE, new HttpResponse());
+        final Element object = new Element(RESPONSE, new HttpResponse());
         arguments.get(1).getPossibleValues().stream()
                 .map(status -> ((Response.Status) status).getStatusCode()).forEach(s -> addStatus(object, s));
         return object;
     }),
 
     WEB_APPLICATION_EXCEPTION_CAUSE(ofNonStatic(WEB_APPLICATION_EXCEPTION, INITIALIZER_NAME, PRIMITIVE_VOID, THROWABLE), (notAvailable, arguments) -> {
-        final Element object = new Element(HTTP_RESPONSE, new HttpResponse());
+        final Element object = new Element(RESPONSE, new HttpResponse());
         return addStatus(object, Response.Status.INTERNAL_SERVER_ERROR.getStatusCode());
     }),
 
     WEB_APPLICATION_EXCEPTION_MESSAGE_CAUSE(ofNonStatic(WEB_APPLICATION_EXCEPTION, INITIALIZER_NAME, PRIMITIVE_VOID, STRING, THROWABLE), (notAvailable, arguments) -> {
-        final Element object = new Element(HTTP_RESPONSE, new HttpResponse());
+        final Element object = new Element(RESPONSE, new HttpResponse());
         return addStatus(object, Response.Status.INTERNAL_SERVER_ERROR.getStatusCode());
     }),
 
@@ -316,21 +316,21 @@ enum KnownResponseResultMethod implements IdentifiableMethod {
             (notAvailable, arguments) -> arguments.get(2)),
 
     WEB_APPLICATION_EXCEPTION_CAUSE_STATUS(ofNonStatic(WEB_APPLICATION_EXCEPTION, INITIALIZER_NAME, PRIMITIVE_VOID, THROWABLE, PRIMITIVE_INT), (notAvailable, arguments) -> {
-        final Element object = new Element(HTTP_RESPONSE, new HttpResponse());
+        final Element object = new Element(RESPONSE, new HttpResponse());
         arguments.get(1).getPossibleValues().stream()
                 .map(status -> (int) status).forEach(s -> addStatus(object, s));
         return object;
     }),
 
     WEB_APPLICATION_EXCEPTION_MESSAGE_CAUSE_STATUS(ofNonStatic(WEB_APPLICATION_EXCEPTION, INITIALIZER_NAME, PRIMITIVE_VOID, STRING, THROWABLE, PRIMITIVE_INT), (notAvailable, arguments) -> {
-        final Element object = new Element(HTTP_RESPONSE, new HttpResponse());
+        final Element object = new Element(RESPONSE, new HttpResponse());
         arguments.get(2).getPossibleValues().stream()
                 .map(status -> (int) status).forEach(s -> addStatus(object, s));
         return object;
     }),
 
     WEB_APPLICATION_EXCEPTION_CAUSE_RESPONSE_STATUS(ofNonStatic(WEB_APPLICATION_EXCEPTION, INITIALIZER_NAME, PRIMITIVE_VOID, THROWABLE, RESPONSE_STATUS), (notAvailable, arguments) -> {
-        final Element object = new Element(HTTP_RESPONSE, new HttpResponse());
+        final Element object = new Element(RESPONSE, new HttpResponse());
         arguments.get(1).getPossibleValues().stream()
                 .map(status -> ((Response.Status) status).getStatusCode()).forEach(s -> addStatus(object, s));
         return object;
@@ -338,7 +338,7 @@ enum KnownResponseResultMethod implements IdentifiableMethod {
 
     WEB_APPLICATION_EXCEPTION_MESSAGE_CAUSE_RESPONSE_STATUS(ofNonStatic(WEB_APPLICATION_EXCEPTION, INITIALIZER_NAME, PRIMITIVE_VOID, STRING, THROWABLE, RESPONSE_STATUS),
             (notAvailable, arguments) -> {
-                final Element object = new Element(HTTP_RESPONSE, new HttpResponse());
+                final Element object = new Element(RESPONSE, new HttpResponse());
                 arguments.get(2).getPossibleValues().stream()
                         .map(status -> ((Response.Status) status).getStatusCode()).forEach(s -> addStatus(object, s));
                 return object;

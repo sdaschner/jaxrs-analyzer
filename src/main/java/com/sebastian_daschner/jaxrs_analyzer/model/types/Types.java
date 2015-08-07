@@ -1,7 +1,5 @@
 package com.sebastian_daschner.jaxrs_analyzer.model.types;
 
-import com.sebastian_daschner.jaxrs_analyzer.model.elements.HttpResponse;
-
 import javax.json.*;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.container.ResourceContext;
@@ -74,8 +72,6 @@ public abstract class Types {
     public static final Type JSON_VALUE = new Type(JsonValue.class.getName());
     public static final Type JSON_OBJECT = new Type(JsonObject.class.getName());
     public static final Type JSON_ARRAY = new Type(JsonArray.class.getName());
-
-    public static final Type HTTP_RESPONSE = new Type(HttpResponse.class.getName());
 
     public static final Set<Type> INTEGER_TYPES = new HashSet<>(Arrays.asList(INTEGER, PRIMITIVE_INT, BIG_INTEGER, LONG, PRIMITIVE_LONG, SHORT, PRIMITIVE_SHORT,
             BYTE, PRIMITIVE_BYTE));
