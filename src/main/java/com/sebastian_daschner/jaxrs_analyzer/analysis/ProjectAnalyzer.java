@@ -154,7 +154,7 @@ public class ProjectAnalyzer {
     private void addDirectoryClasses(final Path location, final Path subPath) {
         for (final File file : location.toFile().listFiles()) {
             if (file.isDirectory())
-                addDirectoryClasses(location.resolve(file.getPath()), subPath.resolve(file.getName()));
+                addDirectoryClasses(location.resolve(file.getName()), subPath.resolve(file.getName()));
             else if (file.isFile() && file.getName().endsWith(".class")) {
                 final String classFileName = subPath.resolve(file.getName()).toString();
                 try {
