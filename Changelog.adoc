@@ -3,6 +3,13 @@ Sebastian Daschner
 
 // new versions are placed on the top
 
+== v0.7
+- Restructured Java type representation
+- Improved type resolution for nested JSR-353 calls
+- Improved type analysis for nested & recursive types & methods
+- Improved method resolution on inherited types
+- Fixed CLI calls with relative paths
+
 == v0.6
 - Fixed class loading issue on Windows systems
 - Fixed potential error on invoke interface in nested methods
