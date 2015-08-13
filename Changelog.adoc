@@ -3,6 +3,12 @@ Sebastian Daschner
 
 // new versions are placed on the top
 
+== v0.6
+- Fixed class loading issue on Windows systems
+- Fixed potential error on invoke interface in nested methods
+- Added type workaround for Map request / response body types
+- Fixed potential error when using `Stream#collect`
+
 == v0.5
 - Improved handling of abstract JAX-RS methods
 - Added more functionality to the CLI tool (e.g. ability to specify several class paths)
