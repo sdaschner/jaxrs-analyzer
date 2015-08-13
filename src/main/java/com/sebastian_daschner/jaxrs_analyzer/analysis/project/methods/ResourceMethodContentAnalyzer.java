@@ -19,6 +19,7 @@ package com.sebastian_daschner.jaxrs_analyzer.analysis.project.methods;
 import com.sebastian_daschner.jaxrs_analyzer.LogProvider;
 import com.sebastian_daschner.jaxrs_analyzer.analysis.bytecode.simulation.MethodPool;
 import com.sebastian_daschner.jaxrs_analyzer.analysis.bytecode.simulation.MethodSimulator;
+import com.sebastian_daschner.jaxrs_analyzer.analysis.utils.JavaUtils;
 import com.sebastian_daschner.jaxrs_analyzer.model.elements.Element;
 import com.sebastian_daschner.jaxrs_analyzer.model.elements.HttpResponse;
 import com.sebastian_daschner.jaxrs_analyzer.model.elements.JsonValue;
@@ -28,8 +29,6 @@ import com.sebastian_daschner.jaxrs_analyzer.model.results.MethodResult;
 import com.sebastian_daschner.jaxrs_analyzer.model.types.Type;
 import com.sebastian_daschner.jaxrs_analyzer.model.types.Types;
 import javassist.CtMethod;
-import javassist.bytecode.BadBytecode;
-import javassist.bytecode.SignatureAttribute;
 
 import java.util.List;
 import java.util.Set;
@@ -67,16 +66,10 @@ class ResourceMethodContentAnalyzer extends MethodContentAnalyzer {
             projectMethods.stream().forEach(MethodPool.getInstance()::addProjectMethod);
 
             final Element returnedElement = methodSimulator.simulate(visitedInstructions);
-            final String signature = method.getGenericSignature() != null ? method.getGenericSignature() : method.getSignature();
-            final Type returnType;
-            try {
-                returnType = new Type(SignatureAttribute.toMethodSignature(signature).getReturnType());
-            } catch (BadBytecode e) {
-                throw new RuntimeException(e);
-            }
+            final Type returnType = JavaUtils.getReturnType(method);
 
-            // void resource methods are interpreted later
-            if (Types.PRIMITIVE_VOID.equals(returnType)) {
+            // void resource methods are interpreted later; stop analyzing on error
+            if (returnType == null || Types.PRIMITIVE_VOID.equals(returnType)) {
                 return;
             }
 

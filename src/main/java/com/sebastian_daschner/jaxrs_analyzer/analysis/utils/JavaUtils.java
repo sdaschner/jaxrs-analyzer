@@ -16,14 +16,17 @@
 
 package com.sebastian_daschner.jaxrs_analyzer.analysis.utils;
 
+import com.sebastian_daschner.jaxrs_analyzer.LogProvider;
 import com.sebastian_daschner.jaxrs_analyzer.model.methods.MethodIdentifier;
 import com.sebastian_daschner.jaxrs_analyzer.model.types.Type;
 import com.sebastian_daschner.jaxrs_analyzer.model.types.Types;
 import javassist.CtBehavior;
 import javassist.CtClass;
+import javassist.CtField;
 import javassist.CtMember;
-import javassist.NotFoundException;
 import javassist.bytecode.AccessFlag;
+import javassist.bytecode.BadBytecode;
+import javassist.bytecode.SignatureAttribute;
 
 import java.util.Collections;
 import java.util.List;
@@ -145,20 +148,75 @@ public final class JavaUtils {
     public static CtBehavior getMethod(final MethodIdentifier identifier) {
         final CtClass ctClass = identifier.getContainingClass().getCtClass();
 
+        // raw parameter types are taken because of type erasure in bytecode method call
+
         if (JavaUtils.isInitializerName(identifier.getMethodName())) {
-            return Stream.of(ctClass.getDeclaredConstructors()).filter(b -> identifier.getParameters().equals(getParameterTypes(b))).findAny().orElse(null);
+            return Stream.of(ctClass.getDeclaredConstructors()).filter(b -> identifier.getParameters().equals(getRawParameterTypes(b))).findAny().orElse(null);
         }
-        return Stream.of(ctClass.getDeclaredMethods())
+
+        return Stream.concat(Stream.of(ctClass.getDeclaredMethods()), Stream.of(ctClass.getMethods()))
                 .filter(b -> identifier.getMethodName().equals(b.getName()))
-                .filter(b -> identifier.getParameters().equals(getParameterTypes(b))).findAny().orElse(null);
+                .filter(b -> identifier.getParameters().equals(getRawParameterTypes(b))).findAny().orElse(null);
     }
 
-    private static List<Type> getParameterTypes(final CtBehavior behavior) {
+    private static List<Type> getRawParameterTypes(final CtBehavior behavior) {
         try {
-            return Stream.of(behavior.getParameterTypes()).map(Type::new).collect(Collectors.toList());
-        } catch (NotFoundException e) {
+            return Stream.of(SignatureAttribute.toMethodSignature(behavior.getSignature()).getParameterTypes()).map(Type::new).collect(Collectors.toList());
+        } catch (BadBytecode e) {
             // ignore
             return Collections.emptyList();
+        }
+    }
+
+    /**
+     * Returns the parameter types of the given method.
+     *
+     * @param behavior The method
+     * @return The parameter types
+     */
+    public static List<Type> getParameterTypes(final CtBehavior behavior) {
+        try {
+            final String sig = behavior.getGenericSignature() == null ? behavior.getSignature() : behavior.getGenericSignature();
+            return Stream.of(SignatureAttribute.toMethodSignature(sig).getParameterTypes()).map(Type::new).collect(Collectors.toList());
+        } catch (BadBytecode e) {
+            // ignore
+            return Collections.emptyList();
+        }
+    }
+
+    /**
+     * Returns the type of the given field.
+     *
+     * @param field The field
+     * @return The field type or {@code null} if the field could not be analyzed
+     */
+    public static Type getFieldType(final CtField field) {
+        try {
+            final String sig = field.getGenericSignature() == null ? field.getSignature() : field.getGenericSignature();
+            return new Type(SignatureAttribute.toTypeSignature(sig));
+        } catch (BadBytecode e) {
+            // ignore
+            LogProvider.error("Could not analyze field: " + field);
+            LogProvider.debug(e);
+            return null;
+        }
+    }
+
+    /**
+     * Returns the return type of the given method
+     *
+     * @param behavior The method
+     * @return The return type or {@code null} if the method could not be analzed
+     */
+    public static Type getReturnType(final CtBehavior behavior) {
+        try {
+            final String sig = behavior.getGenericSignature() == null ? behavior.getSignature() : behavior.getGenericSignature();
+            return new Type(SignatureAttribute.toMethodSignature(sig).getReturnType());
+        } catch (BadBytecode e) {
+            // ignore
+            LogProvider.error("Could not analyze method: " + behavior);
+            LogProvider.debug(e);
+            return null;
         }
     }
 

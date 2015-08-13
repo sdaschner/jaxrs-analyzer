@@ -28,7 +28,6 @@ import javassist.CtClass;
 import javassist.CtMethod;
 import javassist.NotFoundException;
 import javassist.bytecode.BadBytecode;
-import javassist.bytecode.SignatureAttribute;
 
 import javax.json.JsonObject;
 import javax.ws.rs.*;
@@ -140,10 +139,9 @@ public class MethodAnalyzer {
      * Analyzes the current method.
      *
      * @return The method result
-     * @throws NotFoundException If some method could not be accessed
-     * @throws BadBytecode       If the return type could not be determined
+     * @throws BadBytecode If the method could not be analyzed
      */
-    private MethodResult analyzeInternal() throws NotFoundException, BadBytecode {
+    private MethodResult analyzeInternal() throws BadBytecode {
         final MethodResult methodResult = new MethodResult();
 
         analyzeMethodInformation(method, methodResult);
@@ -159,8 +157,7 @@ public class MethodAnalyzer {
             analyzeMethodContent(methodResult);
         else {
             // build empty response with return type
-            final String sig = method.getGenericSignature() != null ? method.getGenericSignature() : method.getSignature();
-            final Type returnType = new Type(SignatureAttribute.toMethodSignature(sig).getReturnType());
+            final Type returnType = JavaUtils.getReturnType(method);
             if (!Types.RESPONSE.equals(returnType) && !Types.PRIMITIVE_VOID.equals(returnType)) {
                 final HttpResponse emptyResponse = new HttpResponse();
                 emptyResponse.getEntityTypes().add(returnType);
@@ -176,9 +173,9 @@ public class MethodAnalyzer {
      *
      * @param ctMethod     The method to analyze
      * @param methodResult The method result
-     * @throws NotFoundException If some method could not be accessed
+     * @throws BadBytecode If the method could not be analyzed
      */
-    private void analyzeMethodInformation(final CtMethod ctMethod, final MethodResult methodResult) throws NotFoundException {
+    private void analyzeMethodInformation(final CtMethod ctMethod, final MethodResult methodResult) throws BadBytecode {
 
         if (!hasJaxRsAnnotations(ctMethod) && annotatedSuperMethod != null) {
             // handle inherited annotations from superclass
@@ -198,15 +195,15 @@ public class MethodAnalyzer {
      *
      * @param ctMethod     The method to analyze
      * @param methodResult The method result
-     * @throws NotFoundException If some method could not be accessed
+     * @throws BadBytecode If the method signature could not be analyzed
      */
-    private void analyzeMethodParameters(final CtMethod ctMethod, final MethodResult methodResult) throws NotFoundException {
+    private void analyzeMethodParameters(final CtMethod ctMethod, final MethodResult methodResult) throws BadBytecode {
         // method parameters and parameter annotations
-        final CtClass[] parameterTypes = ctMethod.getParameterTypes();
+        final List<Type> parameterTypes = JavaUtils.getParameterTypes(ctMethod);
 
-        for (int index = 0; index < parameterTypes.length; index++) {
-            final Type parameterType = new Type(parameterTypes[index]);
-            final Object[][] parameterAnnotations = ctMethod.getAvailableParameterAnnotations();
+        final Object[][] parameterAnnotations = ctMethod.getAvailableParameterAnnotations();
+        for (int index = 0; index < parameterTypes.size(); index++) {
+            final Type parameterType = parameterTypes.get(index);
 
             if (isEntityParameter(ctMethod, index)) {
                 methodResult.setRequestBodyType(parameterType);
@@ -216,7 +213,6 @@ public class MethodAnalyzer {
             for (final Object annotation : parameterAnnotations[index]) {
                 AnnotationInterpreter.interpretMethodParameterAnnotation(annotation, parameterType, methodResult);
             }
-
         }
     }
 

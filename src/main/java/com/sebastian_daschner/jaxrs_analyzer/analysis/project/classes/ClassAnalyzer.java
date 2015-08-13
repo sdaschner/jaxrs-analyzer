@@ -19,6 +19,7 @@ package com.sebastian_daschner.jaxrs_analyzer.analysis.project.classes;
 import com.sebastian_daschner.jaxrs_analyzer.LogProvider;
 import com.sebastian_daschner.jaxrs_analyzer.analysis.project.AnnotationInterpreter;
 import com.sebastian_daschner.jaxrs_analyzer.analysis.project.methods.MethodAnalyzer;
+import com.sebastian_daschner.jaxrs_analyzer.analysis.utils.JavaUtils;
 import com.sebastian_daschner.jaxrs_analyzer.model.results.ClassResult;
 import com.sebastian_daschner.jaxrs_analyzer.model.types.Type;
 import javassist.CtClass;
@@ -144,7 +145,10 @@ public class ClassAnalyzer {
     private void analyzeFields(final ClassResult classResult) {
         for (CtField ctField : ctClass.getDeclaredFields()) {
             try {
-                final Type fieldType = new Type(ctField.getType());
+                final Type fieldType = JavaUtils.getFieldType(ctField);
+                if (fieldType == null)
+                    continue;
+
                 Stream.of(ctField.getAnnotations()).forEach(a -> AnnotationInterpreter.interpretFieldAnnotation(a, fieldType, classResult.getMethods()));
 
             } catch (Exception e) {

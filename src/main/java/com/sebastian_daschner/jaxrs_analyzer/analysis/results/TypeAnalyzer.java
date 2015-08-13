@@ -24,7 +24,6 @@ import com.sebastian_daschner.jaxrs_analyzer.model.types.Type;
 import javassist.CtClass;
 import javassist.CtField;
 import javassist.CtMethod;
-import javassist.bytecode.SignatureAttribute;
 
 import javax.json.*;
 import javax.ws.rs.core.MediaType;
@@ -209,27 +208,19 @@ class TypeAnalyzer {
     }
 
     private static Pair<String, Type> mapField(final CtField field) {
-        try {
-            final String sig = field.getGenericSignature() != null ? field.getGenericSignature() : field.getSignature();
-            final Type fieldType = new Type(SignatureAttribute.toTypeSignature(sig));
-            return Pair.of(field.getName(), fieldType);
-        } catch (Exception e) {
-            LogProvider.error("Could not analyze field: " + field);
-            LogProvider.debug(e);
+        final Type type = JavaUtils.getFieldType(field);
+        if (type == null)
             return null;
-        }
+
+        return Pair.of(field.getName(), type);
     }
 
     private static Pair<String, Type> mapGetter(final CtMethod method) {
-        try {
-            final String sig = method.getGenericSignature() != null ? method.getGenericSignature() : method.getSignature();
-            final Type returnType = new Type(SignatureAttribute.toMethodSignature(sig).getReturnType());
-            return Pair.of(normalizeGetter(method.getName()), returnType);
-        } catch (Exception e) {
-            LogProvider.error("Could not analyze method: " + method);
-            LogProvider.debug(e);
+        final Type returnType = JavaUtils.getReturnType(method);
+        if (returnType == null)
             return null;
-        }
+
+        return Pair.of(normalizeGetter(method.getName()), returnType);
     }
 
     /**

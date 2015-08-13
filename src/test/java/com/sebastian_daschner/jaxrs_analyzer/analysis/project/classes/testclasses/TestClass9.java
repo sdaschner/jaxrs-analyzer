@@ -22,36 +22,32 @@ import com.sebastian_daschner.jaxrs_analyzer.builder.MethodResultBuilder;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.HttpMethod;
 import com.sebastian_daschner.jaxrs_analyzer.model.results.ClassResult;
 import com.sebastian_daschner.jaxrs_analyzer.model.results.MethodResult;
-import com.sebastian_daschner.jaxrs_analyzer.model.types.Types;
+import com.sebastian_daschner.jaxrs_analyzer.model.types.Type;
 
-import javax.ws.rs.POST;
+import javax.ws.rs.GET;
 import javax.ws.rs.Path;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
+import java.util.Map;
 
+// not meant to be correct JAX-RS code, just for test purposes
 @Path("test")
-public class TestClass8 extends ATestClass8 {
+public class TestClass9 {
 
-    @Override
-    public Response getInfo(final String info) {
-        return createResponse();
+    @QueryParam("definitions")
+    private Map<String, Integer> definitions;
+
+    @GET
+    @Path("{info}")
+    public Response getInfo(final Map<String, String> info) {
+        return Response.ok().build();
     }
 
     public static ClassResult getResult() {
-        final MethodResult method = MethodResultBuilder.withResponses(HttpResponseBuilder.withStatues(200).andEntityTypes(Types.STRING).andHeaders("X-Test").build())
-                .andPath("{info}").andMethod(HttpMethod.POST).andRequestBodyType(Types.STRING).build();
+        final MethodResult method = MethodResultBuilder.withResponses(HttpResponseBuilder.withStatues(200).build())
+                .andPath("{info}").andMethod(HttpMethod.GET).andRequestBodyType(new Type("java.util.Map<java.lang.String,java.lang.String>"))
+                .andQueryParam("definitions", new Type("java.util.Map<java.lang.String,java.lang.Integer>")).build();
         return ClassResultBuilder.withResourcePath("test").andMethods(method).build();
-    }
-
-}
-
-abstract class ATestClass8 {
-
-    @POST
-    @Path("{info}")
-    public abstract Response getInfo(final String info);
-
-    protected final Response createResponse() {
-        return Response.ok("hello").header("X-Test", "world").build();
     }
 
 }

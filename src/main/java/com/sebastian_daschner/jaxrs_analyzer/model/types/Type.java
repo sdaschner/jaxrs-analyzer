@@ -36,9 +36,8 @@ public class Type {
         }
     }
 
-    public Type(final CtClass ctClass) {
+    private Type(final CtClass ctClass) {
         try {
-            // TODO ...
             this.ctClass = TypeExtractor.toErasuredClass(ctClass.getName());
             typeParameters = Collections.emptyList();
         } catch (Exception e) {
