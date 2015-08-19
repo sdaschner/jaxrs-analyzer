@@ -66,7 +66,7 @@ class ResourceMethodContentAnalyzer extends MethodContentAnalyzer {
             projectMethods.stream().forEach(MethodPool.getInstance()::addProjectMethod);
 
             final Element returnedElement = methodSimulator.simulate(visitedInstructions);
-            final Type returnType = JavaUtils.getReturnType(method);
+            final Type returnType = JavaUtils.getReturnType(method, null);
 
             // void resource methods are interpreted later; stop analyzing on error
             if (returnType == null || Types.PRIMITIVE_VOID.equals(returnType)) {

@@ -157,7 +157,7 @@ public class MethodAnalyzer {
             analyzeMethodContent(methodResult);
         else {
             // build empty response with return type
-            final Type returnType = JavaUtils.getReturnType(method);
+            final Type returnType = JavaUtils.getReturnType(method, null);
             if (!Types.RESPONSE.equals(returnType) && !Types.PRIMITIVE_VOID.equals(returnType)) {
                 final HttpResponse emptyResponse = new HttpResponse();
                 emptyResponse.getEntityTypes().add(returnType);
@@ -182,7 +182,7 @@ public class MethodAnalyzer {
             analyzeMethodInformation(annotatedSuperMethod, methodResult);
             return;
         }
-
+        methodResult.setLongName(ctMethod.getLongName());
         for (final Object annotation : ctMethod.getAvailableAnnotations()) {
             AnnotationInterpreter.interpretMethodAnnotation(annotation, methodResult);
         }

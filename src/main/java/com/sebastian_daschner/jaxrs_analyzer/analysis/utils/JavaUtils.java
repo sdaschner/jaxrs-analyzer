@@ -20,6 +20,7 @@ import com.sebastian_daschner.jaxrs_analyzer.LogProvider;
 import com.sebastian_daschner.jaxrs_analyzer.model.methods.MethodIdentifier;
 import com.sebastian_daschner.jaxrs_analyzer.model.types.Type;
 import com.sebastian_daschner.jaxrs_analyzer.model.types.Types;
+
 import javassist.CtBehavior;
 import javassist.CtClass;
 import javassist.CtField;
@@ -190,10 +191,10 @@ public final class JavaUtils {
      * @param field The field
      * @return The field type or {@code null} if the field could not be analyzed
      */
-    public static Type getFieldType(final CtField field) {
+    public static Type getFieldType(final CtField field, Type parent) {
         try {
             final String sig = field.getGenericSignature() == null ? field.getSignature() : field.getGenericSignature();
-            return new Type(SignatureAttribute.toTypeSignature(sig));
+            return new Type(SignatureAttribute.toTypeSignature(sig), parent);
         } catch (BadBytecode e) {
             // ignore
             LogProvider.error("Could not analyze field: " + field);
@@ -208,10 +209,10 @@ public final class JavaUtils {
      * @param behavior The method
      * @return The return type or {@code null} if the method could not be analzed
      */
-    public static Type getReturnType(final CtBehavior behavior) {
+    public static Type getReturnType(final CtBehavior behavior, Type parent) {
         try {
             final String sig = behavior.getGenericSignature() == null ? behavior.getSignature() : behavior.getGenericSignature();
-            return new Type(SignatureAttribute.toMethodSignature(sig).getReturnType());
+            return new Type(SignatureAttribute.toMethodSignature(sig).getReturnType(), parent);
         } catch (BadBytecode e) {
             // ignore
             LogProvider.error("Could not analyze method: " + behavior);

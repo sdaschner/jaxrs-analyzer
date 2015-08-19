@@ -33,6 +33,7 @@ public class ResourceMethod {
     private final HttpMethod method;
     private TypeRepresentation requestBody;
 
+    private String longName;
 
     public ResourceMethod(final HttpMethod method) {
         this(method, new MethodParameters());
@@ -72,6 +73,14 @@ public class ResourceMethod {
 
     public void setRequestBody(final TypeRepresentation requestBody) {
         this.requestBody = requestBody;
+    }
+
+    public String getLongName() {
+        return longName;
+    }
+
+    public void setLongName(String longName) {
+        this.longName = longName;
     }
 
     @Override
