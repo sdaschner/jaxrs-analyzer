@@ -115,11 +115,11 @@ class SchemaBuilder {
         value.entrySet().forEach(e -> properties.add(e.getKey(), build(e.getValue())));
         jsonDefinitions.put(definition, Json.createObjectBuilder().add("properties", properties).build());
 
-        return Json.createObjectBuilder().add("$ref", definition).build();
+        return Json.createObjectBuilder().add("$ref", "#/definitions/" + definition).build();
     }
 
     private String nextDefinition() {
-        return "definition#" + nextDefinition.incrementAndGet();
+        return "definition_" + nextDefinition.incrementAndGet();
     }
 
     /**
