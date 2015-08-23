@@ -1,6 +1,7 @@
 package com.sebastian_daschner.jaxrs_analyzer.model.types;
 
 import com.sebastian_daschner.jaxrs_analyzer.LogProvider;
+
 import javassist.CtClass;
 import javassist.NotFoundException;
 import javassist.bytecode.SignatureAttribute;
@@ -20,6 +21,7 @@ public class Type {
 
     private final CtClass ctClass;
     private final List<Type> typeParameters;
+    private final List<String> parametersNames;
 
     /**
      * Constructs a type with the given Java type name.
@@ -31,6 +33,7 @@ public class Type {
         try {
             ctClass = TypeExtractor.toErasuredClass(type);
             typeParameters = TypeExtractor.toTypeParameters(type);
+            parametersNames = TypeExtractor.toParameterNames(ctClass.getGenericSignature());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -40,16 +43,29 @@ public class Type {
         try {
             this.ctClass = TypeExtractor.toErasuredClass(ctClass.getName());
             typeParameters = Collections.emptyList();
+            parametersNames = Collections.emptyList();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+    
+    public Type(final SignatureAttribute.Type sigType) {
+        final String type = getType(sigType, null);
+        try {
+            ctClass = TypeExtractor.toErasuredClass(type);
+            typeParameters = TypeExtractor.toTypeParameters(type);
+            parametersNames = TypeExtractor.toParameterNames(ctClass.getGenericSignature());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
-    public Type(final SignatureAttribute.Type sigType) {
-        final String type = getType(sigType);
+    public Type(final SignatureAttribute.Type sigType, Type parent) {
+        final String type = getType(sigType, parent);
         try {
             ctClass = TypeExtractor.toErasuredClass(type);
             typeParameters = TypeExtractor.toTypeParameters(type);
+            parametersNames = TypeExtractor.toParameterNames(ctClass.getGenericSignature());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -62,7 +78,7 @@ public class Type {
      * @return The Java type representation
      */
     // FIXME refactor
-    private static String getType(final SignatureAttribute.Type type) {
+    private static String getType(final SignatureAttribute.Type type, final Type parent) {
         if (type instanceof SignatureAttribute.ClassType) {
             final StringBuilder builder = new StringBuilder();
             if (type instanceof SignatureAttribute.NestedClassType) {
@@ -87,7 +103,7 @@ public class Type {
                 builder.append('<');
 //                Stream.of(classType.getTypeArguments()).map(JavaUtils::getTypeArgument).collect(Collectors.joining(","));
                 for (int i = 0; i < classType.getTypeArguments().length; i++) {
-                    builder.append(getTypeArgument(classType.getTypeArguments()[i]));
+                    builder.append(getTypeArgument(classType.getTypeArguments()[i], parent));
                     if (i < classType.getTypeArguments().length - 1)
                         builder.append(',');
                 }
@@ -96,19 +112,26 @@ public class Type {
             return builder.toString();
         } else if (type instanceof SignatureAttribute.ArrayType) {
             final SignatureAttribute.ArrayType arrayType = (SignatureAttribute.ArrayType) type;
-            final StringBuilder builder = new StringBuilder(getType(arrayType.getComponentType()));
+            final StringBuilder builder = new StringBuilder(getType(arrayType.getComponentType(), parent));
             for (int i = 0; i < arrayType.getDimension(); i++)
                 builder.append("[]");
             return builder.toString();
         }
 
-        return type.toString();
+        String typeName = type.toString();
+        if (parent != null) {
+            int paramIndex = parent.getParametersNames().indexOf(typeName);
+            if (paramIndex > -1) {
+                typeName = parent.getTypeParameters().get(paramIndex).toString();
+            }
+        }
+        return typeName;
     }
 
-    private static String getTypeArgument(final SignatureAttribute.TypeArgument typeArgument) {
+    private static String getTypeArgument(final SignatureAttribute.TypeArgument typeArgument, final Type parent) {
         if (typeArgument.getKind() == '*')
             return Types.OBJECT.toString();
-        return getType(typeArgument.getType());
+        return getType(typeArgument.getType(), parent);
     }
 
 
@@ -118,6 +141,10 @@ public class Type {
 
     public List<Type> getTypeParameters() {
         return typeParameters;
+    }
+
+    public List<String> getParametersNames() {
+        return parametersNames;
     }
 
     /**

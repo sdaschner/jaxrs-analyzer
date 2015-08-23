@@ -101,6 +101,16 @@ public class TypeTest {
     }
 
     @Test
+    public void testParameterizedTypesInList() {
+        final Type type = new Type("java.util.List<java.lang.Long>");
+        assertThat(type.getCtClass().getName(), is("java.util.List"));
+        assertThat(type.toString(), is("java.util.List<java.lang.Long>"));
+        assertThat(type.getTypeParameters().size(), is(1));
+        assertThat(type.getTypeParameters().get(0).getCtClass().getName(), is("java.lang.Long"));
+        assertTrue(!type.equals(Types.STRING));
+    }
+
+    @Test
     public void testParameterizedTypesInMultiDimensionalArrays() {
         final Type type = new Type("java.util.Collection<java.lang.String>[][]");
         assertThat(type.getCtClass().getName(), is("java.util.Collection[][]"));

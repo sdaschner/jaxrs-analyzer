@@ -145,7 +145,7 @@ public class ClassAnalyzer {
     private void analyzeFields(final ClassResult classResult) {
         for (CtField ctField : ctClass.getDeclaredFields()) {
             try {
-                final Type fieldType = JavaUtils.getFieldType(ctField);
+                final Type fieldType = JavaUtils.getFieldType(ctField, null);
                 if (fieldType == null)
                     continue;
 

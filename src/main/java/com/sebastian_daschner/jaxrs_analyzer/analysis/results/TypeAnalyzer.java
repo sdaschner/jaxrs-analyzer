@@ -21,6 +21,7 @@ import com.sebastian_daschner.jaxrs_analyzer.analysis.utils.JavaUtils;
 import com.sebastian_daschner.jaxrs_analyzer.analysis.utils.Pair;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeRepresentation;
 import com.sebastian_daschner.jaxrs_analyzer.model.types.Type;
+
 import javassist.CtClass;
 import javassist.CtField;
 import javassist.CtMethod;
@@ -31,6 +32,7 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlTransient;
+
 import java.lang.reflect.Modifier;
 import java.util.LinkedList;
 import java.util.List;
@@ -139,8 +141,10 @@ class TypeAnalyzer {
         else
             value = XmlAccessType.PUBLIC_MEMBER;
 
-        final List<CtField> relevantFields = Stream.of(ctClass.getDeclaredFields()).filter(f -> isRelevant(f, value)).collect(Collectors.toList());
-        final List<CtMethod> relevantGetters = Stream.of(ctClass.getDeclaredMethods()).filter(m -> isRelevant(m, value)).collect(Collectors.toList());
+        final List<Pair<Type, CtField>> relevantFields = Stream.of(ctClass.getDeclaredFields())
+                 .filter(f -> isRelevant(f, value)).map(f -> Pair.of(type, f)).collect(Collectors.toList());
+        final List<Pair<Type, CtMethod>> relevantGetters = Stream.of(ctClass.getDeclaredMethods())
+		        .filter(m -> isRelevant(m, value)).map(m -> Pair.of(type, m)).collect(Collectors.toList());
 
         final JsonObjectBuilder builder = Json.createObjectBuilder();
 
@@ -207,20 +211,21 @@ class TypeAnalyzer {
         return name.startsWith("is") && name.length() > 2 && method.getSignature().endsWith(")Z");
     }
 
-    private static Pair<String, Type> mapField(final CtField field) {
-        final Type type = JavaUtils.getFieldType(field);
+    private static Pair<String, Type> mapField(final Pair<Type, CtField> typeAndField) {
+        final Type type = JavaUtils.getFieldType(typeAndField.getRight(), typeAndField.getLeft());
         if (type == null)
             return null;
 
-        return Pair.of(field.getName(), type);
+        return Pair.of(typeAndField.getRight().getName(), type);
     }
 
-    private static Pair<String, Type> mapGetter(final CtMethod method) {
-        final Type returnType = JavaUtils.getReturnType(method);
+    private static Pair<String, Type> mapGetter(final Pair<Type, CtMethod> typeAndMethod) {
+        final Type returnType = JavaUtils.getReturnType(typeAndMethod.getRight(), typeAndMethod.getLeft());
+
         if (returnType == null)
             return null;
 
-        return Pair.of(normalizeGetter(method.getName()), returnType);
+        return Pair.of(normalizeGetter(typeAndMethod.getRight().getName()), returnType);
     }
 
     /**

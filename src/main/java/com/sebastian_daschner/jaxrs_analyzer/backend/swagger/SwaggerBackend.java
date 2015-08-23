@@ -27,6 +27,7 @@ import javax.json.Json;
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonObjectBuilder;
 import javax.ws.rs.core.Response;
+
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.locks.Lock;
@@ -78,7 +79,7 @@ public class SwaggerBackend implements Backend {
     private void appendHeader() {
         builder.add("swagger", SWAGGER_VERSION).add("info", Json.createObjectBuilder()
                 .add("version", projectVersion).add("title", projectName))
-                .add("host", projectDomain).add("basePath", '/' + resources.getBasePath()).add("schemas", Json.createArrayBuilder().add("http"));
+                .add("host", projectDomain).add("basePath", '/' + resources.getBasePath()).add("schemes", Json.createArrayBuilder().add("http"));
     }
 
     private void appendPaths() {
