@@ -20,7 +20,6 @@ import com.sebastian_daschner.jaxrs_analyzer.LogProvider;
 import com.sebastian_daschner.jaxrs_analyzer.model.methods.MethodIdentifier;
 import com.sebastian_daschner.jaxrs_analyzer.model.types.Type;
 import com.sebastian_daschner.jaxrs_analyzer.model.types.Types;
-
 import javassist.CtBehavior;
 import javassist.CtClass;
 import javassist.CtField;
@@ -150,7 +149,6 @@ public final class JavaUtils {
         final CtClass ctClass = identifier.getContainingClass().getCtClass();
 
         // raw parameter types are taken because of type erasure in bytecode method call
-
         if (JavaUtils.isInitializerName(identifier.getMethodName())) {
             return Stream.of(ctClass.getDeclaredConstructors()).filter(b -> identifier.getParameters().equals(getRawParameterTypes(b))).findAny().orElse(null);
         }
@@ -191,10 +189,12 @@ public final class JavaUtils {
      * @param field The field
      * @return The field type or {@code null} if the field could not be analyzed
      */
-    public static Type getFieldType(final CtField field, Type parent) {
+    public static Type getFieldType(final CtField field, final Type containingType) {
         try {
             final String sig = field.getGenericSignature() == null ? field.getSignature() : field.getGenericSignature();
-            return new Type(SignatureAttribute.toTypeSignature(sig), parent);
+            final SignatureAttribute.ClassSignature genericClassSignature = field.getDeclaringClass().getGenericSignature() == null ? null :
+                    SignatureAttribute.toClassSignature(field.getDeclaringClass().getGenericSignature());
+            return new Type(SignatureAttribute.toTypeSignature(sig), genericClassSignature, containingType);
         } catch (BadBytecode e) {
             // ignore
             LogProvider.error("Could not analyze field: " + field);
@@ -207,12 +207,14 @@ public final class JavaUtils {
      * Returns the return type of the given method
      *
      * @param behavior The method
-     * @return The return type or {@code null} if the method could not be analzed
+     * @return The return type or {@code null} if the method could not be analyzed
      */
-    public static Type getReturnType(final CtBehavior behavior, Type parent) {
+    public static Type getReturnType(final CtBehavior behavior, final Type containingType) {
         try {
             final String sig = behavior.getGenericSignature() == null ? behavior.getSignature() : behavior.getGenericSignature();
-            return new Type(SignatureAttribute.toMethodSignature(sig).getReturnType(), parent);
+            final SignatureAttribute.ClassSignature genericClassSignature = behavior.getDeclaringClass().getGenericSignature() == null ? null :
+                    SignatureAttribute.toClassSignature(behavior.getDeclaringClass().getGenericSignature());
+            return new Type(SignatureAttribute.toMethodSignature(sig).getReturnType(), genericClassSignature, containingType);
         } catch (BadBytecode e) {
             // ignore
             LogProvider.error("Could not analyze method: " + behavior);

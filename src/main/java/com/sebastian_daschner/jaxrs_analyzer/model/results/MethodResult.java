@@ -40,7 +40,6 @@ public class MethodResult {
     private HttpMethod httpMethod;
     private ClassResult subResource;
     private ClassResult parentResource;
-    private String longName;
 
     public Set<String> getRequestMediaTypes() {
         return requestMediaTypes;
@@ -97,14 +96,6 @@ public class MethodResult {
 
     public void setParentResource(final ClassResult parentResource) {
         this.parentResource = parentResource;
-    }
-
-    public String getLongName() {
-        return longName;
-    }
-
-    public void setLongName(String longName) {
-        this.longName = longName;
     }
 
     @Override

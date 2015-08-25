@@ -182,7 +182,7 @@ public class MethodAnalyzer {
             analyzeMethodInformation(annotatedSuperMethod, methodResult);
             return;
         }
-        methodResult.setLongName(ctMethod.getLongName());
+
         for (final Object annotation : ctMethod.getAvailableAnnotations()) {
             AnnotationInterpreter.interpretMethodAnnotation(annotation, methodResult);
         }

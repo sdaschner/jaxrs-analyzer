@@ -100,7 +100,6 @@ public class ResultInterpreter {
         // HTTP method and method parameters
         final ResourceMethod resourceMethod = new ResourceMethod(methodResult.getHttpMethod(), methodResult.getMethodParameters());
 
-        resourceMethod.setLongName(methodResult.getLongName());
         if (methodResult.getRequestBodyType() != null)
             resourceMethod.setRequestBody(typeAnalyzer.analyze(methodResult.getRequestBodyType()));
 

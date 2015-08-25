@@ -5,7 +5,6 @@ import javassist.CtClass;
 import javassist.NotFoundException;
 import javassist.bytecode.BadBytecode;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -38,16 +37,6 @@ abstract class TypeExtractor {
             className = type;
 
         return ClassPool.getDefault().get(className);
-    }
-
-    static List<String> toParameterNames(final String genericSignature) {
-        // <E:Ljava/lang/Object;>Ljava/lang/Object;Ljava/util/Collection<TE;>;
-        if ((genericSignature == null) || !genericSignature.startsWith("<")) {
-            return Collections.emptyList();
-        }
-        String genericParameters = genericSignature.substring(1,genericSignature.indexOf(">"));
-        String[] split = genericParameters.split(";");
-        return Arrays.stream(split).map(s -> s.substring(0, s.indexOf(':'))).collect(Collectors.toList());
     }
 
     static List<Type> toTypeParameters(final String descriptor) {
