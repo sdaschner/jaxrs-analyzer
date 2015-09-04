@@ -11,33 +11,18 @@ Using the JSR 339 standard is sufficient.
 Java 8 is needed for the Analyzer.
 
 == Maven Plugin
-
 The Analyzer can be added to your project via https://github.com/sdaschner/jaxrs-analyzer-maven-plugin[Maven plugin].
 
-== Swagger Backend
-
-One of the output formats of the REST documentation is the heavily used Swagger API format. The tool creates the JSON file which can be loaded with Swagger UI.
-
 == Standalone
+Instead of using the Maven plugin, the tool can also run directly from the jar file.
+You can download the latest version https://github.com/sdaschner/jaxrs-analyzer/releases[here].
 
-Instead of using the Maven plugin, the tool can also run directly from the jar file. Therefore this project needs to be build with `mvn clean install`.
-The executable jar file resides under `target/jaxrs-analyzer.jar`.
-Run it with `java -jar jaxrs-analyzer.jar [options] <projectPathToCompiledClasses> [projectPathToCompiledClasses...]`, e.g. `java -jar jaxrs-analyzer.jar -b swagger ../yourProject/target/classes`.
+For usage see the https://github.com/sdaschner/jaxrs-analyzer/blob/master/Documentation.adoc[documentation].
 
-The `projectPath` entries may be directories or jar-files containing the classes to be analyzed.
+== Backends
+The Analyzer supports Plaintext, AsciiDoc and Swagger as output format.
 
-Following available options:
-
-* `-b <backend>` The backend to choose: `swagger` (default), `plaintext`, `asciidoc`
-* `-cp <class path>[:class paths...]` The additional class paths containing classes which are used in the project (separated by colon)
-* `-X` Debug enabled (prints error debugging information on Standard error out)
-* `-n <project name>` The name of the project
-* `-v <project version>` The version of the project
-* `-d <project domain>` The domain of the project
-* `-o <output file>` The location of the analysis output (will be printed to standard out if omitted)
+== Documentation / Feature list
++...+ can be found https://github.com/sdaschner/jaxrs-analyzer/blob/master/Documentation.adoc[here].
 
 Feedback, bug reports and ideas for improvement are very welcome! Feel free to fork, comment, file an issue, etc. ;-)
-
-For a current feature list see http://blog.sebastian-daschner.com/entries/jaxrs_analyzer_v0.2_feature_list[Feature list of JAX-RS Analyzer (v0.2)], http://blog.sebastian-daschner.com/entries/released_jaxrs_analyzer_v0.3[Released JAX-RS Analyzer v0.3], http://blog.sebastian-daschner.com/entries/released_jaxrs_analyzer_v0.4[Released JAX-RS Analyzer v0.4] and http://blog.sebastian-daschner.com/entries/released_jaxrs_analyzer_v0.5[Released JAX-RS Analyzer v0.5].
-
-For an introductional video see http://blog.sebastian-daschner.com/entries/jaxrs_analyzer_explained_video[JAX-RS Analyzer explained (Video)].
