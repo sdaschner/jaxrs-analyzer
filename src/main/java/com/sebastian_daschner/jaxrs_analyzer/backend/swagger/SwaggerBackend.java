@@ -25,9 +25,9 @@ import com.sebastian_daschner.jaxrs_analyzer.model.types.Type;
 
 import javax.json.Json;
 import javax.json.JsonArrayBuilder;
+import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 import javax.ws.rs.core.Response;
-
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.locks.Lock;
@@ -139,7 +139,9 @@ public class SwaggerBackend implements Backend {
                     .add("headers", headers);
 
             if (e.getValue().getResponseBody() != null) {
-                response.add("schema", schemaBuilder.build(e.getValue().getResponseBody()));
+                final JsonObject schema = schemaBuilder.build(e.getValue().getResponseBody());
+                if (!schema.isEmpty())
+                    response.add("schema", schema);
             }
 
             responses.add(e.getKey().toString(), response);

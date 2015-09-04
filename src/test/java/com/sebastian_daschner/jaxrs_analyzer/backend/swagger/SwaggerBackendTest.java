@@ -23,8 +23,8 @@ import com.sebastian_daschner.jaxrs_analyzer.model.rest.HttpMethod;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.Project;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.Resources;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeRepresentation;
-import com.sebastian_daschner.jaxrs_analyzer.model.types.Types;
 import com.sebastian_daschner.jaxrs_analyzer.model.types.Type;
+import com.sebastian_daschner.jaxrs_analyzer.model.types.Types;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -101,6 +101,12 @@ public class SwaggerBackendTest {
                         .andResource("res1", ResourceMethodBuilder.withMethod(HttpMethod.GET)
                                 .andResponse(200, ResponseBuilder.withResponseBody(representation).build()).build()).build(),
                 "{\"swagger\":\"2.0\",\"info\":{\"version\":\"1.0\",\"title\":\"project name\"},\"host\":\"domain.tld\",\"basePath\":\"/rest\",\"schemes\":[\"http\"],\"paths\":{\"/res1\":{\"get\":{\"consumes\":[],\"produces\":[],\"parameters\":[],\"responses\":{\"200\":{\"description\":\"OK\",\"headers\":{},\"schema\":{\"$ref\":\"#/definitions/definition_1\"}}}}}},\"definitions\":{\"definition_1\":{\"properties\":{\"name\":{\"type\":\"string\"},\"value\":{\"type\":\"number\"}}}}}");
+
+        representation = new TypeRepresentation(new Type("javax.ws.rs.core.StreamingOutput"));
+        add(data, ResourcesBuilder.withBase("rest")
+                        .andResource("res1", ResourceMethodBuilder.withMethod(HttpMethod.GET)
+                                .andResponse(200, ResponseBuilder.withResponseBody(representation).build()).build()).build(),
+                "{\"swagger\":\"2.0\",\"info\":{\"version\":\"1.0\",\"title\":\"project name\"},\"host\":\"domain.tld\",\"basePath\":\"/rest\",\"schemes\":[\"http\"],\"paths\":{\"/res1\":{\"get\":{\"consumes\":[],\"produces\":[],\"parameters\":[],\"responses\":{\"200\":{\"description\":\"OK\",\"headers\":{}}}}}},\"definitions\":{}}");
 
         representation = new TypeRepresentation(new Type("com.sebastian_daschner.test.Model"));
         representation.getRepresentations().put("application/json", Json.createArrayBuilder().add(Json.createObjectBuilder().add("name", "string").add("value", 0)).build());
