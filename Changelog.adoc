@@ -6,6 +6,7 @@ Sebastian Daschner
 == v0.8
 - Improved type resolution for type arguments
 - Fixed errors in swagger specification
+- Fixed Maven plugin error on missing Java EE 7 dependency
 
 == v0.7
 - Restructured Java type representation
