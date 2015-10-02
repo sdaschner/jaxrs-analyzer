@@ -22,6 +22,7 @@ import com.sebastian_daschner.jaxrs_analyzer.model.instructions.LoadStoreInstruc
 import com.sebastian_daschner.jaxrs_analyzer.model.instructions.StoreInstruction;
 import com.sebastian_daschner.jaxrs_analyzer.model.types.Type;
 import com.sebastian_daschner.jaxrs_analyzer.model.types.Types;
+import javassist.CtBehavior;
 import javassist.bytecode.*;
 
 import java.util.Collections;
@@ -43,12 +44,12 @@ class LoadStoreInstructionBuilder {
     private final Map<Integer, String> variableNames;
     private final Map<Integer, Type> variableTypes;
 
-    LoadStoreInstructionBuilder(final CodeAttribute codeAttribute) {
+    LoadStoreInstructionBuilder(final CodeAttribute codeAttribute, final CtBehavior method) {
         final LocalVariableAttribute localVariableAttribute = (LocalVariableAttribute) codeAttribute.getAttribute(LocalVariableAttribute.tag);
         final LocalVariableTypeAttribute localVariableTypeAttribute = (LocalVariableTypeAttribute) codeAttribute.getAttribute(LocalVariableAttribute.typeTag);
 
         variableNames = buildVariableNames(localVariableAttribute);
-        variableTypes = buildVariableTypes(localVariableAttribute, localVariableTypeAttribute);
+        variableTypes = buildVariableTypes(localVariableAttribute, localVariableTypeAttribute, method);
     }
 
     /**
@@ -71,21 +72,38 @@ class LoadStoreInstructionBuilder {
      *
      * @param variableAttribute     The localVariableTable attribute
      * @param variableTypeAttribute The localVariableTypeTable attribute
+     * @param method                The method
      * @return The variable types for the variable indexes
      */
     private Map<Integer, Type> buildVariableTypes(final LocalVariableAttribute variableAttribute,
-                                                  final LocalVariableTypeAttribute variableTypeAttribute) {
+                                                  final LocalVariableTypeAttribute variableTypeAttribute,
+                                                  final CtBehavior method) {
         final Map<Integer, Type> types = new HashMap<>();
 
         if (variableAttribute != null)
             IntStream.range(0, variableAttribute.tableLength())
-                    .forEach(i -> types.put(variableAttribute.index(i), getType(variableAttribute.signature(i))));
+                    .forEach(i -> types.put(variableAttribute.index(i), getType(variableAttribute.signature(i), method)));
 
         if (variableTypeAttribute != null)
             IntStream.range(0, variableTypeAttribute.tableLength())
-                    .forEach(i -> types.put(variableTypeAttribute.index(i), getType(variableTypeAttribute.signature(i))));
+                    .forEach(i -> types.put(variableTypeAttribute.index(i), getType(variableTypeAttribute.signature(i), method)));
 
         return types;
+    }
+
+    private Type getType(final String signature, final CtBehavior method) {
+        try {
+            final SignatureAttribute.ClassSignature genericClassSignature = method.getDeclaringClass().getGenericSignature() == null ? null :
+                    SignatureAttribute.toClassSignature(method.getDeclaringClass().getGenericSignature());
+            final SignatureAttribute.MethodSignature methodSig = method.getGenericSignature() == null ? null :
+                    SignatureAttribute.toMethodSignature(method.getGenericSignature());
+
+            return new Type(SignatureAttribute.toTypeSignature(signature), genericClassSignature, null, methodSig);
+        } catch (BadBytecode e) {
+            LogProvider.error("Could not analyze type for signature: " + signature + ", reason: " + e.getMessage());
+            LogProvider.debug(e);
+            return null;
+        }
     }
 
     /**
@@ -110,16 +128,6 @@ class LoadStoreInstructionBuilder {
         final Type type = variableTypes.getOrDefault(index, Types.OBJECT);
         final String name = variableNames.getOrDefault(index, UNKNOWN_VARIABLE_NAME_PREFIX + index);
         return new StoreInstruction(index, type, name);
-    }
-
-    private Type getType(final String signature) {
-        try {
-            return new Type(SignatureAttribute.toTypeSignature(signature));
-        } catch (BadBytecode e) {
-            LogProvider.error("Could not analyze type for signature: " + signature + ", reason: " + e.getMessage());
-            LogProvider.debug(e);
-            return null;
-        }
     }
 
 }

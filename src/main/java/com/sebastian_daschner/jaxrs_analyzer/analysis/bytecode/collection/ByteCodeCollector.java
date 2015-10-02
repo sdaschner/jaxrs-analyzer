@@ -93,7 +93,7 @@ public class ByteCodeCollector implements Opcode {
 
         invokeInstructionBuilder = new InvokeInstructionBuilder(codeIterator, pool);
         fieldInstructionBuilder = new FieldInstructionBuilder(codeIterator, pool);
-        loadStoreInstructionBuilder = new LoadStoreInstructionBuilder(codeAttribute);
+        loadStoreInstructionBuilder = new LoadStoreInstructionBuilder(codeAttribute, method);
         ldcPushInstructionBuilder = new LdcPushInstructionBuilder(pool);
         wideInstructionBuilder = new WideInstructionBuilder(codeIterator, loadStoreInstructionBuilder);
         newInstructionBuilder = new NewInstructionBuilder(codeIterator, pool);

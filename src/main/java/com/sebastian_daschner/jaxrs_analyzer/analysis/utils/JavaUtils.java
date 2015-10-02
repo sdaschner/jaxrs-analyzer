@@ -175,8 +175,11 @@ public final class JavaUtils {
      */
     public static List<Type> getParameterTypes(final CtBehavior behavior) {
         try {
-            final String sig = behavior.getGenericSignature() == null ? behavior.getSignature() : behavior.getGenericSignature();
-            return Stream.of(SignatureAttribute.toMethodSignature(sig).getParameterTypes()).map(Type::new).collect(Collectors.toList());
+            final SignatureAttribute.ClassSignature classSig = behavior.getDeclaringClass().getGenericSignature() == null ? null :
+                    SignatureAttribute.toClassSignature(behavior.getDeclaringClass().getGenericSignature());
+            final SignatureAttribute.MethodSignature methodSig = SignatureAttribute.toMethodSignature(behavior.getGenericSignature() == null ? behavior.getSignature() : behavior.getGenericSignature());
+
+            return Stream.of(methodSig.getParameterTypes()).map(t -> new Type(t, classSig, null, methodSig)).collect(Collectors.toList());
         } catch (BadBytecode e) {
             // ignore
             return Collections.emptyList();
@@ -194,7 +197,7 @@ public final class JavaUtils {
             final String sig = field.getGenericSignature() == null ? field.getSignature() : field.getGenericSignature();
             final SignatureAttribute.ClassSignature genericClassSignature = field.getDeclaringClass().getGenericSignature() == null ? null :
                     SignatureAttribute.toClassSignature(field.getDeclaringClass().getGenericSignature());
-            return new Type(SignatureAttribute.toTypeSignature(sig), genericClassSignature, containingType);
+            return new Type(SignatureAttribute.toTypeSignature(sig), genericClassSignature, containingType, null);
         } catch (BadBytecode e) {
             // ignore
             LogProvider.error("Could not analyze field: " + field);
@@ -211,10 +214,12 @@ public final class JavaUtils {
      */
     public static Type getReturnType(final CtBehavior behavior, final Type containingType) {
         try {
-            final String sig = behavior.getGenericSignature() == null ? behavior.getSignature() : behavior.getGenericSignature();
+            final SignatureAttribute.MethodSignature methodSig = SignatureAttribute.toMethodSignature(behavior.getGenericSignature() == null ?
+                    behavior.getSignature() : behavior.getGenericSignature());
             final SignatureAttribute.ClassSignature genericClassSignature = behavior.getDeclaringClass().getGenericSignature() == null ? null :
                     SignatureAttribute.toClassSignature(behavior.getDeclaringClass().getGenericSignature());
-            return new Type(SignatureAttribute.toMethodSignature(sig).getReturnType(), genericClassSignature, containingType);
+
+            return new Type(methodSig.getReturnType(), genericClassSignature, containingType, methodSig);
         } catch (BadBytecode e) {
             // ignore
             LogProvider.error("Could not analyze method: " + behavior);

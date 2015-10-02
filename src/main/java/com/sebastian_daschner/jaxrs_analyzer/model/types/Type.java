@@ -46,19 +46,22 @@ public class Type {
     }
 
     public Type(final SignatureAttribute.Type sigType) {
-        this(sigType, null, null);
+        this(sigType, null, null, null);
     }
 
     /**
      * Constructs a new type for the given Javassist signature type and the generic class signature of the containing classes.
-     * The later is used for resolving generic type arguments (e.g. {@code public void A getSomething()} declared in {@code public class AClass&lt;A&gt;}).
+     * The later is used for resolving generic type arguments (e.g. {@code public void A getSomething()} declared in {@code public class AClass&lt;A&gt;})
+     * or generic methods (e.g. {@code public <T> T getSomething(Class<T> clazz, ...)}).
      *
-     * @param sigType               The signature type
-     * @param genericClassSignature The generic class signature of the containing class (can be {@code null}).
-     * @param containingType        The type with the actual type arguments
+     * @param sigType                The signature type
+     * @param genericClassSignature  The generic class signature of the containing class, needed for generic classes (can be {@code null}).
+     * @param containingType         The type with the actual type arguments, needed for resolving generic classes with actual arguments
+     * @param genericMethodSignature The generic signature of the method, needed for generic methods (can be {@code null}).
      */
-    public Type(final SignatureAttribute.Type sigType, final SignatureAttribute.ClassSignature genericClassSignature, final Type containingType) {
-        final String type = getType(sigType, genericClassSignature, containingType);
+    public Type(final SignatureAttribute.Type sigType, final SignatureAttribute.ClassSignature genericClassSignature, final Type containingType,
+                final SignatureAttribute.MethodSignature genericMethodSignature) {
+        final String type = getType(sigType, genericClassSignature, containingType, genericMethodSignature);
         try {
             ctClass = TypeExtractor.toErasuredClass(type);
             typeParameters = TypeExtractor.toTypeParameters(type);
@@ -71,13 +74,15 @@ public class Type {
      * Returns the Java type representation (including {@code $} as inner class separator) of the given {@link SignatureAttribute.Type}.
      * Resolves potential generic type arguments into the type parameters (e.g. {@code A} as type defined in {@code &lt;A:Ljava/lang/String;&gt;}).
      *
-     * @param type                  The Javassist type
-     * @param genericClassSignature The generic class signature of the containing class (can be {@code null}).
-     * @param containingType        The type with the actual type arguments
+     * @param type                   The Javassist type
+     * @param genericClassSignature  The generic class signature of the containing class (can be {@code null}).
+     * @param containingType         The type with the actual type arguments
+     * @param genericMethodSignature The generic signature of the method, needed for generic methods (can be {@code null}).
      * @return The Java type representation
      */
     // FIXME refactor
-    private static String getType(final SignatureAttribute.Type type, final SignatureAttribute.ClassSignature genericClassSignature, final Type containingType) {
+    private static String getType(final SignatureAttribute.Type type, final SignatureAttribute.ClassSignature genericClassSignature, final Type containingType,
+                                  final SignatureAttribute.MethodSignature genericMethodSignature) {
         if (type instanceof SignatureAttribute.ClassType) {
             final StringBuilder builder = new StringBuilder();
             if (type instanceof SignatureAttribute.NestedClassType) {
@@ -104,7 +109,7 @@ public class Type {
                 builder.append('<');
 //                Stream.of(classType.getTypeArguments()).map(JavaUtils::getTypeArgument).collect(Collectors.joining(","));
                 for (int i = 0; i < classType.getTypeArguments().length; i++) {
-                    builder.append(getTypeArgument(classType.getTypeArguments()[i], genericClassSignature, containingType));
+                    builder.append(getTypeArgument(classType.getTypeArguments()[i], genericClassSignature, containingType, genericMethodSignature));
                     if (i < classType.getTypeArguments().length - 1)
                         builder.append(',');
                 }
@@ -113,31 +118,47 @@ public class Type {
             return builder.toString();
         } else if (type instanceof SignatureAttribute.ArrayType) {
             final SignatureAttribute.ArrayType arrayType = (SignatureAttribute.ArrayType) type;
-            final StringBuilder builder = new StringBuilder(getType(arrayType.getComponentType(), genericClassSignature, containingType));
+            final StringBuilder builder = new StringBuilder(getType(arrayType.getComponentType(), genericClassSignature, containingType, genericMethodSignature));
             for (int i = 0; i < arrayType.getDimension(); i++)
                 builder.append("[]");
             return builder.toString();
         } else if (type instanceof SignatureAttribute.TypeVariable) {
             final SignatureAttribute.TypeVariable typeVariable = (SignatureAttribute.TypeVariable) type;
-            if (genericClassSignature != null && Stream.of(genericClassSignature.getParameters()).anyMatch(t -> t.getName().equals(typeVariable.getName()))) {
-                int index = 0;
-                for (; index < genericClassSignature.getParameters().length; index++) {
-                    if (genericClassSignature.getParameters()[index].getName().equals(typeVariable.getName()))
-                        break;
-                }
 
-                return containingType != null && index < containingType.getTypeParameters().size() ? containingType.getTypeParameters().get(index).toString() :
-                        Types.OBJECT.toString();
+            // type variable in generic method signature
+            if (genericMethodSignature != null) {
+                int index = getTypeVariableIndex(genericMethodSignature.getTypeParameters(), typeVariable.getName());
+                // TODO resolve type bounds
+                if (index < genericMethodSignature.getTypeParameters().length)
+                    return Types.OBJECT.toString();
             }
+
+            // type variable in generic class signature
+            if (genericClassSignature != null) {
+                int index = getTypeVariableIndex(genericClassSignature.getParameters(), typeVariable.getName());
+                if (index < genericClassSignature.getParameters().length)
+                    return containingType != null && index < containingType.getTypeParameters().size() ? containingType.getTypeParameters().get(index).toString() :
+                            Types.OBJECT.toString();
+            }
+
         }
         return type.toString();
     }
 
+    private static int getTypeVariableIndex(final SignatureAttribute.TypeParameter[] typeParameters, final String typeVariableName) {
+        int index = 0;
+        for (; index < typeParameters.length; index++) {
+            if (typeParameters[index].getName().equals(typeVariableName))
+                break;
+        }
+        return index;
+    }
+
     private static String getTypeArgument(final SignatureAttribute.TypeArgument typeArgument, final SignatureAttribute.ClassSignature genericClassSignature,
-                                          final Type containingType) {
+                                          final Type containingType, final SignatureAttribute.MethodSignature genericMethodSignature) {
         if (typeArgument.getKind() == '*')
             return Types.OBJECT.toString();
-        return getType(typeArgument.getType(), genericClassSignature, containingType);
+        return getType(typeArgument.getType(), genericClassSignature, containingType, genericMethodSignature);
     }
 
 
