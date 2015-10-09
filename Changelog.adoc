@@ -3,6 +3,12 @@ Sebastian Daschner
 
 // new versions are placed on the top
 
+== v0.9 (Current snapshot)
+- Enhanced type resolution for generic types and generic methods
+- Improved Swagger type output
+- Added actual type names to Swagger output
+- Sorted Swagger JSON
+
 == v0.8
 - Improved type resolution for type arguments
 - Fixed errors in swagger specification
