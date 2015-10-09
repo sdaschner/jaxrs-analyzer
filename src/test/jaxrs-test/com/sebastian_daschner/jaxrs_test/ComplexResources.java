@@ -17,6 +17,7 @@
 package com.sebastian_daschner.jaxrs_test;
 
 import javax.ejb.Stateless;
+import javax.inject.Inject;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -36,14 +37,17 @@ public class ComplexResources extends AbstractResources implements Resources {
     @Context
     ResourceContext rc;
 
+    @Inject
+    Manager<Integer> manager;
+
     @Override
     public Response getInfo(final String info) {
-        return Response.ok().header("X-Info", info + " is complex").build();
+        return Response.ok().header("X-Info", manager.getInstance(String.class, info.length()) + " is complex").build();
     }
 
     @Override
     public String getStatus() {
-        return "ok";
+        return "status";
     }
 
     @GET
