@@ -18,7 +18,7 @@ package com.sebastian_daschner.jaxrs_analyzer.analysis.results;
 
 import com.sebastian_daschner.jaxrs_analyzer.LogProvider;
 import com.sebastian_daschner.jaxrs_analyzer.analysis.utils.JavaUtils;
-import com.sebastian_daschner.jaxrs_analyzer.analysis.utils.Pair;
+import com.sebastian_daschner.jaxrs_analyzer.model.Pair;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeRepresentation;
 import com.sebastian_daschner.jaxrs_analyzer.model.types.Type;
 import javassist.CtClass;
@@ -80,6 +80,7 @@ class TypeAnalyzer {
      * @param type The type to analyze
      * @return The type representation of the class (currently just for application/json)
      */
+    // TODO cache analyzed representation to save runtime
     TypeRepresentation analyze(final Type type) {
         lock.lock();
         try {

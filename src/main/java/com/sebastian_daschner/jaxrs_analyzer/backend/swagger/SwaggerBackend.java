@@ -33,6 +33,8 @@ import java.util.Optional;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+import static java.util.Comparator.comparing;
+
 /**
  * A backend which produces a Swagger JSON representation of the resources.
  *
@@ -90,16 +92,18 @@ public class SwaggerBackend implements Backend {
 
     private JsonObjectBuilder buildPathDefinition(final String s) {
         final JsonObjectBuilder methods = Json.createObjectBuilder();
-        resources.getMethods(s).stream().forEach(m -> methods.add(m.getMethod().toString().toLowerCase(), buildForMethod(m)));
+        resources.getMethods(s).stream()
+                .sorted(comparing(ResourceMethod::getMethod))
+                .forEach(m -> methods.add(m.getMethod().toString().toLowerCase(), buildForMethod(m)));
         return methods;
     }
 
     private JsonObjectBuilder buildForMethod(final ResourceMethod method) {
         final JsonArrayBuilder consumes = Json.createArrayBuilder();
-        method.getRequestMediaTypes().stream().forEach(consumes::add);
+        method.getRequestMediaTypes().stream().sorted().forEach(consumes::add);
 
         final JsonArrayBuilder produces = Json.createArrayBuilder();
-        method.getResponseMediaTypes().stream().forEach(produces::add);
+        method.getResponseMediaTypes().stream().sorted().forEach(produces::add);
 
         return Json.createObjectBuilder().add("consumes", consumes).add("produces", produces)
                 .add("parameters", buildParameters(method)).add("responses", buildResponses(method));
@@ -109,10 +113,10 @@ public class SwaggerBackend implements Backend {
         final MethodParameters parameters = method.getMethodParameters();
         final JsonArrayBuilder parameterBuilder = Json.createArrayBuilder();
 
-        parameters.getPathParams().entrySet().stream().forEach(e -> parameterBuilder.add(buildParameter(e, "path")));
-        parameters.getHeaderParams().entrySet().stream().forEach(e -> parameterBuilder.add(buildParameter(e, "header")));
-        parameters.getQueryParams().entrySet().stream().forEach(e -> parameterBuilder.add(buildParameter(e, "query")));
-        parameters.getFormParams().entrySet().stream().forEach(e -> parameterBuilder.add(buildParameter(e, "formData")));
+        parameters.getPathParams().entrySet().stream().sorted(comparing(Map.Entry::getKey)).forEach(e -> parameterBuilder.add(buildParameter(e, "path")));
+        parameters.getHeaderParams().entrySet().stream().sorted(comparing(Map.Entry::getKey)).forEach(e -> parameterBuilder.add(buildParameter(e, "header")));
+        parameters.getQueryParams().entrySet().stream().sorted(comparing(Map.Entry::getKey)).forEach(e -> parameterBuilder.add(buildParameter(e, "query")));
+        parameters.getFormParams().entrySet().stream().sorted(comparing(Map.Entry::getKey)).forEach(e -> parameterBuilder.add(buildParameter(e, "formData")));
 
         if (method.getRequestBody() != null) {
             parameterBuilder.add(Json.createObjectBuilder().add("name", "body").add("in", "body").add("required", true)
@@ -130,9 +134,9 @@ public class SwaggerBackend implements Backend {
     private JsonObjectBuilder buildResponses(final ResourceMethod method) {
         final JsonObjectBuilder responses = Json.createObjectBuilder();
 
-        method.getResponses().entrySet().stream().forEach(e -> {
+        method.getResponses().entrySet().stream().sorted(comparing(Map.Entry::getKey)).forEach(e -> {
             final JsonObjectBuilder headers = Json.createObjectBuilder();
-            e.getValue().getHeaders().forEach(h -> headers.add(h, Json.createObjectBuilder().add("type", "string")));
+            e.getValue().getHeaders().stream().sorted().forEach(h -> headers.add(h, Json.createObjectBuilder().add("type", "string")));
 
             final JsonObjectBuilder response = Json.createObjectBuilder()
                     .add("description", Optional.ofNullable(Response.Status.fromStatusCode(e.getKey())).map(Response.Status::getReasonPhrase).orElse(""))

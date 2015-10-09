@@ -17,12 +17,12 @@
 package com.sebastian_daschner.jaxrs_analyzer.backend.swagger;
 
 import com.sebastian_daschner.jaxrs_analyzer.LogProvider;
+import com.sebastian_daschner.jaxrs_analyzer.model.Pair;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeRepresentation;
 
 import javax.json.*;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Creates Swagger schema type definitions.
@@ -31,8 +31,10 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 class SchemaBuilder {
 
-    private final Map<String, JsonObject> jsonDefinitions = new HashMap<>();
-    private final AtomicInteger nextDefinition = new AtomicInteger(0);
+    /**
+     * The fully-qualified class name together with the JSON definitions identified by the definition names.
+     */
+    private final Map<String, Pair<String, JsonObject>> jsonDefinitions = new HashMap<>();
 
     /**
      * Creates the schema object for the representation. Stores the definition for later use for more complex objects.
@@ -58,7 +60,7 @@ class SchemaBuilder {
             return Json.createObjectBuilder().build();
 
         final JsonValue json = (JsonValue) representation.getRepresentations().values().iterator().next();
-        return build(json);
+        return build(json, representation.getType().getCtClass().getName());
     }
 
     /**
@@ -66,13 +68,13 @@ class SchemaBuilder {
      *
      * @return The schema JSON definitions
      */
-    public JsonObject getDefinitions() {
+    JsonObject getDefinitions() {
         final JsonObjectBuilder builder = Json.createObjectBuilder();
-        jsonDefinitions.entrySet().forEach(e -> builder.add(e.getKey(), e.getValue()));
+        jsonDefinitions.entrySet().forEach(e -> builder.add(e.getKey(), e.getValue().getRight()));
         return builder.build();
     }
 
-    private JsonObject build(final JsonValue value) {
+    private JsonObject build(final JsonValue value, final String typeName) {
         final SwaggerType type = SwaggerUtils.toSwaggerType(value.getValueType());
         switch (type) {
             case ARRAY:
@@ -84,7 +86,7 @@ class SchemaBuilder {
             case STRING:
                 return buildForPrimitive(type);
             case OBJECT:
-                return buildForObject((JsonObject) value);
+                return buildForObject((JsonObject) value, typeName);
             default:
                 LogProvider.error("Unknown Swagger type occurred: " + type);
                 return Json.createObjectBuilder().build();
@@ -96,9 +98,9 @@ class SchemaBuilder {
         if (!jsonArray.isEmpty())
             // reduces all entries to one optional or an empty optional
             if (jsonArray.size() > 1 && !jsonArray.stream().collect(EqualTester::new, EqualTester::add, EqualTester::add).allEqual())
-                builder.add("items", jsonArray.stream().map(this::build).collect(Json::createArrayBuilder, JsonArrayBuilder::add, JsonArrayBuilder::add));
+                builder.add("items", jsonArray.stream().map(v -> build(v, null)).collect(Json::createArrayBuilder, JsonArrayBuilder::add, JsonArrayBuilder::add));
             else
-                builder.add("items", build(jsonArray.get(0)));
+                builder.add("items", build(jsonArray.get(0), null));
 
         return builder.build();
     }
@@ -107,19 +109,34 @@ class SchemaBuilder {
         return Json.createObjectBuilder().add("type", type.toString()).build();
     }
 
-    private JsonObject buildForObject(final JsonObject value) {
-        final String definition = nextDefinition();
+    private JsonObject buildForObject(final JsonObject value, final String typeName) {
+        final String definition = buildDefinition(typeName);
+
+        if (jsonDefinitions.containsKey(definition))
+            return Json.createObjectBuilder().add("$ref", "#/definitions/" + definition).build();
 
         final JsonObjectBuilder properties = Json.createObjectBuilder();
 
-        value.entrySet().forEach(e -> properties.add(e.getKey(), build(e.getValue())));
-        jsonDefinitions.put(definition, Json.createObjectBuilder().add("properties", properties).build());
+        value.entrySet().forEach(e -> properties.add(e.getKey(), build(e.getValue(), null)));
+        jsonDefinitions.put(definition, Pair.of(typeName, Json.createObjectBuilder().add("properties", properties).build()));
 
         return Json.createObjectBuilder().add("$ref", "#/definitions/" + definition).build();
     }
 
-    private String nextDefinition() {
-        return "definition_" + nextDefinition.incrementAndGet();
+    private String buildDefinition(final String typeName) {
+        final String type = typeName == null ? "NestedType" : typeName;
+        final String definition = type.substring(type.lastIndexOf('.') + 1);
+
+        final Pair<String, JsonObject> containedEntry = jsonDefinitions.get(definition);
+        if (containedEntry == null || containedEntry.getLeft() != null && containedEntry.getLeft().equals(type))
+            return definition;
+
+        if (!definition.matches("_\\d+$"))
+            return definition + "_2";
+
+        final int separatorIndex = definition.lastIndexOf('_');
+        final int index = Integer.parseInt(definition.substring(separatorIndex + 1));
+        return definition.substring(0, separatorIndex + 1) + (index + 1);
     }
 
     /**
