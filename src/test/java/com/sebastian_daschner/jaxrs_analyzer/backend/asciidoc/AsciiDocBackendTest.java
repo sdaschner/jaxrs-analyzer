@@ -7,8 +7,8 @@ import com.sebastian_daschner.jaxrs_analyzer.model.rest.HttpMethod;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.Project;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.Resources;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeRepresentation;
-import com.sebastian_daschner.jaxrs_analyzer.model.types.Types;
 import com.sebastian_daschner.jaxrs_analyzer.model.types.Type;
+import com.sebastian_daschner.jaxrs_analyzer.model.types.Types;
 import junit.framework.TestCase;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -121,8 +121,8 @@ public class AsciiDocBackendTest extends TestCase {
                         "\n" +
                         "==== `200 OK`\n" +
                         "*Response Body*: (`javax.json.JsonArray`) + \n" +
-                        "`application/xml`: `[\"string\",0]` + \n" +
-                        "`application/json`: `[\"string\",0]` + \n\n");
+                        "`application/json`: `[\"string\",0]` + \n" +
+                        "`application/xml`: `[\"string\",0]` + \n\n");
 
         representation = new TypeRepresentation(Types.JSON_ARRAY);
         representation.getRepresentations().put("application/json", Json.createArrayBuilder().add(Json.createObjectBuilder().add("key", "string")).add(Json.createObjectBuilder().add("key", "string")).build());

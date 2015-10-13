@@ -33,6 +33,7 @@ import java.util.Optional;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+import static com.sebastian_daschner.jaxrs_analyzer.backend.ComparatorUtils.mapKeyComparator;
 import static java.util.Comparator.comparing;
 
 /**
@@ -113,10 +114,10 @@ public class SwaggerBackend implements Backend {
         final MethodParameters parameters = method.getMethodParameters();
         final JsonArrayBuilder parameterBuilder = Json.createArrayBuilder();
 
-        parameters.getPathParams().entrySet().stream().sorted(comparing(Map.Entry::getKey)).forEach(e -> parameterBuilder.add(buildParameter(e, "path")));
-        parameters.getHeaderParams().entrySet().stream().sorted(comparing(Map.Entry::getKey)).forEach(e -> parameterBuilder.add(buildParameter(e, "header")));
-        parameters.getQueryParams().entrySet().stream().sorted(comparing(Map.Entry::getKey)).forEach(e -> parameterBuilder.add(buildParameter(e, "query")));
-        parameters.getFormParams().entrySet().stream().sorted(comparing(Map.Entry::getKey)).forEach(e -> parameterBuilder.add(buildParameter(e, "formData")));
+        parameters.getPathParams().entrySet().stream().sorted(mapKeyComparator()).forEach(e -> parameterBuilder.add(buildParameter(e, "path")));
+        parameters.getHeaderParams().entrySet().stream().sorted(mapKeyComparator()).forEach(e -> parameterBuilder.add(buildParameter(e, "header")));
+        parameters.getQueryParams().entrySet().stream().sorted(mapKeyComparator()).forEach(e -> parameterBuilder.add(buildParameter(e, "query")));
+        parameters.getFormParams().entrySet().stream().sorted(mapKeyComparator()).forEach(e -> parameterBuilder.add(buildParameter(e, "formData")));
 
         if (method.getRequestBody() != null) {
             parameterBuilder.add(Json.createObjectBuilder().add("name", "body").add("in", "body").add("required", true)
@@ -134,7 +135,7 @@ public class SwaggerBackend implements Backend {
     private JsonObjectBuilder buildResponses(final ResourceMethod method) {
         final JsonObjectBuilder responses = Json.createObjectBuilder();
 
-        method.getResponses().entrySet().stream().sorted(comparing(Map.Entry::getKey)).forEach(e -> {
+        method.getResponses().entrySet().stream().sorted(mapKeyComparator()).forEach(e -> {
             final JsonObjectBuilder headers = Json.createObjectBuilder();
             e.getValue().getHeaders().stream().sorted().forEach(h -> headers.add(h, Json.createObjectBuilder().add("type", "string")));
 

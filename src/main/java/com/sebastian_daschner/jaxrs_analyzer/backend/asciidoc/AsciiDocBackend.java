@@ -13,6 +13,8 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
 
+import static com.sebastian_daschner.jaxrs_analyzer.backend.ComparatorUtils.mapKeyComparator;
+
 /**
  * A backend implementation which produces an AsciiDoc representation of the JAX-RS project.
  *
@@ -84,7 +86,7 @@ public class AsciiDocBackend implements Backend {
             builder.append("` + \n");
 
             builder.append("*Request Body*: (`").append(resourceMethod.getRequestBody().getType()).append("`) + \n");
-            resourceMethod.getRequestBody().getRepresentations().entrySet().stream()
+            resourceMethod.getRequestBody().getRepresentations().entrySet().stream().sorted(mapKeyComparator())
                     .forEach(e -> builder.append('`').append(e.getKey()).append("`: `").append(e.getValue()).append("` + \n"));
         } else {
             builder.append("_No body_ + \n");
@@ -103,13 +105,12 @@ public class AsciiDocBackend implements Backend {
     }
 
     private void appendParams(final String name, final Map<String, Type> parameters) {
-        for (final Map.Entry<String, Type> entry : parameters.entrySet()) {
-            builder.append(name);
-            builder.append(entry.getKey());
-            builder.append(", ");
-            builder.append(entry.getValue());
-            builder.append(" + \n");
-        }
+        parameters.entrySet().stream().sorted(mapKeyComparator()).forEach(entry -> builder.
+                append(name).
+                append(entry.getKey()).
+                append(", ").
+                append(entry.getValue()).
+                append(" + \n"));
     }
 
     private void appendResponse(final ResourceMethod resourceMethod) {
@@ -119,7 +120,7 @@ public class AsciiDocBackend implements Backend {
         builder.append(resourceMethod.getResponseMediaTypes().isEmpty() ? TYPE_WILDCARD : toString(resourceMethod.getResponseMediaTypes()));
         builder.append("`\n\n");
 
-        resourceMethod.getResponses().entrySet().stream().forEach(e -> {
+        resourceMethod.getResponses().entrySet().stream().sorted(mapKeyComparator()).forEach(e -> {
             builder.append("==== `").append(e.getKey()).append(' ')
                     .append(javax.ws.rs.core.Response.Status.fromStatusCode(e.getKey()).getReasonPhrase()).append("`\n");
             final Response response = e.getValue();
@@ -128,7 +129,7 @@ public class AsciiDocBackend implements Backend {
             if (response.getResponseBody() != null) {
                 builder.append("*Response Body*: ").append("(`").append(response.getResponseBody().getType()).append("`) + \n");
                 // TODO remove JSON filtering
-                response.getResponseBody().getRepresentations().entrySet().stream().filter(r -> r.getValue() instanceof JsonValue)
+                response.getResponseBody().getRepresentations().entrySet().stream().sorted(mapKeyComparator()).filter(r -> r.getValue() instanceof JsonValue)
                         .forEach(r -> builder.append('`').append(r.getKey()).append("`: `").append(r.getValue()).append("` + \n"));
             }
 
@@ -136,8 +137,8 @@ public class AsciiDocBackend implements Backend {
         });
     }
 
-    private static String toString(final Set<?> set) {
-        return set.stream().map(Object::toString).collect(Collectors.joining(", "));
+    private static String toString(final Set<String> set) {
+        return set.stream().sorted().map(Object::toString).collect(Collectors.joining(", "));
     }
 
 }
