@@ -3,7 +3,9 @@ Sebastian Daschner
 
 // new versions are placed on the top
 
-== v0.9 (Current snapshot)
+// == v0.10 (Current snapshot)
+
+== v0.9
 - Enhanced type resolution for generic types and generic methods
 - Improved Swagger type output
 - Added actual type names to Swagger output
