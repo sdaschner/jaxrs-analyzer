@@ -17,8 +17,8 @@
 package com.sebastian_daschner.jaxrs_analyzer.analysis.project.classes;
 
 
-import com.sebastian_daschner.jaxrs_analyzer.model.results.ClassResult;
 import com.sebastian_daschner.jaxrs_analyzer.analysis.utils.TestClassUtils;
+import com.sebastian_daschner.jaxrs_analyzer.model.results.ClassResult;
 import javassist.ClassPool;
 import javassist.CtClass;
 import javassist.NotFoundException;

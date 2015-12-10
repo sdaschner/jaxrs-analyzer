@@ -50,9 +50,6 @@ public class TypeAnalyzerTest {
         final Set<Class<?>> testClasses = TestClassUtils.getClasses("com.sebastian_daschner.jaxrs_analyzer.analysis.results.testclasses.typeanalyzer");
 
         for (final Class<?> testClass : testClasses) {
-            if (!testClass.getSimpleName().startsWith("TestClass"))
-                continue;
-
             final Object[] testData = new Object[2];
 
             testData[0] = testClass;

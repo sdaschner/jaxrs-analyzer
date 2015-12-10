@@ -51,9 +51,6 @@ public class SubResourceLocatorMethodContentAnalyzerTest {
         final Set<Class<?>> testClasses = TestClassUtils.getClasses("com.sebastian_daschner.jaxrs_analyzer.analysis.project.methods.testclasses.subresource");
 
         for (final Class<?> testClass : testClasses) {
-            if (!testClass.getSimpleName().startsWith("TestClass"))
-                continue;
-
             final Object[] testData = new Object[3];
 
             testData[0] = testClass.getSimpleName();

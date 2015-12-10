@@ -29,10 +29,10 @@ public class TestClassUtils {
     }
 
     /**
-     * Returns all classes in the given package.
+     * Returns all root classes of compilation units in the given package.
      *
      * @param packageName The package name where to search
-     * @return All found classes
+     * @return All found classes except inner classes
      * @throws ClassNotFoundException If a class could not be found
      */
     public static Set<Class<?>> getClasses(final String packageName) throws ClassNotFoundException {
@@ -43,7 +43,7 @@ public class TestClassUtils {
         final String classPath = new File(TestClassUtils.class.getProtectionDomain().getCodeSource().getLocation().getPath()).getAbsolutePath();
         final Path testClassesDir = Paths.get(classPath + (classPath.endsWith(File.separator) ? "" : File.separatorChar) + postfixPackageName.replace('.', File.separatorChar));
 
-        final File[] testClasses = testClassesDir.toFile().listFiles((dir, name) -> name.endsWith("class"));
+        final File[] testClasses = testClassesDir.toFile().listFiles((dir, name) -> name.endsWith("class") && !name.contains("$"));
 
         for (final File classFile : testClasses) {
             // load test class
