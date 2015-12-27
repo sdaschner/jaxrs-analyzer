@@ -16,17 +16,14 @@
 
 package com.sebastian_daschner.jaxrs_analyzer.analysis.results.testclasses.typeanalyzer;
 
+import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeIdentifier;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeRepresentation;
 import com.sebastian_daschner.jaxrs_analyzer.model.types.Type;
+import com.sebastian_daschner.jaxrs_analyzer.model.types.Types;
 
-import javax.json.Json;
-import javax.json.JsonObject;
 import java.time.LocalDate;
-import java.util.Date;
+import java.util.*;
 
-/**
- * @author Sebastian Daschner
- */
 public class TestClass4 {
 
     private LocalDate first;
@@ -41,13 +38,17 @@ public class TestClass4 {
         return second;
     }
 
-    public static TypeRepresentation getResult() {
-        final TypeRepresentation representation = new TypeRepresentation(new Type(TestClass4.class.getName()));
+    public static Set<TypeRepresentation> expectedTypeRepresentations() {
+        final Map<String, TypeIdentifier> properties = new HashMap<>();
 
-        final JsonObject jsonObject = Json.createObjectBuilder().add("first", "date").add("second", "date").build();
+        properties.put("first", TypeIdentifier.ofType(Types.DATE));
+        properties.put("second", TypeIdentifier.ofType(Types.DATE));
 
-        representation.getRepresentations().put("application/json", jsonObject);
-        return representation;
+        return Collections.singleton(TypeRepresentation.ofConcrete(expectedIdentifier(), properties));
+    }
+
+    public static TypeIdentifier expectedIdentifier() {
+        return TypeIdentifier.ofType(new Type(TestClass4.class.getName()));
     }
 
 }

@@ -18,6 +18,8 @@ package com.sebastian_daschner.jaxrs_analyzer.builder;
 
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.ResourceMethod;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.Resources;
+import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeIdentifier;
+import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeRepresentation;
 
 import java.util.stream.Stream;
 
@@ -40,6 +42,11 @@ public class ResourcesBuilder {
 
     public ResourcesBuilder andResource(final String resource, final ResourceMethod... method) {
         Stream.of(method).forEach(m -> resources.addMethod(resource, m));
+        return this;
+    }
+
+    public ResourcesBuilder andTypeRepresentation(final TypeIdentifier identifier, final TypeRepresentation representation) {
+        resources.getTypeRepresentations().put(identifier, representation);
         return this;
     }
 

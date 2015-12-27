@@ -38,7 +38,6 @@ import static com.sebastian_daschner.jaxrs_analyzer.model.types.Types.*;
  */
 final class JsonMapper {
 
-
     private JsonMapper() {
         throw new UnsupportedOperationException();
     }

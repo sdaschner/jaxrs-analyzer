@@ -17,6 +17,7 @@
 package com.sebastian_daschner.jaxrs_analyzer.analysis.results;
 
 import com.sebastian_daschner.jaxrs_analyzer.analysis.utils.TestClassUtils;
+import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeIdentifier;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeRepresentation;
 import com.sebastian_daschner.jaxrs_analyzer.model.types.Type;
 import javassist.NotFoundException;
@@ -26,20 +27,22 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
 import java.io.IOException;
-import java.util.Collection;
-import java.util.LinkedList;
-import java.util.Set;
+import java.util.*;
 
 @RunWith(Parameterized.class)
-public class TypeAnalyzerTest {
+public class JavaTypeAnalyzerTest {
 
-    private final TypeAnalyzer classUnderTest;
-    private final TypeRepresentation expectedResult;
+    private final JavaTypeAnalyzer classUnderTest;
+    private final TypeIdentifier expectedIdentifier;
+    private final Set<TypeRepresentation> expectedRepresentations;
     private final Class<?> clazz;
+    private final Map<TypeIdentifier, TypeRepresentation> actualTypeRepresentations;
 
-    public TypeAnalyzerTest(final Class<?> clazz, final TypeRepresentation expectedResult) throws NotFoundException {
-        this.expectedResult = expectedResult;
-        this.classUnderTest = new TypeAnalyzer();
+    public JavaTypeAnalyzerTest(final Class<?> clazz, final TypeIdentifier expectedIdentifier, final Set<TypeRepresentation> expectedRepresentations) throws NotFoundException {
+        actualTypeRepresentations = new HashMap<>();
+        this.expectedIdentifier = expectedIdentifier;
+        this.expectedRepresentations = expectedRepresentations;
+        this.classUnderTest = new JavaTypeAnalyzer(actualTypeRepresentations);
         this.clazz = clazz;
     }
 
@@ -50,12 +53,14 @@ public class TypeAnalyzerTest {
         final Set<Class<?>> testClasses = TestClassUtils.getClasses("com.sebastian_daschner.jaxrs_analyzer.analysis.results.testclasses.typeanalyzer");
 
         for (final Class<?> testClass : testClasses) {
-            final Object[] testData = new Object[2];
+            if (!testClass.getSimpleName().startsWith("TestClass"))
+                continue;
+
+            final Object[] testData = new Object[3];
 
             testData[0] = testClass;
-
-            // evaluate static "getResult"-method
-            testData[1] = testClass.getDeclaredMethod("getResult").invoke(null);
+            testData[1] = testClass.getDeclaredMethod("expectedIdentifier").invoke(null);
+            testData[2] = testClass.getDeclaredMethod("expectedTypeRepresentations").invoke(null);
 
             data.add(testData);
         }
@@ -65,15 +70,18 @@ public class TypeAnalyzerTest {
 
     @Test
     public void test() {
-        final TypeRepresentation actualResult;
+        final TypeIdentifier actualIdentifier;
         try {
-            actualResult = classUnderTest.analyze(new Type(clazz.getName()));
+            actualIdentifier = classUnderTest.analyze(new Type(clazz.getName()));
         } catch (Exception e) {
             System.err.println("failed for " + clazz.getSimpleName());
             throw e;
         }
 
-        Assert.assertEquals("failed for " + clazz.getSimpleName(), expectedResult, actualResult);
+        Assert.assertEquals("failed for " + clazz.getSimpleName(), expectedIdentifier, actualIdentifier);
+        final Map<TypeIdentifier, TypeRepresentation> expectedTypeRepresentations = expectedRepresentations.stream()
+                .collect(HashMap::new, (m, r) -> m.put(r.getIdentifier(), r), Map::putAll);
+        Assert.assertEquals("failed for " + clazz.getSimpleName(), expectedTypeRepresentations, actualTypeRepresentations);
     }
 
 }

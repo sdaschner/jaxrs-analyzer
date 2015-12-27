@@ -16,18 +16,14 @@
 
 package com.sebastian_daschner.jaxrs_analyzer.analysis.results.testclasses.typeanalyzer;
 
+import com.sebastian_daschner.jaxrs_analyzer.analysis.results.TypeIdentifierUtils;
+import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeIdentifier;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeRepresentation;
 import com.sebastian_daschner.jaxrs_analyzer.model.types.Type;
 
-import javax.json.Json;
-import javax.json.JsonObject;
 import javax.xml.bind.annotation.*;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
-/**
- * @author Sebastian Daschner
- */
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.FIELD)
 public class TestClass5 {
@@ -46,14 +42,25 @@ public class TestClass5 {
         return null;
     }
 
-    public static TypeRepresentation getResult() {
-        final TypeRepresentation representation = new TypeRepresentation(new Type(TestClass5.class.getName()));
+    public static Set<TypeRepresentation> expectedTypeRepresentations() {
+        final Map<String, TypeIdentifier> properties = new HashMap<>();
 
-        final JsonObject jsonObject = Json.createObjectBuilder().add("first", Json.createArrayBuilder()
-                .add("string")).add("second", Json.createArrayBuilder().add("string")).build();
+        final TypeIdentifier listIdentifier = TypeIdentifier.ofType(new Type("java.util.List<java.lang.String>"));
+        final TypeIdentifier setIdentifier = TypeIdentifier.ofType(new Type("java.util.Set<java.lang.String>"));
 
-        representation.getRepresentations().put("application/json", jsonObject);
-        return representation;
+        properties.put("first", listIdentifier);
+        properties.put("second", setIdentifier);
+
+        final TypeRepresentation testClass5 = TypeRepresentation.ofConcrete(expectedIdentifier(), properties);
+        final TypeRepresentation string = TypeRepresentation.ofConcrete(TypeIdentifierUtils.STRING_IDENTIFIER);
+        final TypeRepresentation listString = TypeRepresentation.ofCollection(listIdentifier, string);
+        final TypeRepresentation setString = TypeRepresentation.ofCollection(setIdentifier, string);
+
+        return new HashSet<>(Arrays.asList(testClass5, listString, setString));
+    }
+
+    public static TypeIdentifier expectedIdentifier() {
+        return TypeIdentifier.ofType(new Type(TestClass5.class.getName()));
     }
 
 }

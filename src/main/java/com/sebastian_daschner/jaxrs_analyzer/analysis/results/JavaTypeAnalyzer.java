@@ -19,24 +19,20 @@ package com.sebastian_daschner.jaxrs_analyzer.analysis.results;
 import com.sebastian_daschner.jaxrs_analyzer.LogProvider;
 import com.sebastian_daschner.jaxrs_analyzer.analysis.utils.JavaUtils;
 import com.sebastian_daschner.jaxrs_analyzer.model.Pair;
+import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeIdentifier;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeRepresentation;
 import com.sebastian_daschner.jaxrs_analyzer.model.types.Type;
+import com.sebastian_daschner.jaxrs_analyzer.model.types.Types;
 import javassist.CtClass;
 import javassist.CtField;
 import javassist.CtMethod;
 
-import javax.json.*;
-import javax.ws.rs.core.MediaType;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlTransient;
 import java.lang.reflect.Modifier;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Objects;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -44,114 +40,93 @@ import static com.sebastian_daschner.jaxrs_analyzer.model.types.Types.COLLECTION
 
 /**
  * Analyzes a class (usually a POJO) for it's properties and methods.
- * The analysis is used to derive the JSON/XML representations. This class is thread-safe.
+ * The analysis is used to derive the JSON/XML representations.
  *
  * @author Sebastian Daschner
  */
-class TypeAnalyzer {
+class JavaTypeAnalyzer {
 
     private final static String[] NAMES_TO_IGNORE = {"getClass"};
-    private static final JsonString EMPTY_JSON_STRING = new JsonString() {
-        private static final String TYPE = "string";
 
-        @Override
-        public ValueType getValueType() {
-            return ValueType.STRING;
-        }
+    private final Set<Type> analyzedTypes;
+    private final Map<TypeIdentifier, TypeRepresentation> typeRepresentations;
 
-        @Override
-        public String getString() {
-            return TYPE;
-        }
-
-        @Override
-        public CharSequence getChars() {
-            return TYPE;
-        }
-    };
-
-    private final Lock lock = new ReentrantLock();
-    private final List<Type> typesPath = new LinkedList<>();
-    private Type type;
+    JavaTypeAnalyzer(final Map<TypeIdentifier, TypeRepresentation> typeRepresentations) {
+        this.typeRepresentations = typeRepresentations;
+        analyzedTypes = new HashSet<>();
+    }
 
     /**
-     * Analyzes the given type. Resolves known generics and creates a representation of the contained class.
+     * Analyzes the given type. Resolves known generics and creates a representation of the contained class, all contained properties
+     * and nested types recursively.
      *
-     * @param type The type to analyze
-     * @return The type representation of the class (currently just for application/json)
+     * @param rootType The type to analyze
+     * @return The (root) type identifier
      */
-    // TODO cache analyzed representation to save runtime
-    TypeRepresentation analyze(final Type type) {
-        lock.lock();
-        try {
-            typesPath.clear();
-            this.type = ResponseTypeNormalizer.normalizeResponseWrapper(type);
-            final boolean collection = this.type.isAssignableTo(COLLECTION);
+    // TODO consider arrays
+    TypeIdentifier analyze(final Type rootType) {
+        final Type type = ResponseTypeNormalizer.normalizeResponseWrapper(rootType);
+        final TypeIdentifier identifier = TypeIdentifier.ofType(type);
 
-            if (!collection && isJDKType())
-                return new TypeRepresentation(this.type);
-
-            // TODO analyze XML as well
-            final TypeRepresentation representation = new TypeRepresentation(ResponseTypeNormalizer.normalize(this.type));
-            representation.getRepresentations().put(MediaType.APPLICATION_JSON, analyzeInternal(this.type));
-            return representation;
-        } finally {
-            lock.unlock();
+        if (!analyzedTypes.contains(type) && (type.isAssignableTo(COLLECTION) || !isJDKType(type))) {
+            analyzedTypes.add(type);
+            typeRepresentations.put(identifier, analyzeInternal(identifier, type));
         }
+
+        return identifier;
     }
 
-    private boolean isJDKType() {
+    private static boolean isJDKType(final Type type) {
         // exclude java, javax, etc. packages
-        return type.toString().startsWith("java");
+        if (Types.PRIMITIVE_TYPES.contains(type))
+            return true;
+
+        final String name = type.toString();
+        return name.startsWith("java.") || name.startsWith("javax.");
     }
 
-    private JsonValue analyzeInternal(final Type type) {
-        // break recursion if type has already been included in that execution
-        if (typesPath.contains(type))
-            return Json.createObjectBuilder().build();
-
-        typesPath.add(type);
-
+    private TypeRepresentation analyzeInternal(final TypeIdentifier identifier, final Type type) {
         if (type.isAssignableTo(COLLECTION)) {
-            final JsonArrayBuilder arrayBuilder = Json.createArrayBuilder();
-            JsonMapper.addToArray(arrayBuilder, ResponseTypeNormalizer.normalizeCollection(type), this::analyzeInternal);
-            return arrayBuilder.build();
+            final Type containedType = ResponseTypeNormalizer.normalizeCollection(type);
+            return TypeRepresentation.ofCollection(identifier, analyzeInternal(TypeIdentifier.ofType(containedType), containedType));
         }
 
-        try {
-            return analyzeClass(type);
-        } catch (Exception e) {
-            LogProvider.error("Could not analyze class for type analysis: " + e.getMessage());
-            LogProvider.debug(e);
-            return Json.createObjectBuilder().build();
-        }
+        return TypeRepresentation.ofConcrete(identifier, analyzeClass(type));
     }
 
-    private JsonValue analyzeClass(final Type type) throws ClassNotFoundException {
+    private Map<String, TypeIdentifier> analyzeClass(final Type type) {
         final CtClass ctClass = type.getCtClass();
-        if (ctClass.isEnum())
-            return EMPTY_JSON_STRING;
+        if (ctClass.isEnum() || isJDKType(type))
+            return Collections.emptyMap();
 
         // TODO analyze & test inheritance
 
-        final XmlAccessType value;
-        if (ctClass.hasAnnotation(XmlAccessorType.class))
-            value = ((XmlAccessorType) ctClass.getAnnotation(XmlAccessorType.class)).value();
-        else
-            value = XmlAccessType.PUBLIC_MEMBER;
+        final XmlAccessType value = getXmlAccessType(ctClass);
 
         final List<CtField> relevantFields = Stream.of(ctClass.getDeclaredFields()).filter(f -> isRelevant(f, value)).collect(Collectors.toList());
         final List<CtMethod> relevantGetters = Stream.of(ctClass.getDeclaredMethods()).filter(m -> isRelevant(m, value)).collect(Collectors.toList());
 
-        final JsonObjectBuilder builder = Json.createObjectBuilder();
+        final Map<String, TypeIdentifier> properties = new HashMap<>();
 
-        relevantFields.stream().map(f -> mapField(f, type)).filter(Objects::nonNull)
-                .forEach(p -> JsonMapper.addToObject(builder, p.getLeft(), p.getRight(), this::analyzeInternal));
+        Stream.concat(relevantFields.stream().map(f -> mapField(f, type)), relevantGetters.stream().map(g -> mapGetter(g, type)))
+                .filter(Objects::nonNull).forEach(p -> {
+            properties.put(p.getLeft(), TypeIdentifier.ofType(p.getRight()));
+            analyze(p.getRight());
+        });
 
-        relevantGetters.stream().map(g -> mapGetter(g, type)).filter(Objects::nonNull)
-                .forEach(p -> JsonMapper.addToObject(builder, p.getLeft(), p.getRight(), this::analyzeInternal));
+        return properties;
+    }
 
-        return builder.build();
+    private XmlAccessType getXmlAccessType(CtClass ctClass) {
+        try {
+            if (ctClass.hasAnnotation(XmlAccessorType.class))
+                return ((XmlAccessorType) ctClass.getAnnotation(XmlAccessorType.class)).value();
+        } catch (ClassNotFoundException e) {
+            LogProvider.error("Could not analyze JAXB annotation of type: " + e.getMessage());
+            LogProvider.debug(e);
+        }
+
+        return XmlAccessType.PUBLIC_MEMBER;
     }
 
     private static boolean isRelevant(final CtField field, final XmlAccessType accessType) {

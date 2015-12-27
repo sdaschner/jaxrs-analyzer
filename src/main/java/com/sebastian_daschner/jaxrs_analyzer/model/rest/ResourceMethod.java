@@ -31,7 +31,7 @@ public class ResourceMethod {
 
     private final MethodParameters methodParameters;
     private final HttpMethod method;
-    private TypeRepresentation requestBody;
+    private TypeIdentifier requestBody;
 
 
     public ResourceMethod(final HttpMethod method) {
@@ -66,11 +66,11 @@ public class ResourceMethod {
         return method;
     }
 
-    public TypeRepresentation getRequestBody() {
+    public TypeIdentifier getRequestBody() {
         return requestBody;
     }
 
-    public void setRequestBody(final TypeRepresentation requestBody) {
+    public void setRequestBody(final TypeIdentifier requestBody) {
         this.requestBody = requestBody;
     }
 

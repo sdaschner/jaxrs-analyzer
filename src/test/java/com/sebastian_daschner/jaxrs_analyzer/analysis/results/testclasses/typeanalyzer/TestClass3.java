@@ -16,17 +16,15 @@
 
 package com.sebastian_daschner.jaxrs_analyzer.analysis.results.testclasses.typeanalyzer;
 
+import com.sebastian_daschner.jaxrs_analyzer.analysis.results.TypeIdentifierUtils;
+import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeIdentifier;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeRepresentation;
 
-import javax.json.Json;
-import javax.json.JsonObject;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
+import java.util.*;
 
-/**
- * @author Sebastian Daschner
- */
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.FIELD)
 public class TestClass3 {
@@ -45,14 +43,27 @@ public class TestClass3 {
         return second;
     }
 
-    public static TypeRepresentation getResult() {
-        final TypeRepresentation representation = new TypeRepresentation(new com.sebastian_daschner.jaxrs_analyzer.model.types.Type(TestClass3.class.getName()));
+    public static Set<TypeRepresentation> expectedTypeRepresentations() {
+        final Map<String, TypeIdentifier> properties = new HashMap<>();
 
-        final JsonObject jsonObject = Json.createObjectBuilder().add("first", Json.createObjectBuilder().add("name", "string"))
-                .add("second", "string").add("third", Json.createObjectBuilder()).build();
+        final TypeIdentifier innerClassIdentifier = TypeIdentifier.ofType(new com.sebastian_daschner.jaxrs_analyzer.model.types.Type(InnerClass.class.getName()));
+        final TypeIdentifier typeIdentifier = TypeIdentifier.ofType(new com.sebastian_daschner.jaxrs_analyzer.model.types.Type(Type.class.getName()));
+        final TypeIdentifier anotherInnerIdentifier = TypeIdentifier.ofType(new com.sebastian_daschner.jaxrs_analyzer.model.types.Type(AnotherInner.class.getName()));
 
-        representation.getRepresentations().put("application/json", jsonObject);
-        return representation;
+        properties.put("first", innerClassIdentifier);
+        properties.put("second", typeIdentifier);
+        properties.put("third", anotherInnerIdentifier);
+
+        final TypeRepresentation testClass3 = TypeRepresentation.ofConcrete(expectedIdentifier(), properties);
+        final TypeRepresentation innerClass = TypeRepresentation.ofConcrete(innerClassIdentifier, Collections.singletonMap("name", TypeIdentifierUtils.STRING_IDENTIFIER));
+        final TypeRepresentation anotherInner = TypeRepresentation.ofConcrete(anotherInnerIdentifier);
+        final TypeRepresentation type = TypeRepresentation.ofConcrete(typeIdentifier);
+
+        return new HashSet<>(Arrays.asList(testClass3, innerClass, anotherInner, type));
+    }
+
+    public static TypeIdentifier expectedIdentifier() {
+        return TypeIdentifier.ofType(new com.sebastian_daschner.jaxrs_analyzer.model.types.Type(TestClass3.class.getName()));
     }
 
     public AnotherInner getThirrd() {

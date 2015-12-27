@@ -16,13 +16,17 @@
 
 package com.sebastian_daschner.jaxrs_analyzer.analysis.results.testclasses.typeanalyzer;
 
+import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeIdentifier;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeRepresentation;
 import com.sebastian_daschner.jaxrs_analyzer.model.types.Type;
+import com.sebastian_daschner.jaxrs_analyzer.model.types.Types;
 
-import javax.json.Json;
-import javax.json.JsonObject;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 public class TestClass11 {
@@ -31,14 +35,19 @@ public class TestClass11 {
     private int second;
     private TestClass11 child;
 
-    public static TypeRepresentation getResult() {
-        final TypeRepresentation representation = new TypeRepresentation(new Type(TestClass11.class.getName()));
+    public static Set<TypeRepresentation> expectedTypeRepresentations() {
+        final Map<String, TypeIdentifier> properties = new HashMap<>();
 
-        final JsonObject emptyObject = Json.createObjectBuilder().build();
-        final JsonObject jsonObject = Json.createObjectBuilder().add("first", false).add("second", 0).add("child", emptyObject).build();
+        final TypeIdentifier identifier = expectedIdentifier();
+        properties.put("first", TypeIdentifier.ofType(Types.PRIMITIVE_BOOLEAN));
+        properties.put("second", TypeIdentifier.ofType(Types.PRIMITIVE_INT));
+        properties.put("child", identifier);
 
-        representation.getRepresentations().put("application/json", jsonObject);
-        return representation;
+        return Collections.singleton(TypeRepresentation.ofConcrete(identifier, properties));
+    }
+
+    public static TypeIdentifier expectedIdentifier() {
+        return TypeIdentifier.ofType(new Type(TestClass11.class.getName()));
     }
 
 }

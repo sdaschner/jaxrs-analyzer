@@ -16,63 +16,148 @@
 
 package com.sebastian_daschner.jaxrs_analyzer.model.rest;
 
-import com.sebastian_daschner.jaxrs_analyzer.model.types.Type;
-
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.Map;
-import java.util.Objects;
 
 /**
- * Represents a request/response body type.
+ * Represents a request/response body type including the properties which actually will be serialized (e.g. depending on the JAXB mapping).
+ * Enables the {@link TypeRepresentationVisitor}s to access the recursive model.
  *
  * @author Sebastian Daschner
  */
-public class TypeRepresentation {
+public abstract class TypeRepresentation {
 
-    private final Type type;
+    private final TypeIdentifier identifier;
+
+    private TypeRepresentation(final TypeIdentifier identifier) {
+        this.identifier = identifier;
+    }
+
+    public abstract void accept(final TypeRepresentationVisitor visitor);
+
+    public TypeIdentifier getIdentifier() {
+        return identifier;
+    }
 
     /**
-     * The different media type representations (e.g. application/json -> object representation).
+     * Returns the component type which is either the actual type identifier or the contained type for a collection type.
+     *
+     * @return The component type
      */
-    private final Map<String, Object> representations = new HashMap<>();
-
-    public TypeRepresentation(final Type type) {
-        Objects.requireNonNull(type);
-        this.type = type;
-    }
-
-    public Type getType() {
-        return type;
-    }
-
-    public Map<String, Object> getRepresentations() {
-        return representations;
-    }
+    public abstract TypeIdentifier getComponentType();
 
     @Override
-    public boolean equals(final Object o) {
+    public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        final TypeRepresentation that = (TypeRepresentation) o;
-
-        if (!type.equals(that.type)) return false;
-        return representations.equals(that.representations);
+        TypeRepresentation that = (TypeRepresentation) o;
+        return identifier.equals(that.identifier);
     }
 
     @Override
     public int hashCode() {
-        int result = type.hashCode();
-        result = 31 * result + representations.hashCode();
-        return result;
+        return identifier.hashCode();
     }
 
-    @Override
-    public String toString() {
-        return "TypeRepresentation{" +
-                "type='" + type + '\'' +
-                ", representations=" + representations +
-                '}';
+    /**
+     * Creates a type representation of a concrete type (i.e. a Java type, not a programmatically created type) without actual properties.
+     * This is used for JDK internal types (like {@link String}, {@link Object}) where no property analysis is desired.
+     *
+     * @param identifier The type identifier
+     * @return The type representation
+     */
+    public static TypeRepresentation ofConcrete(final TypeIdentifier identifier) {
+        return new ConcreteTypeRepresentation(identifier, Collections.emptyMap());
+    }
+
+    /**
+     * Creates a type representation of a concrete type (i.e. a Java type, not a programmatically created type) plus the actual properties.
+     *
+     * @param identifier The type identifier
+     * @param properties The type (POJO) description
+     * @return The type representation
+     */
+    public static TypeRepresentation ofConcrete(final TypeIdentifier identifier, final Map<String, TypeIdentifier> properties) {
+        return new ConcreteTypeRepresentation(identifier, properties);
+    }
+
+    /**
+     * Creates a type representation of a collection type (i.e. anything assignable to {@link java.util.Collection} or an array) which contains an actual representation.
+     * <p>
+     * Example: {@code identifier: java.util.List<java.lang.String>, typeRepresentation: java.lang.String}
+     *
+     * @param identifier         The type identifier of the collection type
+     * @param typeRepresentation The contained type representation
+     * @return The type representation
+     */
+    public static TypeRepresentation ofCollection(final TypeIdentifier identifier, final TypeRepresentation typeRepresentation) {
+        return new CollectionTypeRepresentation(identifier, typeRepresentation);
+    }
+
+    public static class ConcreteTypeRepresentation extends TypeRepresentation {
+
+        private final Map<String, TypeIdentifier> properties;
+
+        private ConcreteTypeRepresentation(final TypeIdentifier identifier, final Map<String, TypeIdentifier> properties) {
+            super(identifier);
+            this.properties = properties;
+        }
+
+        public Map<String, TypeIdentifier> getProperties() {
+            return properties;
+        }
+
+        @Override
+        public TypeIdentifier getComponentType() {
+            return getIdentifier();
+        }
+
+        @Override
+        public void accept(final TypeRepresentationVisitor visitor) {
+            visitor.visit(this);
+        }
+
+        @Override
+        public String toString() {
+            return "ConcreteTypeRepresentation{" +
+                    "identifier=" + getIdentifier() +
+                    ",properties=" + properties +
+                    '}';
+        }
+    }
+
+    public static class CollectionTypeRepresentation extends TypeRepresentation {
+
+        private final TypeRepresentation representation;
+
+        private CollectionTypeRepresentation(final TypeIdentifier identifier, final TypeRepresentation representation) {
+            super(identifier);
+            this.representation = representation;
+        }
+
+        public TypeRepresentation getRepresentation() {
+            return representation;
+        }
+
+        @Override
+        public TypeIdentifier getComponentType() {
+            return representation.getIdentifier();
+        }
+
+        @Override
+        public void accept(final TypeRepresentationVisitor visitor) {
+            visitor.visit(this);
+            representation.accept(visitor);
+        }
+
+        @Override
+        public String toString() {
+            return "CollectionTypeRepresentation{" +
+                    "identifier=" + getIdentifier() +
+                    ",representation=" + representation +
+                    '}';
+        }
     }
 
 }

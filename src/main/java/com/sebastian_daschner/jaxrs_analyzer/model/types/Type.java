@@ -52,7 +52,7 @@ public class Type {
     /**
      * Constructs a new type for the given Javassist signature type and the generic class signature of the containing classes.
      * The later is used for resolving generic type arguments (e.g. {@code public void A getSomething()} declared in {@code public class AClass&lt;A&gt;})
-     * or generic methods (e.g. {@code public <T> T getSomething(Class<T> clazz, ...)}).
+     * or generic methods (e.g. {@code public &lt;T&gt; T getSomething(Class&lt;T&gt; clazz, ...)}).
      *
      * @param sigType                The signature type
      * @param genericClassSignature  The generic class signature of the containing class, needed for generic classes (can be {@code null}).

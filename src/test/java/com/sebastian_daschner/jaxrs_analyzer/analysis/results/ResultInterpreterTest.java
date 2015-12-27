@@ -17,10 +17,7 @@
 package com.sebastian_daschner.jaxrs_analyzer.analysis.results;
 
 import com.sebastian_daschner.jaxrs_analyzer.builder.*;
-import com.sebastian_daschner.jaxrs_analyzer.model.rest.HttpMethod;
-import com.sebastian_daschner.jaxrs_analyzer.model.rest.ResourceMethod;
-import com.sebastian_daschner.jaxrs_analyzer.model.rest.Resources;
-import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeRepresentation;
+import com.sebastian_daschner.jaxrs_analyzer.model.rest.*;
 import com.sebastian_daschner.jaxrs_analyzer.model.results.ClassResult;
 import com.sebastian_daschner.jaxrs_analyzer.model.results.MethodResult;
 import com.sebastian_daschner.jaxrs_analyzer.model.types.Type;
@@ -28,13 +25,14 @@ import com.sebastian_daschner.jaxrs_analyzer.model.types.Types;
 import org.junit.Before;
 import org.junit.Test;
 
-import javax.json.Json;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
+import static com.sebastian_daschner.jaxrs_analyzer.analysis.results.TypeIdentifierUtils.STRING_IDENTIFIER;
 import static org.junit.Assert.assertEquals;
 
 public class ResultInterpreterTest {
@@ -51,7 +49,7 @@ public class ResultInterpreterTest {
         final Resources expectedResult = new Resources();
         expectedResult.setBasePath("path");
         final ResourceMethod resourceMethod = ResourceMethodBuilder.withMethod(HttpMethod.GET)
-                .andResponse(200, ResponseBuilder.withResponseBody(new TypeRepresentation(Types.STRING)).build())
+                .andResponse(200, ResponseBuilder.withResponseBody(STRING_IDENTIFIER).build())
                 .build();
         expectedResult.addMethod("test", resourceMethod);
 
@@ -72,7 +70,7 @@ public class ResultInterpreterTest {
         final Resources expectedResult = new Resources();
         expectedResult.setBasePath("path");
         final ResourceMethod resourceGetMethod = ResourceMethodBuilder.withMethod(HttpMethod.GET)
-                .andResponse(200, ResponseBuilder.withResponseBody(new TypeRepresentation(Types.STRING)).build())
+                .andResponse(200, ResponseBuilder.withResponseBody(STRING_IDENTIFIER).build())
                 .build();
         expectedResult.addMethod("test", resourceGetMethod);
         final ResourceMethod resourcePostMethod = ResourceMethodBuilder.withMethod(HttpMethod.POST)
@@ -98,11 +96,13 @@ public class ResultInterpreterTest {
     public void testNormalizeGenericEntity() {
         final Resources expectedResult = new Resources();
         expectedResult.setBasePath("path");
-        final TypeRepresentation representation = new TypeRepresentation(Types.STRING);
-        representation.getRepresentations().put("application/json", Json.createArrayBuilder().add("string").build());
+
+        final TypeIdentifier stringListIdentifier = TypeIdentifier.ofType(new Type("java.util.List<java.lang.String>"));
+        final TypeRepresentation stringList = TypeRepresentation.ofCollection(stringListIdentifier, TypeRepresentation.ofConcrete(STRING_IDENTIFIER));
+        expectedResult.getTypeRepresentations().put(stringListIdentifier, stringList);
 
         final ResourceMethod resourceGetMethod = ResourceMethodBuilder.withMethod(HttpMethod.GET)
-                .andResponse(200, ResponseBuilder.withResponseBody(representation).build())
+                .andResponse(200, ResponseBuilder.withResponseBody(stringListIdentifier).build())
                 .build();
         expectedResult.addMethod("test", resourceGetMethod);
 
@@ -123,10 +123,9 @@ public class ResultInterpreterTest {
     public void testNormalizeGenericEntityNoCollection() {
         final Resources expectedResult = new Resources();
         expectedResult.setBasePath("path");
-        final TypeRepresentation representation = new TypeRepresentation(Types.STRING);
 
         final ResourceMethod resourceGetMethod = ResourceMethodBuilder.withMethod(HttpMethod.GET)
-                .andResponse(200, ResponseBuilder.withResponseBody(representation).build())
+                .andResponse(200, ResponseBuilder.withResponseBody(STRING_IDENTIFIER).build())
                 .build();
         expectedResult.addMethod("test", resourceGetMethod);
 
@@ -148,7 +147,7 @@ public class ResultInterpreterTest {
         final Resources expectedResult = new Resources();
         expectedResult.setBasePath("path");
         final ResourceMethod resourceGetMethod = ResourceMethodBuilder.withMethod(HttpMethod.GET)
-                .andResponse(200, ResponseBuilder.withResponseBody(new TypeRepresentation(Types.STRING)).build())
+                .andResponse(200, ResponseBuilder.withResponseBody(STRING_IDENTIFIER).build())
                 .andResponseMediaTypes("application/xml").build();
         expectedResult.addMethod("test", resourceGetMethod);
 
@@ -169,7 +168,7 @@ public class ResultInterpreterTest {
         final Resources expectedResult = new Resources();
         expectedResult.setBasePath("path");
         final ResourceMethod resourceGetMethod = ResourceMethodBuilder.withMethod(HttpMethod.GET)
-                .andResponse(200, ResponseBuilder.withResponseBody(new TypeRepresentation(Types.STRING)).build())
+                .andResponse(200, ResponseBuilder.withResponseBody(STRING_IDENTIFIER).build())
                 .andResponseMediaTypes("application/json").build();
         expectedResult.addMethod("test", resourceGetMethod);
 
@@ -191,7 +190,7 @@ public class ResultInterpreterTest {
         final Resources expectedResult = new Resources();
         expectedResult.setBasePath("path/nested");
         final ResourceMethod resourceGetMethod = ResourceMethodBuilder.withMethod(HttpMethod.GET)
-                .andResponse(200, ResponseBuilder.withResponseBody(new TypeRepresentation(Types.STRING)).build())
+                .andResponse(200, ResponseBuilder.withResponseBody(STRING_IDENTIFIER).build())
                 .andResponseMediaTypes("application/json").build();
         expectedResult.addMethod("test", resourceGetMethod);
 
@@ -212,7 +211,7 @@ public class ResultInterpreterTest {
         final Resources expectedResult = new Resources();
         expectedResult.setBasePath("path");
         final ResourceMethod resourceGetMethod = ResourceMethodBuilder.withMethod(HttpMethod.GET)
-                .andResponse(200, ResponseBuilder.withResponseBody(new TypeRepresentation(Types.STRING)).build())
+                .andResponse(200, ResponseBuilder.withResponseBody(STRING_IDENTIFIER).build())
                 .andResponseMediaTypes("application/json").build();
         final ResourceMethod resourcePostMethod = ResourceMethodBuilder.withMethod(HttpMethod.POST).andResponse(204, ResponseBuilder.newBuilder().build())
                 .andRequestBodyType(Types.STRING).build();
@@ -236,11 +235,13 @@ public class ResultInterpreterTest {
     public void testNormalizeList() {
         final Resources expectedResult = new Resources();
         expectedResult.setBasePath("path");
-        final TypeRepresentation representation = new TypeRepresentation(Types.STRING);
-        representation.getRepresentations().put("application/json", Json.createArrayBuilder().add("string").build());
+
+        final TypeIdentifier stringListIdentifier = TypeIdentifier.ofType(new Type("java.util.List<java.lang.String>"));
+        final TypeRepresentation stringList = TypeRepresentation.ofCollection(stringListIdentifier, TypeRepresentation.ofConcrete(STRING_IDENTIFIER));
+        expectedResult.getTypeRepresentations().put(stringListIdentifier, stringList);
 
         final ResourceMethod resourceGetMethod = ResourceMethodBuilder.withMethod(HttpMethod.GET)
-                .andResponse(200, ResponseBuilder.withResponseBody(representation).build())
+                .andResponse(200, ResponseBuilder.withResponseBody(stringListIdentifier).build())
                 .build();
         expectedResult.addMethod("test", resourceGetMethod);
 
@@ -263,11 +264,12 @@ public class ResultInterpreterTest {
 
         final Resources expectedResult = new Resources();
         expectedResult.setBasePath("path");
-        final TypeRepresentation representation = new TypeRepresentation(configurationType);
-        representation.getRepresentations().put("application/json", Json.createObjectBuilder().add("name", "string").build());
+        final TypeIdentifier identifier = TypeIdentifier.ofType(configurationType);
+        expectedResult.getTypeRepresentations().put(identifier, TypeRepresentation.ofConcrete(identifier,
+                Collections.singletonMap("name", STRING_IDENTIFIER)));
 
         final ResourceMethod resourceGetMethod = ResourceMethodBuilder.withMethod(HttpMethod.GET)
-                .andResponse(200, ResponseBuilder.withResponseBody(representation).build())
+                .andResponse(200, ResponseBuilder.withResponseBody(identifier).build())
                 .andResponse(204, ResponseBuilder.newBuilder().build())
                 .build();
         expectedResult.addMethod("test", resourceGetMethod);

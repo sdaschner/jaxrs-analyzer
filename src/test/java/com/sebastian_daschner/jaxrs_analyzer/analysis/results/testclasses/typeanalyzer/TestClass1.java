@@ -16,15 +16,17 @@
 
 package com.sebastian_daschner.jaxrs_analyzer.analysis.results.testclasses.typeanalyzer;
 
+import com.sebastian_daschner.jaxrs_analyzer.analysis.results.TypeIdentifierUtils;
+import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeIdentifier;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeRepresentation;
 import com.sebastian_daschner.jaxrs_analyzer.model.types.Type;
+import com.sebastian_daschner.jaxrs_analyzer.model.types.Types;
 
-import javax.json.Json;
-import javax.json.JsonObject;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
-/**
- * @author Sebastian Daschner
- */
 public class TestClass1 {
 
     private static String PRIVATE_FIELD;
@@ -49,14 +51,18 @@ public class TestClass1 {
         return null;
     }
 
+    public static Set<TypeRepresentation> expectedTypeRepresentations() {
+        final Map<String, TypeIdentifier> properties = new HashMap<>();
 
-    public static TypeRepresentation getResult() {
-        final TypeRepresentation representation = new TypeRepresentation(new Type(TestClass1.class.getName()));
+        properties.put("publicField", TypeIdentifierUtils.STRING_IDENTIFIER);
+        properties.put("test", TypeIdentifierUtils.STRING_IDENTIFIER);
+        properties.put("int", TypeIdentifier.ofType(Types.PRIMITIVE_INT));
 
-        final JsonObject jsonObject = Json.createObjectBuilder().add("publicField", "string").add("test", "string").add("int", 0).build();
+        return Collections.singleton(TypeRepresentation.ofConcrete(expectedIdentifier(), properties));
+    }
 
-        representation.getRepresentations().put("application/json", jsonObject);
-        return representation;
+    public static TypeIdentifier expectedIdentifier() {
+        return TypeIdentifier.ofType(new Type(TestClass1.class.getName()));
     }
 
 }

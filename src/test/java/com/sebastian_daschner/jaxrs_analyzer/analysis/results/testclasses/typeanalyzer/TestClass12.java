@@ -16,13 +16,14 @@
 
 package com.sebastian_daschner.jaxrs_analyzer.analysis.results.testclasses.typeanalyzer;
 
+import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeIdentifier;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeRepresentation;
 import com.sebastian_daschner.jaxrs_analyzer.model.types.Type;
+import com.sebastian_daschner.jaxrs_analyzer.model.types.Types;
 
-import javax.json.Json;
-import javax.json.JsonObject;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
+import java.util.*;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 public class TestClass12 {
@@ -30,20 +31,33 @@ public class TestClass12 {
     private int first;
     private InnerTestClass child;
 
-    public static TypeRepresentation getResult() {
-        final TypeRepresentation representation = new TypeRepresentation(new Type(TestClass12.class.getName()));
-
-        final JsonObject inner = Json.createObjectBuilder().add("second", 0).add("child", Json.createObjectBuilder()).build();
-        final JsonObject jsonObject = Json.createObjectBuilder().add("first", 0).add("child", inner).build();
-
-        representation.getRepresentations().put("application/json", jsonObject);
-        return representation;
-    }
-
     @XmlAccessorType(XmlAccessType.FIELD)
     private class InnerTestClass {
         private int second;
         private TestClass12 child;
+    }
+
+    public static Set<TypeRepresentation> expectedTypeRepresentations() {
+        final Map<String, TypeIdentifier> properties = new HashMap<>();
+
+        final TypeIdentifier innerTestIdentifier = TypeIdentifier.ofType(new Type(InnerTestClass.class.getName()));
+        properties.put("first", TypeIdentifier.ofType(Types.PRIMITIVE_INT));
+        properties.put("child", innerTestIdentifier);
+
+        final TypeIdentifier testClass12Identifier = expectedIdentifier();
+        final TypeRepresentation testClass12 = TypeRepresentation.ofConcrete(testClass12Identifier, properties);
+
+        final Map<String, TypeIdentifier> innerProperties = new HashMap<>();
+        innerProperties.put("second", TypeIdentifier.ofType(Types.PRIMITIVE_INT));
+        innerProperties.put("child", testClass12Identifier);
+
+        final TypeRepresentation innerTestClass = TypeRepresentation.ofConcrete(innerTestIdentifier, innerProperties);
+
+        return new HashSet<>(Arrays.asList(testClass12, innerTestClass));
+    }
+
+    public static TypeIdentifier expectedIdentifier() {
+        return TypeIdentifier.ofType(new Type(TestClass12.class.getName()));
     }
 
 }

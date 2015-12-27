@@ -16,19 +16,20 @@
 
 package com.sebastian_daschner.jaxrs_analyzer.analysis.results.testclasses.typeanalyzer;
 
+import com.sebastian_daschner.jaxrs_analyzer.analysis.results.TypeIdentifierUtils;
+import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeIdentifier;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeRepresentation;
 import com.sebastian_daschner.jaxrs_analyzer.model.types.Type;
 
-import javax.json.Json;
-import javax.json.JsonObject;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
-/**
- * @author Sebastian Daschner
- */
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.NONE)
 public class TestClass8 {
@@ -46,13 +47,16 @@ public class TestClass8 {
         return second;
     }
 
-    public static TypeRepresentation getResult() {
-        final TypeRepresentation representation = new TypeRepresentation(new Type(TestClass8.class.getName()));
+    public static Set<TypeRepresentation> expectedTypeRepresentations() {
+        final Map<String, TypeIdentifier> properties = new HashMap<>();
 
-        final JsonObject jsonObject = Json.createObjectBuilder().add("third", "string").build();
+        properties.put("third", TypeIdentifierUtils.STRING_IDENTIFIER);
 
-        representation.getRepresentations().put("application/json", jsonObject);
-        return representation;
+        return Collections.singleton(TypeRepresentation.ofConcrete(expectedIdentifier(), properties));
+    }
+
+    public static TypeIdentifier expectedIdentifier() {
+        return TypeIdentifier.ofType(new Type(TestClass8.class.getName()));
     }
 
 }

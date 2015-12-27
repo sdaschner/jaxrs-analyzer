@@ -27,13 +27,13 @@ import java.util.Set;
 public class Response {
 
     private final Set<String> headers = new HashSet<>();
-    private final TypeRepresentation responseBody;
+    private final TypeIdentifier responseBody;
 
     public Response() {
         this(null);
     }
 
-    public Response(final TypeRepresentation responseBody) {
+    public Response(final TypeIdentifier responseBody) {
         this.responseBody = responseBody;
     }
 
@@ -41,16 +41,16 @@ public class Response {
         return headers;
     }
 
-    public TypeRepresentation getResponseBody() {
+    public TypeIdentifier getResponseBody() {
         return responseBody;
     }
 
     @Override
-    public boolean equals(final Object o) {
+    public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        final Response response = (Response) o;
+        Response response = (Response) o;
 
         if (!headers.equals(response.headers)) return false;
         return !(responseBody != null ? !responseBody.equals(response.responseBody) : response.responseBody != null);

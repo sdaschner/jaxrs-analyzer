@@ -18,8 +18,6 @@ package com.sebastian_daschner.jaxrs_analyzer.backend.swagger;
 
 import com.sebastian_daschner.jaxrs_analyzer.model.types.Type;
 
-import javax.json.JsonValue;
-
 import static com.sebastian_daschner.jaxrs_analyzer.model.types.Types.*;
 
 /**
@@ -56,31 +54,6 @@ final class SwaggerUtils {
             return SwaggerType.ARRAY;
 
         return SwaggerType.OBJECT;
-    }
-
-    /**
-     * Converts the given JSON value type to the Swagger JSON type.
-     *
-     * @param type The JSON value type
-     * @return The Swagger type
-     */
-    static SwaggerType toSwaggerType(final JsonValue.ValueType type) {
-        switch (type) {
-            case ARRAY:
-                return SwaggerType.ARRAY;
-            case OBJECT:
-                return SwaggerType.OBJECT;
-            case STRING:
-                return SwaggerType.STRING;
-            case NUMBER:
-                return SwaggerType.NUMBER;
-            case TRUE:
-            case FALSE:
-                return SwaggerType.BOOLEAN;
-            case NULL:
-            default:
-                return SwaggerType.NULL;
-        }
     }
 
 }

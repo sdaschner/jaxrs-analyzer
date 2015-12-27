@@ -1,0 +1,41 @@
+package com.sebastian_daschner.jaxrs_analyzer.analysis.results.testclasses.typeanalyzer;
+
+import com.sebastian_daschner.jaxrs_analyzer.analysis.results.TypeIdentifierUtils;
+import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeIdentifier;
+import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeRepresentation;
+import com.sebastian_daschner.jaxrs_analyzer.model.types.Type;
+
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import java.util.*;
+
+// TODO remove
+@XmlAccessorType(XmlAccessType.FIELD)
+public class TestClass16 extends SuperTestClass2 {
+
+    private String world;
+    private SuperTestClass2 partner;
+
+    public static Set<TypeRepresentation> expectedTypeRepresentations() {
+        final Map<String, TypeIdentifier> properties = new HashMap<>();
+
+        final TypeIdentifier superTestClass2 = TypeIdentifier.ofType(new Type(SuperTestClass2.class.getName()));
+        final TypeIdentifier stringIdentifier = TypeIdentifierUtils.STRING_IDENTIFIER;
+        properties.put("hello", stringIdentifier);
+        properties.put("world", stringIdentifier);
+        properties.put("partner", superTestClass2);
+
+        return new HashSet<>(Arrays.asList(TypeRepresentation.ofConcrete(expectedIdentifier(), properties),
+                TypeRepresentation.ofConcrete(superTestClass2, Collections.singletonMap("hello", stringIdentifier))));
+    }
+
+    public static TypeIdentifier expectedIdentifier() {
+        return TypeIdentifier.ofType(new Type(TestClass16.class.getName()));
+    }
+
+}
+
+@XmlAccessorType(XmlAccessType.FIELD)
+class SuperTestClass2 {
+    private String hello;
+}

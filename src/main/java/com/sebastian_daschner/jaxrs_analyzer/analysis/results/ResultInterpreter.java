@@ -25,21 +25,18 @@ import com.sebastian_daschner.jaxrs_analyzer.model.results.ClassResult;
 import com.sebastian_daschner.jaxrs_analyzer.model.results.MethodResult;
 import com.sebastian_daschner.jaxrs_analyzer.model.types.Type;
 
-import javax.ws.rs.core.MediaType;
 import java.util.Set;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 /**
- * Interprets the analyzed project results to REST results. This class is thread-safe.
+ * Interprets the analyzed project results to REST results.
  *
  * @author Sebastian Daschner
  */
 public class ResultInterpreter {
 
-    private final Lock lock = new ReentrantLock();
-    private final TypeAnalyzer typeAnalyzer = new TypeAnalyzer();
+    private JavaTypeAnalyzer javaTypeAnalyzer;
     private Resources resources;
+    private DynamicTypeAnalyzer dynamicTypeAnalyzer;
 
     /**
      * Interprets the class results.
@@ -47,17 +44,15 @@ public class ResultInterpreter {
      * @return All REST resources
      */
     public Resources interpret(final Set<ClassResult> classResults) {
-        try {
-            lock.lock();
-            resources = new Resources();
-            resources.setBasePath(PathNormalizer.getApplicationPath(classResults));
+        resources = new Resources();
+        resources.setBasePath(PathNormalizer.getApplicationPath(classResults));
 
-            classResults.stream().filter(c -> c.getResourcePath() != null).forEach(this::interpretClassResult);
+        javaTypeAnalyzer = new JavaTypeAnalyzer(resources.getTypeRepresentations());
+        dynamicTypeAnalyzer = new DynamicTypeAnalyzer(resources.getTypeRepresentations());
 
-            return resources;
-        } finally {
-            lock.unlock();
-        }
+        classResults.stream().filter(c -> c.getResourcePath() != null).forEach(this::interpretClassResult);
+
+        return resources;
     }
 
     /**
@@ -100,8 +95,9 @@ public class ResultInterpreter {
         // HTTP method and method parameters
         final ResourceMethod resourceMethod = new ResourceMethod(methodResult.getHttpMethod(), methodResult.getMethodParameters());
 
-        if (methodResult.getRequestBodyType() != null)
-            resourceMethod.setRequestBody(typeAnalyzer.analyze(methodResult.getRequestBodyType()));
+        if (methodResult.getRequestBodyType() != null) {
+            resourceMethod.setRequestBody(javaTypeAnalyzer.analyze(methodResult.getRequestBodyType()));
+        }
 
         // add default status code due to JSR 339
         addDefaultResponses(methodResult);
@@ -128,12 +124,16 @@ public class ResultInterpreter {
     private void interpretResponse(final HttpResponse httpResponse, final ResourceMethod method) {
         method.getResponseMediaTypes().addAll(httpResponse.getContentTypes());
         httpResponse.getStatuses().stream().forEach(s -> {
-            final Response response = httpResponse.getEntityTypes().isEmpty() ? new Response() :
-                    new Response(typeAnalyzer.analyze(JavaUtils.determineMostSpecificType(httpResponse.getEntityTypes().stream().toArray(Type[]::new))));
+            Response response = httpResponse.getInlineEntities().stream().findAny()
+                    .map(JsonMapper::map).map(dynamicTypeAnalyzer::analyze).map(Response::new).orElse(null);
+
+            if (response == null) {
+                // no inline entities -> potential class type will be considered
+                response = httpResponse.getEntityTypes().isEmpty() ? new Response() :
+                        new Response(javaTypeAnalyzer.analyze(JavaUtils.determineMostSpecificType(httpResponse.getEntityTypes().stream().toArray(Type[]::new))));
+            }
 
             response.getHeaders().addAll(httpResponse.getHeaders());
-            httpResponse.getInlineEntities().stream().map(JsonMapper::map)
-                    .forEach(j -> response.getResponseBody().getRepresentations().put(MediaType.APPLICATION_JSON, j));
 
             method.getResponses().put(s, response);
         });

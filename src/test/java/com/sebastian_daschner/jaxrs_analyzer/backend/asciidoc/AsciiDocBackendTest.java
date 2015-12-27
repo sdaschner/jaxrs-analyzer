@@ -1,12 +1,10 @@
 package com.sebastian_daschner.jaxrs_analyzer.backend.asciidoc;
 
+import com.sebastian_daschner.jaxrs_analyzer.backend.Backend;
 import com.sebastian_daschner.jaxrs_analyzer.builder.ResourceMethodBuilder;
 import com.sebastian_daschner.jaxrs_analyzer.builder.ResourcesBuilder;
 import com.sebastian_daschner.jaxrs_analyzer.builder.ResponseBuilder;
-import com.sebastian_daschner.jaxrs_analyzer.model.rest.HttpMethod;
-import com.sebastian_daschner.jaxrs_analyzer.model.rest.Project;
-import com.sebastian_daschner.jaxrs_analyzer.model.rest.Resources;
-import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeRepresentation;
+import com.sebastian_daschner.jaxrs_analyzer.model.rest.*;
 import com.sebastian_daschner.jaxrs_analyzer.model.types.Type;
 import com.sebastian_daschner.jaxrs_analyzer.model.types.Types;
 import junit.framework.TestCase;
@@ -14,14 +12,15 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
-import javax.json.Json;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.Map;
 
 @RunWith(Parameterized.class)
 public class AsciiDocBackendTest extends TestCase {
 
-    private final AsciiDocBackend cut;
+    private final Backend cut;
     private final Resources resources;
     private final String expectedOutput;
 
@@ -42,11 +41,15 @@ public class AsciiDocBackendTest extends TestCase {
     @Parameterized.Parameters
     public static Collection<Object[]> data() {
         final Collection<Object[]> data = new LinkedList<>();
+        final TypeIdentifier stringIdentifier = TypeIdentifier.ofType(Types.STRING);
+        final TypeIdentifier intIdentifier = TypeIdentifier.ofType(Types.PRIMITIVE_INT);
 
-        TypeRepresentation representation;
+        TypeIdentifier identifier;
+        TypeIdentifier nestedIdentifier;
+        Map<String, TypeIdentifier> properties = new HashMap<>();
 
         add(data, ResourcesBuilder.withBase("rest").andResource("res1", ResourceMethodBuilder.withMethod(HttpMethod.GET)
-                        .andResponse(200, ResponseBuilder.withResponseBody(new TypeRepresentation(Types.STRING)).andHeaders("Location").build()).build()).build(),
+                        .andResponse(200, ResponseBuilder.withResponseBody(TypeIdentifier.ofType(Types.STRING)).andHeaders("Location").build()).build()).build(),
                 "= REST resources of project name\n" +
                         "1.0\n" +
                         "\n" +
@@ -62,11 +65,13 @@ public class AsciiDocBackendTest extends TestCase {
                         "*Header*: `Location` + \n" +
                         "*Response Body*: (`java.lang.String`) + \n\n");
 
-        representation = new TypeRepresentation(Types.JSON_OBJECT);
-        representation.getRepresentations().put("application/json", Json.createObjectBuilder().add("key", "string").add("another", 0).build());
+        identifier = TypeIdentifier.ofDynamic();
+        properties.put("key", stringIdentifier);
+        properties.put("another", intIdentifier);
         add(data, ResourcesBuilder.withBase("rest")
+                        .andTypeRepresentation(identifier, TypeRepresentation.ofConcrete(identifier, properties))
                         .andResource("res1", ResourceMethodBuilder.withMethod(HttpMethod.GET)
-                                .andResponse(200, ResponseBuilder.withResponseBody(representation).build()).build()).build(),
+                                .andResponse(200, ResponseBuilder.withResponseBody(identifier).build()).build()).build(),
                 "= REST resources of project name\n" +
                         "1.0\n" +
                         "\n" +
@@ -79,14 +84,17 @@ public class AsciiDocBackendTest extends TestCase {
                         "*Content-Type*: `\\*/*`\n" +
                         "\n" +
                         "==== `200 OK`\n" +
-                        "*Response Body*: (`javax.json.JsonObject`) + \n" +
-                        "`application/json`: `{\"key\":\"string\",\"another\":0}` + \n\n");
+                        "*Response Body*: (`javax.json.Json`) + \n" +
+                        "`{\"another\":0,\"key\":\"string\"}` + \n\n");
 
-        representation = new TypeRepresentation(Types.JSON_OBJECT);
-        representation.getRepresentations().put("application/json", Json.createArrayBuilder().add(Json.createObjectBuilder().add("key", "string").add("another", 0)).build());
+        identifier = TypeIdentifier.ofDynamic();
+        properties = new HashMap<>();
+        properties.put("key", stringIdentifier);
+        properties.put("another", intIdentifier);
         add(data, ResourcesBuilder.withBase("rest")
+                        .andTypeRepresentation(identifier, TypeRepresentation.ofCollection(identifier, TypeRepresentation.ofConcrete(TypeIdentifier.ofDynamic(), properties)))
                         .andResource("res1", ResourceMethodBuilder.withMethod(HttpMethod.GET)
-                                .andResponse(200, ResponseBuilder.withResponseBody(representation).build()).build()).build(),
+                                .andResponse(200, ResponseBuilder.withResponseBody(identifier).build()).build()).build(),
                 "= REST resources of project name\n" +
                         "1.0\n" +
                         "\n" +
@@ -99,15 +107,14 @@ public class AsciiDocBackendTest extends TestCase {
                         "*Content-Type*: `\\*/*`\n" +
                         "\n" +
                         "==== `200 OK`\n" +
-                        "*Response Body*: (`javax.json.JsonObject`) + \n" +
-                        "`application/json`: `[{\"key\":\"string\",\"another\":0}]` + \n\n");
+                        "*Response Body*: (`javax.json.Json`) + \n" +
+                        "`[{\"another\":0,\"key\":\"string\"}]` + \n\n");
 
-        representation = new TypeRepresentation(Types.JSON_ARRAY);
-        representation.getRepresentations().put("application/json", Json.createArrayBuilder().add("string").add(0).build());
-        representation.getRepresentations().put("application/xml", Json.createArrayBuilder().add("string").add(0).build());
+        identifier = TypeIdentifier.ofDynamic();
         add(data, ResourcesBuilder.withBase("rest")
+                        .andTypeRepresentation(identifier, TypeRepresentation.ofCollection(identifier, TypeRepresentation.ofConcrete(stringIdentifier)))
                         .andResource("res1", ResourceMethodBuilder.withMethod(HttpMethod.GET)
-                                .andResponse(200, ResponseBuilder.withResponseBody(representation).build()).build()).build(),
+                                .andResponse(200, ResponseBuilder.withResponseBody(identifier).build()).build()).build(),
                 "= REST resources of project name\n" +
                         "1.0\n" +
                         "\n" +
@@ -120,15 +127,16 @@ public class AsciiDocBackendTest extends TestCase {
                         "*Content-Type*: `\\*/*`\n" +
                         "\n" +
                         "==== `200 OK`\n" +
-                        "*Response Body*: (`javax.json.JsonArray`) + \n" +
-                        "`application/json`: `[\"string\",0]` + \n" +
-                        "`application/xml`: `[\"string\",0]` + \n\n");
+                        "*Response Body*: (`javax.json.Json`) + \n" +
+                        "`[\"string\"]` + \n\n");
 
-        representation = new TypeRepresentation(Types.JSON_ARRAY);
-        representation.getRepresentations().put("application/json", Json.createArrayBuilder().add(Json.createObjectBuilder().add("key", "string")).add(Json.createObjectBuilder().add("key", "string")).build());
+        identifier = TypeIdentifier.ofDynamic();
+        properties = new HashMap<>();
+        properties.put("key", stringIdentifier);
         add(data, ResourcesBuilder.withBase("rest")
+                        .andTypeRepresentation(identifier, TypeRepresentation.ofCollection(identifier, TypeRepresentation.ofConcrete(TypeIdentifier.ofDynamic(), properties)))
                         .andResource("res1", ResourceMethodBuilder.withMethod(HttpMethod.GET)
-                                .andResponse(200, ResponseBuilder.withResponseBody(representation).build()).build()).build(),
+                                .andResponse(200, ResponseBuilder.withResponseBody(identifier).build()).build()).build(),
                 "= REST resources of project name\n" +
                         "1.0\n" +
                         "\n" +
@@ -141,14 +149,17 @@ public class AsciiDocBackendTest extends TestCase {
                         "*Content-Type*: `\\*/*`\n" +
                         "\n" +
                         "==== `200 OK`\n" +
-                        "*Response Body*: (`javax.json.JsonArray`) + \n" +
-                        "`application/json`: `[{\"key\":\"string\"},{\"key\":\"string\"}]` + \n\n");
+                        "*Response Body*: (`javax.json.Json`) + \n" +
+                        "`[{\"key\":\"string\"}]` + \n\n");
 
-        representation = new TypeRepresentation(new Type("com.sebastian_daschner.test.Model"));
-        representation.getRepresentations().put("application/json", Json.createObjectBuilder().add("name", "string").add("value", 0).build());
+        identifier = TypeIdentifier.ofType(new Type("com.sebastian_daschner.test.Model"));
+        properties = new HashMap<>();
+        properties.put("name", stringIdentifier);
+        properties.put("value", intIdentifier);
         add(data, ResourcesBuilder.withBase("rest")
+                        .andTypeRepresentation(identifier, TypeRepresentation.ofConcrete(identifier, properties))
                         .andResource("res1", ResourceMethodBuilder.withMethod(HttpMethod.GET)
-                                .andResponse(200, ResponseBuilder.withResponseBody(representation).build()).build()).build(),
+                                .andResponse(200, ResponseBuilder.withResponseBody(identifier).build()).build()).build(),
                 "= REST resources of project name\n" +
                         "1.0\n" +
                         "\n" +
@@ -162,12 +173,35 @@ public class AsciiDocBackendTest extends TestCase {
                         "\n" +
                         "==== `200 OK`\n" +
                         "*Response Body*: (`com.sebastian_daschner.test.Model`) + \n" +
-                        "`application/json`: `{\"name\":\"string\",\"value\":0}` + \n\n");
+                        "`{\"name\":\"string\",\"value\":0}` + \n\n");
 
-        representation = new TypeRepresentation(new Type("com.sebastian_daschner.test.Model"));
-        representation.getRepresentations().put("application/json", Json.createArrayBuilder().add(Json.createObjectBuilder().add("name", "string").add("value", 0)).build());
+        identifier = TypeIdentifier.ofType(new Type("java.util.List<com.sebastian_daschner.test.Model>"));
+        nestedIdentifier = TypeIdentifier.ofType(new Type("com.sebastian_daschner.test.Model"));
+        properties = new HashMap<>();
+        properties.put("name", stringIdentifier);
+        properties.put("value", intIdentifier);
         add(data, ResourcesBuilder.withBase("rest")
-                        .andResource("res1", ResourceMethodBuilder.withMethod(HttpMethod.POST).andRequestBodyType(representation).andAcceptMediaTypes("application/json")
+                        .andTypeRepresentation(identifier, TypeRepresentation.ofCollection(identifier, TypeRepresentation.ofConcrete(nestedIdentifier, properties)))
+                        .andResource("res1", ResourceMethodBuilder.withMethod(HttpMethod.GET)
+                                .andResponse(200, ResponseBuilder.withResponseBody(identifier).build()).build()).build(),
+                "= REST resources of project name\n" +
+                        "1.0\n" +
+                        "\n" +
+                        "== `GET rest/res1`\n" +
+                        "\n" +
+                        "=== Request\n" +
+                        "_No body_ + \n" +
+                        "\n" +
+                        "=== Response\n" +
+                        "*Content-Type*: `\\*/*`\n" +
+                        "\n" +
+                        "==== `200 OK`\n" +
+                        "*Response Body*: (Collection of `com.sebastian_daschner.test.Model`) + \n" +
+                        "`[{\"name\":\"string\",\"value\":0}]` + \n\n");
+
+        add(data, ResourcesBuilder.withBase("rest")
+                        .andTypeRepresentation(identifier, TypeRepresentation.ofCollection(identifier, TypeRepresentation.ofConcrete(nestedIdentifier, properties)))
+                        .andResource("res1", ResourceMethodBuilder.withMethod(HttpMethod.POST).andRequestBodyType(identifier).andAcceptMediaTypes("application/json")
                                 .andResponse(201, ResponseBuilder.newBuilder().andHeaders("Location").build()).build()).build(),
                 "= REST resources of project name\n" +
                         "1.0\n" +
@@ -176,8 +210,8 @@ public class AsciiDocBackendTest extends TestCase {
                         "\n" +
                         "=== Request\n" +
                         "*Content-Type*: `application/json` + \n" +
-                        "*Request Body*: (`com.sebastian_daschner.test.Model`) + \n" +
-                        "`application/json`: `[{\"name\":\"string\",\"value\":0}]` + \n" +
+                        "*Request Body*: (Collection of `com.sebastian_daschner.test.Model`) + \n" +
+                        "`[{\"name\":\"string\",\"value\":0}]` + \n" +
                         "\n" +
                         "=== Response\n" +
                         "*Content-Type*: `\\*/*`\n" +
@@ -186,7 +220,8 @@ public class AsciiDocBackendTest extends TestCase {
                         "*Header*: `Location` + \n\n");
 
         add(data, ResourcesBuilder.withBase("rest")
-                        .andResource("res1", ResourceMethodBuilder.withMethod(HttpMethod.POST).andRequestBodyType(representation).andAcceptMediaTypes("application/json")
+                        .andTypeRepresentation(identifier, TypeRepresentation.ofCollection(identifier, TypeRepresentation.ofConcrete(nestedIdentifier, properties)))
+                        .andResource("res1", ResourceMethodBuilder.withMethod(HttpMethod.POST).andRequestBodyType(identifier).andAcceptMediaTypes("application/json")
                                 .andResponse(201, ResponseBuilder.newBuilder().andHeaders("Location").build()).build())
                         .andResource("res2", ResourceMethodBuilder.withMethod(HttpMethod.GET).andResponse(200, ResponseBuilder.newBuilder().build()).build()).build(),
                 "= REST resources of project name\n" +
@@ -196,8 +231,8 @@ public class AsciiDocBackendTest extends TestCase {
                         "\n" +
                         "=== Request\n" +
                         "*Content-Type*: `application/json` + \n" +
-                        "*Request Body*: (`com.sebastian_daschner.test.Model`) + \n" +
-                        "`application/json`: `[{\"name\":\"string\",\"value\":0}]` + \n" +
+                        "*Request Body*: (Collection of `com.sebastian_daschner.test.Model`) + \n" +
+                        "`[{\"name\":\"string\",\"value\":0}]` + \n" +
                         "\n" +
                         "=== Response\n" +
                         "*Content-Type*: `\\*/*`\n" +

@@ -18,11 +18,13 @@ package com.sebastian_daschner.jaxrs_analyzer.backend.plaintext;
 
 import com.sebastian_daschner.jaxrs_analyzer.analysis.utils.StringUtils;
 import com.sebastian_daschner.jaxrs_analyzer.backend.Backend;
+import com.sebastian_daschner.jaxrs_analyzer.backend.JsonRepresentationAppender;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.*;
 import com.sebastian_daschner.jaxrs_analyzer.model.types.Type;
+import com.sebastian_daschner.jaxrs_analyzer.model.types.Types;
 
-import javax.json.JsonValue;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -46,6 +48,7 @@ public class PlainTextBackend implements Backend {
     private Resources resources;
     private String projectName;
     private String projectVersion;
+    private TypeRepresentationVisitor visitor;
 
     @Override
     public String render(final Project project) {
@@ -56,6 +59,7 @@ public class PlainTextBackend implements Backend {
             resources = project.getResources();
             projectName = project.getName();
             projectVersion = project.getVersion();
+            visitor = new JsonRepresentationAppender(builder, resources.getTypeRepresentations());
 
             return renderInternal();
         } finally {
@@ -102,9 +106,12 @@ public class PlainTextBackend implements Backend {
             builder.append(resourceMethod.getRequestMediaTypes().isEmpty() ? TYPE_WILDCARD : toString(resourceMethod.getRequestMediaTypes()));
             builder.append('\n');
 
-            builder.append("  Request Body: ").append(resourceMethod.getRequestBody().getType()).append('\n');
-            resourceMethod.getRequestBody().getRepresentations().entrySet().stream().sorted(mapKeyComparator())
-                    .forEach(e -> builder.append("   ").append(e.getKey()).append(": ").append(e.getValue()).append('\n'));
+            builder.append("  Request Body: ").append(toTypeOrCollection(resourceMethod.getRequestBody())).append('\n');
+            Optional.ofNullable(resources.getTypeRepresentations().get(resourceMethod.getRequestBody())).ifPresent(r -> {
+                builder.append("   ");
+                r.accept(visitor);
+                builder.append('\n');
+            });
         } else {
             builder.append("  No body\n");
         }
@@ -145,12 +152,12 @@ public class PlainTextBackend implements Backend {
                 builder.append('\n');
             }
             if (response.getResponseBody() != null) {
-                builder.append("   Response Body: ").append(response.getResponseBody().getType());
-                // TODO remove JSON filtering
-                response.getResponseBody().getRepresentations().entrySet().stream().sorted(mapKeyComparator())
-                        .filter(r -> r.getValue() instanceof JsonValue)
-                        .forEach(r -> builder.append(" (").append(r.getKey()).append("): \n").append(r.getValue()));
-                builder.append('\n');
+                builder.append("   Response Body: ").append(toTypeOrCollection(response.getResponseBody())).append('\n');
+                Optional.ofNullable(resources.getTypeRepresentations().get(response.getResponseBody())).ifPresent(r -> {
+                    builder.append("    ");
+                    r.accept(visitor);
+                    builder.append('\n');
+                });
             }
 
             builder.append('\n');
@@ -159,6 +166,14 @@ public class PlainTextBackend implements Backend {
 
     private void appendResourceEnd() {
         builder.append("\n");
+    }
+
+    private String toTypeOrCollection(final TypeIdentifier type) {
+        final TypeRepresentation representation = resources.getTypeRepresentations().get(type);
+        if (representation != null && !representation.getComponentType().equals(type) && !type.getType().equals(Types.JSON)) {
+            return "Collection of " + representation.getComponentType().getType();
+        }
+        return type.getType().toString();
     }
 
     private static String toString(final Set<String> set) {

@@ -73,6 +73,8 @@ public abstract class Types {
     public static final Type JSON_OBJECT = new Type(JsonObject.class.getName());
     public static final Type JSON_ARRAY = new Type(JsonArray.class.getName());
 
+    public static final Set<Type> PRIMITIVE_TYPES = new HashSet<>(Arrays.asList(PRIMITIVE_BOOLEAN, PRIMITIVE_VOID, PRIMITIVE_CHAR, PRIMITIVE_INT, PRIMITIVE_LONG,
+            PRIMITIVE_SHORT, PRIMITIVE_BYTE, PRIMITIVE_DOUBLE, PRIMITIVE_FLOAT));
     public static final Set<Type> INTEGER_TYPES = new HashSet<>(Arrays.asList(INTEGER, PRIMITIVE_INT, BIG_INTEGER, LONG, PRIMITIVE_LONG, SHORT, PRIMITIVE_SHORT,
             BYTE, PRIMITIVE_BYTE));
     public static final Set<Type> DOUBLE_TYPES = new HashSet<>(Arrays.asList(DOUBLE, PRIMITIVE_DOUBLE, FLOAT, PRIMITIVE_FLOAT, BIG_DECIMAL));

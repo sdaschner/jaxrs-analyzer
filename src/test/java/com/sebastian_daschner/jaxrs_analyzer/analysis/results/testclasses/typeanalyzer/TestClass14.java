@@ -16,40 +16,21 @@
 
 package com.sebastian_daschner.jaxrs_analyzer.analysis.results.testclasses.typeanalyzer;
 
+import com.sebastian_daschner.jaxrs_analyzer.analysis.results.TypeIdentifierUtils;
+import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeIdentifier;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeRepresentation;
 import com.sebastian_daschner.jaxrs_analyzer.model.types.Type;
+import com.sebastian_daschner.jaxrs_analyzer.model.types.Types;
 
-import javax.json.Json;
-import javax.json.JsonObject;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
-
-import java.util.List;
+import java.util.*;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 public class TestClass14 {
 
     private GenericFields<Long, String> longAndString;
     private GenericFields<String, Long> stringAndLong;
-
-    public static TypeRepresentation getResult() {
-        final TypeRepresentation representation = new TypeRepresentation(
-                new Type(TestClass14.class.getName()));
-
-        final JsonObject jsonLongAndString = Json.createObjectBuilder()
-                .add("a", 0).add("b", "string")
-                .add("listA", Json.createArrayBuilder().add(0)).build();
-        final JsonObject jsonStringAndLong = Json.createObjectBuilder()
-                .add("a", "string").add("b", 0)
-                .add("listA", Json.createArrayBuilder().add("string")).build();
-
-        final JsonObject jsonObject = Json.createObjectBuilder()
-                .add("longAndString", jsonLongAndString)
-                .add("stringAndLong", jsonStringAndLong).build();
-
-        representation.getRepresentations().put("application/json", jsonObject);
-        return representation;
-    }
 
     public GenericFields<Long, String> getLongAndString() {
         return longAndString;
@@ -80,6 +61,43 @@ public class TestClass14 {
             return listA;
         }
 
+    }
+
+    public static Set<TypeRepresentation> expectedTypeRepresentations() {
+        final Map<String, TypeIdentifier> properties = new HashMap<>();
+
+        final TypeIdentifier longStringIdentifier = TypeIdentifier.ofType(new Type("com.sebastian_daschner.jaxrs_analyzer.analysis.results.testclasses.typeanalyzer.TestClass14$GenericFields<java.lang.Long,java.lang.String>"));
+        final TypeIdentifier stringLongIdentifier = TypeIdentifier.ofType(new Type("com.sebastian_daschner.jaxrs_analyzer.analysis.results.testclasses.typeanalyzer.TestClass14$GenericFields<java.lang.String,java.lang.Long>"));
+        final TypeIdentifier stringIdentifier = TypeIdentifierUtils.STRING_IDENTIFIER;
+        final TypeIdentifier longIdentifier = TypeIdentifier.ofType(Types.LONG);
+
+        properties.put("longAndString", longStringIdentifier);
+        properties.put("stringAndLong", stringLongIdentifier);
+
+        final TypeRepresentation testClass13 = TypeRepresentation.ofConcrete(expectedIdentifier(), properties);
+
+        final TypeIdentifier listStringIdentifier = TypeIdentifier.ofType(new Type("java.util.List<java.lang.String>"));
+        final TypeRepresentation listString = TypeRepresentation.ofCollection(listStringIdentifier, TypeRepresentation.ofConcrete(stringIdentifier));
+        final TypeIdentifier listLongIdentifier = TypeIdentifier.ofType(new Type("java.util.List<java.lang.Long>"));
+        final TypeRepresentation listLong = TypeRepresentation.ofCollection(listLongIdentifier, TypeRepresentation.ofConcrete(longIdentifier));
+
+        final Map<String, TypeIdentifier> longStringProperties = new HashMap<>();
+        longStringProperties.put("a", longIdentifier);
+        longStringProperties.put("b", stringIdentifier);
+        longStringProperties.put("listA", listStringIdentifier);
+        final TypeRepresentation longString = TypeRepresentation.ofConcrete(longStringIdentifier, longStringProperties);
+
+        final Map<String, TypeIdentifier> stringLongProperties = new HashMap<>();
+        stringLongProperties.put("a", stringIdentifier);
+        stringLongProperties.put("b", longIdentifier);
+        stringLongProperties.put("listA", listLongIdentifier);
+        final TypeRepresentation stringLong = TypeRepresentation.ofConcrete(stringLongIdentifier, stringLongProperties);
+
+        return new HashSet<>(Arrays.asList(testClass13, longString, stringLong, listLong, listString));
+    }
+
+    public static TypeIdentifier expectedIdentifier() {
+        return TypeIdentifier.ofType(new Type(TestClass14.class.getName()));
     }
 
 }

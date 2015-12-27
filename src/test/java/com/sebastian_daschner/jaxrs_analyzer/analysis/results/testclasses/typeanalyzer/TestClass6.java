@@ -16,16 +16,18 @@
 
 package com.sebastian_daschner.jaxrs_analyzer.analysis.results.testclasses.typeanalyzer;
 
+import com.sebastian_daschner.jaxrs_analyzer.analysis.results.TypeIdentifierUtils;
+import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeIdentifier;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeRepresentation;
 import com.sebastian_daschner.jaxrs_analyzer.model.types.Type;
+import com.sebastian_daschner.jaxrs_analyzer.model.types.Types;
 
-import javax.json.Json;
-import javax.json.JsonObject;
 import javax.xml.bind.annotation.XmlElement;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
-/**
- * @author Sebastian Daschner
- */
 public class TestClass6 {
 
     private boolean first;
@@ -52,13 +54,18 @@ public class TestClass6 {
         return second;
     }
 
-    public static TypeRepresentation getResult() {
-        final TypeRepresentation representation = new TypeRepresentation(new Type(TestClass6.class.getName()));
+    public static Set<TypeRepresentation> expectedTypeRepresentations() {
+        final Map<String, TypeIdentifier> properties = new HashMap<>();
 
-        final JsonObject jsonObject = Json.createObjectBuilder().add("first", false).add("second", "string").add("third", "string").build();
+        properties.put("first", TypeIdentifier.ofType(Types.PRIMITIVE_BOOLEAN));
+        properties.put("second", TypeIdentifierUtils.STRING_IDENTIFIER);
+        properties.put("third", TypeIdentifierUtils.STRING_IDENTIFIER);
 
-        representation.getRepresentations().put("application/json", jsonObject);
-        return representation;
+        return Collections.singleton(TypeRepresentation.ofConcrete(expectedIdentifier(), properties));
+    }
+
+    public static TypeIdentifier expectedIdentifier() {
+        return TypeIdentifier.ofType(new Type(TestClass6.class.getName()));
     }
 
 }

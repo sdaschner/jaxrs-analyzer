@@ -59,11 +59,11 @@ public class SwaggerBackend implements Backend {
         try {
             // initialize fields
             builder = Json.createObjectBuilder();
-            schemaBuilder = new SchemaBuilder();
             resources = project.getResources();
             projectName = project.getName();
             projectVersion = project.getVersion();
             projectDomain = project.getDomain();
+            schemaBuilder = new SchemaBuilder(resources.getTypeRepresentations());
 
             return renderInternal();
         } finally {

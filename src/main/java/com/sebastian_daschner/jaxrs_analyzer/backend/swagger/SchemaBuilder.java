@@ -16,13 +16,18 @@
 
 package com.sebastian_daschner.jaxrs_analyzer.backend.swagger;
 
-import com.sebastian_daschner.jaxrs_analyzer.LogProvider;
 import com.sebastian_daschner.jaxrs_analyzer.model.Pair;
+import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeIdentifier;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeRepresentation;
+import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeRepresentationVisitor;
 
-import javax.json.*;
+import javax.json.Json;
+import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
 import java.util.HashMap;
 import java.util.Map;
+
+import static com.sebastian_daschner.jaxrs_analyzer.backend.ComparatorUtils.mapKeyComparator;
 
 /**
  * Creates Swagger schema type definitions.
@@ -37,94 +42,114 @@ class SchemaBuilder {
     private final Map<String, Pair<String, JsonObject>> jsonDefinitions = new HashMap<>();
 
     /**
-     * Creates the schema object for the representation. Stores the definition for later use for more complex objects.
-     * The definitions are retrieved via {@link SchemaBuilder#getDefinitions} after all types have been built.
+     * All known representation defined in the REST resources
+     */
+    private final Map<TypeIdentifier, TypeRepresentation> typeRepresentations;
+
+    SchemaBuilder(final Map<TypeIdentifier, TypeRepresentation> typeRepresentations) {
+        this.typeRepresentations = typeRepresentations;
+    }
+
+    /**
+     * Creates the schema object for the identifier.
+     * The actual definitions are retrieved via {@link SchemaBuilder#getDefinitions} after all types have been declared.
      *
-     * @param representation The representation
+     * @param identifier The identifier
      * @return The schema JSON object
      */
-    JsonObject build(final TypeRepresentation representation) {
-        // TODO support XML as well
-
-        final SwaggerType type = SwaggerUtils.toSwaggerType(representation.getType());
+    JsonObject build(final TypeIdentifier identifier) {
+        final SwaggerType type = SwaggerUtils.toSwaggerType(identifier.getType());
         switch (type) {
             case BOOLEAN:
             case INTEGER:
             case NUMBER:
             case NULL:
             case STRING:
-                return buildForPrimitive(type);
+                final JsonObjectBuilder builder = Json.createObjectBuilder();
+                addPrimitive(builder, type);
+                return builder.build();
         }
 
-        if (representation.getRepresentations().isEmpty())
-            return Json.createObjectBuilder().build();
+        final JsonObjectBuilder builder = Json.createObjectBuilder();
 
-        final JsonValue json = (JsonValue) representation.getRepresentations().values().iterator().next();
-        return build(json, representation.getType().getCtClass().getName());
+        final TypeRepresentationVisitor visitor = new TypeRepresentationVisitor() {
+
+            private boolean inCollection = false;
+
+            @Override
+            public void visit(final TypeRepresentation.ConcreteTypeRepresentation representation) {
+                final JsonObjectBuilder nestedBuilder = inCollection ? Json.createObjectBuilder() : builder;
+                add(nestedBuilder, representation);
+
+                if (inCollection) {
+                    builder.add("items", nestedBuilder.build());
+                }
+            }
+
+            @Override
+            public void visit(final TypeRepresentation.CollectionTypeRepresentation representation) {
+                builder.add("type", "array");
+                inCollection = true;
+            }
+
+        };
+
+        final TypeRepresentation representation = typeRepresentations.get(identifier);
+        if (representation == null)
+            builder.add("type", "object");
+        else
+            representation.accept(visitor);
+        return builder.build();
     }
 
     /**
-     * Returns the stored schema definitions. This has to be called after all calls of {@link SchemaBuilder#build(TypeRepresentation)}.
+     * Returns the stored schema definitions. This has to be called after all calls of {@link SchemaBuilder#build(TypeIdentifier)}.
      *
      * @return The schema JSON definitions
      */
     JsonObject getDefinitions() {
         final JsonObjectBuilder builder = Json.createObjectBuilder();
-        jsonDefinitions.entrySet().forEach(e -> builder.add(e.getKey(), e.getValue().getRight()));
+        jsonDefinitions.entrySet().stream().sorted(mapKeyComparator()).forEach(e -> builder.add(e.getKey(), e.getValue().getRight()));
         return builder.build();
     }
 
-    private JsonObject build(final JsonValue value, final String typeName) {
-        final SwaggerType type = SwaggerUtils.toSwaggerType(value.getValueType());
+    private void add(final JsonObjectBuilder builder, final TypeRepresentation.ConcreteTypeRepresentation representation) {
+        final SwaggerType type = SwaggerUtils.toSwaggerType(representation.getIdentifier().getType());
         switch (type) {
-            case ARRAY:
-                return buildForArray((JsonArray) value);
             case BOOLEAN:
             case INTEGER:
             case NUMBER:
             case NULL:
             case STRING:
-                return buildForPrimitive(type);
-            case OBJECT:
-                return buildForObject((JsonObject) value, typeName);
-            default:
-                LogProvider.error("Unknown Swagger type occurred: " + type);
-                return Json.createObjectBuilder().build();
+                addPrimitive(builder, type);
+                return;
         }
+
+        addObject(builder, representation.getIdentifier(), representation.getProperties());
     }
 
-    private JsonObject buildForArray(final JsonArray jsonArray) {
-        final JsonObjectBuilder builder = Json.createObjectBuilder().add("type", "array");
-        if (!jsonArray.isEmpty())
-            // reduces all entries to one optional or an empty optional
-            if (jsonArray.size() > 1 && !jsonArray.stream().collect(EqualTester::new, EqualTester::add, EqualTester::add).allEqual())
-                builder.add("items", jsonArray.stream().map(v -> build(v, null)).collect(Json::createArrayBuilder, JsonArrayBuilder::add, JsonArrayBuilder::add));
-            else
-                builder.add("items", build(jsonArray.get(0), null));
+    private void addObject(final JsonObjectBuilder builder, final TypeIdentifier identifier, final Map<String, TypeIdentifier> properties) {
+        final String definition = buildDefinition(identifier.getName());
 
-        return builder.build();
+        if (jsonDefinitions.containsKey(definition)) {
+            builder.add("$ref", "#/definitions/" + definition).build();
+            return;
+        }
+
+        final JsonObjectBuilder nestedBuilder = Json.createObjectBuilder();
+
+        properties.entrySet().stream().sorted(mapKeyComparator()).forEach(e -> nestedBuilder.add(e.getKey(), build(e.getValue())));
+        jsonDefinitions.put(definition, Pair.of(identifier.getName(), Json.createObjectBuilder().add("properties", nestedBuilder).build()));
+
+        builder.add("$ref", "#/definitions/" + definition).build();
     }
 
-    private JsonObject buildForPrimitive(final SwaggerType type) {
-        return Json.createObjectBuilder().add("type", type.toString()).build();
-    }
-
-    private JsonObject buildForObject(final JsonObject value, final String typeName) {
-        final String definition = buildDefinition(typeName);
-
-        if (jsonDefinitions.containsKey(definition))
-            return Json.createObjectBuilder().add("$ref", "#/definitions/" + definition).build();
-
-        final JsonObjectBuilder properties = Json.createObjectBuilder();
-
-        value.entrySet().forEach(e -> properties.add(e.getKey(), build(e.getValue(), null)));
-        jsonDefinitions.put(definition, Pair.of(typeName, Json.createObjectBuilder().add("properties", properties).build()));
-
-        return Json.createObjectBuilder().add("$ref", "#/definitions/" + definition).build();
+    private void addPrimitive(final JsonObjectBuilder builder, final SwaggerType type) {
+        builder.add("type", type.toString()).build();
     }
 
     private String buildDefinition(final String typeName) {
-        final String type = typeName == null ? "NestedType" : typeName;
+        final String type = typeName.startsWith(TypeIdentifier.DYNAMIC_TYPE_PREFIX) ? "NestedType" : typeName;
         final String definition = type.substring(type.lastIndexOf('.') + 1);
 
         final Pair<String, JsonObject> containedEntry = jsonDefinitions.get(definition);
@@ -139,28 +164,4 @@ class SchemaBuilder {
         return definition.substring(0, separatorIndex + 1) + (index + 1);
     }
 
-    /**
-     * Used as Stream collection to test, if all objects are equal.
-     */
-    private class EqualTester {
-
-        private JsonValue first;
-        private boolean equal = true;
-
-        public void add(final JsonValue value) {
-            if (first == null)
-                first = value;
-            else
-                equal = equal && first.equals(value);
-        }
-
-        public void add(final EqualTester other) {
-            if (first != null && other.first != null)
-                equal = equal && other.equal && first.equals(other.first);
-        }
-
-        public boolean allEqual() {
-            return equal;
-        }
-    }
 }

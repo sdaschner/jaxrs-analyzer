@@ -16,16 +16,15 @@
 
 package com.sebastian_daschner.jaxrs_analyzer.analysis.results.testclasses.typeanalyzer;
 
+import com.sebastian_daschner.jaxrs_analyzer.analysis.results.TypeIdentifierUtils;
+import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeIdentifier;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeRepresentation;
 import com.sebastian_daschner.jaxrs_analyzer.model.types.Type;
 
-import javax.json.Json;
-import javax.json.JsonObject;
 import javax.xml.bind.annotation.XmlTransient;
+import java.util.Collections;
+import java.util.Set;
 
-/**
- * @author Sebastian Daschner
- */
 public class TestClass2 {
 
     private String first;
@@ -45,13 +44,12 @@ public class TestClass2 {
         return second;
     }
 
-    public static TypeRepresentation getResult() {
-        final TypeRepresentation representation = new TypeRepresentation(new Type(TestClass2.class.getName()));
+    public static Set<TypeRepresentation> expectedTypeRepresentations() {
+        return Collections.singleton(TypeRepresentation.ofConcrete(expectedIdentifier(), Collections.singletonMap("second", TypeIdentifierUtils.STRING_IDENTIFIER)));
+    }
 
-        final JsonObject jsonObject = Json.createObjectBuilder().add("second", "string").build();
-
-        representation.getRepresentations().put("application/json", jsonObject);
-        return representation;
+    public static TypeIdentifier expectedIdentifier() {
+        return TypeIdentifier.ofType(new Type(TestClass2.class.getName()));
     }
 
 }

@@ -16,13 +16,18 @@
 
 package com.sebastian_daschner.jaxrs_analyzer.analysis.results.testclasses.typeanalyzer;
 
+import com.sebastian_daschner.jaxrs_analyzer.analysis.results.TypeIdentifierUtils;
+import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeIdentifier;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeRepresentation;
 import com.sebastian_daschner.jaxrs_analyzer.model.types.Type;
+import com.sebastian_daschner.jaxrs_analyzer.model.types.Types;
 
-import javax.json.Json;
-import javax.json.JsonObject;
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 public class TestClass9 {
 
@@ -63,14 +68,19 @@ public class TestClass9 {
         this.date = date;
     }
 
-    public static TypeRepresentation getResult() {
-        final TypeRepresentation representation = new TypeRepresentation(new Type(TestClass9.class.getName()));
+    public static Set<TypeRepresentation> expectedTypeRepresentations() {
+        final Map<String, TypeIdentifier> properties = new HashMap<>();
 
-        final JsonObject jsonObject = Json.createObjectBuilder().add("first", false).add("second", "string").add("time", "date")
-                .add("date", "date").build();
+        properties.put("first", TypeIdentifier.ofType(Types.PRIMITIVE_BOOLEAN));
+        properties.put("second", TypeIdentifierUtils.STRING_IDENTIFIER);
+        properties.put("time", TypeIdentifier.ofType(Types.DATE));
+        properties.put("date", TypeIdentifier.ofType(Types.DATE));
 
-        representation.getRepresentations().put("application/json", jsonObject);
-        return representation;
+        return Collections.singleton(TypeRepresentation.ofConcrete(expectedIdentifier(), properties));
+    }
+
+    public static TypeIdentifier expectedIdentifier() {
+        return TypeIdentifier.ofType(new Type(TestClass9.class.getName()));
     }
 
 }

@@ -17,7 +17,7 @@
 package com.sebastian_daschner.jaxrs_analyzer.builder;
 
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.Response;
-import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeRepresentation;
+import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeIdentifier;
 
 import java.util.stream.Stream;
 
@@ -36,7 +36,7 @@ public class ResponseBuilder {
         return new ResponseBuilder(new Response());
     }
 
-    public static ResponseBuilder withResponseBody(final TypeRepresentation responseBody) {
+    public static ResponseBuilder withResponseBody(final TypeIdentifier responseBody) {
         return new ResponseBuilder(new Response(responseBody));
     }
 

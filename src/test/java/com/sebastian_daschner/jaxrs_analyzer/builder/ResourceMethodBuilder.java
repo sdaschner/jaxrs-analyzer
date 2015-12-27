@@ -19,7 +19,7 @@ package com.sebastian_daschner.jaxrs_analyzer.builder;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.HttpMethod;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.ResourceMethod;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.Response;
-import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeRepresentation;
+import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeIdentifier;
 import com.sebastian_daschner.jaxrs_analyzer.model.types.Type;
 
 import java.util.Arrays;
@@ -37,12 +37,12 @@ public class ResourceMethodBuilder {
     }
 
     public ResourceMethodBuilder andRequestBodyType(final Type type) {
-        method.setRequestBody(new TypeRepresentation(type));
+        method.setRequestBody(TypeIdentifier.ofType(type));
         return this;
     }
 
-    public ResourceMethodBuilder andRequestBodyType(final TypeRepresentation representation) {
-        method.setRequestBody(representation);
+    public ResourceMethodBuilder andRequestBodyType(final TypeIdentifier identifier) {
+        method.setRequestBody(identifier);
         return this;
     }
 

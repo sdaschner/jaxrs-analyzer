@@ -25,12 +25,9 @@ import java.util.*;
  */
 public class Resources {
 
-    private final Map<String, Set<ResourceMethod>> resources;
+    private final Map<String, Set<ResourceMethod>> resources = new HashMap<>();
+    private final Map<TypeIdentifier, TypeRepresentation> typeRepresentations = new HashMap<>();
     private String basePath;
-
-    public Resources() {
-        resources = new HashMap<>();
-    }
 
     /**
      * Adds the method to the resource's methods.
@@ -62,6 +59,10 @@ public class Resources {
         return Collections.unmodifiableSet(resources.get(resource));
     }
 
+    public Map<TypeIdentifier, TypeRepresentation> getTypeRepresentations() {
+        return typeRepresentations;
+    }
+
     public String getBasePath() {
         return basePath;
     }
@@ -71,19 +72,22 @@ public class Resources {
     }
 
     @Override
-    public boolean equals(final Object o) {
+    public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        final Resources resources1 = (Resources) o;
+        Resources resources1 = (Resources) o;
 
         if (!resources.equals(resources1.resources)) return false;
+        if (!typeRepresentations.equals(resources1.typeRepresentations)) return false;
         return !(basePath != null ? !basePath.equals(resources1.basePath) : resources1.basePath != null);
+
     }
 
     @Override
     public int hashCode() {
         int result = resources.hashCode();
+        result = 31 * result + typeRepresentations.hashCode();
         result = 31 * result + (basePath != null ? basePath.hashCode() : 0);
         return result;
     }
@@ -92,6 +96,7 @@ public class Resources {
     public String toString() {
         return "Resources{" +
                 "resources=" + resources +
+                ", typeRepresentations=" + typeRepresentations +
                 ", basePath='" + basePath + '\'' +
                 '}';
     }
