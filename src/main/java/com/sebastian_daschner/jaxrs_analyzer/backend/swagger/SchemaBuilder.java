@@ -136,6 +136,9 @@ class SchemaBuilder {
             return;
         }
 
+        // reserve definition
+        jsonDefinitions.put(definition, Pair.of(identifier.getName(), Json.createObjectBuilder().build()));
+
         final JsonObjectBuilder nestedBuilder = Json.createObjectBuilder();
 
         properties.entrySet().stream().sorted(mapKeyComparator()).forEach(e -> nestedBuilder.add(e.getKey(), build(e.getValue())));
@@ -149,11 +152,10 @@ class SchemaBuilder {
     }
 
     private String buildDefinition(final String typeName) {
-        final String type = typeName.startsWith(TypeIdentifier.DYNAMIC_TYPE_PREFIX) ? "NestedType" : typeName;
-        final String definition = type.substring(type.lastIndexOf('.') + 1);
+        final String definition = typeName.startsWith(TypeIdentifier.DYNAMIC_TYPE_PREFIX) ? "JsonObject" : typeName.substring(typeName.lastIndexOf('.') + 1);
 
         final Pair<String, JsonObject> containedEntry = jsonDefinitions.get(definition);
-        if (containedEntry == null || containedEntry.getLeft() != null && containedEntry.getLeft().equals(type))
+        if (containedEntry == null || containedEntry.getLeft() != null && containedEntry.getLeft().equals(typeName))
             return definition;
 
         if (!definition.matches("_\\d+$"))

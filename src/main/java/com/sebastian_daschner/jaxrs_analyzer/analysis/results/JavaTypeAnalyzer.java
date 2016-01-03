@@ -48,8 +48,11 @@ class JavaTypeAnalyzer {
 
     private final static String[] NAMES_TO_IGNORE = {"getClass"};
 
-    private final Set<Type> analyzedTypes;
+    /**
+     * The type representation storage where all analyzed types have to be added. This will be created by the caller.
+     */
     private final Map<TypeIdentifier, TypeRepresentation> typeRepresentations;
+    private final Set<Type> analyzedTypes;
 
     JavaTypeAnalyzer(final Map<TypeIdentifier, TypeRepresentation> typeRepresentations) {
         this.typeRepresentations = typeRepresentations;

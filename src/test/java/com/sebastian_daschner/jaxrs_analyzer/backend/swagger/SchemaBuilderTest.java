@@ -69,11 +69,11 @@ public class SchemaBuilderTest {
                         .add("array1", Json.createObjectBuilder().add("type", "array").add("items", type("integer")))
                         .add("hello1", type("string"))
                         .add("test1", type("integer"))))
-                .add("NestedType", Json.createObjectBuilder().add("properties", Json.createObjectBuilder().add("test", type("integer"))))
+                .add("JsonObject", Json.createObjectBuilder().add("properties", Json.createObjectBuilder().add("test", type("integer"))))
                 .add("Object", Json.createObjectBuilder().add("properties", Json.createObjectBuilder()
                         .add("array2", Json.createObjectBuilder().add("type", "array").add("items", type("integer")))
                         .add("hello2", type("string"))
-                        .add("object2", Json.createObjectBuilder().add("$ref", "#/definitions/NestedType"))
+                        .add("object2", Json.createObjectBuilder().add("$ref", "#/definitions/JsonObject"))
                         .add("test2", type("integer"))))
                 .build()));
     }
@@ -129,11 +129,11 @@ public class SchemaBuilderTest {
 
         cut = new SchemaBuilder(representations);
 
-        assertThat(cut.build(identifier), is(Json.createObjectBuilder().add("$ref", "#/definitions/NestedType").build()));
+        assertThat(cut.build(identifier), is(Json.createObjectBuilder().add("$ref", "#/definitions/JsonObject").build()));
 
         final JsonObject definitions = cut.getDefinitions();
         assertThat(definitions, is(Json.createObjectBuilder()
-                .add("NestedType", Json.createObjectBuilder().add("properties", Json.createObjectBuilder()
+                .add("JsonObject", Json.createObjectBuilder().add("properties", Json.createObjectBuilder()
                         .add("array1", Json.createObjectBuilder().add("type", "object"))
                         .add("hello1", type("string"))
                         .add("test1", type("integer"))))
@@ -165,6 +165,42 @@ public class SchemaBuilderTest {
                         .add("array1", Json.createObjectBuilder().add("type", "array").add("items", type("integer")))
                         .add("hello1", type("string"))
                         .add("test1", type("integer"))))
+                .build()));
+    }
+
+    @Test
+    public void testSameDynamicDefinitions() {
+        final TypeIdentifier firstIdentifier = TypeIdentifier.ofDynamic();
+        final TypeIdentifier secondIdentifier = TypeIdentifier.ofDynamic();
+
+        final Map<String, TypeIdentifier> firstProperties = new HashMap<>();
+        firstProperties.put("test1", INT_IDENTIFIER);
+        firstProperties.put("hello1", STRING_IDENTIFIER);
+        firstProperties.put("array1", INT_LIST_IDENTIFIER);
+        firstProperties.put("nested", secondIdentifier);
+
+        final Map<String, TypeIdentifier> secondProperties = new HashMap<>();
+        secondProperties.put("nested", firstIdentifier);
+
+        representations.put(INT_LIST_IDENTIFIER, TypeRepresentation.ofCollection(INTEGER_IDENTIFIER, TypeRepresentation.ofConcrete(INTEGER_IDENTIFIER)));
+        representations.put(firstIdentifier, TypeRepresentation.ofConcrete(firstIdentifier, firstProperties));
+        representations.put(secondIdentifier, TypeRepresentation.ofConcrete(secondIdentifier, secondProperties));
+
+        cut = new SchemaBuilder(representations);
+
+        assertThat(cut.build(firstIdentifier), is(Json.createObjectBuilder().add("$ref", "#/definitions/JsonObject").build()));
+        assertThat(cut.build(firstIdentifier), is(Json.createObjectBuilder().add("$ref", "#/definitions/JsonObject").build()));
+        assertThat(cut.build(secondIdentifier), is(Json.createObjectBuilder().add("$ref", "#/definitions/JsonObject_2").build()));
+
+        final JsonObject definitions = cut.getDefinitions();
+        assertThat(definitions, is(Json.createObjectBuilder()
+                .add("JsonObject", Json.createObjectBuilder().add("properties", Json.createObjectBuilder()
+                        .add("array1", Json.createObjectBuilder().add("type", "array").add("items", type("integer")))
+                        .add("hello1", type("string"))
+                        .add("nested", Json.createObjectBuilder().add("$ref", "#/definitions/JsonObject_2"))
+                        .add("test1", type("integer"))))
+                .add("JsonObject_2", Json.createObjectBuilder().add("properties", Json.createObjectBuilder()
+                        .add("nested", Json.createObjectBuilder().add("$ref", "#/definitions/JsonObject"))))
                 .build()));
     }
 

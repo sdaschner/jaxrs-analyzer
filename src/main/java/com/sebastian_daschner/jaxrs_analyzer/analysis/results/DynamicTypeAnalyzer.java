@@ -34,6 +34,9 @@ import java.util.Map;
  */
 class DynamicTypeAnalyzer {
 
+    /**
+     * The type representation storage where all analyzed types have to be added. This will be created by the caller.
+     */
     private final Map<TypeIdentifier, TypeRepresentation> typeRepresentations;
 
     DynamicTypeAnalyzer(final Map<TypeIdentifier, TypeRepresentation> typeRepresentations) {
@@ -47,49 +50,68 @@ class DynamicTypeAnalyzer {
      * @return The type identifier
      */
     TypeIdentifier analyze(final JsonValue jsonValue) {
-        return analyzeInternal(jsonValue).getIdentifier();
+        return analyzeInternal(jsonValue);
     }
 
-    private TypeRepresentation analyzeInternal(final JsonValue jsonValue) {
-
+    private TypeIdentifier analyzeInternal(final JsonValue jsonValue) {
         switch (jsonValue.getValueType()) {
             case ARRAY:
                 return analyzeInternal((JsonArray) jsonValue);
             case OBJECT:
                 return analyzeInternal((JsonObject) jsonValue);
             case STRING:
-                return TypeRepresentation.ofConcrete(TypeIdentifier.ofType(Types.STRING));
+                return TypeIdentifier.ofType(Types.STRING);
             case NUMBER:
-                return TypeRepresentation.ofConcrete(TypeIdentifier.ofType(Types.DOUBLE));
+                return TypeIdentifier.ofType(Types.DOUBLE);
             case TRUE:
             case FALSE:
-                return TypeRepresentation.ofConcrete(TypeIdentifier.ofType(Types.PRIMITIVE_BOOLEAN));
+                return TypeIdentifier.ofType(Types.PRIMITIVE_BOOLEAN);
             case NULL:
-                return TypeRepresentation.ofConcrete(TypeIdentifier.ofType(Types.OBJECT));
+                return TypeIdentifier.ofType(Types.OBJECT);
             default:
                 throw new IllegalArgumentException("Unknown JSON value type provided");
         }
     }
 
-    private TypeRepresentation analyzeInternal(final JsonArray jsonArray) {
-        final TypeRepresentation containedRepresentation = jsonArray.isEmpty() ? TypeRepresentation.ofConcrete(TypeIdentifier.ofType(Types.OBJECT))
-                : analyzeInternal(jsonArray.get(0));
+    private TypeIdentifier analyzeInternal(final JsonArray jsonArray) {
+        final TypeIdentifier containedIdentifier = jsonArray.isEmpty() ? TypeIdentifier.ofType(Types.OBJECT) : analyzeInternal(jsonArray.get(0));
+        final TypeRepresentation containedRepresentation = typeRepresentations.getOrDefault(containedIdentifier, TypeRepresentation.ofConcrete(containedIdentifier));
+
+        final TypeIdentifier existingCollection = findExistingCollection(containedRepresentation);
+        if (existingCollection != null) {
+            return existingCollection;
+        }
 
         final TypeIdentifier identifier = TypeIdentifier.ofDynamic();
-        final TypeRepresentation representation = TypeRepresentation.ofCollection(identifier, containedRepresentation);
-        typeRepresentations.put(identifier, representation);
-
-        return representation;
+        typeRepresentations.put(identifier, TypeRepresentation.ofCollection(identifier, containedRepresentation));
+        return identifier;
     }
 
-    private TypeRepresentation analyzeInternal(final JsonObject jsonObject) {
+    private TypeIdentifier analyzeInternal(final JsonObject jsonObject) {
+        final HashMap<String, TypeIdentifier> properties = jsonObject.entrySet().stream()
+                .collect(HashMap::new, (m, v) -> m.put(v.getKey(), analyze(v.getValue())), Map::putAll);
+
+        final TypeIdentifier existing = findExistingType(properties);
+        if (existing != null)
+            return existing;
+
         final TypeIdentifier identifier = TypeIdentifier.ofDynamic();
-        final TypeRepresentation representation = TypeRepresentation.ofConcrete(identifier, jsonObject.entrySet().stream()
-                .collect(HashMap::new, (m, v) -> m.put(v.getKey(), analyze(v.getValue())), Map::putAll));
+        typeRepresentations.put(identifier, TypeRepresentation.ofConcrete(identifier, properties));
+        return identifier;
+    }
 
-        typeRepresentations.put(identifier, representation);
+    private TypeIdentifier findExistingCollection(final TypeRepresentation containedRepresentation) {
+        return typeRepresentations.entrySet().stream().filter(e -> e.getValue() instanceof TypeRepresentation.CollectionTypeRepresentation)
+                .filter(e -> e.getKey().getType().equals(Types.JSON))
+                .filter(e -> ((TypeRepresentation.CollectionTypeRepresentation) e.getValue()).contentEquals(containedRepresentation))
+                .map(Map.Entry::getKey).findAny().orElse(null);
+    }
 
-        return representation;
+    private TypeIdentifier findExistingType(final HashMap<String, TypeIdentifier> properties) {
+        return typeRepresentations.entrySet().stream().filter(e -> e.getValue() instanceof TypeRepresentation.ConcreteTypeRepresentation)
+                .filter(e -> e.getKey().getType().equals(Types.JSON))
+                .filter(e -> ((TypeRepresentation.ConcreteTypeRepresentation) e.getValue()).contentEquals(properties))
+                .map(Map.Entry::getKey).findAny().orElse(null);
     }
 
 }

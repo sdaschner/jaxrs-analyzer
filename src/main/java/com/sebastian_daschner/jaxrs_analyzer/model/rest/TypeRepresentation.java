@@ -16,6 +16,8 @@
 
 package com.sebastian_daschner.jaxrs_analyzer.model.rest;
 
+import com.sebastian_daschner.jaxrs_analyzer.model.types.Types;
+
 import java.util.Collections;
 import java.util.Map;
 
@@ -47,7 +49,7 @@ public abstract class TypeRepresentation {
     public abstract TypeIdentifier getComponentType();
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(final Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
@@ -118,6 +120,16 @@ public abstract class TypeRepresentation {
             visitor.visit(this);
         }
 
+        /**
+         * Checks if the properties of this representation matches the given properties.
+         *
+         * @param properties The other properties to check
+         * @return {@code true} if the content equals
+         */
+        public boolean contentEquals(final Map<String, TypeIdentifier> properties) {
+            return this.properties.equals(properties);
+        }
+
         @Override
         public String toString() {
             return "ConcreteTypeRepresentation{" +
@@ -149,6 +161,34 @@ public abstract class TypeRepresentation {
         public void accept(final TypeRepresentationVisitor visitor) {
             visitor.visit(this);
             representation.accept(visitor);
+        }
+
+        /**
+         * Checks if the nested type of this collection representation matches the given type (i.e. the same property bindings for concrete types
+         * or the same contained representation for collection types). This does not check the actual type (identifier).
+         *
+         * @param representation The other nested representation to check
+         * @return {@code true} if the content equals
+         */
+        public boolean contentEquals(final TypeRepresentation representation) {
+            final boolean thisStaticType = !this.representation.getIdentifier().getType().equals(Types.JSON);
+            final boolean otherStaticType = !representation.getIdentifier().getType().equals(Types.JSON);
+
+            if (thisStaticType ^ otherStaticType)
+                return false;
+
+            if (thisStaticType)
+                return this.representation.getIdentifier().equals(representation.getIdentifier());
+
+            final boolean thisCollection = this.representation instanceof CollectionTypeRepresentation;
+            final boolean thatCollection = representation instanceof CollectionTypeRepresentation;
+            if (thisCollection ^ thatCollection)
+                return false;
+
+            if (thisCollection)
+                return ((CollectionTypeRepresentation) this.representation).contentEquals(((CollectionTypeRepresentation) representation).getRepresentation());
+
+            return ((ConcreteTypeRepresentation) this.representation).contentEquals(((ConcreteTypeRepresentation) representation).getProperties());
         }
 
         @Override

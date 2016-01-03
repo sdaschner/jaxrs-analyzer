@@ -71,7 +71,7 @@ public class JsonRepresentationAppender implements TypeRepresentationVisitor {
             return "\"string\"";
 
         if (BOOLEAN.equals(type) || PRIMITIVE_BOOLEAN.equals(type))
-            return "true";
+            return "false";
 
         if (INTEGER_TYPES.contains(type))
             return "0";

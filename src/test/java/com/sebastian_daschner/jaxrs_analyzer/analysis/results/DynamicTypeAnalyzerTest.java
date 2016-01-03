@@ -2,18 +2,21 @@ package com.sebastian_daschner.jaxrs_analyzer.analysis.results;
 
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeIdentifier;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeRepresentation;
+import com.sebastian_daschner.jaxrs_analyzer.model.types.Type;
 import com.sebastian_daschner.jaxrs_analyzer.model.types.Types;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import javax.json.Json;
 import javax.json.JsonNumber;
 import javax.json.JsonString;
 import javax.json.JsonValue;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.sebastian_daschner.jaxrs_analyzer.analysis.results.TypeIdentifierUtils.STRING_IDENTIFIER;
+import static com.sebastian_daschner.jaxrs_analyzer.analysis.results.TypeIdentifierUtils.STRING_LIST_IDENTIFIER;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 
@@ -112,10 +115,14 @@ public class DynamicTypeAnalyzerTest {
         assertThat(collection.getComponentType().getType(), is(Types.STRING));
     }
 
-    // TODO remove ignore
     @Test
-    @Ignore
     public void testEqualTypes() {
+        // should be ignored
+        typeRepresentations.put(STRING_LIST_IDENTIFIER, TypeRepresentation.ofCollection(STRING_LIST_IDENTIFIER, TypeRepresentation.ofConcrete(STRING_IDENTIFIER)));
+        final TypeIdentifier modelIdentifier = TypeIdentifier.ofType(new Type("com.sebastian_daschner.test.Model"));
+        final Map<String, TypeIdentifier> modelProperties = Collections.singletonMap("string", TypeIdentifierUtils.STRING_IDENTIFIER);
+        typeRepresentations.put(modelIdentifier, TypeRepresentation.ofConcrete(modelIdentifier, modelProperties));
+
         TypeIdentifier identifier = cut.analyze(Json.createArrayBuilder().add("foobar").build());
         final String firstName = identifier.getName();
         assertThat(identifier.getType(), is(Types.JSON));
@@ -129,7 +136,7 @@ public class DynamicTypeAnalyzerTest {
         final String thirdName = identifier.getName();
         assertThat(identifier.getType(), is(Types.JSON));
 
-        assertThat(typeRepresentations.size(), is(4));
+        assertThat(typeRepresentations.size(), is(6));
 
         TypeRepresentation.CollectionTypeRepresentation collection = getRepresentation(firstName);
         assertThat(collection.getIdentifier().getName(), is(firstName));
