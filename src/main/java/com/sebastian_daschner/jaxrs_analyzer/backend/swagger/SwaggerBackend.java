@@ -52,6 +52,8 @@ public class SwaggerBackend implements Backend {
     private String projectName;
     private String projectVersion;
     private String projectDomain;
+    private boolean renderSwaggerTags;
+    private int swaggerTagsPathOffset;
 
     @Override
     public String render(final Project project) {
@@ -64,6 +66,8 @@ public class SwaggerBackend implements Backend {
             projectVersion = project.getVersion();
             projectDomain = project.getDomain();
             schemaBuilder = new SchemaBuilder(resources.getTypeRepresentations());
+            renderSwaggerTags = project.isRenderSwaggerTags();
+            swaggerTagsPathOffset = project.getSwaggerTagsPathOffset();
 
             return renderInternal();
         } finally {
@@ -83,6 +87,21 @@ public class SwaggerBackend implements Backend {
         builder.add("swagger", SWAGGER_VERSION).add("info", Json.createObjectBuilder()
                 .add("version", projectVersion).add("title", projectName))
                 .add("host", projectDomain).add("basePath", '/' + resources.getBasePath()).add("schemes", Json.createArrayBuilder().add("http"));
+        if( renderSwaggerTags ) {
+            final JsonArrayBuilder tags = Json.createArrayBuilder();
+                    resources.getResources().stream()
+                        .map(this::extractTag).filter(t -> t.isPresent()).map(t -> t.get())
+                        .distinct().sorted().forEach(t -> tags.add(t));
+            builder.add("tags", tags);
+        }
+    }
+
+    private Optional<String> extractTag(final String s) {
+        String tag = null;
+        if( s.split("/").length > swaggerTagsPathOffset && !s.split("/")[swaggerTagsPathOffset].startsWith("{")) {
+            tag = s.split("/")[swaggerTagsPathOffset];
+        }
+        return Optional.ofNullable(tag);
     }
 
     private void appendPaths() {
@@ -95,19 +114,25 @@ public class SwaggerBackend implements Backend {
         final JsonObjectBuilder methods = Json.createObjectBuilder();
         resources.getMethods(s).stream()
                 .sorted(comparing(ResourceMethod::getMethod))
-                .forEach(m -> methods.add(m.getMethod().toString().toLowerCase(), buildForMethod(m)));
+                .forEach(m -> methods.add(m.getMethod().toString().toLowerCase(), buildForMethod(m, s)));
         return methods;
     }
 
-    private JsonObjectBuilder buildForMethod(final ResourceMethod method) {
+    private JsonObjectBuilder buildForMethod(final ResourceMethod method, final String s) {
         final JsonArrayBuilder consumes = Json.createArrayBuilder();
         method.getRequestMediaTypes().stream().sorted().forEach(consumes::add);
 
         final JsonArrayBuilder produces = Json.createArrayBuilder();
         method.getResponseMediaTypes().stream().sorted().forEach(produces::add);
 
-        return Json.createObjectBuilder().add("consumes", consumes).add("produces", produces)
+        final JsonObjectBuilder methodDescription = Json.createObjectBuilder().add("consumes", consumes).add("produces", produces)
                 .add("parameters", buildParameters(method)).add("responses", buildResponses(method));
+
+        if( renderSwaggerTags ) {
+            extractTag(s).ifPresent( t -> methodDescription.add("tags", Json.createArrayBuilder().add(t)));
+        }
+
+        return methodDescription;
     }
 
     private JsonArrayBuilder buildParameters(final ResourceMethod method) {
