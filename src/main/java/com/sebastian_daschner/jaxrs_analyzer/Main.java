@@ -48,6 +48,8 @@ public class Main {
      * <li>{@code -v project version} The version of the project</li>
      * <li>{@code -d project domain} The domain of the project</li>
      * <li>{@code -o output file} The location of the analysis output (will be printed to standard out if omitted)</li>
+     * <li>{@code -renderSwaggerTags} Enables rendering of Swagger tags (has no effect on other backends</li>
+     * <li>{@code -swaggerTagsPathOffset path offset} The number at which path position the Swagger tags should be extracted</li>
      * </ul>
      *
      * @param args The arguments
@@ -64,6 +66,8 @@ public class Main {
         String version = null;
         String domain = null;
         Path outputFileLocation = null;
+        Boolean renderSwaggerTags = null;
+        Integer swaggerTagsPathOffset = null;
 
         try {
             for (int i = 0; i < args.length; i++) {
@@ -104,6 +108,12 @@ public class Main {
                         case "-o":
                             outputFileLocation = Paths.get(args[++i]);
                             break;
+                        case "-renderSwaggerTags":
+                            renderSwaggerTags = true;
+                            break;
+                        case "-swaggerTagsPathOffset":
+                            swaggerTagsPathOffset = Integer.valueOf(args[++i]);
+                            break;
                         default:
                             System.err.print("Unknown option " + args[i] + '\n');
                             printUsageAndExit();
@@ -120,6 +130,14 @@ public class Main {
         } catch (IndexOutOfBoundsException e) {
             System.err.println("Please provide valid number of arguments\n");
             printUsageAndExit();
+        } catch(NumberFormatException nfe) {
+            System.err.println("Please provide valid integer number as an argument\n");
+            printUsageAndExit();
+        }
+
+        if( swaggerTagsPathOffset != null && swaggerTagsPathOffset < 0 ) {
+            System.err.println("Please provide positive integer number for option -swaggerTagsPathOffset\n");
+            printUsageAndExit();
         }
 
         if (projectPaths.isEmpty()) {
@@ -127,7 +145,8 @@ public class Main {
             printUsageAndExit();
         }
 
-        final JAXRSAnalyzer jaxrsAnalyzer = new JAXRSAnalyzer(projectPaths, classPaths, backendType, name, version, domain, outputFileLocation);
+        final JAXRSAnalyzer jaxrsAnalyzer = new JAXRSAnalyzer(projectPaths, classPaths, backendType, name, version, domain, outputFileLocation,
+            renderSwaggerTags, swaggerTagsPathOffset);
         jaxrsAnalyzer.analyze();
     }
 
@@ -142,6 +161,8 @@ public class Main {
         System.err.println(" -v <project version> The version of the project");
         System.err.println(" -d <project domain> The domain of the project");
         System.err.println(" -o <output file> The location of the analysis output (will be printed to standard out if omitted)");
+        System.err.println(" -renderSwaggerTags Enables rendering of Swagger tags (has no effect on other backends)");
+        System.err.println(" -swaggerTagsPathOffset <path offset> The number at which path position the Swagger tags should be extracted");
         System.err.println("\nExample: java -jar jaxrs-analyzer.jar -b swagger -n \"My Project\" -cp ~/libs/lib1.jar:~/libs/project/bin ~/project/target/classes");
         System.exit(1);
     }

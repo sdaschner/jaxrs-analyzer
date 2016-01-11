@@ -32,7 +32,7 @@ public class AsciiDocBackendTest extends TestCase {
 
     @Test
     public void test() {
-        final Project project = new Project("project name", "1.0", "domain.tld", resources);
+        final Project project = new Project("project name", "1.0", "domain.tld", resources, false, 0);
         final String actualOutput = cut.render(project);
 
         assertEquals(expectedOutput, actualOutput);
