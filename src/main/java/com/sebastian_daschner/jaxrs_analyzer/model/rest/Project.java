@@ -13,8 +13,11 @@ public class Project {
     private final String version;
     private final String domain;
     private final Resources resources;
+    private final boolean renderSwaggerTags;
+    private final int swaggerTagsPathOffset;
 
-    public Project(final String name, final String version, final String domain, final Resources resources) {
+    public Project(final String name, final String version, final String domain, final Resources resources,
+            final boolean renderSwaggerTags, final int swaggerTagsPathOffset) {
         StringUtils.requireNonBlank(name);
         StringUtils.requireNonBlank(version);
         StringUtils.requireNonBlank(domain);
@@ -22,6 +25,8 @@ public class Project {
         this.version = version;
         this.domain = domain;
         this.resources = resources;
+        this.renderSwaggerTags = renderSwaggerTags;
+        this.swaggerTagsPathOffset = swaggerTagsPathOffset;
     }
 
     public String getName() {
@@ -40,4 +45,13 @@ public class Project {
         return resources;
     }
 
+    public boolean isRenderSwaggerTags()
+    {
+        return renderSwaggerTags;
+    }
+
+    public int getSwaggerTagsPathOffset()
+    {
+        return swaggerTagsPathOffset;
+    }
 }

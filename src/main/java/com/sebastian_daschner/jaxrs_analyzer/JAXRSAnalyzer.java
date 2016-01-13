@@ -26,6 +26,8 @@ public class JAXRSAnalyzer {
     private static final String DEFAULT_VERSION = "0.1-SNAPSHOT";
     private static final String DEFAULT_DOMAIN = "example.com";
     private static final BackendType DEFAULT_BACKEND = BackendType.SWAGGER;
+    private static final boolean DEFAULT_RENDER_SWAGGER_TAGS = false;
+    private static final int DEFAULT_SWAGGER_TAGS_PATH_OFFSET = 0;
 
     private final Set<Path> projectPaths = new HashSet<>();
     private final Set<Path> classPaths = new HashSet<>();
@@ -34,6 +36,8 @@ public class JAXRSAnalyzer {
     private final String projectVersion;
     private final String domain;
     private final Path outputLocation;
+    private final boolean renderSwaggerTags;
+    private final int swaggerTagsPathOffset;
 
     /**
      * Constructs a JAX-RS Analyzer.
@@ -45,9 +49,12 @@ public class JAXRSAnalyzer {
      * @param projectVersion The project version (can be {@code null})
      * @param domain         The domain (can be {@code null})
      * @param outputLocation The location of the output file (output will be printed to standard out if {@code null})
+     * @param renderSwaggerTags The flag if Swagger tags should be generated (can be {@code null})
+     * @param swaggerTagsPathOffset The path offset for Swagger tags (can be {@code null})
      */
     public JAXRSAnalyzer(final Set<Path> projectPaths, final Set<Path> classPaths, final BackendType backendType, final String projectName,
-                         final String projectVersion, final String domain, final Path outputLocation) {
+                         final String projectVersion, final String domain, final Path outputLocation,
+                         final Boolean renderSwaggerTags, final Integer swaggerTagsPathOffset) {
         Objects.requireNonNull(projectPaths);
         Objects.requireNonNull(classPaths);
         if (projectPaths.isEmpty())
@@ -60,6 +67,8 @@ public class JAXRSAnalyzer {
         this.domain = Optional.ofNullable(domain).orElse(DEFAULT_DOMAIN);
         this.backendType = Optional.ofNullable(backendType).orElse(DEFAULT_BACKEND);
         this.outputLocation = outputLocation;
+        this.renderSwaggerTags = Optional.ofNullable(renderSwaggerTags).orElse(DEFAULT_RENDER_SWAGGER_TAGS);
+        this.swaggerTagsPathOffset = Optional.ofNullable(swaggerTagsPathOffset).orElse(DEFAULT_SWAGGER_TAGS_PATH_OFFSET);
     }
 
     /**
@@ -67,7 +76,7 @@ public class JAXRSAnalyzer {
      */
     public void analyze() {
         final Resources resources = new ProjectAnalyzer(classPaths.toArray(new Path[classPaths.size()])).analyze(projectPaths.toArray(new Path[projectPaths.size()]));
-        final Project project = new Project(projectName, projectVersion, domain, resources);
+        final Project project = new Project(projectName, projectVersion, domain, resources, renderSwaggerTags, swaggerTagsPathOffset);
 
         if (isEmpty(resources)) {
             LogProvider.info("Empty JAX-RS analysis result, omitting output");

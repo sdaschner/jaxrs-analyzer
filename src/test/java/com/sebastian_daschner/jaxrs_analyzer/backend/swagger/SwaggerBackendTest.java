@@ -40,16 +40,21 @@ public class SwaggerBackendTest {
     private final Backend cut;
     private final Resources resources;
     private final String expectedOutput;
+    private final Boolean renderSwaggerTags;
+    private final Integer swaggerTagsPathOffset;
 
-    public SwaggerBackendTest(final Resources resources, final String expectedOutput) {
+    public SwaggerBackendTest(final Resources resources, final String expectedOutput,
+            final Boolean renderSwaggerTags, final Integer swaggerTagsPathOffset) {
         cut = new SwaggerBackend();
         this.resources = resources;
         this.expectedOutput = expectedOutput;
+        this.renderSwaggerTags = renderSwaggerTags;
+        this.swaggerTagsPathOffset = swaggerTagsPathOffset;
     }
 
     @Test
     public void test() {
-        final Project project = new Project("project name", "1.0", "domain.tld", resources);
+        final Project project = new Project("project name", "1.0", "domain.tld", resources, renderSwaggerTags, swaggerTagsPathOffset);
         final String actualOutput = cut.render(project);
 
         assertEquals(expectedOutput, actualOutput);
@@ -131,13 +136,53 @@ public class SwaggerBackendTest {
                                 .andResponse(201, ResponseBuilder.newBuilder().andHeaders("Location").build()).build()).build(),
                 "{\"swagger\":\"2.0\",\"info\":{\"version\":\"1.0\",\"title\":\"project name\"},\"host\":\"domain.tld\",\"basePath\":\"/rest\",\"schemes\":[\"http\"],\"paths\":{\"/res8\":{\"post\":{\"consumes\":[\"application/json\"],\"produces\":[],\"parameters\":[{\"name\":\"body\",\"in\":\"body\",\"required\":true,\"schema\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/definitions/Model\"}}}],\"responses\":{\"201\":{\"description\":\"Created\",\"headers\":{\"Location\":{\"type\":\"string\"}}}}}}},\"definitions\":{\"Model\":{\"properties\":{\"name\":{\"type\":\"string\"},\"value\":{\"type\":\"integer\"}}}}}");
 
+        add(data, ResourcesBuilder.withBase("rest")
+                .andResource("res09", ResourceMethodBuilder.withMethod(HttpMethod.GET)
+                        .andResponse(200, ResponseBuilder.withResponseBody(TypeIdentifier.ofType(Types.STRING)).andHeaders("Location").build()).build())
+                .andResource("res10", ResourceMethodBuilder.withMethod(HttpMethod.GET)
+                        .andResponse(200, ResponseBuilder.withResponseBody(TypeIdentifier.ofType(Types.STRING)).andHeaders("Location").build()).build()).build(),
+        "{\"swagger\":\"2.0\",\"info\":{\"version\":\"1.0\",\"title\":\"project name\"},\"host\":\"domain.tld\",\"basePath\":\"/rest\",\"schemes\":[\"http\"],\"tags\":[\"res09\",\"res10\"],\"paths\":{"
+                + "\"/res09\":{\"get\":{\"consumes\":[],\"produces\":[],\"parameters\":[],\"responses\":{\"200\":{\"description\":\"OK\",\"headers\":{\"Location\":{\"type\":\"string\"}},\"schema\":{\"type\":\"string\"}}},\"tags\":[\"res09\"]}},"
+                + "\"/res10\":{\"get\":{\"consumes\":[],\"produces\":[],\"parameters\":[],\"responses\":{\"200\":{\"description\":\"OK\",\"headers\":{\"Location\":{\"type\":\"string\"}},\"schema\":{\"type\":\"string\"}}},\"tags\":[\"res10\"]}}"
+                + "},\"definitions\":{}}",
+        true, 0);
+
+        add(data, ResourcesBuilder.withBase("rest")
+        .andResource("v2/res11", ResourceMethodBuilder.withMethod(HttpMethod.GET)
+                .andResponse(200, ResponseBuilder.withResponseBody(TypeIdentifier.ofType(Types.STRING)).andHeaders("Location").build()).build())
+        .andResource("v2/res12", ResourceMethodBuilder.withMethod(HttpMethod.GET)
+                .andResponse(200, ResponseBuilder.withResponseBody(TypeIdentifier.ofType(Types.STRING)).andHeaders("Location").build()).build()).build(),
+        "{\"swagger\":\"2.0\",\"info\":{\"version\":\"1.0\",\"title\":\"project name\"},\"host\":\"domain.tld\",\"basePath\":\"/rest\",\"schemes\":[\"http\"],\"tags\":[\"res11\",\"res12\"],\"paths\":{"
+                + "\"/v2/res11\":{\"get\":{\"consumes\":[],\"produces\":[],\"parameters\":[],\"responses\":{\"200\":{\"description\":\"OK\",\"headers\":{\"Location\":{\"type\":\"string\"}},\"schema\":{\"type\":\"string\"}}},\"tags\":[\"res11\"]}},"
+                + "\"/v2/res12\":{\"get\":{\"consumes\":[],\"produces\":[],\"parameters\":[],\"responses\":{\"200\":{\"description\":\"OK\",\"headers\":{\"Location\":{\"type\":\"string\"}},\"schema\":{\"type\":\"string\"}}},\"tags\":[\"res12\"]}}"
+                + "},\"definitions\":{}}",
+        true, 1);
+
+        add(data, ResourcesBuilder.withBase("rest")
+        .andResource("v2/res13", ResourceMethodBuilder.withMethod(HttpMethod.GET)
+                .andResponse(200, ResponseBuilder.withResponseBody(TypeIdentifier.ofType(Types.STRING)).andHeaders("Location").build()).build())
+        .andResource("v2/res14", ResourceMethodBuilder.withMethod(HttpMethod.GET)
+                .andResponse(200, ResponseBuilder.withResponseBody(TypeIdentifier.ofType(Types.STRING)).andHeaders("Location").build()).build()).build(),
+        "{\"swagger\":\"2.0\",\"info\":{\"version\":\"1.0\",\"title\":\"project name\"},\"host\":\"domain.tld\",\"basePath\":\"/rest\",\"schemes\":[\"http\"],\"tags\":[],\"paths\":{"
+                + "\"/v2/res13\":{\"get\":{\"consumes\":[],\"produces\":[],\"parameters\":[],\"responses\":{\"200\":{\"description\":\"OK\",\"headers\":{\"Location\":{\"type\":\"string\"}},\"schema\":{\"type\":\"string\"}}}}},"
+                + "\"/v2/res14\":{\"get\":{\"consumes\":[],\"produces\":[],\"parameters\":[],\"responses\":{\"200\":{\"description\":\"OK\",\"headers\":{\"Location\":{\"type\":\"string\"}},\"schema\":{\"type\":\"string\"}}}}}"
+                + "},\"definitions\":{}}",
+        true, 42);
+
         return data;
     }
 
     public static void add(final Collection<Object[]> data, final Resources resources, final String output) {
-        final Object[] objects = new Object[2];
+        add(data, resources, output, false, 0);
+    }
+
+    public static void add(final Collection<Object[]> data, final Resources resources, final String output,
+            final Boolean renderSwaggerTags, final Integer swaggerTagsPathOffset) {
+        final Object[] objects = new Object[4];
         objects[0] = resources;
         objects[1] = output;
+        objects[2] = renderSwaggerTags;
+        objects[3] = swaggerTagsPathOffset;
         data.add(objects);
     }
 
