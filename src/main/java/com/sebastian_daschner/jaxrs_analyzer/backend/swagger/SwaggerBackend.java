@@ -29,6 +29,7 @@ import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 import javax.ws.rs.core.Response;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -43,17 +44,20 @@ import static java.util.Comparator.comparing;
  */
 public class SwaggerBackend implements Backend {
 
+    private static final String NAME = "Swagger";
     private static final String SWAGGER_VERSION = "2.0";
 
     private final Lock lock = new ReentrantLock();
+    private final SwaggerOptions options;
     private Resources resources;
     private JsonObjectBuilder builder;
     private SchemaBuilder schemaBuilder;
     private String projectName;
     private String projectVersion;
-    private String projectDomain;
-    private boolean renderSwaggerTags;
-    private int swaggerTagsPathOffset;
+
+    SwaggerBackend(final SwaggerOptions options) {
+        this.options = options;
+    }
 
     @Override
     public String render(final Project project) {
@@ -64,10 +68,7 @@ public class SwaggerBackend implements Backend {
             resources = project.getResources();
             projectName = project.getName();
             projectVersion = project.getVersion();
-            projectDomain = project.getDomain();
             schemaBuilder = new SchemaBuilder(resources.getTypeRepresentations());
-            renderSwaggerTags = project.isRenderSwaggerTags();
-            swaggerTagsPathOffset = project.getSwaggerTagsPathOffset();
 
             return renderInternal();
         } finally {
@@ -86,22 +87,26 @@ public class SwaggerBackend implements Backend {
     private void appendHeader() {
         builder.add("swagger", SWAGGER_VERSION).add("info", Json.createObjectBuilder()
                 .add("version", projectVersion).add("title", projectName))
-                .add("host", projectDomain).add("basePath", '/' + resources.getBasePath()).add("schemes", Json.createArrayBuilder().add("http"));
-        if( renderSwaggerTags ) {
+                .add("host", options.getDomain()).add("basePath", '/' + resources.getBasePath())
+                .add("schemes", options.getSchemes().stream().map(Enum::name).map(String::toLowerCase).sorted()
+                        .collect(Json::createArrayBuilder, JsonArrayBuilder::add, JsonArrayBuilder::add));
+        if (options.isRenderTags()) {
             final JsonArrayBuilder tags = Json.createArrayBuilder();
-                    resources.getResources().stream()
-                        .map(this::extractTag).filter(t -> t.isPresent()).map(t -> t.get())
-                        .distinct().sorted().forEach(t -> tags.add(t));
+            resources.getResources().stream()
+                    .map(this::extractTag).filter(Objects::nonNull)
+                    .distinct().sorted().forEach(tags::add);
             builder.add("tags", tags);
         }
     }
 
-    private Optional<String> extractTag(final String s) {
-        String tag = null;
-        if( s.split("/").length > swaggerTagsPathOffset && !s.split("/")[swaggerTagsPathOffset].startsWith("{")) {
-            tag = s.split("/")[swaggerTagsPathOffset];
+    private String extractTag(final String s) {
+        final int offset = options.getTagsPathOffset();
+        final String[] parts = s.split("/");
+
+        if (parts.length > offset && !parts[offset].contains("{")) {
+            return parts[offset];
         }
-        return Optional.ofNullable(tag);
+        return null;
     }
 
     private void appendPaths() {
@@ -128,9 +133,8 @@ public class SwaggerBackend implements Backend {
         final JsonObjectBuilder methodDescription = Json.createObjectBuilder().add("consumes", consumes).add("produces", produces)
                 .add("parameters", buildParameters(method)).add("responses", buildResponses(method));
 
-        if( renderSwaggerTags ) {
-            extractTag(s).ifPresent( t -> methodDescription.add("tags", Json.createArrayBuilder().add(t)));
-        }
+        if (options.isRenderTags())
+            Optional.ofNullable(extractTag(s)).ifPresent(t -> methodDescription.add("tags", Json.createArrayBuilder().add(t)));
 
         return methodDescription;
     }
@@ -182,6 +186,11 @@ public class SwaggerBackend implements Backend {
 
     private void appendDefinitions() {
         builder.add("definitions", schemaBuilder.getDefinitions());
+    }
+
+    @Override
+    public String getName() {
+        return NAME;
     }
 
 }

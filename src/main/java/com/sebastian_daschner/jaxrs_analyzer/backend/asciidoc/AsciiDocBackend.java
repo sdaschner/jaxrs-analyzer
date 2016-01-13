@@ -24,6 +24,7 @@ import static com.sebastian_daschner.jaxrs_analyzer.backend.ComparatorUtils.mapK
  */
 public class AsciiDocBackend implements Backend {
 
+    private static final String NAME = "AsciiDoc";
     private static final String DOCUMENT_TITLE = "= REST resources of ";
     private static final String TYPE_WILDCARD = "\\*/*";
 
@@ -156,6 +157,11 @@ public class AsciiDocBackend implements Backend {
 
     private static String toString(final Set<String> set) {
         return set.stream().sorted().map(Object::toString).collect(Collectors.joining(", "));
+    }
+
+    @Override
+    public String getName() {
+        return NAME;
     }
 
 }

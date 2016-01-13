@@ -33,7 +33,7 @@ public class PlainTextBackendTest {
 
     @Test
     public void test() {
-        final Project project = new Project("project name", "1.0", "domain.tld", resources, false, 0);
+        final Project project = new Project("project name", "1.0", resources);
         final String actualOutput = cut.render(project);
         assertEquals(expectedOutput, actualOutput);
     }

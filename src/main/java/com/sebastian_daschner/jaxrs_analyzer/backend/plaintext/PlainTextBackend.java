@@ -40,6 +40,7 @@ import static java.util.Comparator.comparing;
  */
 public class PlainTextBackend implements Backend {
 
+    private static final String NAME = "Plain text";
     private static final String REST_HEADER = "REST resources of ";
     private static final String TYPE_WILDCARD = "*/*";
 
@@ -178,6 +179,11 @@ public class PlainTextBackend implements Backend {
 
     private static String toString(final Set<String> set) {
         return set.stream().sorted().map(Object::toString).collect(Collectors.joining(", "));
+    }
+
+    @Override
+    public String getName() {
+        return NAME;
     }
 
 }

@@ -15,10 +15,13 @@
  */
 package com.sebastian_daschner.jaxrs_analyzer;
 
-import com.sebastian_daschner.jaxrs_analyzer.backend.BackendType;
+import com.sebastian_daschner.jaxrs_analyzer.backend.Backend;
+import com.sebastian_daschner.jaxrs_analyzer.backend.swagger.SwaggerBackendBuilder;
+import com.sebastian_daschner.jaxrs_analyzer.backend.swagger.SwaggerScheme;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -31,6 +34,20 @@ import java.util.stream.Stream;
  * @author Sebastian Daschner
  */
 public class Main {
+
+    private static final String DEFAULT_NAME = "project";
+    private static final String DEFAULT_VERSION = "0.1-SNAPSHOT";
+
+    private static final Set<Path> projectPaths = new HashSet<>();
+    private static final Set<Path> classPaths = new HashSet<>();
+    private static String name = DEFAULT_NAME;
+    private static String version = DEFAULT_VERSION;
+    private static BackendType backendType = BackendType.SWAGGER;
+    private static String domain;
+    private static Set<SwaggerScheme> swaggerSchemes;
+    private static Boolean renderSwaggerTags;
+    private static Integer swaggerTagsPathOffset;
+    private static Path outputFileLocation;
 
     /**
      * Inspects JAX-RS projects and outputs the gathered information.
@@ -48,8 +65,13 @@ public class Main {
      * <li>{@code -v project version} The version of the project</li>
      * <li>{@code -d project domain} The domain of the project</li>
      * <li>{@code -o output file} The location of the analysis output (will be printed to standard out if omitted)</li>
-     * <li>{@code -renderSwaggerTags} Enables rendering of Swagger tags (has no effect on other backends</li>
-     * <li>{@code -swaggerTagsPathOffset path offset} The number at which path position the Swagger tags should be extracted</li>
+     * </ul>
+     * <p>
+     * Following available backend specific options (only have effect if the corresponding backend is selected):
+     * <ul>
+     * <li>{@code --swaggerSchemes scheme[,schemes]} The Swagger schemes: {@code http} (default), {@code https}, {@code ws}, {@code wss}")</li>
+     * <li>{@code --renderSwaggerTags} Enables rendering of Swagger tags (will not be rendered per default)</li>
+     * <li>{@code --swaggerTagsPathOffset path offset} The number at which path position the Swagger tags should be extracted ({@code 0} per default)</li>
      * </ul>
      *
      * @param args The arguments
@@ -59,39 +81,31 @@ public class Main {
             printUsageAndExit();
         }
 
-        final Set<Path> projectPaths = new HashSet<>();
-        final Set<Path> classPaths = new HashSet<>();
-        BackendType backendType = null;
-        String name = null;
-        String version = null;
-        String domain = null;
-        Path outputFileLocation = null;
-        Boolean renderSwaggerTags = null;
-        Integer swaggerTagsPathOffset = null;
+        try {
+            extractArgs(args);
+        } catch (IllegalArgumentException e) {
+            System.err.println(e.getMessage() + '\n');
+            printUsageAndExit();
+        }
 
+        validateArgs();
+
+        final Backend backend = constructBackend();
+
+        final JAXRSAnalyzer jaxrsAnalyzer = new JAXRSAnalyzer(projectPaths, classPaths, name, version, backend, outputFileLocation);
+        jaxrsAnalyzer.analyze();
+    }
+
+    private static void extractArgs(String[] args) {
         try {
             for (int i = 0; i < args.length; i++) {
                 if (args[i].startsWith("-")) {
                     switch (args[i]) {
                         case "-b":
-                            backendType = BackendType.getByNameIgnoreCase(args[++i]);
-                            if (backendType == null) {
-                                System.err.println("Unknown backend " + args[i] + '\n');
-                                printUsageAndExit();
-                            }
+                            backendType = extractBackend(args[++i]);
                             break;
                         case "-cp":
-                            final List<Path> paths = Stream.of(args[++i].split(":"))
-                                    .map(s -> s.replaceFirst("^~", System.getProperty("user.home")))
-                                    .map(Paths::get).collect(Collectors.toList());
-                            paths.forEach(p -> {
-                                if (!p.toFile().exists()) {
-                                    System.err.println("Class path " + p.toFile() + " doesn't exist\n");
-                                    printUsageAndExit();
-                                }
-                            });
-
-                            paths.forEach(classPaths::add);
+                            extractClassPaths(args[++i]).forEach(classPaths::add);
                             break;
                         case "-X":
                             LogProvider.injectDebugLogger(System.err::println);
@@ -108,15 +122,17 @@ public class Main {
                         case "-o":
                             outputFileLocation = Paths.get(args[++i]);
                             break;
-                        case "-renderSwaggerTags":
+                        case "--swaggerSchemes":
+                            swaggerSchemes = extractSwaggerSchemes(args[++i]);
+                            break;
+                        case "--renderSwaggerTags":
                             renderSwaggerTags = true;
                             break;
-                        case "-swaggerTagsPathOffset":
+                        case "--swaggerTagsPathOffset":
                             swaggerTagsPathOffset = Integer.valueOf(args[++i]);
                             break;
                         default:
-                            System.err.print("Unknown option " + args[i] + '\n');
-                            printUsageAndExit();
+                            throw new IllegalArgumentException("Unknown option " + args[i]);
                     }
                 } else {
                     final Path path = Paths.get(args[i].replaceFirst("^~", System.getProperty("user.home")));
@@ -128,15 +144,59 @@ public class Main {
                 }
             }
         } catch (IndexOutOfBoundsException e) {
-            System.err.println("Please provide valid number of arguments\n");
-            printUsageAndExit();
-        } catch(NumberFormatException nfe) {
-            System.err.println("Please provide valid integer number as an argument\n");
-            printUsageAndExit();
+            throw new IllegalArgumentException("Please provide valid number of arguments");
         }
+    }
 
-        if( swaggerTagsPathOffset != null && swaggerTagsPathOffset < 0 ) {
-            System.err.println("Please provide positive integer number for option -swaggerTagsPathOffset\n");
+    private static BackendType extractBackend(final String name) {
+        switch (name.toLowerCase()) {
+            case "swagger":
+                return BackendType.SWAGGER;
+            case "plaintext":
+                return BackendType.PLAINTEXT;
+            case "asciidoc":
+                return BackendType.ASCIIDOC;
+            default:
+                throw new IllegalArgumentException("Unknown backend " + name);
+        }
+    }
+
+    private static List<Path> extractClassPaths(final String classPaths) {
+        final List<Path> paths = Stream.of(classPaths.split(":"))
+                .map(s -> s.replaceFirst("^~", System.getProperty("user.home")))
+                .map(Paths::get).collect(Collectors.toList());
+        paths.forEach(p -> {
+            if (!p.toFile().exists()) {
+                throw new IllegalArgumentException("Class path " + p.toFile() + " doesn't exist");
+            }
+        });
+        return paths;
+    }
+
+    private static Set<SwaggerScheme> extractSwaggerSchemes(final String schemes) {
+        return Stream.of(schemes.split(","))
+                .map(Main::extractSwaggerScheme)
+                .collect(() -> EnumSet.noneOf(SwaggerScheme.class), Set::add, Set::addAll);
+    }
+
+    private static SwaggerScheme extractSwaggerScheme(final String scheme) {
+        switch (scheme.toLowerCase()) {
+            case "http":
+                return SwaggerScheme.HTTP;
+            case "https":
+                return SwaggerScheme.HTTPS;
+            case "ws":
+                return SwaggerScheme.WS;
+            case "wss":
+                return SwaggerScheme.WSS;
+            default:
+                throw new IllegalArgumentException("Unknown swagger scheme " + scheme);
+        }
+    }
+
+    private static void validateArgs() {
+        if (swaggerTagsPathOffset != null && swaggerTagsPathOffset < 0) {
+            System.err.println("Please provide positive integer number for option --swaggerTagsPathOffset\n");
             printUsageAndExit();
         }
 
@@ -144,10 +204,37 @@ public class Main {
             System.err.println("Please provide at least one project path\n");
             printUsageAndExit();
         }
+    }
 
-        final JAXRSAnalyzer jaxrsAnalyzer = new JAXRSAnalyzer(projectPaths, classPaths, backendType, name, version, domain, outputFileLocation,
-            renderSwaggerTags, swaggerTagsPathOffset);
-        jaxrsAnalyzer.analyze();
+    private static Backend constructBackend() {
+        switch (backendType) {
+            case SWAGGER:
+                return configureSwaggerBackend();
+            case PLAINTEXT:
+                return Backend.plainText().build();
+            case ASCIIDOC:
+                return Backend.asciiDoc().build();
+            default:
+                // can not happen
+                throw new IllegalArgumentException("Unknown backend type " + backendType);
+        }
+    }
+
+    private static Backend configureSwaggerBackend() {
+        final SwaggerBackendBuilder builder = Backend.swagger();
+
+        if (domain != null)
+            builder.domain(domain);
+        if (swaggerSchemes != null)
+            builder.schemes(swaggerSchemes);
+        if (renderSwaggerTags != null) {
+            if (swaggerTagsPathOffset != null)
+                builder.renderTags(renderSwaggerTags, swaggerTagsPathOffset);
+            else
+                builder.renderTags(renderSwaggerTags);
+        }
+
+        return builder.build();
     }
 
     private static void printUsageAndExit() {
@@ -161,10 +248,15 @@ public class Main {
         System.err.println(" -v <project version> The version of the project");
         System.err.println(" -d <project domain> The domain of the project");
         System.err.println(" -o <output file> The location of the analysis output (will be printed to standard out if omitted)");
-        System.err.println(" -renderSwaggerTags Enables rendering of Swagger tags (has no effect on other backends)");
-        System.err.println(" -swaggerTagsPathOffset <path offset> The number at which path position the Swagger tags should be extracted");
+        System.err.println("\nFollowing available backend specific options (only have effect if the corresponding backend is selected):\n");
+        System.err.println(" --swaggerSchemes <scheme>[,schemes] The Swagger schemes: http (default), https, ws, wss");
+        System.err.println(" --renderSwaggerTags Enables rendering of Swagger tags (default tag will be used per default)");
+        System.err.println(" --swaggerTagsPathOffset <path offset> The number at which path position the Swagger tags should be extracted (0 will be used per default)");
         System.err.println("\nExample: java -jar jaxrs-analyzer.jar -b swagger -n \"My Project\" -cp ~/libs/lib1.jar:~/libs/project/bin ~/project/target/classes");
         System.exit(1);
     }
 
+    private enum BackendType {
+        SWAGGER, PLAINTEXT, ASCIIDOC;
+    }
 }
