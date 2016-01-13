@@ -15,8 +15,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.sebastian_daschner.jaxrs_analyzer.analysis.results.TypeIdentifierUtils.STRING_IDENTIFIER;
-import static com.sebastian_daschner.jaxrs_analyzer.analysis.results.TypeIdentifierUtils.STRING_LIST_IDENTIFIER;
+import static com.sebastian_daschner.jaxrs_analyzer.analysis.results.TypeUtils.STRING_IDENTIFIER;
+import static com.sebastian_daschner.jaxrs_analyzer.analysis.results.TypeUtils.STRING_LIST_IDENTIFIER;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 
@@ -120,7 +120,7 @@ public class DynamicTypeAnalyzerTest {
         // should be ignored
         typeRepresentations.put(STRING_LIST_IDENTIFIER, TypeRepresentation.ofCollection(STRING_LIST_IDENTIFIER, TypeRepresentation.ofConcrete(STRING_IDENTIFIER)));
         final TypeIdentifier modelIdentifier = TypeIdentifier.ofType(new Type("com.sebastian_daschner.test.Model"));
-        final Map<String, TypeIdentifier> modelProperties = Collections.singletonMap("string", TypeIdentifierUtils.STRING_IDENTIFIER);
+        final Map<String, TypeIdentifier> modelProperties = Collections.singletonMap("string", TypeUtils.STRING_IDENTIFIER);
         typeRepresentations.put(modelIdentifier, TypeRepresentation.ofConcrete(modelIdentifier, modelProperties));
 
         TypeIdentifier identifier = cut.analyze(Json.createArrayBuilder().add("foobar").build());

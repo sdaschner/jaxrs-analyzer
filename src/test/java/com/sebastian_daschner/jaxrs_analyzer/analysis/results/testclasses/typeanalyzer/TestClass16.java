@@ -1,6 +1,6 @@
 package com.sebastian_daschner.jaxrs_analyzer.analysis.results.testclasses.typeanalyzer;
 
-import com.sebastian_daschner.jaxrs_analyzer.analysis.results.TypeIdentifierUtils;
+import com.sebastian_daschner.jaxrs_analyzer.analysis.results.TypeUtils;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeIdentifier;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeRepresentation;
 import com.sebastian_daschner.jaxrs_analyzer.model.types.Type;
@@ -9,8 +9,6 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import java.util.*;
 
-// TODO remove
-@XmlAccessorType(XmlAccessType.FIELD)
 public class TestClass16 extends SuperTestClass2 {
 
     private String world;
@@ -20,8 +18,9 @@ public class TestClass16 extends SuperTestClass2 {
         final Map<String, TypeIdentifier> properties = new HashMap<>();
 
         final TypeIdentifier superTestClass2 = TypeIdentifier.ofType(new Type(SuperTestClass2.class.getName()));
-        final TypeIdentifier stringIdentifier = TypeIdentifierUtils.STRING_IDENTIFIER;
-        properties.put("hello", stringIdentifier);
+        final TypeIdentifier stringIdentifier = TypeUtils.STRING_IDENTIFIER;
+        // TODO un-comment
+//        properties.put("hello", stringIdentifier);
         properties.put("world", stringIdentifier);
         properties.put("partner", superTestClass2);
 

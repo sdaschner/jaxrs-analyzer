@@ -41,7 +41,7 @@ public class TestClass4 {
     public static Set<TypeRepresentation> expectedTypeRepresentations() {
         final Map<String, TypeIdentifier> properties = new HashMap<>();
 
-        properties.put("first", TypeIdentifier.ofType(Types.DATE));
+        properties.put("first", TypeIdentifier.ofType(new Type("java.time.LocalDate")));
         properties.put("second", TypeIdentifier.ofType(Types.DATE));
 
         return Collections.singleton(TypeRepresentation.ofConcrete(expectedIdentifier(), properties));

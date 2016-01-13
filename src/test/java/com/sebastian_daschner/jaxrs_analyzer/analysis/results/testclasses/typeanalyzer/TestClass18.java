@@ -1,10 +1,9 @@
 package com.sebastian_daschner.jaxrs_analyzer.analysis.results.testclasses.typeanalyzer;
 
-import com.sebastian_daschner.jaxrs_analyzer.analysis.results.TypeIdentifierUtils;
+import com.sebastian_daschner.jaxrs_analyzer.analysis.results.TypeUtils;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeIdentifier;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeRepresentation;
 import com.sebastian_daschner.jaxrs_analyzer.model.types.Type;
-import com.sebastian_daschner.jaxrs_analyzer.model.types.Types;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -24,8 +23,9 @@ public class TestClass18 extends SuperTestClass4 {
         final Map<String, TypeIdentifier> properties = new HashMap<>();
 
         final TypeIdentifier identifier = expectedIdentifier();
-        properties.put("foobar", TypeIdentifierUtils.STRING_IDENTIFIER);
-        properties.put("test", TypeIdentifierUtils.STRING_IDENTIFIER);
+        properties.put("foobar", TypeUtils.STRING_IDENTIFIER);
+        // TODO un-comment
+//        properties.put("test", TypeUtils.STRING_IDENTIFIER);
         properties.put("partner", identifier);
 
         return Collections.singleton(TypeRepresentation.ofConcrete(identifier, properties));

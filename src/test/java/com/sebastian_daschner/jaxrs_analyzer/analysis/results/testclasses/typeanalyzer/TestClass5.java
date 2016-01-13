@@ -16,7 +16,7 @@
 
 package com.sebastian_daschner.jaxrs_analyzer.analysis.results.testclasses.typeanalyzer;
 
-import com.sebastian_daschner.jaxrs_analyzer.analysis.results.TypeIdentifierUtils;
+import com.sebastian_daschner.jaxrs_analyzer.analysis.results.TypeUtils;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeIdentifier;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeRepresentation;
 import com.sebastian_daschner.jaxrs_analyzer.model.types.Type;
@@ -52,7 +52,7 @@ public class TestClass5 {
         properties.put("second", setIdentifier);
 
         final TypeRepresentation testClass5 = TypeRepresentation.ofConcrete(expectedIdentifier(), properties);
-        final TypeRepresentation string = TypeRepresentation.ofConcrete(TypeIdentifierUtils.STRING_IDENTIFIER);
+        final TypeRepresentation string = TypeRepresentation.ofConcrete(TypeUtils.STRING_IDENTIFIER);
         final TypeRepresentation listString = TypeRepresentation.ofCollection(listIdentifier, string);
         final TypeRepresentation setString = TypeRepresentation.ofCollection(setIdentifier, string);
 

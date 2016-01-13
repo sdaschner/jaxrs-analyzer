@@ -107,6 +107,7 @@ final class JsonMapper {
             builder.add(key, false);
     }
 
+    // TODO remove unused code, refactor & test types (e.g. Date, JSR-310)
     static void addToObject(final JsonObjectBuilder builder, final String key, final Type type, final Function<Type, javax.json.JsonValue> defaultBehavior) {
         if (STRING.equals(type)) {
             builder.add(key, "string");

@@ -7,7 +7,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.sebastian_daschner.jaxrs_analyzer.analysis.results.TypeIdentifierUtils.*;
+import static com.sebastian_daschner.jaxrs_analyzer.analysis.results.TypeUtils.*;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 

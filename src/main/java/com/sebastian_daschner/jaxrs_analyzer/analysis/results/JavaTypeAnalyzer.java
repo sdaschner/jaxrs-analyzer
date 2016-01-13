@@ -26,6 +26,7 @@ import com.sebastian_daschner.jaxrs_analyzer.model.types.Types;
 import javassist.CtClass;
 import javassist.CtField;
 import javassist.CtMethod;
+import javassist.NotFoundException;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -102,10 +103,9 @@ class JavaTypeAnalyzer {
         if (ctClass.isEnum() || isJDKType(type))
             return Collections.emptyMap();
 
-        // TODO analyze & test inheritance
-
         final XmlAccessType value = getXmlAccessType(ctClass);
 
+        // TODO analyze & test inheritance
         final List<CtField> relevantFields = Stream.of(ctClass.getDeclaredFields()).filter(f -> isRelevant(f, value)).collect(Collectors.toList());
         final List<CtMethod> relevantGetters = Stream.of(ctClass.getDeclaredMethods()).filter(m -> isRelevant(m, value)).collect(Collectors.toList());
 
@@ -122,9 +122,15 @@ class JavaTypeAnalyzer {
 
     private XmlAccessType getXmlAccessType(CtClass ctClass) {
         try {
-            if (ctClass.hasAnnotation(XmlAccessorType.class))
-                return ((XmlAccessorType) ctClass.getAnnotation(XmlAccessorType.class)).value();
-        } catch (ClassNotFoundException e) {
+            CtClass current = ctClass;
+
+            while (current != null) {
+                if (current.hasAnnotation(XmlAccessorType.class))
+                    return ((XmlAccessorType) current.getAnnotation(XmlAccessorType.class)).value();
+                current = current.getSuperclass();
+            }
+
+        } catch (ClassNotFoundException | NotFoundException e) {
             LogProvider.error("Could not analyze JAXB annotation of type: " + e.getMessage());
             LogProvider.debug(e);
         }

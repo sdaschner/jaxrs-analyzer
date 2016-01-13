@@ -21,13 +21,15 @@ import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeIdentifier;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeRepresentation;
 import com.sebastian_daschner.jaxrs_analyzer.model.types.Type;
 import javassist.NotFoundException;
-import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
 import java.io.IOException;
 import java.util.*;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 @RunWith(Parameterized.class)
 public class JavaTypeAnalyzerTest {
@@ -78,10 +80,17 @@ public class JavaTypeAnalyzerTest {
             throw e;
         }
 
-        Assert.assertEquals("failed for " + clazz.getSimpleName(), expectedIdentifier, actualIdentifier);
+        assertEquals("failed for " + clazz.getSimpleName(), expectedIdentifier, actualIdentifier);
+
         final Map<TypeIdentifier, TypeRepresentation> expectedTypeRepresentations = expectedRepresentations.stream()
                 .collect(HashMap::new, (m, r) -> m.put(r.getIdentifier(), r), Map::putAll);
-        Assert.assertEquals("failed for " + clazz.getSimpleName(), expectedTypeRepresentations, actualTypeRepresentations);
+        assertEquals("failed for " + clazz.getSimpleName(), expectedTypeRepresentations, actualTypeRepresentations);
+
+        expectedRepresentations.stream().forEach(ex -> {
+            final TypeRepresentation ac = actualTypeRepresentations.get(ex.getIdentifier());
+            if (!TypeUtils.equals(ex, ac))
+                fail("failed for " + clazz.getSimpleName() + "\nNo type representation match \nexpected: " + ex + "\nactual:   " + ac);
+        });
     }
 
 }

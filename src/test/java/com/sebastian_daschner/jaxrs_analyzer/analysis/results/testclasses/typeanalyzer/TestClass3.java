@@ -16,7 +16,7 @@
 
 package com.sebastian_daschner.jaxrs_analyzer.analysis.results.testclasses.typeanalyzer;
 
-import com.sebastian_daschner.jaxrs_analyzer.analysis.results.TypeIdentifierUtils;
+import com.sebastian_daschner.jaxrs_analyzer.analysis.results.TypeUtils;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeIdentifier;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeRepresentation;
 
@@ -55,7 +55,7 @@ public class TestClass3 {
         properties.put("third", anotherInnerIdentifier);
 
         final TypeRepresentation testClass3 = TypeRepresentation.ofConcrete(expectedIdentifier(), properties);
-        final TypeRepresentation innerClass = TypeRepresentation.ofConcrete(innerClassIdentifier, Collections.singletonMap("name", TypeIdentifierUtils.STRING_IDENTIFIER));
+        final TypeRepresentation innerClass = TypeRepresentation.ofConcrete(innerClassIdentifier, Collections.singletonMap("name", TypeUtils.STRING_IDENTIFIER));
         final TypeRepresentation anotherInner = TypeRepresentation.ofConcrete(anotherInnerIdentifier);
         final TypeRepresentation type = TypeRepresentation.ofConcrete(typeIdentifier);
 

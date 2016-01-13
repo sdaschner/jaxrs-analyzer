@@ -16,7 +16,7 @@
 
 package com.sebastian_daschner.jaxrs_analyzer.analysis.results.testclasses.typeanalyzer;
 
-import com.sebastian_daschner.jaxrs_analyzer.analysis.results.TypeIdentifierUtils;
+import com.sebastian_daschner.jaxrs_analyzer.analysis.results.TypeUtils;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeIdentifier;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeRepresentation;
 import com.sebastian_daschner.jaxrs_analyzer.model.types.Type;
@@ -54,8 +54,8 @@ public class TestClass1 {
     public static Set<TypeRepresentation> expectedTypeRepresentations() {
         final Map<String, TypeIdentifier> properties = new HashMap<>();
 
-        properties.put("publicField", TypeIdentifierUtils.STRING_IDENTIFIER);
-        properties.put("test", TypeIdentifierUtils.STRING_IDENTIFIER);
+        properties.put("publicField", TypeUtils.STRING_IDENTIFIER);
+        properties.put("test", TypeUtils.STRING_IDENTIFIER);
         properties.put("int", TypeIdentifier.ofType(Types.PRIMITIVE_INT));
 
         return Collections.singleton(TypeRepresentation.ofConcrete(expectedIdentifier(), properties));

@@ -32,7 +32,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-import static com.sebastian_daschner.jaxrs_analyzer.analysis.results.TypeIdentifierUtils.STRING_IDENTIFIER;
+import static com.sebastian_daschner.jaxrs_analyzer.analysis.results.TypeUtils.STRING_IDENTIFIER;
 import static org.junit.Assert.assertEquals;
 
 public class ResultInterpreterTest {

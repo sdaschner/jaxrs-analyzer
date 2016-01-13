@@ -16,7 +16,7 @@
 
 package com.sebastian_daschner.jaxrs_analyzer.analysis.results.testclasses.typeanalyzer;
 
-import com.sebastian_daschner.jaxrs_analyzer.analysis.results.TypeIdentifierUtils;
+import com.sebastian_daschner.jaxrs_analyzer.analysis.results.TypeUtils;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeIdentifier;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeRepresentation;
 import com.sebastian_daschner.jaxrs_analyzer.model.types.Type;
@@ -68,7 +68,7 @@ public class TestClass14 {
 
         final TypeIdentifier longStringIdentifier = TypeIdentifier.ofType(new Type("com.sebastian_daschner.jaxrs_analyzer.analysis.results.testclasses.typeanalyzer.TestClass14$GenericFields<java.lang.Long,java.lang.String>"));
         final TypeIdentifier stringLongIdentifier = TypeIdentifier.ofType(new Type("com.sebastian_daschner.jaxrs_analyzer.analysis.results.testclasses.typeanalyzer.TestClass14$GenericFields<java.lang.String,java.lang.Long>"));
-        final TypeIdentifier stringIdentifier = TypeIdentifierUtils.STRING_IDENTIFIER;
+        final TypeIdentifier stringIdentifier = TypeUtils.STRING_IDENTIFIER;
         final TypeIdentifier longIdentifier = TypeIdentifier.ofType(Types.LONG);
 
         properties.put("longAndString", longStringIdentifier);
@@ -84,13 +84,13 @@ public class TestClass14 {
         final Map<String, TypeIdentifier> longStringProperties = new HashMap<>();
         longStringProperties.put("a", longIdentifier);
         longStringProperties.put("b", stringIdentifier);
-        longStringProperties.put("listA", listStringIdentifier);
+        longStringProperties.put("listA", listLongIdentifier);
         final TypeRepresentation longString = TypeRepresentation.ofConcrete(longStringIdentifier, longStringProperties);
 
         final Map<String, TypeIdentifier> stringLongProperties = new HashMap<>();
         stringLongProperties.put("a", stringIdentifier);
         stringLongProperties.put("b", longIdentifier);
-        stringLongProperties.put("listA", listLongIdentifier);
+        stringLongProperties.put("listA", listStringIdentifier);
         final TypeRepresentation stringLong = TypeRepresentation.ofConcrete(stringLongIdentifier, stringLongProperties);
 
         return new HashSet<>(Arrays.asList(testClass13, longString, stringLong, listLong, listString));
