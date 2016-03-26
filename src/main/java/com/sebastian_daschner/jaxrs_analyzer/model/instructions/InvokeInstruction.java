@@ -16,9 +16,8 @@
 
 package com.sebastian_daschner.jaxrs_analyzer.model.instructions;
 
+import com.sebastian_daschner.jaxrs_analyzer.model.Types;
 import com.sebastian_daschner.jaxrs_analyzer.model.methods.MethodIdentifier;
-import com.sebastian_daschner.jaxrs_analyzer.model.types.Types;
-import com.sebastian_daschner.jaxrs_analyzer.model.types.Type;
 
 /**
  * Represents an INVOKE_XYZ instruction.
@@ -40,9 +39,7 @@ public class InvokeInstruction implements Instruction {
         if (identifier.isStaticMethod())
             difference++;
 
-        for (final Type parameterType : identifier.getParameters()) {
-            difference--;
-        }
+        difference -= identifier.getParameters();
 
         return difference;
     }

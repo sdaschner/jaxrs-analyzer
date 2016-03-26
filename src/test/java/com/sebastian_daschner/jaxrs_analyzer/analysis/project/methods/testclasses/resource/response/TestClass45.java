@@ -17,7 +17,6 @@
 package com.sebastian_daschner.jaxrs_analyzer.analysis.project.methods.testclasses.resource.response;
 
 import com.sebastian_daschner.jaxrs_analyzer.model.elements.HttpResponse;
-import com.sebastian_daschner.jaxrs_analyzer.model.types.Type;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
@@ -38,8 +37,8 @@ public class TestClass45 {
         final HttpResponse firstResult = new HttpResponse();
 
         firstResult.getStatuses().add(200);
-        firstResult.getEntityTypes().add(new Type("java.util.List<com.sebastian_daschner.jaxrs_analyzer.analysis.project.methods.testclasses.resource.response.TestClass45$User>"));
-        firstResult.getEntityTypes().add(new Type("java.util.LinkedList"));
+        firstResult.getEntityTypes().add("java.util.List<com.sebastian_daschner.jaxrs_analyzer.analysis.project.methods.testclasses.resource.response.TestClass45$User>");
+        firstResult.getEntityTypes().add("java.util.LinkedList");
 
         final HttpResponse secondResult = new HttpResponse();
         secondResult.getStatuses().add(500);

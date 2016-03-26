@@ -1,13 +1,12 @@
 package com.sebastian_daschner.jaxrs_analyzer.analysis.project.classes.testclasses;
 
+import com.sebastian_daschner.jaxrs_analyzer.model.Types;
 import com.sebastian_daschner.jaxrs_analyzer.builder.ClassResultBuilder;
 import com.sebastian_daschner.jaxrs_analyzer.builder.HttpResponseBuilder;
 import com.sebastian_daschner.jaxrs_analyzer.builder.MethodResultBuilder;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.HttpMethod;
 import com.sebastian_daschner.jaxrs_analyzer.model.results.ClassResult;
 import com.sebastian_daschner.jaxrs_analyzer.model.results.MethodResult;
-import com.sebastian_daschner.jaxrs_analyzer.model.types.Type;
-import com.sebastian_daschner.jaxrs_analyzer.model.types.Types;
 
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -25,8 +24,8 @@ public class TestClass11 extends ATestClass11 {
     }
 
     public static ClassResult getResult() {
-        final MethodResult method = MethodResultBuilder.withResponses(HttpResponseBuilder.withStatues(200).andEntityTypes(new Type("javax.ws.rs.core.GenericEntity"),
-                new Type("javax.ws.rs.core.GenericEntity<java.util.List<java.lang.String>>")).build())
+        final MethodResult method = MethodResultBuilder.withResponses(HttpResponseBuilder.withStatues(200).andEntityTypes("javax.ws.rs.core.GenericEntity",
+                "javax.ws.rs.core.GenericEntity<java.util.List<java.lang.String>>").build())
                 .andPath("{info}").andMethod(HttpMethod.POST).andRequestBodyType(Types.STRING).build();
         return ClassResultBuilder.withResourcePath("test").andMethods(method).build();
     }

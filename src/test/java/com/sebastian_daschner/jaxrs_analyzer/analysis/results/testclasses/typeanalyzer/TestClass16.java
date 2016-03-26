@@ -3,7 +3,6 @@ package com.sebastian_daschner.jaxrs_analyzer.analysis.results.testclasses.typea
 import com.sebastian_daschner.jaxrs_analyzer.analysis.results.TypeUtils;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeIdentifier;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeRepresentation;
-import com.sebastian_daschner.jaxrs_analyzer.model.types.Type;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -17,7 +16,7 @@ public class TestClass16 extends SuperTestClass2 {
     public static Set<TypeRepresentation> expectedTypeRepresentations() {
         final Map<String, TypeIdentifier> properties = new HashMap<>();
 
-        final TypeIdentifier superTestClass2 = TypeIdentifier.ofType(new Type(SuperTestClass2.class.getName()));
+        final TypeIdentifier superTestClass2 = TypeIdentifier.ofType(SuperTestClass2.class.getName());
         final TypeIdentifier stringIdentifier = TypeUtils.STRING_IDENTIFIER;
         properties.put("hello", stringIdentifier);
         properties.put("world", stringIdentifier);
@@ -28,7 +27,7 @@ public class TestClass16 extends SuperTestClass2 {
     }
 
     public static TypeIdentifier expectedIdentifier() {
-        return TypeIdentifier.ofType(new Type(TestClass16.class.getName()));
+        return TypeIdentifier.ofType(TestClass16.class.getName());
     }
 
 }

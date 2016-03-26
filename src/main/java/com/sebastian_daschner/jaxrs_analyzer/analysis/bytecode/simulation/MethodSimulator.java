@@ -16,16 +16,14 @@
 
 package com.sebastian_daschner.jaxrs_analyzer.analysis.bytecode.simulation;
 
-import com.sebastian_daschner.jaxrs_analyzer.LogProvider;
+import com.sebastian_daschner.jaxrs_analyzer.model.JavaUtils;
+import com.sebastian_daschner.jaxrs_analyzer.model.Types;
 import com.sebastian_daschner.jaxrs_analyzer.model.elements.Element;
 import com.sebastian_daschner.jaxrs_analyzer.model.elements.MethodHandle;
 import com.sebastian_daschner.jaxrs_analyzer.model.instructions.*;
 import com.sebastian_daschner.jaxrs_analyzer.model.methods.Method;
 import com.sebastian_daschner.jaxrs_analyzer.model.methods.MethodIdentifier;
-import com.sebastian_daschner.jaxrs_analyzer.model.types.Type;
-import com.sebastian_daschner.jaxrs_analyzer.model.types.Types;
 
-import java.lang.reflect.Field;
 import java.util.*;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -43,7 +41,7 @@ public class MethodSimulator {
     private final MethodPool methodPool = MethodPool.getInstance();
     private final Stack<Element> runtimeStack = new Stack<>();
 
-    protected Map<Integer, Element> localVariables = new HashMap<>();
+    Map<Integer, Element> localVariables = new HashMap<>();
 
     private Element returnElement;
 
@@ -69,7 +67,7 @@ public class MethodSimulator {
      * @param instructions The instructions to simulate
      * @return The return element of the method
      */
-    protected Element simulateInternal(final List<Instruction> instructions) {
+    Element simulateInternal(final List<Instruction> instructions) {
         instructions.stream().forEach(this::simulate);
 
         return returnElement;
@@ -83,8 +81,8 @@ public class MethodSimulator {
     private void simulate(final Instruction instruction) {
         switch (instruction.getType()) {
             case PUSH:
-                final Object value = ((PushInstruction) instruction).getValue();
-                runtimeStack.push(new Element(new Type(value.getClass().getCanonicalName()), value));
+                Object value = ((PushInstruction) instruction).getValue();
+                runtimeStack.push(new Element(JavaUtils.getType(value), value));
                 break;
             case METHOD_HANDLE:
                 simulateMethodHandle((InvokeDynamicInstruction) instruction);
@@ -97,7 +95,12 @@ public class MethodSimulator {
                 runtimeStack.push(new Element(((GetFieldInstruction) instruction).getPropertyType()));
                 break;
             case GET_STATIC:
-                simulateGetStatic((GetStaticInstruction) instruction);
+                final GetStaticInstruction getStaticInstruction = (GetStaticInstruction) instruction;
+                value = getStaticInstruction.getValue();
+                if (value != null)
+                    runtimeStack.push(new Element(getStaticInstruction.getPropertyType(), value));
+                else
+                    runtimeStack.push(new Element(getStaticInstruction.getPropertyType()));
                 break;
             case LOAD:
                 final LoadInstruction loadInstruction = (LoadInstruction) instruction;
@@ -137,7 +140,7 @@ public class MethodSimulator {
      * @param instruction The instruction to simulate
      */
     private void simulateMethodHandle(final InvokeDynamicInstruction instruction) {
-        final List<Element> arguments = instruction.getDynamicIdentifier().getParameters().stream().map(t -> runtimeStack.pop()).collect(Collectors.toList());
+        final List<Element> arguments = IntStream.range(0, instruction.getDynamicIdentifier().getParameters()).mapToObj(t -> runtimeStack.pop()).collect(Collectors.toList());
         Collections.reverse(arguments);
 
         if (!instruction.getDynamicIdentifier().isStaticMethod())
@@ -157,7 +160,7 @@ public class MethodSimulator {
         final List<Element> arguments = new LinkedList<>();
         MethodIdentifier identifier = instruction.getIdentifier();
 
-        identifier.getParameters().forEach(t -> arguments.add(runtimeStack.pop()));
+        IntStream.range(0, identifier.getParameters()).forEach(i -> arguments.add(runtimeStack.pop()));
         Collections.reverse(arguments);
 
         Element object = null;
@@ -175,25 +178,6 @@ public class MethodSimulator {
         final Element returnedElement = method.invoke(object, arguments);
         if (returnedElement != null)
             runtimeStack.push(returnedElement);
-    }
-
-    /**
-     * Simulates the get static instruction.
-     *
-     * @param instruction The instruction to simulate
-     */
-    private void simulateGetStatic(final GetStaticInstruction instruction) {
-        try {
-            // TODO test other get_static scenarios
-            final Field field = Class.forName(instruction.getContainingClass().toString()).getDeclaredField(instruction.getPropertyName());
-            field.setAccessible(true);
-            final Object value = field.get(null);
-            runtimeStack.push(new Element(instruction.getPropertyType(), value));
-        } catch (ReflectiveOperationException e) {
-            LogProvider.error("Could not access static property, reason: " + e.getMessage());
-            LogProvider.debug(e);
-            runtimeStack.push(new Element(instruction.getPropertyType()));
-        }
     }
 
     /**
@@ -218,7 +202,7 @@ public class MethodSimulator {
      * @param variableType The type of the variable
      * @param element      The element to merge
      */
-    private void mergeElementStore(final int index, final Type variableType, final Element element) {
+    private void mergeElementStore(final int index, final String variableType, final Element element) {
         final Element created = new Element(variableType);
         created.merge(element);
         localVariables.merge(index, created, Element::merge);

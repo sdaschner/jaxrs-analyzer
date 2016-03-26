@@ -16,10 +16,9 @@
 
 package com.sebastian_daschner.jaxrs_analyzer.analysis.project.methods.testclasses.resource.json;
 
+import com.sebastian_daschner.jaxrs_analyzer.model.Types;
 import com.sebastian_daschner.jaxrs_analyzer.model.elements.Element;
 import com.sebastian_daschner.jaxrs_analyzer.model.elements.HttpResponse;
-import com.sebastian_daschner.jaxrs_analyzer.model.types.Type;
-import com.sebastian_daschner.jaxrs_analyzer.model.types.Types;
 
 import javax.json.Json;
 import javax.json.JsonArray;
@@ -49,34 +48,34 @@ public class TestClass6 {
         final com.sebastian_daschner.jaxrs_analyzer.model.elements.JsonObject jsonObject = new com.sebastian_daschner.jaxrs_analyzer.model.elements.JsonObject();
         final com.sebastian_daschner.jaxrs_analyzer.model.elements.JsonArray jsonArray = new com.sebastian_daschner.jaxrs_analyzer.model.elements.JsonArray();
         jsonArray.getElements().add(new Element(Types.PRIMITIVE_BOOLEAN, 1));
-        jsonArray.getElements().add(new Element(new Type("java.lang.String"), "duke"));
-        jsonObject.getStructure().put("array", new Element(new Type("javax.json.JsonArray"), jsonArray));
-        jsonObject.getStructure().put("int", new Element(new Type("java.lang.Integer"), 42));
+        jsonArray.getElements().add(new Element("java.lang.String", "duke"));
+        jsonObject.getStructure().put("array", new Element("javax.json.JsonArray", jsonArray));
+        jsonObject.getStructure().put("int", new Element("java.lang.Integer", 42));
         jsonObject.getStructure().put("boolean", new Element(Types.PRIMITIVE_BOOLEAN, 1));
-        jsonObject.getStructure().put("long", new Element(new Type("java.lang.Long"), 100000000000000L));
-        jsonObject.getStructure().put("double", new Element(new Type("java.lang.Double"), 1.2d));
+        jsonObject.getStructure().put("long", new Element("java.lang.Long", 100000000000000L));
+        jsonObject.getStructure().put("double", new Element("java.lang.Double", 1.2d));
 
         final com.sebastian_daschner.jaxrs_analyzer.model.elements.JsonObject object = new com.sebastian_daschner.jaxrs_analyzer.model.elements.JsonObject();
-        object.getStructure().put("key", new Element(new Type("java.lang.String"), "value"));
-        object.getStructure().put("test", new Element(new Type("java.lang.Integer"), 1));
-        jsonObject.getStructure().put("jsonObject", new Element(new Type("javax.json.JsonObject"), object));
+        object.getStructure().put("key", new Element("java.lang.String", "value"));
+        object.getStructure().put("test", new Element("java.lang.Integer", 1));
+        jsonObject.getStructure().put("jsonObject", new Element("javax.json.JsonObject", object));
 
         final com.sebastian_daschner.jaxrs_analyzer.model.elements.JsonArray array = new com.sebastian_daschner.jaxrs_analyzer.model.elements.JsonArray();
-        array.getElements().add(new Element(new Type("java.lang.String"), "first"));
-        array.getElements().add(new Element(new Type("java.lang.String"), "second"));
-        array.getElements().add(new Element(new Type("java.lang.Double"), 3d));
+        array.getElements().add(new Element("java.lang.String", "first"));
+        array.getElements().add(new Element("java.lang.String", "second"));
+        array.getElements().add(new Element("java.lang.Double", 3d));
 
         final com.sebastian_daschner.jaxrs_analyzer.model.elements.JsonObject firstNested = new com.sebastian_daschner.jaxrs_analyzer.model.elements.JsonObject();
-        firstNested.getStructure().put("key", new Element(new Type("java.lang.String"), "object"));
+        firstNested.getStructure().put("key", new Element("java.lang.String", "object"));
         final com.sebastian_daschner.jaxrs_analyzer.model.elements.JsonObject secondNested = new com.sebastian_daschner.jaxrs_analyzer.model.elements.JsonObject();
-        secondNested.getStructure().put("nested", new Element(new Type("java.lang.String"), "object"));
+        secondNested.getStructure().put("nested", new Element("java.lang.String", "object"));
 
-        array.getElements().add(new Element(new Type("javax.json.JsonObject"), firstNested));
-        array.getElements().add(new Element(new Type("javax.json.JsonObject"), secondNested));
-        jsonObject.getStructure().put("jsonArray", new Element(new Type("javax.json.JsonArray"), array));
+        array.getElements().add(new Element("javax.json.JsonObject", firstNested));
+        array.getElements().add(new Element("javax.json.JsonObject", secondNested));
+        jsonObject.getStructure().put("jsonArray", new Element("javax.json.JsonArray", array));
 
         final HttpResponse httpResponse = new HttpResponse();
-        httpResponse.getEntityTypes().add(new Type(JsonObject.class.getName()));
+        httpResponse.getEntityTypes().add(JsonObject.class.getName());
         httpResponse.getInlineEntities().add(jsonObject);
 
         return Collections.singleton(httpResponse);

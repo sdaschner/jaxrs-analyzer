@@ -1,6 +1,6 @@
 package com.sebastian_daschner.jaxrs_analyzer.model.rest;
 
-import com.sebastian_daschner.jaxrs_analyzer.model.types.Types;
+import com.sebastian_daschner.jaxrs_analyzer.model.Types;
 import org.junit.Test;
 
 import java.util.Collections;

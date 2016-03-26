@@ -16,10 +16,9 @@
 
 package com.sebastian_daschner.jaxrs_analyzer.analysis.bytecode.reduction.testclasses;
 
+import com.sebastian_daschner.jaxrs_analyzer.model.Types;
 import com.sebastian_daschner.jaxrs_analyzer.model.instructions.*;
 import com.sebastian_daschner.jaxrs_analyzer.model.methods.MethodIdentifier;
-import com.sebastian_daschner.jaxrs_analyzer.model.types.Types;
-import com.sebastian_daschner.jaxrs_analyzer.model.types.Type;
 
 import javax.ws.rs.core.Response;
 import java.util.LinkedList;
@@ -36,7 +35,7 @@ public class TestClass6 {
     public static List<Instruction> instructions() {
         final List<Instruction> instructions = new LinkedList<>();
 
-        instructions.add(new LoadInstruction(0, new Type(TestClass6.class.getCanonicalName()), "this"));
+        instructions.add(new LoadInstruction(0, TestClass6.class.getCanonicalName(), "this"));
         instructions.add(new DupInstruction());
         instructions.add(new StoreInstruction(2, Types.OBJECT, "variable$2"));
         instructions.add(new SizeChangingInstruction("monitorenter", 0, 1));

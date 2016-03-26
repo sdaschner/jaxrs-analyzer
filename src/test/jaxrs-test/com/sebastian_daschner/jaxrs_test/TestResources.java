@@ -24,6 +24,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.net.URI;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 
 /**
@@ -46,9 +47,11 @@ public class TestResources {
     }
 
     @GET
-    public List<Model> getModels() {
+    public List<? extends Model> getModels() {
         return this.testStore.getModels();
     }
+
+    public <T extends Comparable<? super T>> T foobar() {return null;}
 
     @POST
     public Response simplePost(String string) {
@@ -82,12 +85,14 @@ public class TestResources {
 
     @DELETE
     @Path("{id}")
-    public Response delete(@PathParam("id") final String id) {
+    public Response delete(@PathParam("id") final Map<String, List<String>> id) {
         try {
-            this.testStore.delete(id);
+            this.testStore.delete("id");
             return Response.noContent().build();
         } catch (EntityNotFoundException e) {
             return Response.status(Response.Status.NOT_FOUND).header("X-Message", "The entity with identifier " + id + " was not found.").build();
+        } catch (Exception e) {
+            return Response.serverError().build();
         }
     }
 

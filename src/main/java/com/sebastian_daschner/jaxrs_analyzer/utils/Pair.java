@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.sebastian_daschner.jaxrs_analyzer.model;
+package com.sebastian_daschner.jaxrs_analyzer.utils;
 
 /**
  * Represents a tuple of two elements.

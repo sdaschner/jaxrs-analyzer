@@ -3,7 +3,6 @@ package com.sebastian_daschner.jaxrs_analyzer.analysis.results.testclasses.typea
 import com.sebastian_daschner.jaxrs_analyzer.analysis.results.TypeUtils;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeIdentifier;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeRepresentation;
-import com.sebastian_daschner.jaxrs_analyzer.model.types.Type;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -32,7 +31,7 @@ public class TestClass15 extends SuperTestClass1 {
     }
 
     public static TypeIdentifier expectedIdentifier() {
-        return TypeIdentifier.ofType(new Type(TestClass15.class.getName()));
+        return TypeIdentifier.ofType(TestClass15.class.getName());
     }
 
 }

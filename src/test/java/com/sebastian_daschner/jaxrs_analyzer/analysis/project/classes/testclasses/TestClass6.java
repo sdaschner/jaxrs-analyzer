@@ -16,14 +16,13 @@
 
 package com.sebastian_daschner.jaxrs_analyzer.analysis.project.classes.testclasses;
 
+import com.sebastian_daschner.jaxrs_analyzer.model.Types;
 import com.sebastian_daschner.jaxrs_analyzer.builder.ClassResultBuilder;
 import com.sebastian_daschner.jaxrs_analyzer.builder.HttpResponseBuilder;
 import com.sebastian_daschner.jaxrs_analyzer.builder.MethodResultBuilder;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.HttpMethod;
 import com.sebastian_daschner.jaxrs_analyzer.model.results.ClassResult;
 import com.sebastian_daschner.jaxrs_analyzer.model.results.MethodResult;
-import com.sebastian_daschner.jaxrs_analyzer.model.types.Types;
-import com.sebastian_daschner.jaxrs_analyzer.model.types.Type;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -37,7 +36,7 @@ public interface TestClass6 {
 
     static ClassResult getResult() {
         final MethodResult method = MethodResultBuilder.withResponses(HttpResponseBuilder.newBuilder()
-                .andEntityTypes(new Type("com.sebastian_daschner.jaxrs_analyzer.analysis.project.classes.testclasses.TestClass6$Model")).build())
+                .andEntityTypes("com.sebastian_daschner.jaxrs_analyzer.analysis.project.classes.testclasses.TestClass6$Model").build())
                 .andPath("{info}").andMethod(HttpMethod.GET).andRequestBodyType(Types.STRING).build();
         return ClassResultBuilder.withResourcePath("test").andMethods(method).build();
     }

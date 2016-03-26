@@ -16,14 +16,13 @@
 
 package com.sebastian_daschner.jaxrs_analyzer.analysis.project.classes.testclasses;
 
+import com.sebastian_daschner.jaxrs_analyzer.model.Types;
 import com.sebastian_daschner.jaxrs_analyzer.builder.ClassResultBuilder;
 import com.sebastian_daschner.jaxrs_analyzer.builder.HttpResponseBuilder;
 import com.sebastian_daschner.jaxrs_analyzer.builder.MethodResultBuilder;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.HttpMethod;
 import com.sebastian_daschner.jaxrs_analyzer.model.results.ClassResult;
 import com.sebastian_daschner.jaxrs_analyzer.model.results.MethodResult;
-import com.sebastian_daschner.jaxrs_analyzer.model.types.Type;
-import com.sebastian_daschner.jaxrs_analyzer.model.types.Types;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -41,7 +40,7 @@ public class TestClass13<T extends TestClass13.Model> {
     public static ClassResult getResult() {
         // TODO uncomment to resolve type variable bounds
 //        final Type type = new Type("com.sebastian_daschner.jaxrs_analyzer.analysis.project.classes.testclasses.TestClass13$Model");
-        final Type type = Types.OBJECT;
+        final String type = Types.OBJECT;
         final MethodResult method = MethodResultBuilder.withResponses(HttpResponseBuilder.withStatues(200).andHeaders("X-Info").build()).andPath("{info}")
                 .andMethod(HttpMethod.GET).andRequestBodyType(type).build();
         return ClassResultBuilder.withResourcePath("test").andMethods(method).build();

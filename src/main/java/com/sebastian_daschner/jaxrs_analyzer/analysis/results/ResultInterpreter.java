@@ -16,14 +16,13 @@
 
 package com.sebastian_daschner.jaxrs_analyzer.analysis.results;
 
-import com.sebastian_daschner.jaxrs_analyzer.analysis.utils.JavaUtils;
+import com.sebastian_daschner.jaxrs_analyzer.model.JavaUtils;
 import com.sebastian_daschner.jaxrs_analyzer.model.elements.HttpResponse;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.ResourceMethod;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.Resources;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.Response;
 import com.sebastian_daschner.jaxrs_analyzer.model.results.ClassResult;
 import com.sebastian_daschner.jaxrs_analyzer.model.results.MethodResult;
-import com.sebastian_daschner.jaxrs_analyzer.model.types.Type;
 
 import java.util.Set;
 
@@ -96,7 +95,8 @@ public class ResultInterpreter {
         final ResourceMethod resourceMethod = new ResourceMethod(methodResult.getHttpMethod(), methodResult.getMethodParameters());
 
         if (methodResult.getRequestBodyType() != null) {
-            resourceMethod.setRequestBody(javaTypeAnalyzer.analyze(methodResult.getRequestBodyType()));
+            // TODO
+//            resourceMethod.setRequestBody(javaTypeAnalyzer.analyze(methodResult.getRequestBodyType()));
         }
 
         // add default status code due to JSR 339
@@ -130,7 +130,7 @@ public class ResultInterpreter {
             if (response == null) {
                 // no inline entities -> potential class type will be considered
                 response = httpResponse.getEntityTypes().isEmpty() ? new Response() :
-                        new Response(javaTypeAnalyzer.analyze(JavaUtils.determineMostSpecificType(httpResponse.getEntityTypes().stream().toArray(Type[]::new))));
+                        new Response(javaTypeAnalyzer.analyze(JavaUtils.determineMostSpecificType(httpResponse.getEntityTypes().stream().toArray(String[]::new))));
             }
 
             response.getHeaders().addAll(httpResponse.getHeaders());

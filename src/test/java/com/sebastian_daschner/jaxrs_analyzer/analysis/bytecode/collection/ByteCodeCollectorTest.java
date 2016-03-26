@@ -16,68 +16,51 @@
 
 package com.sebastian_daschner.jaxrs_analyzer.analysis.bytecode.collection;
 
-import com.sebastian_daschner.jaxrs_analyzer.analysis.utils.TestClassUtils;
-import com.sebastian_daschner.jaxrs_analyzer.model.instructions.Instruction;
-import javassist.ClassPool;
-import javassist.CtBehavior;
-import javassist.CtClass;
-import javassist.NotFoundException;
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-
-import java.io.IOException;
-import java.util.Collection;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
-
-@RunWith(Parameterized.class)
+//@RunWith(Parameterized.class)
 public class ByteCodeCollectorTest {
 
-    private ByteCodeCollector classUnderTest;
-    private final String testClassName;
-    private final List<Instruction> expectedInstructions;
-    private final CtBehavior method;
-
-    public ByteCodeCollectorTest(final CtBehavior testMethod, final List<Instruction> expectedInstructions) {
-        this.expectedInstructions = expectedInstructions;
-        this.testClassName = testMethod.getDeclaringClass().getSimpleName();
-        this.classUnderTest = new ByteCodeCollector();
-        method = testMethod;
-    }
-
-    @Parameterized.Parameters
-    public static Collection<Object[]> data() throws NotFoundException, IOException, ReflectiveOperationException {
-        Collection<Object[]> data = new LinkedList<>();
-
-        final Set<Class<?>> testClasses = TestClassUtils.getClasses("com.sebastian_daschner.jaxrs_analyzer.analysis.bytecode.collection.testclasses");
-
-        for (final Class<?> testClass : testClasses) {
-            final Object[] testData = new Object[2];
-
-            // load test class
-            ClassPool pool = ClassPool.getDefault();
-            final CtClass ctClass = pool.get(testClass.getCanonicalName());
-
-            // "method"-method
-            testData[0] = ctClass.getDeclaredMethod("method");
-
-            // evaluate static "getResult"-method
-            testData[1] = testClass.getDeclaredMethod("getResult").invoke(null);
-
-            data.add(testData);
-        }
-
-        return data;
-    }
-
-    @Test
-    public void test() {
-        final List<Instruction> actualInstructions = classUnderTest.buildInstructions(method);
-
-        Assert.assertEquals("failed for " + testClassName, expectedInstructions, actualInstructions);
-    }
+//    private ByteCodeCollector classUnderTest;
+//    private final String testClassName;
+//    private final List<Instruction> expectedInstructions;
+//    private final CtBehavior method;
+//
+//    public ByteCodeCollectorTest(final CtBehavior testMethod, final List<Instruction> expectedInstructions) {
+//        this.expectedInstructions = expectedInstructions;
+//        this.testClassName = testMethod.getDeclaringClass().getSimpleName();
+//        this.classUnderTest = new ByteCodeCollector();
+//        method = testMethod;
+//    }
+//
+//    @Parameterized.Parameters
+//    public static Collection<Object[]> data() throws NotFoundException, IOException, ReflectiveOperationException {
+//        Collection<Object[]> data = new LinkedList<>();
+//
+//        final Set<Class<?>> testClasses = TestClassUtils.getClasses("com.sebastian_daschner.jaxrs_analyzer.analysis.bytecode.collection.testclasses");
+//
+//        for (final Class<?> testClass : testClasses) {
+//            final Object[] testData = new Object[2];
+//
+//            // load test class
+//            ClassPool pool = ClassPool.getDefault();
+//            final CtClass ctClass = pool.get(testClass.getCanonicalName());
+//
+//            // "method"-method
+//            testData[0] = ctClass.getDeclaredMethod("method");
+//
+//            // evaluate static "getResult"-method
+//            testData[1] = testClass.getDeclaredMethod("getResult").invoke(null);
+//
+//            data.add(testData);
+//        }
+//
+//        return data;
+//    }
+//
+//    @Test
+//    public void test() {
+//        final List<Instruction> actualInstructions = classUnderTest.buildInstructions(method);
+//
+//        Assert.assertEquals("failed for " + testClassName, expectedInstructions, actualInstructions);
+//    }
 
 }

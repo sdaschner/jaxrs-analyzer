@@ -19,7 +19,6 @@ package com.sebastian_daschner.jaxrs_analyzer.analysis.results.testclasses.typea
 import com.sebastian_daschner.jaxrs_analyzer.analysis.results.TypeUtils;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeIdentifier;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeRepresentation;
-import com.sebastian_daschner.jaxrs_analyzer.model.types.Type;
 
 import javax.xml.bind.annotation.*;
 import java.util.*;
@@ -45,8 +44,8 @@ public class TestClass5 {
     public static Set<TypeRepresentation> expectedTypeRepresentations() {
         final Map<String, TypeIdentifier> properties = new HashMap<>();
 
-        final TypeIdentifier listIdentifier = TypeIdentifier.ofType(new Type("java.util.List<java.lang.String>"));
-        final TypeIdentifier setIdentifier = TypeIdentifier.ofType(new Type("java.util.Set<java.lang.String>"));
+        final TypeIdentifier listIdentifier = TypeIdentifier.ofType("java.util.List<java.lang.String>");
+        final TypeIdentifier setIdentifier = TypeIdentifier.ofType("java.util.Set<java.lang.String>");
 
         properties.put("first", listIdentifier);
         properties.put("second", setIdentifier);
@@ -60,7 +59,7 @@ public class TestClass5 {
     }
 
     public static TypeIdentifier expectedIdentifier() {
-        return TypeIdentifier.ofType(new Type(TestClass5.class.getName()));
+        return TypeIdentifier.ofType(TestClass5.class.getName());
     }
 
 }

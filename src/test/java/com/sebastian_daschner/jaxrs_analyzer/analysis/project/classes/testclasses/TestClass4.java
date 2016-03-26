@@ -19,10 +19,10 @@ package com.sebastian_daschner.jaxrs_analyzer.analysis.project.classes.testclass
 import com.sebastian_daschner.jaxrs_analyzer.builder.ClassResultBuilder;
 import com.sebastian_daschner.jaxrs_analyzer.builder.HttpResponseBuilder;
 import com.sebastian_daschner.jaxrs_analyzer.builder.MethodResultBuilder;
+import com.sebastian_daschner.jaxrs_analyzer.model.Types;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.HttpMethod;
 import com.sebastian_daschner.jaxrs_analyzer.model.results.ClassResult;
 import com.sebastian_daschner.jaxrs_analyzer.model.results.MethodResult;
-import com.sebastian_daschner.jaxrs_analyzer.model.types.Types;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;

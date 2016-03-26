@@ -16,9 +16,7 @@
 
 package com.sebastian_daschner.jaxrs_analyzer.backend.swagger;
 
-import com.sebastian_daschner.jaxrs_analyzer.model.types.Type;
-
-import static com.sebastian_daschner.jaxrs_analyzer.model.types.Types.*;
+import static com.sebastian_daschner.jaxrs_analyzer.model.Types.*;
 
 /**
  * Contains Swagger JSON type functionality.
@@ -37,7 +35,7 @@ final class SwaggerUtils {
      * @param type The Java type definition
      * @return The Swagger type
      */
-    static SwaggerType toSwaggerType(final Type type) {
+    static SwaggerType toSwaggerType(final String type) {
         if (STRING.equals(type))
             return SwaggerType.STRING;
 
@@ -50,8 +48,9 @@ final class SwaggerUtils {
         if (DOUBLE_TYPES.contains(type))
             return SwaggerType.NUMBER;
 
-        if (type.getCtClass().isArray())
-            return SwaggerType.ARRAY;
+        // TODO
+//        if (type.getCtClass().isArray())
+//            return SwaggerType.ARRAY;
 
         return SwaggerType.OBJECT;
     }

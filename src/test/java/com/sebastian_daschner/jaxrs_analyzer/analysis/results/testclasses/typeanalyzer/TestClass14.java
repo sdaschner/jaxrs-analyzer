@@ -17,10 +17,9 @@
 package com.sebastian_daschner.jaxrs_analyzer.analysis.results.testclasses.typeanalyzer;
 
 import com.sebastian_daschner.jaxrs_analyzer.analysis.results.TypeUtils;
+import com.sebastian_daschner.jaxrs_analyzer.model.Types;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeIdentifier;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeRepresentation;
-import com.sebastian_daschner.jaxrs_analyzer.model.types.Type;
-import com.sebastian_daschner.jaxrs_analyzer.model.types.Types;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -66,8 +65,8 @@ public class TestClass14 {
     public static Set<TypeRepresentation> expectedTypeRepresentations() {
         final Map<String, TypeIdentifier> properties = new HashMap<>();
 
-        final TypeIdentifier longStringIdentifier = TypeIdentifier.ofType(new Type("com.sebastian_daschner.jaxrs_analyzer.analysis.results.testclasses.typeanalyzer.TestClass14$GenericFields<java.lang.Long,java.lang.String>"));
-        final TypeIdentifier stringLongIdentifier = TypeIdentifier.ofType(new Type("com.sebastian_daschner.jaxrs_analyzer.analysis.results.testclasses.typeanalyzer.TestClass14$GenericFields<java.lang.String,java.lang.Long>"));
+        final TypeIdentifier longStringIdentifier = TypeIdentifier.ofType("com.sebastian_daschner.jaxrs_analyzer.analysis.results.testclasses.typeanalyzer.TestClass14$GenericFields<java.lang.Long,java.lang.String>");
+        final TypeIdentifier stringLongIdentifier = TypeIdentifier.ofType("com.sebastian_daschner.jaxrs_analyzer.analysis.results.testclasses.typeanalyzer.TestClass14$GenericFields<java.lang.String,java.lang.Long>");
         final TypeIdentifier stringIdentifier = TypeUtils.STRING_IDENTIFIER;
         final TypeIdentifier longIdentifier = TypeIdentifier.ofType(Types.LONG);
 
@@ -76,9 +75,9 @@ public class TestClass14 {
 
         final TypeRepresentation testClass13 = TypeRepresentation.ofConcrete(expectedIdentifier(), properties);
 
-        final TypeIdentifier listStringIdentifier = TypeIdentifier.ofType(new Type("java.util.List<java.lang.String>"));
+        final TypeIdentifier listStringIdentifier = TypeIdentifier.ofType("java.util.List<java.lang.String>");
         final TypeRepresentation listString = TypeRepresentation.ofCollection(listStringIdentifier, TypeRepresentation.ofConcrete(stringIdentifier));
-        final TypeIdentifier listLongIdentifier = TypeIdentifier.ofType(new Type("java.util.List<java.lang.Long>"));
+        final TypeIdentifier listLongIdentifier = TypeIdentifier.ofType("java.util.List<java.lang.Long>");
         final TypeRepresentation listLong = TypeRepresentation.ofCollection(listLongIdentifier, TypeRepresentation.ofConcrete(longIdentifier));
 
         final Map<String, TypeIdentifier> longStringProperties = new HashMap<>();
@@ -97,7 +96,7 @@ public class TestClass14 {
     }
 
     public static TypeIdentifier expectedIdentifier() {
-        return TypeIdentifier.ofType(new Type(TestClass14.class.getName()));
+        return TypeIdentifier.ofType(TestClass14.class.getName());
     }
 
 }

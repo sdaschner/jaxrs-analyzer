@@ -3,14 +3,13 @@ package com.sebastian_daschner.jaxrs_analyzer.backend;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeIdentifier;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeRepresentation;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeRepresentationVisitor;
-import com.sebastian_daschner.jaxrs_analyzer.model.types.Type;
 
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import static com.sebastian_daschner.jaxrs_analyzer.model.Types.*;
 import static com.sebastian_daschner.jaxrs_analyzer.backend.ComparatorUtils.mapKeyComparator;
-import static com.sebastian_daschner.jaxrs_analyzer.model.types.Types.*;
 
 /**
  * Adds the JSON representation of type identifiers to String builders.
@@ -66,7 +65,7 @@ public class JsonRepresentationAppender implements TypeRepresentationVisitor {
     }
 
     private static String toPrimitiveType(final TypeIdentifier value) {
-        final Type type = value.getType();
+        final String type = value.getType();
         if (STRING.equals(type))
             return "\"string\"";
 

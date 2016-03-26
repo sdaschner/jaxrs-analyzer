@@ -16,8 +16,6 @@
 
 package com.sebastian_daschner.jaxrs_analyzer.model.instructions;
 
-import com.sebastian_daschner.jaxrs_analyzer.model.types.Type;
-
 /**
  * Represents a GET_FIELD/STATIC instruction.
  *
@@ -25,18 +23,17 @@ import com.sebastian_daschner.jaxrs_analyzer.model.types.Type;
  */
 public abstract class GetPropertyInstruction implements Instruction {
 
-    private final Type containingClass;
+    private final String containingClass;
     private final String propertyName;
-    // TODO check if parameterized types are used
-    private final Type propertyType;
+    private final String propertyType;
 
-    protected GetPropertyInstruction(final Type containingClass, final String propertyName, final Type propertyType) {
+    protected GetPropertyInstruction(final String containingClass, final String propertyName, final String propertyType) {
         this.containingClass = containingClass;
         this.propertyName = propertyName;
         this.propertyType = propertyType;
     }
 
-    public Type getContainingClass() {
+    public String getContainingClass() {
         return containingClass;
     }
 
@@ -44,7 +41,7 @@ public abstract class GetPropertyInstruction implements Instruction {
         return propertyName;
     }
 
-    public Type getPropertyType() {
+    public String getPropertyType() {
         return propertyType;
     }
 

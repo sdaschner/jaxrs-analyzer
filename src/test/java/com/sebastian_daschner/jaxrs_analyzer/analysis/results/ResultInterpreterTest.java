@@ -16,12 +16,11 @@
 
 package com.sebastian_daschner.jaxrs_analyzer.analysis.results;
 
+import com.sebastian_daschner.jaxrs_analyzer.model.Types;
 import com.sebastian_daschner.jaxrs_analyzer.builder.*;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.*;
 import com.sebastian_daschner.jaxrs_analyzer.model.results.ClassResult;
 import com.sebastian_daschner.jaxrs_analyzer.model.results.MethodResult;
-import com.sebastian_daschner.jaxrs_analyzer.model.types.Type;
-import com.sebastian_daschner.jaxrs_analyzer.model.types.Types;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -97,7 +96,7 @@ public class ResultInterpreterTest {
         final Resources expectedResult = new Resources();
         expectedResult.setBasePath("path");
 
-        final TypeIdentifier stringListIdentifier = TypeIdentifier.ofType(new Type("java.util.List<java.lang.String>"));
+        final TypeIdentifier stringListIdentifier = TypeIdentifier.ofType("java.util.List<java.lang.String>");
         final TypeRepresentation stringList = TypeRepresentation.ofCollection(stringListIdentifier, TypeRepresentation.ofConcrete(STRING_IDENTIFIER));
         expectedResult.getTypeRepresentations().put(stringListIdentifier, stringList);
 
@@ -108,7 +107,7 @@ public class ResultInterpreterTest {
 
         final ClassResult appPathResult = ClassResultBuilder.withApplicationPath("path").build();
         final MethodResult method = MethodResultBuilder
-                .withResponses(HttpResponseBuilder.withStatues(200).andEntityTypes(new Type("javax.ws.rs.core.GenericEntity<java.util.List<java.lang.String>>")).build())
+                .withResponses(HttpResponseBuilder.withStatues(200).andEntityTypes("javax.ws.rs.core.GenericEntity<java.util.List<java.lang.String>>").build())
                 .andMethod(HttpMethod.GET).build();
         final ClassResult resClassResult = ClassResultBuilder.withResourcePath("test").andMethods(method).build();
 
@@ -131,7 +130,7 @@ public class ResultInterpreterTest {
 
         final ClassResult appPathResult = ClassResultBuilder.withApplicationPath("path").build();
         final MethodResult method = MethodResultBuilder
-                .withResponses(HttpResponseBuilder.withStatues(200).andEntityTypes(new Type("javax.ws.rs.core.GenericEntity<java.lang.String>")).build())
+                .withResponses(HttpResponseBuilder.withStatues(200).andEntityTypes("javax.ws.rs.core.GenericEntity<java.lang.String>").build())
                 .andMethod(HttpMethod.GET).build();
         final ClassResult resClassResult = ClassResultBuilder.withResourcePath("test").andMethods(method).build();
 
@@ -236,7 +235,7 @@ public class ResultInterpreterTest {
         final Resources expectedResult = new Resources();
         expectedResult.setBasePath("path");
 
-        final TypeIdentifier stringListIdentifier = TypeIdentifier.ofType(new Type("java.util.List<java.lang.String>"));
+        final TypeIdentifier stringListIdentifier = TypeIdentifier.ofType("java.util.List<java.lang.String>");
         final TypeRepresentation stringList = TypeRepresentation.ofCollection(stringListIdentifier, TypeRepresentation.ofConcrete(STRING_IDENTIFIER));
         expectedResult.getTypeRepresentations().put(stringListIdentifier, stringList);
 
@@ -247,7 +246,7 @@ public class ResultInterpreterTest {
 
         final ClassResult appPathResult = ClassResultBuilder.withApplicationPath("path").build();
         final MethodResult method = MethodResultBuilder
-                .withResponses(HttpResponseBuilder.withStatues(200).andEntityTypes(new Type("javax.ws.rs.core.GenericEntity<java.util.List<java.lang.String>>")).build())
+                .withResponses(HttpResponseBuilder.withStatues(200).andEntityTypes("javax.ws.rs.core.GenericEntity<java.util.List<java.lang.String>>").build())
                 .andMethod(HttpMethod.GET).build();
         final ClassResult resClassResult = ClassResultBuilder.withResourcePath("test").andMethods(method).build();
 
@@ -260,7 +259,7 @@ public class ResultInterpreterTest {
 
     @Test
     public void testAmbiguousEntityTypes() {
-        final Type configurationType = new Type("com.sebastian_daschner.jaxrs_analyzer.analysis.results.ResultInterpreterTest$ConfigurationManager$Configuration");
+        final String configurationType = "com.sebastian_daschner.jaxrs_analyzer.analysis.results.ResultInterpreterTest$ConfigurationManager$Configuration";
 
         final Resources expectedResult = new Resources();
         expectedResult.setBasePath("path");

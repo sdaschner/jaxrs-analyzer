@@ -16,6 +16,8 @@
 
 package com.sebastian_daschner.jaxrs_analyzer.model.results;
 
+import com.sebastian_daschner.jaxrs_analyzer.model.rest.MethodParameters;
+
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -29,6 +31,8 @@ public class ClassResult {
 
     private String applicationPath;
     private String resourcePath;
+    private String originalClass;
+    private final MethodParameters classFields = new MethodParameters();
     private final Set<MethodResult> methods = new HashSet<>();
     private final Set<String> requestMediaTypes = new HashSet<>();
     private final Set<String> responseMediaTypes = new HashSet<>();
@@ -48,6 +52,18 @@ public class ClassResult {
 
     public void setResourcePath(final String resourcePath) {
         this.resourcePath = resourcePath;
+    }
+
+    public String getOriginalClass() {
+        return originalClass;
+    }
+
+    public void setOriginalClass(String originalClass) {
+        this.originalClass = originalClass;
+    }
+
+    public MethodParameters getClassFields() {
+        return classFields;
     }
 
     public Set<MethodResult> getMethods() {
@@ -85,6 +101,7 @@ public class ClassResult {
         if (!requestMediaTypes.equals(that.requestMediaTypes)) return false;
         if (applicationPath != null ? !applicationPath.equals(that.applicationPath) : that.applicationPath != null)
             return false;
+        if (!classFields.equals(that.classFields)) return false;
         if (!methods.equals(that.methods)) return false;
         if (resourcePath != null ? !resourcePath.equals(that.resourcePath) : that.resourcePath != null) return false;
         return responseMediaTypes.equals(that.responseMediaTypes);
@@ -94,6 +111,7 @@ public class ClassResult {
     public int hashCode() {
         int result = applicationPath != null ? applicationPath.hashCode() : 0;
         result = 31 * result + (resourcePath != null ? resourcePath.hashCode() : 0);
+        result = 31 * result + classFields.hashCode();
         result = 31 * result + methods.hashCode();
         result = 31 * result + requestMediaTypes.hashCode();
         result = 31 * result + responseMediaTypes.hashCode();
@@ -105,6 +123,7 @@ public class ClassResult {
         return "ClassResult{" +
                 "applicationPath='" + applicationPath + '\'' +
                 ", resourcePath='" + resourcePath + '\'' +
+                ", classFields=" + classFields +
                 ", methods=" + methods +
                 ", requestMediaTypes=" + requestMediaTypes +
                 ", responseMediaTypes=" + responseMediaTypes +

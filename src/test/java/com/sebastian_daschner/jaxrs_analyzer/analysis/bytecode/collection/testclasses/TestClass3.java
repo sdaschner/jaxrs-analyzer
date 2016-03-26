@@ -16,10 +16,9 @@
 
 package com.sebastian_daschner.jaxrs_analyzer.analysis.bytecode.collection.testclasses;
 
+import com.sebastian_daschner.jaxrs_analyzer.model.Types;
 import com.sebastian_daschner.jaxrs_analyzer.model.instructions.*;
 import com.sebastian_daschner.jaxrs_analyzer.model.methods.MethodIdentifier;
-import com.sebastian_daschner.jaxrs_analyzer.model.types.Types;
-import com.sebastian_daschner.jaxrs_analyzer.model.types.Type;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -37,7 +36,7 @@ public class TestClass3 {
 
     public static List<Instruction> getResult() {
         final List<Instruction> instructions = new LinkedList<>();
-        final Type arithmeticException = new Type(ArithmeticException.class.getName());
+        final String arithmeticException = ArithmeticException.class.getName();
 
         // constant folding
         instructions.add(new PushInstruction(6));

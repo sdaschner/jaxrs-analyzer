@@ -14,21 +14,19 @@
  * limitations under the License.
  */
 
-package com.sebastian_daschner.jaxrs_analyzer.analysis.project.methods;
+package com.sebastian_daschner.jaxrs_analyzer.analysis.bytecode;
 
 import com.sebastian_daschner.jaxrs_analyzer.LogProvider;
 import com.sebastian_daschner.jaxrs_analyzer.analysis.bytecode.simulation.MethodPool;
 import com.sebastian_daschner.jaxrs_analyzer.analysis.bytecode.simulation.MethodSimulator;
-import com.sebastian_daschner.jaxrs_analyzer.analysis.utils.JavaUtils;
+import com.sebastian_daschner.jaxrs_analyzer.model.JavaUtils;
+import com.sebastian_daschner.jaxrs_analyzer.model.Types;
 import com.sebastian_daschner.jaxrs_analyzer.model.elements.Element;
 import com.sebastian_daschner.jaxrs_analyzer.model.elements.HttpResponse;
 import com.sebastian_daschner.jaxrs_analyzer.model.elements.JsonValue;
 import com.sebastian_daschner.jaxrs_analyzer.model.instructions.Instruction;
 import com.sebastian_daschner.jaxrs_analyzer.model.methods.ProjectMethod;
 import com.sebastian_daschner.jaxrs_analyzer.model.results.MethodResult;
-import com.sebastian_daschner.jaxrs_analyzer.model.types.Type;
-import com.sebastian_daschner.jaxrs_analyzer.model.types.Types;
-import javassist.CtMethod;
 
 import java.util.List;
 import java.util.Set;
@@ -49,15 +47,14 @@ class ResourceMethodContentAnalyzer extends MethodContentAnalyzer {
     /**
      * Analyzes the method (including own project methods).
      *
-     * @param method The method to analyze
-     * @param result The result
+     * @param methodResult The method result
      */
-    void analyze(final CtMethod method, final MethodResult result) {
+    void analyze(final MethodResult methodResult) {
         lock.lock();
         try {
-            buildPackagePrefix(method);
+            buildPackagePrefix(methodResult.getParentResource().getOriginalClass());
 
-            final List<Instruction> visitedInstructions = interpretRelevantInstructions(method);
+            final List<Instruction> visitedInstructions = interpretRelevantInstructions(methodResult.getInstructions());
 
             // find project defined methods in invoke occurrences
             final Set<ProjectMethod> projectMethods = findProjectMethods(visitedInstructions);
@@ -66,10 +63,10 @@ class ResourceMethodContentAnalyzer extends MethodContentAnalyzer {
             projectMethods.stream().forEach(MethodPool.getInstance()::addProjectMethod);
 
             final Element returnedElement = methodSimulator.simulate(visitedInstructions);
-            final Type returnType = JavaUtils.getReturnType(method, null);
+            final String returnType = JavaUtils.getReturnType(methodResult.getOriginalMethodSignature());
 
             // void resource methods are interpreted later; stop analyzing on error
-            if (returnType == null || Types.PRIMITIVE_VOID.equals(returnType)) {
+            if (Types.PRIMITIVE_VOID.equals(returnType)) {
                 return;
             }
 
@@ -93,11 +90,11 @@ class ResourceMethodContentAnalyzer extends MethodContentAnalyzer {
 
                 possibleObjects.stream().filter(o -> o instanceof JsonValue).map(o -> (JsonValue) o).forEach(defaultResponse.getInlineEntities()::add);
 
-                result.getResponses().add(defaultResponse);
+                methodResult.getResponses().add(defaultResponse);
             }
 
             // add Response results as well
-            returnedElement.getPossibleValues().stream().filter(o -> o instanceof HttpResponse).map(o -> (HttpResponse) o).forEach(result.getResponses()::add);
+            returnedElement.getPossibleValues().stream().filter(o -> o instanceof HttpResponse).map(o -> (HttpResponse) o).forEach(methodResult.getResponses()::add);
         } finally {
             lock.unlock();
         }

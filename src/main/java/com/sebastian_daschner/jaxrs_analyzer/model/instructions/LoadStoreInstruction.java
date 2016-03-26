@@ -16,8 +16,7 @@
 
 package com.sebastian_daschner.jaxrs_analyzer.model.instructions;
 
-import com.sebastian_daschner.jaxrs_analyzer.analysis.utils.StringUtils;
-import com.sebastian_daschner.jaxrs_analyzer.model.types.Type;
+import com.sebastian_daschner.jaxrs_analyzer.utils.StringUtils;
 
 import java.util.Objects;
 
@@ -28,11 +27,24 @@ import java.util.Objects;
  */
 public abstract class LoadStoreInstruction implements Instruction {
 
+    /**
+     * The variable name which is taken, if no information is found in the local variables attribute.
+     */
+    private static final String UNKNOWN_VARIABLE_NAME_PREFIX = "variable$";
+
     private final int number;
-    private final Type variableType;
+    private final String variableType;
     private final String name;
 
-    protected LoadStoreInstruction(final int number, final Type variableType, final String name) {
+    protected LoadStoreInstruction(final int number, final String variableType) {
+        Objects.requireNonNull(variableType);
+
+        this.number = number;
+        this.variableType = variableType;
+        name = UNKNOWN_VARIABLE_NAME_PREFIX + number;
+    }
+
+    protected LoadStoreInstruction(final int number, final String variableType, final String name) {
         Objects.requireNonNull(variableType);
         StringUtils.requireNonBlank(name);
 
@@ -45,7 +57,7 @@ public abstract class LoadStoreInstruction implements Instruction {
         return number;
     }
 
-    public Type getVariableType() {
+    public String getVariableType() {
         return variableType;
     }
 

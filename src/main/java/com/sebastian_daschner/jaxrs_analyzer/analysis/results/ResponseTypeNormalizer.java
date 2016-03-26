@@ -16,10 +16,12 @@
 
 package com.sebastian_daschner.jaxrs_analyzer.analysis.results;
 
-import com.sebastian_daschner.jaxrs_analyzer.model.types.Types;
-import com.sebastian_daschner.jaxrs_analyzer.model.types.Type;
+import com.sebastian_daschner.jaxrs_analyzer.model.Types;
 
 import javax.ws.rs.core.GenericEntity;
+
+import static com.sebastian_daschner.jaxrs_analyzer.model.JavaUtils.getTypeParameters;
+import static com.sebastian_daschner.jaxrs_analyzer.model.JavaUtils.isAssignableTo;
 
 /**
  * Normalizes the request/response body Java types.
@@ -38,9 +40,9 @@ final class ResponseTypeNormalizer {
      * @param type The type
      * @return The fully normalized type
      */
-    static Type normalize(final Type type) {
-        Type currentType = type;
-        Type lastType;
+    static String normalize(final String type) {
+        String currentType = type;
+        String lastType;
         do {
             lastType = currentType;
             currentType = normalizeCollection(currentType);
@@ -56,10 +58,10 @@ final class ResponseTypeNormalizer {
      * @param type The type
      * @return The normalized type
      */
-    static Type normalizeCollection(final Type type) {
-        if (type.isAssignableTo(Types.COLLECTION)) {
-            if (!type.getTypeParameters().isEmpty()) {
-                return type.getTypeParameters().get(0);
+    static String normalizeCollection(final String type) {
+        if (isAssignableTo(type, Types.COLLECTION)) {
+            if (!getTypeParameters(type).isEmpty()) {
+                return getTypeParameters(type).get(0);
             }
             return Types.OBJECT;
         }
@@ -72,9 +74,9 @@ final class ResponseTypeNormalizer {
      * @param type The type
      * @return The normalized type
      */
-    static Type normalizeResponseWrapper(final Type type) {
-        if (!type.getTypeParameters().isEmpty() && type.isAssignableTo(Types.GENERIC_ENTITY))
-            return type.getTypeParameters().get(0);
+    static String normalizeResponseWrapper(final String type) {
+        if (!getTypeParameters(type).isEmpty() && isAssignableTo(type, Types.GENERIC_ENTITY))
+            return getTypeParameters(type).get(0);
         return type;
     }
 

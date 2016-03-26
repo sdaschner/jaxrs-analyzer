@@ -16,10 +16,10 @@
 
 package com.sebastian_daschner.jaxrs_analyzer.analysis.project.methods.testclasses.resource.json;
 
+import com.sebastian_daschner.jaxrs_analyzer.model.Types;
 import com.sebastian_daschner.jaxrs_analyzer.model.elements.Element;
 import com.sebastian_daschner.jaxrs_analyzer.model.elements.HttpResponse;
 import com.sebastian_daschner.jaxrs_analyzer.model.elements.JsonObject;
-import com.sebastian_daschner.jaxrs_analyzer.model.types.Type;
 
 import javax.json.Json;
 import javax.json.JsonStructure;
@@ -41,11 +41,11 @@ public class TestClass8 {
     public static Set<HttpResponse> getResult() {
 
         final JsonObject jsonObject = new JsonObject();
-        jsonObject.getStructure().put("key", new Element(new Type("java.lang.String"), "value"));
+        jsonObject.getStructure().put("key", new Element(Types.STRING, "value"));
 
 
         final HttpResponse httpResponse = new HttpResponse();
-        httpResponse.getEntityTypes().add(new Type(JsonStructure.class.getName()));
+        httpResponse.getEntityTypes().add(JsonStructure.class.getName());
         httpResponse.getInlineEntities().add(jsonObject);
 
         final HttpResponse errorResponse = new HttpResponse();

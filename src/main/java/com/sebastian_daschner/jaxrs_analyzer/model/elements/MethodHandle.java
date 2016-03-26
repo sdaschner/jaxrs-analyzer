@@ -17,8 +17,7 @@
 package com.sebastian_daschner.jaxrs_analyzer.model.elements;
 
 import com.sebastian_daschner.jaxrs_analyzer.analysis.bytecode.simulation.MethodPool;
-import com.sebastian_daschner.jaxrs_analyzer.analysis.utils.JavaUtils;
-import com.sebastian_daschner.jaxrs_analyzer.model.types.Type;
+import com.sebastian_daschner.jaxrs_analyzer.model.JavaUtils;
 import com.sebastian_daschner.jaxrs_analyzer.model.methods.Method;
 import com.sebastian_daschner.jaxrs_analyzer.model.methods.MethodIdentifier;
 
@@ -45,7 +44,7 @@ public class MethodHandle extends Element implements Method {
      */
     private final List<Element> transferredArguments = new LinkedList<>();
 
-    public MethodHandle(final Type returnType, final MethodIdentifier handleIdentifier, final List<Element> transferredArguments) {
+    public MethodHandle(final String returnType, final MethodIdentifier handleIdentifier, final List<Element> transferredArguments) {
         super(returnType);
         this.possibleIdentifiers.add(handleIdentifier);
         this.transferredArguments.addAll(transferredArguments);
@@ -109,4 +108,5 @@ public class MethodHandle extends Element implements Method {
                 ", type='" + getTypes() + '\'' +
                 '}';
     }
+
 }

@@ -1,10 +1,9 @@
 package com.sebastian_daschner.jaxrs_analyzer.backend;
 
+import com.sebastian_daschner.jaxrs_analyzer.model.Types;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeIdentifier;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeRepresentation;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeRepresentationVisitor;
-import com.sebastian_daschner.jaxrs_analyzer.model.types.Type;
-import com.sebastian_daschner.jaxrs_analyzer.model.types.Types;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -16,7 +15,7 @@ import static org.junit.Assert.assertThat;
 
 public class JsonRepresentationAppenderTest {
 
-    private static final TypeIdentifier STRING_LIST_IDENTIFIER = TypeIdentifier.ofType(new Type("java.util.List<java.lang.String>"));
+    private static final TypeIdentifier STRING_LIST_IDENTIFIER = TypeIdentifier.ofType("java.util.List<java.lang.String>");
     private static final TypeIdentifier STRING_IDENTIFIER = TypeIdentifier.ofType(Types.STRING);
     private static final TypeIdentifier INT_IDENTIFIER = TypeIdentifier.ofType(Types.PRIMITIVE_INT);
 
@@ -67,7 +66,7 @@ public class JsonRepresentationAppenderTest {
 
     @Test
     public void testVisitMultipleList() {
-        final TypeIdentifier identifier = TypeIdentifier.ofType(new Type("java.util.List<java.util.List<java.lang.String>>"));
+        final TypeIdentifier identifier = TypeIdentifier.ofType("java.util.List<java.util.List<java.lang.String>>");
         final TypeRepresentation representation = TypeRepresentation.ofCollection(identifier, TypeRepresentation.ofCollection(STRING_LIST_IDENTIFIER,
                 TypeRepresentation.ofConcrete(STRING_IDENTIFIER)));
         representations.put(identifier, representation);
@@ -96,7 +95,7 @@ public class JsonRepresentationAppenderTest {
 
     @Test
     public void testVisitConcrete() {
-        final TypeIdentifier identifier = TypeIdentifier.ofType(new Type("com.sebastian_daschner.test.Model"));
+        final TypeIdentifier identifier = TypeIdentifier.ofType("com.sebastian_daschner.test.Model");
         Map<String, TypeIdentifier> properties = new HashMap<>();
         properties.put("world", INT_IDENTIFIER);
         properties.put("hello", STRING_IDENTIFIER);
@@ -110,7 +109,7 @@ public class JsonRepresentationAppenderTest {
 
     @Test
     public void testVisitConcreteWithNested() {
-        final TypeIdentifier identifier = TypeIdentifier.ofType(new Type("com.sebastian_daschner.test.Model"));
+        final TypeIdentifier identifier = TypeIdentifier.ofType("com.sebastian_daschner.test.Model");
         Map<String, TypeIdentifier> properties = new HashMap<>();
         properties.put("world", INT_IDENTIFIER);
         properties.put("hello", STRING_IDENTIFIER);
@@ -126,7 +125,7 @@ public class JsonRepresentationAppenderTest {
     @Test
     public void testVisitConcreteWithNestedPreventSuppression() {
         final TypeIdentifier dateIdentifier = TypeIdentifier.ofType(Types.DATE);
-        final TypeIdentifier modelIdentifier = TypeIdentifier.ofType(new Type("com.sebastian_daschner.test.Model"));
+        final TypeIdentifier modelIdentifier = TypeIdentifier.ofType("com.sebastian_daschner.test.Model");
         final TypeIdentifier objectIdentifier = TypeIdentifier.ofType(Types.OBJECT);
 
         Map<String, TypeIdentifier> properties = new HashMap<>();

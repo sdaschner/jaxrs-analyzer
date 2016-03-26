@@ -1,12 +1,11 @@
 package com.sebastian_daschner.jaxrs_analyzer.backend.asciidoc;
 
+import com.sebastian_daschner.jaxrs_analyzer.model.Types;
 import com.sebastian_daschner.jaxrs_analyzer.backend.Backend;
 import com.sebastian_daschner.jaxrs_analyzer.builder.ResourceMethodBuilder;
 import com.sebastian_daschner.jaxrs_analyzer.builder.ResourcesBuilder;
 import com.sebastian_daschner.jaxrs_analyzer.builder.ResponseBuilder;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.*;
-import com.sebastian_daschner.jaxrs_analyzer.model.types.Type;
-import com.sebastian_daschner.jaxrs_analyzer.model.types.Types;
 import junit.framework.TestCase;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -152,7 +151,7 @@ public class AsciiDocBackendTest extends TestCase {
                         "*Response Body*: (`javax.json.Json`) + \n" +
                         "`[{\"key\":\"string\"}]` + \n\n");
 
-        identifier = TypeIdentifier.ofType(new Type("com.sebastian_daschner.test.Model"));
+        identifier = TypeIdentifier.ofType("com.sebastian_daschner.test.Model");
         properties = new HashMap<>();
         properties.put("name", stringIdentifier);
         properties.put("value", intIdentifier);
@@ -175,8 +174,8 @@ public class AsciiDocBackendTest extends TestCase {
                         "*Response Body*: (`com.sebastian_daschner.test.Model`) + \n" +
                         "`{\"name\":\"string\",\"value\":0}` + \n\n");
 
-        identifier = TypeIdentifier.ofType(new Type("java.util.List<com.sebastian_daschner.test.Model>"));
-        nestedIdentifier = TypeIdentifier.ofType(new Type("com.sebastian_daschner.test.Model"));
+        identifier = TypeIdentifier.ofType("java.util.List<com.sebastian_daschner.test.Model>");
+        nestedIdentifier = TypeIdentifier.ofType("com.sebastian_daschner.test.Model");
         properties = new HashMap<>();
         properties.put("name", stringIdentifier);
         properties.put("value", intIdentifier);

@@ -16,6 +16,7 @@
 
 package com.sebastian_daschner.jaxrs_analyzer.analysis.project.classes.testclasses;
 
+import com.sebastian_daschner.jaxrs_analyzer.model.Types;
 import com.sebastian_daschner.jaxrs_analyzer.builder.ClassResultBuilder;
 import com.sebastian_daschner.jaxrs_analyzer.builder.HttpResponseBuilder;
 import com.sebastian_daschner.jaxrs_analyzer.builder.MethodResultBuilder;
@@ -23,8 +24,6 @@ import com.sebastian_daschner.jaxrs_analyzer.model.elements.Element;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.HttpMethod;
 import com.sebastian_daschner.jaxrs_analyzer.model.results.ClassResult;
 import com.sebastian_daschner.jaxrs_analyzer.model.results.MethodResult;
-import com.sebastian_daschner.jaxrs_analyzer.model.types.Types;
-import com.sebastian_daschner.jaxrs_analyzer.model.types.Type;
 
 import javax.json.Json;
 import javax.json.JsonObject;
@@ -44,8 +43,8 @@ public class TestClass3 {
 
     public static ClassResult getResult() {
         final com.sebastian_daschner.jaxrs_analyzer.model.elements.JsonObject jsonObject = new com.sebastian_daschner.jaxrs_analyzer.model.elements.JsonObject();
-        jsonObject.getStructure().put("key", new Element(new Type("java.lang.String"), "value"));
-        jsonObject.getStructure().put("duke", new Element(new Type("java.lang.Integer"), 42));
+        jsonObject.getStructure().put("key", new Element(Types.STRING, "value"));
+        jsonObject.getStructure().put("duke", new Element(Types.INTEGER, 42));
         final MethodResult firstMethod = MethodResultBuilder.withResponses(HttpResponseBuilder.newBuilder().andEntityTypes(Types.JSON_OBJECT)
                 .andInlineEntities(jsonObject).build())
                 .andMethod(HttpMethod.GET).build();

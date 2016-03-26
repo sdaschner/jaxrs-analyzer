@@ -17,27 +17,30 @@
 package com.sebastian_daschner.jaxrs_analyzer.analysis;
 
 import com.sebastian_daschner.jaxrs_analyzer.LogProvider;
-import com.sebastian_daschner.jaxrs_analyzer.analysis.project.classes.ClassAnalyzer;
+import com.sebastian_daschner.jaxrs_analyzer.analysis.bytecode.BytecodeAnalyzer;
 import com.sebastian_daschner.jaxrs_analyzer.analysis.results.ResultInterpreter;
+import com.sebastian_daschner.jaxrs_analyzer.analysis.classes.JAXRSClassVisitor;
+import com.sebastian_daschner.jaxrs_analyzer.utils.Pair;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.Resources;
 import com.sebastian_daschner.jaxrs_analyzer.model.results.ClassResult;
-import javassist.ClassPool;
-import javassist.CtClass;
-import javassist.NotFoundException;
+import org.objectweb.asm.ClassReader;
+import org.objectweb.asm.ClassVisitor;
 
+import javax.ws.rs.ApplicationPath;
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Method;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Enumeration;
 import java.util.HashSet;
-import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -54,9 +57,10 @@ public class ProjectAnalyzer {
     // b should have result
 
     private final Lock lock = new ReentrantLock();
-    private final Set<CtClass> classes = new HashSet<>();
-    private final ClassAnalyzer classAnalyzer = new ClassAnalyzer();
+    private final Set<String> classes = new HashSet<>();
     private final ResultInterpreter resultInterpreter = new ResultInterpreter();
+    private final BytecodeAnalyzer bytecodeAnalyzer = new BytecodeAnalyzer();
+    private final URLClassLoader urlClassLoader = (URLClassLoader) ClassLoader.getSystemClassLoader();
 
     /**
      * Creates a project analyzer with given class path locations where to search for classes.
@@ -79,13 +83,47 @@ public class ProjectAnalyzer {
             Stream.of(projectPaths).forEach(this::addProjectPath);
 
             // analyze relevant classes
-            final Set<ClassResult> classResults = classes.stream()
-                    .map(classAnalyzer::analyze)
-                    .filter(Objects::nonNull).collect(Collectors.toSet());
+            final JobRegistry jobRegistry = JobRegistry.getInstance();
+            final Set<ClassResult> classResults = new HashSet<>();
+
+            classes.stream().filter(this::isJAXRSRootResource).forEach(c -> jobRegistry.analyzeResourceClass(c, new ClassResult()));
+
+            Pair<String, ClassResult> classResultPair;
+            while ((classResultPair = jobRegistry.nextUnhandledClass()) != null) {
+                final ClassResult classResult = classResultPair.getRight();
+
+                classResults.add(classResult);
+                analyzeClass(classResultPair.getLeft(), classResult);
+
+                bytecodeAnalyzer.analyzeBytecode(classResult);
+            }
 
             return resultInterpreter.interpret(classResults);
         } finally {
             lock.unlock();
+        }
+    }
+
+    private boolean isJAXRSRootResource(String className) {
+        try {
+            final Class<?> clazz = urlClassLoader.loadClass(className);
+            return clazz.isAnnotationPresent(javax.ws.rs.Path.class) || clazz.isAnnotationPresent(ApplicationPath.class);
+        } catch (ClassNotFoundException e) {
+            LogProvider.error("The class " + className + " could not be loaded!");
+            LogProvider.debug(e);
+            return false;
+        }
+    }
+
+    private void analyzeClass(final String className, ClassResult classResult) {
+        try {
+            final ClassReader classReader = new ClassReader(className);
+            final ClassVisitor visitor = new JAXRSClassVisitor(classResult);
+
+            classReader.accept(visitor, ClassReader.EXPAND_FRAMES);
+        } catch (IOException e) {
+            LogProvider.error("The class " + className + " could not be loaded!");
+            LogProvider.debug(e);
         }
     }
 
@@ -98,11 +136,12 @@ public class ProjectAnalyzer {
         if (!location.toFile().exists())
             throw new IllegalArgumentException("The location '" + location + "' does not exist!");
         try {
-            ClassPool.getDefault().insertClassPath(location.toString());
-        } catch (NotFoundException e) {
-            throw new IllegalArgumentException("The location '" + location + "' could not be loaded!", e);
+            final Method method = URLClassLoader.class.getDeclaredMethod("addURL", URL.class);
+            method.setAccessible(true);
+            method.invoke(urlClassLoader, location.toUri().toURL());
+        } catch (Exception e) {
+            throw new IllegalArgumentException("The location '" + location + "' could not be loaded to the class path!", e);
         }
-
     }
 
     /**
@@ -133,12 +172,7 @@ public class ProjectAnalyzer {
             while (entries.hasMoreElements()) {
                 final String entryName = entries.nextElement().getName();
                 if (entryName.endsWith(".class"))
-                    try {
-                        classes.add(ClassPool.getDefault().getCtClass(convertToQualifiedName(entryName)));
-                    } catch (NotFoundException e) {
-                        LogProvider.error("Could not load class file " + entryName);
-                        LogProvider.debug(e);
-                    }
+                    classes.add(convertToQualifiedName(entryName));
             }
         } catch (IOException e) {
             throw new IllegalArgumentException("Could not read jar-file '" + location + "', reason: " + e.getMessage());
@@ -157,12 +191,7 @@ public class ProjectAnalyzer {
                 addDirectoryClasses(location.resolve(file.getName()), subPath.resolve(file.getName()));
             else if (file.isFile() && file.getName().endsWith(".class")) {
                 final String classFileName = subPath.resolve(file.getName()).toString();
-                try {
-                    classes.add(ClassPool.getDefault().getCtClass(convertToQualifiedName(classFileName)));
-                } catch (NotFoundException e) {
-                    LogProvider.error("Could not load class file " + classFileName);
-                    LogProvider.debug(e);
-                }
+                classes.add(convertToQualifiedName(classFileName));
             }
         }
     }

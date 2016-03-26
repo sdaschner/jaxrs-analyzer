@@ -16,8 +16,6 @@
 
 package com.sebastian_daschner.jaxrs_analyzer.model.instructions;
 
-import com.sebastian_daschner.jaxrs_analyzer.model.types.Type;
-
 import java.util.Objects;
 
 /**
@@ -27,15 +25,15 @@ import java.util.Objects;
  */
 public class NewInstruction implements Instruction {
 
-    private final Type createdType;
+    private final String createdType;
 
-    public NewInstruction(final Type createdType) {
+    public NewInstruction(final String createdType) {
         Objects.requireNonNull(createdType);
 
         this.createdType = createdType;
     }
 
-    public Type getCreatedType() {
+    public String getCreatedType() {
         return createdType;
     }
 

@@ -17,7 +17,7 @@
 package com.sebastian_daschner.jaxrs_analyzer.analysis.project.methods.testclasses.resource.response;
 
 import com.sebastian_daschner.jaxrs_analyzer.model.elements.HttpResponse;
-import com.sebastian_daschner.jaxrs_analyzer.model.types.Types;
+import com.sebastian_daschner.jaxrs_analyzer.model.Types;
 
 import javax.ws.rs.core.Response;
 import java.util.Arrays;

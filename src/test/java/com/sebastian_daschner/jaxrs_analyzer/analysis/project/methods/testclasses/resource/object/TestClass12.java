@@ -2,7 +2,7 @@ package com.sebastian_daschner.jaxrs_analyzer.analysis.project.methods.testclass
 
 import com.sebastian_daschner.jaxrs_analyzer.builder.HttpResponseBuilder;
 import com.sebastian_daschner.jaxrs_analyzer.model.elements.HttpResponse;
-import com.sebastian_daschner.jaxrs_analyzer.model.types.Types;
+import com.sebastian_daschner.jaxrs_analyzer.model.Types;
 
 import java.util.Collections;
 import java.util.Set;

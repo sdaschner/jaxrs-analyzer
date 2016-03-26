@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.sebastian_daschner.jaxrs_analyzer.analysis.utils;
+package com.sebastian_daschner.jaxrs_analyzer.utils;
 
 /**
  * Contains utility functions for Strings.

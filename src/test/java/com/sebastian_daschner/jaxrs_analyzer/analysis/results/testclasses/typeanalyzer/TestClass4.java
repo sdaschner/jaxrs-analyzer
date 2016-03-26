@@ -16,10 +16,9 @@
 
 package com.sebastian_daschner.jaxrs_analyzer.analysis.results.testclasses.typeanalyzer;
 
+import com.sebastian_daschner.jaxrs_analyzer.model.Types;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeIdentifier;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeRepresentation;
-import com.sebastian_daschner.jaxrs_analyzer.model.types.Type;
-import com.sebastian_daschner.jaxrs_analyzer.model.types.Types;
 
 import java.time.LocalDate;
 import java.util.*;
@@ -41,14 +40,14 @@ public class TestClass4 {
     public static Set<TypeRepresentation> expectedTypeRepresentations() {
         final Map<String, TypeIdentifier> properties = new HashMap<>();
 
-        properties.put("first", TypeIdentifier.ofType(new Type("java.time.LocalDate")));
+        properties.put("first", TypeIdentifier.ofType("java.time.LocalDate"));
         properties.put("second", TypeIdentifier.ofType(Types.DATE));
 
         return Collections.singleton(TypeRepresentation.ofConcrete(expectedIdentifier(), properties));
     }
 
     public static TypeIdentifier expectedIdentifier() {
-        return TypeIdentifier.ofType(new Type(TestClass4.class.getName()));
+        return TypeIdentifier.ofType(TestClass4.class.getName());
     }
 
 }

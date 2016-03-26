@@ -16,12 +16,14 @@
 
 package com.sebastian_daschner.jaxrs_analyzer.model.results;
 
-import com.sebastian_daschner.jaxrs_analyzer.model.types.Type;
 import com.sebastian_daschner.jaxrs_analyzer.model.elements.HttpResponse;
+import com.sebastian_daschner.jaxrs_analyzer.model.instructions.Instruction;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.HttpMethod;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.MethodParameters;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -35,8 +37,10 @@ public class MethodResult {
     private final Set<String> responseMediaTypes = new HashSet<>();
     private final MethodParameters methodParameters = new MethodParameters();
     private final Set<HttpResponse> responses = new HashSet<>();
+    private final List<Instruction> instructions = new ArrayList<>();
     private String path;
-    private Type requestBodyType;
+    private String requestBodyType;
+    private String originalMethodSignature;
     private HttpMethod httpMethod;
     private ClassResult subResource;
     private ClassResult parentResource;
@@ -57,6 +61,10 @@ public class MethodResult {
         return responses;
     }
 
+    public List<Instruction> getInstructions() {
+        return instructions;
+    }
+
     public String getPath() {
         return path;
     }
@@ -65,12 +73,20 @@ public class MethodResult {
         this.path = path;
     }
 
-    public Type getRequestBodyType() {
+    public String getRequestBodyType() {
         return requestBodyType;
     }
 
-    public void setRequestBodyType(final Type requestBodyType) {
+    public void setRequestBodyType(final String requestBodyType) {
         this.requestBodyType = requestBodyType;
+    }
+
+    public String getOriginalMethodSignature() {
+        return originalMethodSignature;
+    }
+
+    public void setOriginalMethodSignature(String originalMethodSignature) {
+        this.originalMethodSignature = originalMethodSignature;
     }
 
     public HttpMethod getHttpMethod() {
@@ -109,6 +125,7 @@ public class MethodResult {
         if (!responseMediaTypes.equals(that.responseMediaTypes)) return false;
         if (!methodParameters.equals(that.methodParameters)) return false;
         if (!responses.equals(that.responses)) return false;
+        if (!instructions.equals(that.instructions)) return false;
         if (path != null ? !path.equals(that.path) : that.path != null) return false;
         if (requestBodyType != null ? !requestBodyType.equals(that.requestBodyType) : that.requestBodyType != null)
             return false;
@@ -123,6 +140,7 @@ public class MethodResult {
         result = 31 * result + responseMediaTypes.hashCode();
         result = 31 * result + methodParameters.hashCode();
         result = 31 * result + responses.hashCode();
+        result = 31 * result + instructions.hashCode();
         result = 31 * result + (path != null ? path.hashCode() : 0);
         result = 31 * result + (requestBodyType != null ? requestBodyType.hashCode() : 0);
         result = 31 * result + (httpMethod != null ? httpMethod.hashCode() : 0);
@@ -137,6 +155,7 @@ public class MethodResult {
                 ", responseMediaTypes=" + responseMediaTypes +
                 ", methodParameters=" + methodParameters +
                 ", responses=" + responses +
+                ", instructions=" + instructions +
                 ", path='" + path + '\'' +
                 ", requestBodyType='" + requestBodyType + '\'' +
                 ", httpMethod=" + httpMethod +

@@ -16,10 +16,9 @@
 
 package com.sebastian_daschner.jaxrs_analyzer.analysis.bytecode.collection.testclasses;
 
+import com.sebastian_daschner.jaxrs_analyzer.model.Types;
 import com.sebastian_daschner.jaxrs_analyzer.model.instructions.*;
 import com.sebastian_daschner.jaxrs_analyzer.model.methods.MethodIdentifier;
-import com.sebastian_daschner.jaxrs_analyzer.model.types.Type;
-import com.sebastian_daschner.jaxrs_analyzer.model.types.Types;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -42,17 +41,17 @@ public class TestClass4 {
         instructions.add(new LoadInstruction(1, Types.PRIMITIVE_INT, "number"));
         instructions.add(new SizeChangingInstruction("idiv", 1, 2));
         instructions.add(new StoreInstruction(2, Types.OBJECT, "variable$2"));
-        instructions.add(new GetStaticInstruction(new Type(System.class.getName()), "out", new Type("java.io.PrintStream")));
+        instructions.add(new GetStaticInstruction(System.class.getName(), "out", "java.io.PrintStream", System.out));
         instructions.add(new PushInstruction("Computed"));
-        instructions.add(new InvokeInstruction(MethodIdentifier.ofNonStatic(new Type("java.io.PrintStream"), "println", Types.PRIMITIVE_VOID, Types.STRING)));
+        instructions.add(new InvokeInstruction(MethodIdentifier.ofNonStatic("java.io.PrintStream", "println", Types.PRIMITIVE_VOID, Types.STRING)));
         instructions.add(new LoadInstruction(2, Types.OBJECT, "variable$2"));
         instructions.add(new ReturnInstruction());
 
         instructions.add(new ExceptionHandlerInstruction());
         instructions.add(new StoreInstruction(3, Types.OBJECT, "variable$3"));
-        instructions.add(new GetStaticInstruction(new Type(System.class.getName()), "out", new Type("java.io.PrintStream")));
+        instructions.add(new GetStaticInstruction(System.class.getName(), "out", "java.io.PrintStream", System.out));
         instructions.add(new PushInstruction("Computed"));
-        instructions.add(new InvokeInstruction(MethodIdentifier.ofNonStatic(new Type("java.io.PrintStream"), "println", Types.PRIMITIVE_VOID, Types.STRING)));
+        instructions.add(new InvokeInstruction(MethodIdentifier.ofNonStatic("java.io.PrintStream", "println", Types.PRIMITIVE_VOID, Types.STRING)));
         instructions.add(new LoadInstruction(3, Types.OBJECT, "variable$3"));
         instructions.add(new ThrowInstruction());
 

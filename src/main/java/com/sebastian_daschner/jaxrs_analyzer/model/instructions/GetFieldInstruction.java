@@ -16,8 +16,6 @@
 
 package com.sebastian_daschner.jaxrs_analyzer.model.instructions;
 
-import com.sebastian_daschner.jaxrs_analyzer.model.types.Type;
-
 /**
  * Represents a GET_FIELD instruction.
  *
@@ -25,7 +23,7 @@ import com.sebastian_daschner.jaxrs_analyzer.model.types.Type;
  */
 public class GetFieldInstruction extends GetPropertyInstruction {
 
-    public GetFieldInstruction(final Type containingClass, final String fieldName, final Type fieldType) {
+    public GetFieldInstruction(final String containingClass, final String fieldName, final String fieldType) {
         super(containingClass, fieldName, fieldType);
     }
 

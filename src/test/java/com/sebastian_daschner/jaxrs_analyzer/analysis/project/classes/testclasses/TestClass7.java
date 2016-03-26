@@ -21,7 +21,7 @@ import com.sebastian_daschner.jaxrs_analyzer.builder.MethodResultBuilder;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.HttpMethod;
 import com.sebastian_daschner.jaxrs_analyzer.model.results.ClassResult;
 import com.sebastian_daschner.jaxrs_analyzer.model.results.MethodResult;
-import com.sebastian_daschner.jaxrs_analyzer.model.types.Types;
+import com.sebastian_daschner.jaxrs_analyzer.model.Types;
 
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;

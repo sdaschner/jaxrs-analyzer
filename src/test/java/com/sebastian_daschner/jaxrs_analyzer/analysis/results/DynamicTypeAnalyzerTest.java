@@ -1,9 +1,8 @@
 package com.sebastian_daschner.jaxrs_analyzer.analysis.results;
 
+import com.sebastian_daschner.jaxrs_analyzer.model.Types;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeIdentifier;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeRepresentation;
-import com.sebastian_daschner.jaxrs_analyzer.model.types.Type;
-import com.sebastian_daschner.jaxrs_analyzer.model.types.Types;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -119,7 +118,7 @@ public class DynamicTypeAnalyzerTest {
     public void testEqualTypes() {
         // should be ignored
         typeRepresentations.put(STRING_LIST_IDENTIFIER, TypeRepresentation.ofCollection(STRING_LIST_IDENTIFIER, TypeRepresentation.ofConcrete(STRING_IDENTIFIER)));
-        final TypeIdentifier modelIdentifier = TypeIdentifier.ofType(new Type("com.sebastian_daschner.test.Model"));
+        final TypeIdentifier modelIdentifier = TypeIdentifier.ofType("com.sebastian_daschner.test.Model");
         final Map<String, TypeIdentifier> modelProperties = Collections.singletonMap("string", TypeUtils.STRING_IDENTIFIER);
         typeRepresentations.put(modelIdentifier, TypeRepresentation.ofConcrete(modelIdentifier, modelProperties));
 

@@ -1,7 +1,6 @@
 package com.sebastian_daschner.jaxrs_analyzer.model.rest;
 
-import com.sebastian_daschner.jaxrs_analyzer.model.types.Type;
-import com.sebastian_daschner.jaxrs_analyzer.model.types.Types;
+import com.sebastian_daschner.jaxrs_analyzer.model.Types;
 
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -20,11 +19,11 @@ public abstract class TypeIdentifier {
     @Override
     public abstract boolean equals(final Object object);
 
-    public abstract Type getType();
+    public abstract String getType();
 
     public abstract String getName();
 
-    public static TypeIdentifier ofType(final Type type) {
+    public static TypeIdentifier ofType(final String type) {
         return new JavaTypeIdentifier(type);
     }
 
@@ -33,21 +32,21 @@ public abstract class TypeIdentifier {
     }
 
     private static class JavaTypeIdentifier extends TypeIdentifier {
-        private final Type type;
+        private final String type;
 
-        public JavaTypeIdentifier(final Type type) {
+        public JavaTypeIdentifier(final String type) {
             Objects.requireNonNull(type);
             this.type = type;
         }
 
         @Override
-        public Type getType() {
+        public String getType() {
             return type;
         }
 
         @Override
         public String getName() {
-            return type.toString();
+            return type;
         }
 
         @Override
@@ -82,7 +81,7 @@ public abstract class TypeIdentifier {
         }
 
         @Override
-        public Type getType() {
+        public String getType() {
             return Types.JSON;
         }
 

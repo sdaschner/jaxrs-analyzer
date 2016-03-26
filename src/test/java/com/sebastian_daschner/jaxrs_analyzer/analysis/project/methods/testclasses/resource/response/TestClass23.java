@@ -17,7 +17,6 @@
 package com.sebastian_daschner.jaxrs_analyzer.analysis.project.methods.testclasses.resource.response;
 
 import com.sebastian_daschner.jaxrs_analyzer.model.elements.HttpResponse;
-import com.sebastian_daschner.jaxrs_analyzer.model.types.Type;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -25,6 +24,8 @@ import java.lang.annotation.Annotation;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Set;
+
+import static java.util.Collections.singletonList;
 
 public class TestClass23 {
 
@@ -45,7 +46,7 @@ public class TestClass23 {
         final HttpResponse result = new HttpResponse();
 
         result.getStatuses().addAll(Arrays.asList(200, 417));
-        result.getEntityTypes().addAll(Arrays.asList(new Type("java.lang.Long")));
+        result.getEntityTypes().addAll(singletonList("java.lang.Long"));
         result.getHeaders().addAll(Arrays.asList("Link", "ETag", "Vary"));
         result.getContentTypes().add("application/xml");
 

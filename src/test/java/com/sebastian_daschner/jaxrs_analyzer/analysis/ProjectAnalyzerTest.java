@@ -16,12 +16,11 @@
 
 package com.sebastian_daschner.jaxrs_analyzer.analysis;
 
+import com.sebastian_daschner.jaxrs_analyzer.LogProvider;
+import com.sebastian_daschner.jaxrs_analyzer.model.Types;
 import com.sebastian_daschner.jaxrs_analyzer.builder.ResourceMethodBuilder;
 import com.sebastian_daschner.jaxrs_analyzer.builder.ResponseBuilder;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.*;
-import com.sebastian_daschner.jaxrs_analyzer.model.types.Type;
-import com.sebastian_daschner.jaxrs_analyzer.model.types.Types;
-import javassist.NotFoundException;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -36,6 +35,7 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Stream;
 
+import static java.util.Collections.singletonList;
 import static org.junit.Assert.*;
 
 public class ProjectAnalyzerTest {
@@ -44,7 +44,8 @@ public class ProjectAnalyzerTest {
     private Path path;
 
     @Before
-    public void setUp() throws MalformedURLException, NotFoundException {
+    public void setUp() throws MalformedURLException {
+        LogProvider.injectDebugLogger(System.out::println);
 
         final String testClassPath = "src/test/jaxrs-test";
 
@@ -53,7 +54,7 @@ public class ProjectAnalyzerTest {
         final StandardJavaFileManager fileManager = compiler.getStandardFileManager(null, null, null);
         final List<JavaFileObject> compilationUnits = findClassFiles(testClassPath, fileManager);
 
-        final JavaCompiler.CompilationTask compilationTask = compiler.getTask(null, null, null, null, null, compilationUnits);
+        final JavaCompiler.CompilationTask compilationTask = compiler.getTask(null, null, null, singletonList("-g"), null, compilationUnits);
         assertTrue("Could not compile test project", compilationTask.call());
 
         path = Paths.get(testClassPath).toAbsolutePath();
@@ -141,16 +142,16 @@ public class ProjectAnalyzerTest {
 
         final TypeIdentifier stringIdentifier = TypeIdentifier.ofType(Types.STRING);
 
-        final TypeIdentifier modelIdentifier = TypeIdentifier.ofType(new Type("com.sebastian_daschner.jaxrs_test.Model"));
+        final TypeIdentifier modelIdentifier = TypeIdentifier.ofType("com.sebastian_daschner.jaxrs_test.Model");
         properties = new HashMap<>();
         properties.put("id", TypeIdentifier.ofType(Types.PRIMITIVE_LONG));
         properties.put("name", stringIdentifier);
         final TypeRepresentation modelRepresentation = TypeRepresentation.ofConcrete(modelIdentifier, properties);
         resources.getTypeRepresentations().put(modelIdentifier, modelRepresentation);
 
-        final TypeIdentifier modelListIdentifier = TypeIdentifier.ofType(new Type("java.util.List<com.sebastian_daschner.jaxrs_test.Model>"));
+        final TypeIdentifier modelListIdentifier = TypeIdentifier.ofType("java.util.List<com.sebastian_daschner.jaxrs_test.Model>");
         resources.getTypeRepresentations().put(modelListIdentifier, TypeRepresentation.ofCollection(modelListIdentifier, modelRepresentation));
-        final TypeIdentifier stringArrayListIdentifier = TypeIdentifier.ofType(new Type("java.util.ArrayList<java.lang.String>"));
+        final TypeIdentifier stringArrayListIdentifier = TypeIdentifier.ofType("java.util.ArrayList<java.lang.String>");
         resources.getTypeRepresentations().put(stringArrayListIdentifier, TypeRepresentation.ofCollection(stringArrayListIdentifier, TypeRepresentation.ofConcrete(stringIdentifier)));
 
         resources.setBasePath("rest");

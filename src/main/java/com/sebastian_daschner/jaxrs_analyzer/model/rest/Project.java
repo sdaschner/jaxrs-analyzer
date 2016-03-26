@@ -1,6 +1,6 @@
 package com.sebastian_daschner.jaxrs_analyzer.model.rest;
 
-import com.sebastian_daschner.jaxrs_analyzer.analysis.utils.StringUtils;
+import com.sebastian_daschner.jaxrs_analyzer.utils.StringUtils;
 
 /**
  * A REST project.

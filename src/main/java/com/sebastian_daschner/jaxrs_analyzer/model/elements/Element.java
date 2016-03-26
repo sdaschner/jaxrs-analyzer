@@ -16,8 +16,7 @@
 
 package com.sebastian_daschner.jaxrs_analyzer.model.elements;
 
-import com.sebastian_daschner.jaxrs_analyzer.model.types.Types;
-import com.sebastian_daschner.jaxrs_analyzer.model.types.Type;
+import com.sebastian_daschner.jaxrs_analyzer.model.Types;
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -37,13 +36,13 @@ public class Element {
     public static final Element EMPTY = new UnmodifiableElement(Types.OBJECT);
 
     private final Set<Object> possibleValues;
-    private final Set<Type> types;
+    private final Set<String> types;
 
-    public Element(final Type type, final Object... values) {
+    public Element(final String type, final Object... values) {
         this(Collections.singleton(type), values);
     }
 
-    public Element(final Set<Type> types, final Object... values) {
+    public Element(final Set<String> types, final Object... values) {
         Objects.requireNonNull(types);
 
         this.types = new HashSet<>(types);
@@ -72,7 +71,7 @@ public class Element {
         return possibleValues;
     }
 
-    public Set<Type> getTypes() {
+    public Set<String> getTypes() {
         return types;
     }
 
@@ -107,7 +106,7 @@ public class Element {
      */
     private static class UnmodifiableElement extends Element {
 
-        public UnmodifiableElement(final Type type) {
+        public UnmodifiableElement(final String type) {
             super(type);
         }
 
@@ -117,7 +116,7 @@ public class Element {
         }
 
         @Override
-        public Set<Type> getTypes() {
+        public Set<String> getTypes() {
             return Collections.unmodifiableSet(super.getTypes());
         }
     }

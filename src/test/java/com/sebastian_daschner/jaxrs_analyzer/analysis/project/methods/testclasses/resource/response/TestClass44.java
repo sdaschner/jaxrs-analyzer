@@ -17,7 +17,6 @@
 package com.sebastian_daschner.jaxrs_analyzer.analysis.project.methods.testclasses.resource.response;
 
 import com.sebastian_daschner.jaxrs_analyzer.model.elements.HttpResponse;
-import com.sebastian_daschner.jaxrs_analyzer.model.types.Type;
 
 import javax.ws.rs.core.Response;
 import java.util.Collections;
@@ -38,8 +37,8 @@ public class TestClass44 {
         final HttpResponse result = new HttpResponse();
 
         result.getStatuses().add(200);
-        result.getEntityTypes().add(new Type("java.util.List<com.sebastian_daschner.jaxrs_analyzer.analysis.project.methods.testclasses.resource.response.TestClass44$User>"));
-        result.getEntityTypes().add(new Type("java.util.LinkedList"));
+        result.getEntityTypes().add("java.util.List<com.sebastian_daschner.jaxrs_analyzer.analysis.project.methods.testclasses.resource.response.TestClass44$User>");
+        result.getEntityTypes().add("java.util.LinkedList");
 
         return Collections.singleton(result);
     }

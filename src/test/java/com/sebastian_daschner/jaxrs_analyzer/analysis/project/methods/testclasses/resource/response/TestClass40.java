@@ -16,12 +16,11 @@
 
 package com.sebastian_daschner.jaxrs_analyzer.analysis.project.methods.testclasses.resource.response;
 
+import com.sebastian_daschner.jaxrs_analyzer.model.Types;
 import com.sebastian_daschner.jaxrs_analyzer.model.elements.Element;
 import com.sebastian_daschner.jaxrs_analyzer.model.elements.HttpResponse;
 import com.sebastian_daschner.jaxrs_analyzer.model.elements.JsonArray;
 import com.sebastian_daschner.jaxrs_analyzer.model.elements.JsonObject;
-import com.sebastian_daschner.jaxrs_analyzer.model.types.Type;
-import com.sebastian_daschner.jaxrs_analyzer.model.types.Types;
 
 import javax.json.Json;
 import javax.json.JsonArrayBuilder;
@@ -58,17 +57,17 @@ public class TestClass40 {
         final HttpResponse result = new HttpResponse();
 
         result.getStatuses().add(200);
-        result.getEntityTypes().add(new Type("javax.json.JsonObject"));
+        result.getEntityTypes().add("javax.json.JsonObject");
 
         final JsonArray jsonArray = new JsonArray();
-        jsonArray.getElements().add(new Element(new Type("java.lang.String"), "test1"));
+        jsonArray.getElements().add(new Element("java.lang.String", "test1"));
 
         final JsonArray nestedArray = new JsonArray();
-        nestedArray.getElements().add(new Element(new Type("java.lang.String"), "test2"));
+        nestedArray.getElements().add(new Element("java.lang.String", "test2"));
         jsonArray.getElements().add(new Element(Types.JSON_ARRAY, nestedArray));
 
         JsonObject jsonObject = new JsonObject();
-        jsonObject.getStructure().put("test", new Element(new Type("java.lang.Object"), null));
+        jsonObject.getStructure().put("test", new Element("java.lang.Object", null));
         jsonObject.getStructure().put("array", new Element(Types.JSON_ARRAY, jsonArray));
 
         result.getInlineEntities().add(jsonObject);

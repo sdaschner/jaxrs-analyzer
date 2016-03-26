@@ -16,7 +16,6 @@
 
 package com.sebastian_daschner.jaxrs_analyzer.model.rest;
 
-import com.sebastian_daschner.jaxrs_analyzer.model.types.Type;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -31,34 +30,34 @@ public class MethodParameters {
     /*
      * The params contain the parameter names -> Java types
      */
-    private final Map<String, Type> matrixParams = new HashMap<>();
-    private final Map<String, Type> queryParams = new HashMap<>();
-    private final Map<String, Type> pathParams = new HashMap<>();
-    private final Map<String, Type> cookieParams = new HashMap<>();
-    private final Map<String, Type> headerParams = new HashMap<>();
-    private final Map<String, Type> formParams = new HashMap<>();
+    private final Map<String, String> matrixParams = new HashMap<>();
+    private final Map<String, String> queryParams = new HashMap<>();
+    private final Map<String, String> pathParams = new HashMap<>();
+    private final Map<String, String> cookieParams = new HashMap<>();
+    private final Map<String, String> headerParams = new HashMap<>();
+    private final Map<String, String> formParams = new HashMap<>();
 
-    public Map<String, Type> getMatrixParams() {
+    public Map<String, String> getMatrixParams() {
         return matrixParams;
     }
 
-    public Map<String, Type> getQueryParams() {
+    public Map<String, String> getQueryParams() {
         return queryParams;
     }
 
-    public Map<String, Type> getPathParams() {
+    public Map<String, String> getPathParams() {
         return pathParams;
     }
 
-    public Map<String, Type> getCookieParams() {
+    public Map<String, String> getCookieParams() {
         return cookieParams;
     }
 
-    public Map<String, Type> getHeaderParams() {
+    public Map<String, String> getHeaderParams() {
         return headerParams;
     }
 
-    public Map<String, Type> getFormParams() {
+    public Map<String, String> getFormParams() {
         return formParams;
     }
 

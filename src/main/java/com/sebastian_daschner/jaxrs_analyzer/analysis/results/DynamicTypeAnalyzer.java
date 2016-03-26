@@ -16,9 +16,9 @@
 
 package com.sebastian_daschner.jaxrs_analyzer.analysis.results;
 
+import com.sebastian_daschner.jaxrs_analyzer.model.Types;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeIdentifier;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeRepresentation;
-import com.sebastian_daschner.jaxrs_analyzer.model.types.Types;
 
 import javax.json.JsonArray;
 import javax.json.JsonObject;

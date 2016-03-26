@@ -33,7 +33,6 @@ public class ResourceMethod {
     private final HttpMethod method;
     private TypeIdentifier requestBody;
 
-
     public ResourceMethod(final HttpMethod method) {
         this(method, new MethodParameters());
     }

@@ -16,8 +16,8 @@
 
 package com.sebastian_daschner.jaxrs_analyzer.analysis.bytecode.collection.testclasses;
 
+import com.sebastian_daschner.jaxrs_analyzer.model.Types;
 import com.sebastian_daschner.jaxrs_analyzer.model.instructions.*;
-import com.sebastian_daschner.jaxrs_analyzer.model.types.Types;
 
 import java.util.LinkedList;
 import java.util.List;

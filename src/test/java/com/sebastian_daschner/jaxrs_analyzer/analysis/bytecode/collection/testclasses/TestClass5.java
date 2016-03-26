@@ -16,9 +16,8 @@
 
 package com.sebastian_daschner.jaxrs_analyzer.analysis.bytecode.collection.testclasses;
 
+import com.sebastian_daschner.jaxrs_analyzer.model.Types;
 import com.sebastian_daschner.jaxrs_analyzer.model.instructions.*;
-import com.sebastian_daschner.jaxrs_analyzer.model.types.Type;
-import com.sebastian_daschner.jaxrs_analyzer.model.types.Types;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -35,7 +34,7 @@ public class TestClass5 {
         final List<Instruction> instructions = new LinkedList<>();
 
         // constant folding
-        instructions.add(new LoadInstruction(0, new Type(TestClass5.class.getCanonicalName()), "this"));
+        instructions.add(new LoadInstruction(0, TestClass5.class.getCanonicalName(), "this"));
         instructions.add(new DupInstruction());
         instructions.add(new StoreInstruction(2, Types.OBJECT, "variable$2"));
         instructions.add(new SizeChangingInstruction("monitorenter", 0, 1));

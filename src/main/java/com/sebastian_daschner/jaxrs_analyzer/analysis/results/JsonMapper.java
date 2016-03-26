@@ -20,7 +20,6 @@ import com.sebastian_daschner.jaxrs_analyzer.model.elements.Element;
 import com.sebastian_daschner.jaxrs_analyzer.model.elements.JsonArray;
 import com.sebastian_daschner.jaxrs_analyzer.model.elements.JsonObject;
 import com.sebastian_daschner.jaxrs_analyzer.model.elements.JsonValue;
-import com.sebastian_daschner.jaxrs_analyzer.model.types.Type;
 
 import javax.json.Json;
 import javax.json.JsonArrayBuilder;
@@ -28,7 +27,7 @@ import javax.json.JsonObjectBuilder;
 import java.util.Set;
 import java.util.function.Function;
 
-import static com.sebastian_daschner.jaxrs_analyzer.model.types.Types.*;
+import static com.sebastian_daschner.jaxrs_analyzer.model.Types.*;
 
 /**
  * Creates JSON-P Json objects from the internal {@link JsonValue}s and maps JSON types.
@@ -93,7 +92,7 @@ final class JsonMapper {
         addToObject(builder, key, value.getTypes());
     }
 
-    private static void addToObject(final JsonObjectBuilder builder, final String key, final Set<Type> types) {
+    private static void addToObject(final JsonObjectBuilder builder, final String key, final Set<String> types) {
         if (types.contains(STRING))
             builder.add(key, "string");
 
@@ -108,7 +107,7 @@ final class JsonMapper {
     }
 
     // TODO remove unused code, refactor & test types (e.g. Date, JSR-310)
-    static void addToObject(final JsonObjectBuilder builder, final String key, final Type type, final Function<Type, javax.json.JsonValue> defaultBehavior) {
+    static void addToObject(final JsonObjectBuilder builder, final String key, final String type, final Function<String, javax.json.JsonValue> defaultBehavior) {
         if (STRING.equals(type)) {
             builder.add(key, "string");
             return;
@@ -119,32 +118,33 @@ final class JsonMapper {
             return;
         }
 
-        if (INTEGER_TYPES.contains(type)) {
-            builder.add(key, 0);
-            return;
-        }
-
-        if (DOUBLE_TYPES.contains(type)) {
-            builder.add(key, 0.0);
-            return;
-        }
-
-        // plain-old date and JSR-310
-        if (type.isAssignableTo(DATE) || type.isAssignableTo(TEMPORAL_ACCESSOR)) {
-            builder.add(key, "date");
-            return;
-        }
-
-        if (type.isAssignableTo(MAP)) {
-            builder.add(key, Json.createObjectBuilder().build());
-            return;
-        }
+        // TODO
+//        if (INTEGER_TYPES.contains(type)) {
+//            builder.add(key, 0);
+//            return;
+//        }
+//
+//        if (DOUBLE_TYPES.contains(type)) {
+//            builder.add(key, 0.0);
+//            return;
+//        }
+//
+//        // plain-old date and JSR-310
+//        if (type.isAssignableTo(DATE) || type.isAssignableTo(TEMPORAL_ACCESSOR)) {
+//            builder.add(key, "date");
+//            return;
+//        }
+//
+//        if (type.isAssignableTo(MAP)) {
+//            builder.add(key, Json.createObjectBuilder().build());
+//            return;
+//        }
 
         // fall-back
         builder.add(key, defaultBehavior.apply(type));
     }
 
-    static void addToArray(final JsonArrayBuilder builder, final Type type, final Function<Type, javax.json.JsonValue> defaultBehavior) {
+    static void addToArray(final JsonArrayBuilder builder, final String type, final Function<String, javax.json.JsonValue> defaultBehavior) {
         if (STRING.equals(type)) {
             builder.add("string");
             return;
@@ -155,15 +155,15 @@ final class JsonMapper {
             return;
         }
 
-        if (INTEGER_TYPES.contains(type)) {
-            builder.add(0);
-            return;
-        }
-
-        if (DOUBLE_TYPES.contains(type)) {
-            builder.add(0.0);
-            return;
-        }
+//        if (INTEGER_TYPES.contains(type)) {
+//            builder.add(0);
+//            return;
+//        }
+//
+//        if (DOUBLE_TYPES.contains(type)) {
+//            builder.add(0.0);
+//            return;
+//        }
 
         builder.add(defaultBehavior.apply(type));
     }

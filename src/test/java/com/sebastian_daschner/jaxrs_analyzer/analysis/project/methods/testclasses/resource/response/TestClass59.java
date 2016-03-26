@@ -17,7 +17,6 @@
 package com.sebastian_daschner.jaxrs_analyzer.analysis.project.methods.testclasses.resource.response;
 
 import com.sebastian_daschner.jaxrs_analyzer.model.elements.HttpResponse;
-import com.sebastian_daschner.jaxrs_analyzer.model.types.Type;
 
 import javax.ws.rs.core.Response;
 import java.util.Arrays;
@@ -38,7 +37,7 @@ public class TestClass59 {
     public static Set<HttpResponse> getResult() {
         final HttpResponse responseFound = new HttpResponse();
         responseFound.getStatuses().add(200);
-        responseFound.getEntityTypes().add(new Type("com.sebastian_daschner.jaxrs_analyzer.analysis.project.methods.testclasses.resource.response.TestClass59$ConfigurationManager$Configuration"));
+        responseFound.getEntityTypes().add("com.sebastian_daschner.jaxrs_analyzer.analysis.project.methods.testclasses.resource.response.TestClass59$ConfigurationManager$Configuration");
 
         final HttpResponse responseNotFound = new HttpResponse();
         responseNotFound.getStatuses().add(204);

@@ -22,7 +22,6 @@ import com.sebastian_daschner.jaxrs_analyzer.builder.MethodResultBuilder;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.HttpMethod;
 import com.sebastian_daschner.jaxrs_analyzer.model.results.ClassResult;
 import com.sebastian_daschner.jaxrs_analyzer.model.results.MethodResult;
-import com.sebastian_daschner.jaxrs_analyzer.model.types.Type;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -45,8 +44,8 @@ public class TestClass9 {
 
     public static ClassResult getResult() {
         final MethodResult method = MethodResultBuilder.withResponses(HttpResponseBuilder.withStatues(200).build())
-                .andPath("{info}").andMethod(HttpMethod.GET).andRequestBodyType(new Type("java.util.Map<java.lang.String,java.lang.String>"))
-                .andQueryParam("definitions", new Type("java.util.Map<java.lang.String,java.lang.Integer>")).build();
+                .andPath("{info}").andMethod(HttpMethod.GET).andRequestBodyType("java.util.Map<java.lang.String,java.lang.String>")
+                .andQueryParam("definitions", "java.util.Map<java.lang.String,java.lang.Integer>").build();
         return ClassResultBuilder.withResourcePath("test").andMethods(method).build();
     }
 

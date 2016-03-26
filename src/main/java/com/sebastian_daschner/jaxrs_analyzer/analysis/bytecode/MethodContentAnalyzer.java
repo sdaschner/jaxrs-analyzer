@@ -14,24 +14,25 @@
  * limitations under the License.
  */
 
-package com.sebastian_daschner.jaxrs_analyzer.analysis.project.methods;
+package com.sebastian_daschner.jaxrs_analyzer.analysis.bytecode;
 
 import com.sebastian_daschner.jaxrs_analyzer.LogProvider;
-import com.sebastian_daschner.jaxrs_analyzer.analysis.bytecode.collection.ByteCodeCollector;
 import com.sebastian_daschner.jaxrs_analyzer.analysis.bytecode.reduction.RelevantInstructionReducer;
-import com.sebastian_daschner.jaxrs_analyzer.analysis.utils.JavaUtils;
+import com.sebastian_daschner.jaxrs_analyzer.analysis.classes.ProjectMethodClassVisitor;
 import com.sebastian_daschner.jaxrs_analyzer.model.instructions.Instruction;
 import com.sebastian_daschner.jaxrs_analyzer.model.instructions.InvokeInstruction;
 import com.sebastian_daschner.jaxrs_analyzer.model.methods.MethodIdentifier;
 import com.sebastian_daschner.jaxrs_analyzer.model.methods.ProjectMethod;
-import javassist.CtBehavior;
-import javassist.CtMethod;
-import javassist.Modifier;
+import com.sebastian_daschner.jaxrs_analyzer.model.results.MethodResult;
+import org.objectweb.asm.ClassReader;
+import org.objectweb.asm.ClassVisitor;
 
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 /**
  * Analyzes the content of a method. Sub classes have to be thread-safe.
@@ -44,33 +45,31 @@ abstract class MethodContentAnalyzer {
      * The number of package hierarchies which are taken to identify project resources.
      */
     private static final int PROJECT_PACKAGE_HIERARCHIES = 2;
-    private final ByteCodeCollector byteCodeCollector = new ByteCodeCollector();
     private final RelevantInstructionReducer instructionReducer = new RelevantInstructionReducer();
-    protected String projectPackagePrefix;
+    private String projectPackagePrefix;
 
     /**
      * Interprets the relevant instructions for the given method.
      *
-     * @param method The method to interpret
-     * @return The instructions
+     * @param instructions The instructions to reduce
+     * @return The reduced instructions
      */
-    protected List<Instruction> interpretRelevantInstructions(final CtBehavior method) {
-        final List<Instruction> allInstructions = byteCodeCollector.buildInstructions(method);
-        return instructionReducer.reduceInstructions(allInstructions);
+    List<Instruction> interpretRelevantInstructions(final List<Instruction> instructions) {
+        return instructionReducer.reduceInstructions(instructions);
     }
 
     /**
      * Builds the project package prefix for the class of given method.
      * The current project which is analyzed is identified by the first two package nodes.
-     *
-     * @param method The method
      */
-    protected void buildPackagePrefix(final CtMethod method) {
-        final String packageName = method.getDeclaringClass().getPackageName();
-        final String[] splitPackage = packageName.split("\\.");
+    void buildPackagePrefix(final String className) {
+        // TODO test
+        final int lastPackageSeparator = className.lastIndexOf('/');
+        final String packageName = className.substring(0, lastPackageSeparator == -1 ? className.length() : lastPackageSeparator);
+        final String[] splitPackage = packageName.split("/");
 
         if (splitPackage.length >= PROJECT_PACKAGE_HIERARCHIES) {
-            projectPackagePrefix = String.join(".", splitPackage[0], splitPackage[1]);
+            projectPackagePrefix = IntStream.range(0, PROJECT_PACKAGE_HIERARCHIES).mapToObj(i -> splitPackage[i]).collect(Collectors.joining("."));
         } else {
             projectPackagePrefix = packageName;
         }
@@ -82,7 +81,7 @@ abstract class MethodContentAnalyzer {
      * @param instructions The instructions where to search
      * @return The found project methods
      */
-    protected Set<ProjectMethod> findProjectMethods(final List<Instruction> instructions) {
+    Set<ProjectMethod> findProjectMethods(final List<Instruction> instructions) {
         final Set<ProjectMethod> projectMethods = new HashSet<>();
 
         addProjectMethods(instructions, projectMethods);
@@ -100,19 +99,32 @@ abstract class MethodContentAnalyzer {
         Set<MethodIdentifier> projectMethodIdentifiers = findUnhandledProjectMethodIdentifiers(instructions, projectMethods);
 
         for (MethodIdentifier identifier : projectMethodIdentifiers) {
-            final CtBehavior method = JavaUtils.getMethod(identifier);
-            if (method == null) {
-                LogProvider.error("Could not find project method: " + identifier);
+            // TODO cache results -> singleton pool?
+
+            final MethodResult methodResult = visitProjectMethod(identifier);
+            if (methodResult == null) {
                 continue;
             }
 
-            final int modifiers = method.getModifiers();
-            if (Modifier.isNative(modifiers) || Modifier.isAbstract(modifiers))
-                continue;
-
-            final List<Instruction> nestedMethodInstructions = interpretRelevantInstructions(method);
+            final List<Instruction> nestedMethodInstructions = interpretRelevantInstructions(methodResult.getInstructions());
             projectMethods.add(new ProjectMethod(identifier, nestedMethodInstructions));
             addProjectMethods(nestedMethodInstructions, projectMethods);
+        }
+    }
+
+    private MethodResult visitProjectMethod(MethodIdentifier identifier) {
+        try {
+            final ClassReader classReader = new ClassReader(identifier.getContainingClass());
+            final MethodResult methodResult = new MethodResult();
+            methodResult.setOriginalMethodSignature(identifier.getSignature());
+            final ClassVisitor visitor = new ProjectMethodClassVisitor(methodResult, identifier);
+
+            classReader.accept(visitor, ClassReader.EXPAND_FRAMES);
+            return methodResult;
+        } catch (IOException e) {
+            LogProvider.error("Could not analyze project method " + identifier.getContainingClass() + "#" + identifier.getMethodName());
+            LogProvider.debug(e);
+            return null;
         }
     }
 
@@ -141,7 +153,7 @@ abstract class MethodContentAnalyzer {
         final MethodIdentifier identifier = instruction.getIdentifier();
 
         // check if method is in own package
-        return identifier.getContainingClass().toString().startsWith(projectPackagePrefix);
+        return identifier.getContainingClass().startsWith(projectPackagePrefix);
     }
 
 }

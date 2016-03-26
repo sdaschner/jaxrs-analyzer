@@ -1,9 +1,8 @@
 package com.sebastian_daschner.jaxrs_analyzer.backend.swagger;
 
+import com.sebastian_daschner.jaxrs_analyzer.model.Types;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeIdentifier;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeRepresentation;
-import com.sebastian_daschner.jaxrs_analyzer.model.types.Type;
-import com.sebastian_daschner.jaxrs_analyzer.model.types.Types;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -20,7 +19,7 @@ public class SchemaBuilderTest {
     private static final TypeIdentifier STRING_IDENTIFIER = TypeIdentifier.ofType(Types.STRING);
     private static final TypeIdentifier INT_IDENTIFIER = TypeIdentifier.ofType(Types.PRIMITIVE_INT);
     private static final TypeIdentifier INTEGER_IDENTIFIER = TypeIdentifier.ofType(Types.INTEGER);
-    private static final TypeIdentifier INT_LIST_IDENTIFIER = TypeIdentifier.ofType(new Type("java.util.List<java.lang.Integer>"));
+    private static final TypeIdentifier INT_LIST_IDENTIFIER = TypeIdentifier.ofType("java.util.List<java.lang.Integer>");
     private static final TypeIdentifier OBJECT_IDENTIFIER = TypeIdentifier.ofType(Types.OBJECT);
 
     private SchemaBuilder cut;
@@ -35,7 +34,7 @@ public class SchemaBuilderTest {
     public void testSimpleDefinitions() {
         representations.put(INT_LIST_IDENTIFIER, TypeRepresentation.ofCollection(INTEGER_IDENTIFIER, TypeRepresentation.ofConcrete(INTEGER_IDENTIFIER)));
 
-        final TypeIdentifier modelIdentifier = TypeIdentifier.ofType(new Type("com.sebastian_daschner.test.Model"));
+        final TypeIdentifier modelIdentifier = TypeIdentifier.ofType("com.sebastian_daschner.test.Model");
         final Map<String, TypeIdentifier> modelProperties = new HashMap<>();
 
         modelProperties.put("test1", INT_IDENTIFIER);
@@ -80,8 +79,8 @@ public class SchemaBuilderTest {
 
     @Test
     public void testMultipleDefinitionsNameCollisions() {
-        final TypeIdentifier lockIdentifier = TypeIdentifier.ofType(new Type("java.util.concurrent.locks.Lock"));
-        final TypeIdentifier anotherLockIdentifier = TypeIdentifier.ofType(new Type("javax.ejb.Lock"));
+        final TypeIdentifier lockIdentifier = TypeIdentifier.ofType("java.util.concurrent.locks.Lock");
+        final TypeIdentifier anotherLockIdentifier = TypeIdentifier.ofType("javax.ejb.Lock");
 
         final Map<String, TypeIdentifier> lockProperties = new HashMap<>();
         lockProperties.put("test1", INT_IDENTIFIER);
@@ -142,7 +141,7 @@ public class SchemaBuilderTest {
 
     @Test
     public void testMultipleDifferentDefinitions() {
-        final TypeIdentifier modelIdentifier = TypeIdentifier.ofType(new Type("com.sebastian_daschner.test.Model"));
+        final TypeIdentifier modelIdentifier = TypeIdentifier.ofType("com.sebastian_daschner.test.Model");
         final Map<String, TypeIdentifier> properties = new HashMap<>();
 
         properties.put("test1", INT_IDENTIFIER);
@@ -156,7 +155,7 @@ public class SchemaBuilderTest {
 
         assertThat(cut.build(modelIdentifier), is(Json.createObjectBuilder().add("$ref", "#/definitions/Model").build()));
         assertThat(cut.build(TypeIdentifier.ofType(Types.OBJECT)), is(Json.createObjectBuilder().add("type", "object").build()));
-        final TypeIdentifier secondModelIdentifier = TypeIdentifier.ofType(new Type("com.sebastian_daschner.test.Model"));
+        final TypeIdentifier secondModelIdentifier = TypeIdentifier.ofType("com.sebastian_daschner.test.Model");
         assertThat(cut.build(secondModelIdentifier), is(Json.createObjectBuilder().add("$ref", "#/definitions/Model").build()));
 
         final JsonObject definitions = cut.getDefinitions();

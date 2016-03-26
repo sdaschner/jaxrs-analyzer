@@ -16,12 +16,11 @@
 
 package com.sebastian_daschner.jaxrs_analyzer.analysis.project.methods.testclasses.resource.response;
 
+import com.sebastian_daschner.jaxrs_analyzer.model.Types;
 import com.sebastian_daschner.jaxrs_analyzer.model.elements.Element;
 import com.sebastian_daschner.jaxrs_analyzer.model.elements.HttpResponse;
 import com.sebastian_daschner.jaxrs_analyzer.model.elements.JsonArray;
 import com.sebastian_daschner.jaxrs_analyzer.model.elements.JsonObject;
-import com.sebastian_daschner.jaxrs_analyzer.model.types.Type;
-import com.sebastian_daschner.jaxrs_analyzer.model.types.Types;
 
 import javax.json.Json;
 import javax.ws.rs.core.Response;
@@ -42,18 +41,18 @@ public class TestClass37 {
         final HttpResponse secondResult = new HttpResponse();
 
         firstResult.getStatuses().add(202);
-        firstResult.getEntityTypes().add(new Type("javax.json.JsonArray"));
+        firstResult.getEntityTypes().add("javax.json.JsonArray");
 
         secondResult.getStatuses().add(200);
-        secondResult.getEntityTypes().add(new Type("javax.json.JsonObject"));
+        secondResult.getEntityTypes().add("javax.json.JsonObject");
 
         final JsonObject jsonObject = new JsonObject();
-        jsonObject.getStructure().put("key", new Element(new Type("java.lang.String"), "value"));
-        jsonObject.getStructure().put("duke", new Element(new Type("java.lang.Integer"), 42));
+        jsonObject.getStructure().put("key", new Element("java.lang.String", "value"));
+        jsonObject.getStructure().put("duke", new Element("java.lang.Integer", 42));
 
         final JsonArray jsonArray = new JsonArray();
         jsonArray.getElements().add(new Element(Types.PRIMITIVE_BOOLEAN, 1));
-        jsonArray.getElements().add(new Element(new Type("java.lang.String"), "hello"));
+        jsonArray.getElements().add(new Element("java.lang.String", "hello"));
 
         firstResult.getInlineEntities().add(jsonArray);
         secondResult.getInlineEntities().add(jsonObject);

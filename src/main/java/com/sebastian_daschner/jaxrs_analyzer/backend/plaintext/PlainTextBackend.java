@@ -16,12 +16,11 @@
 
 package com.sebastian_daschner.jaxrs_analyzer.backend.plaintext;
 
-import com.sebastian_daschner.jaxrs_analyzer.analysis.utils.StringUtils;
+import com.sebastian_daschner.jaxrs_analyzer.utils.StringUtils;
+import com.sebastian_daschner.jaxrs_analyzer.model.Types;
 import com.sebastian_daschner.jaxrs_analyzer.backend.Backend;
 import com.sebastian_daschner.jaxrs_analyzer.backend.JsonRepresentationAppender;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.*;
-import com.sebastian_daschner.jaxrs_analyzer.model.types.Type;
-import com.sebastian_daschner.jaxrs_analyzer.model.types.Types;
 
 import java.util.Map;
 import java.util.Optional;
@@ -129,7 +128,7 @@ public class PlainTextBackend implements Backend {
         builder.append('\n');
     }
 
-    private void appendParams(final String name, final Map<String, Type> parameters) {
+    private void appendParams(final String name, final Map<String, String> parameters) {
         parameters.entrySet().stream().sorted(mapKeyComparator()).forEach(e -> builder
                 .append(name)
                 .append(e.getKey())
@@ -174,7 +173,7 @@ public class PlainTextBackend implements Backend {
         if (representation != null && !representation.getComponentType().equals(type) && !type.getType().equals(Types.JSON)) {
             return "Collection of " + representation.getComponentType().getType();
         }
-        return type.getType().toString();
+        return type.getType();
     }
 
     private static String toString(final Set<String> set) {

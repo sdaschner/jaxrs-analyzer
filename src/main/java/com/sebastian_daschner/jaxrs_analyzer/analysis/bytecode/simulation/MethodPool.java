@@ -21,7 +21,6 @@ import com.sebastian_daschner.jaxrs_analyzer.model.methods.IdentifiableMethod;
 import com.sebastian_daschner.jaxrs_analyzer.model.methods.Method;
 import com.sebastian_daschner.jaxrs_analyzer.model.methods.MethodIdentifier;
 import com.sebastian_daschner.jaxrs_analyzer.model.methods.ProjectMethod;
-import com.sebastian_daschner.jaxrs_analyzer.model.types.Types;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -30,6 +29,8 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.Function;
 import java.util.stream.Stream;
+
+import static com.sebastian_daschner.jaxrs_analyzer.model.Types.PRIMITIVE_VOID;
 
 /**
  * A thread-safe singleton pool of known {@link Method}s.
@@ -43,7 +44,7 @@ public class MethodPool {
      */
     private static final MethodPool INSTANCE = new MethodPool();
     private static final Function<MethodIdentifier, Method> DEFAULT_METHOD = identifier -> (object, arguments) -> {
-        if (!Types.PRIMITIVE_VOID.equals(identifier.getReturnType()))
+        if (!PRIMITIVE_VOID.equals(identifier.getReturnType()))
             return new Element(identifier.getReturnType());
         return null;
     };

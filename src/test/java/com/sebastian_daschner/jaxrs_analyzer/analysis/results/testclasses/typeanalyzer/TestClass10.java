@@ -16,10 +16,9 @@
 
 package com.sebastian_daschner.jaxrs_analyzer.analysis.results.testclasses.typeanalyzer;
 
+import com.sebastian_daschner.jaxrs_analyzer.model.Types;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeIdentifier;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeRepresentation;
-import com.sebastian_daschner.jaxrs_analyzer.model.types.Type;
-import com.sebastian_daschner.jaxrs_analyzer.model.types.Types;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -47,14 +46,14 @@ public class TestClass10 {
         final Map<String, TypeIdentifier> properties = new HashMap<>();
 
         properties.put("first", TypeIdentifier.ofType(Types.PRIMITIVE_BOOLEAN));
-        properties.put("second", TypeIdentifier.ofType(new Type("java.util.Map")));
-        properties.put("third", TypeIdentifier.ofType(new Type("java.util.Map<java.lang.String,java.lang.String>")));
+        properties.put("second", TypeIdentifier.ofType("java.util.Map"));
+        properties.put("third", TypeIdentifier.ofType("java.util.Map<java.lang.String,java.lang.String>"));
 
         return Collections.singleton(TypeRepresentation.ofConcrete(expectedIdentifier(), properties));
     }
 
     public static TypeIdentifier expectedIdentifier() {
-        return TypeIdentifier.ofType(new Type(TestClass10.class.getName()));
+        return TypeIdentifier.ofType(TestClass10.class.getName());
     }
 
 }

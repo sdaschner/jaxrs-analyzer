@@ -21,7 +21,6 @@ import com.sebastian_daschner.jaxrs_analyzer.model.rest.MethodParameters;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.Project;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.ResourceMethod;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.Resources;
-import com.sebastian_daschner.jaxrs_analyzer.model.types.Type;
 
 import javax.json.Json;
 import javax.json.JsonArrayBuilder;
@@ -155,7 +154,7 @@ public class SwaggerBackend implements Backend {
         return parameterBuilder;
     }
 
-    private JsonObjectBuilder buildParameter(final Map.Entry<String, Type> entry, final String context) {
+    private JsonObjectBuilder buildParameter(final Map.Entry<String, String> entry, final String context) {
         return Json.createObjectBuilder()
                 .add("name", entry.getKey()).add("in", context)
                 .add("required", true).add("type", SwaggerUtils.toSwaggerType(entry.getValue()).toString());

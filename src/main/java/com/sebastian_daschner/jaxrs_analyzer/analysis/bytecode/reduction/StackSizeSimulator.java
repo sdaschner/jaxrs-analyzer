@@ -16,7 +16,7 @@
 
 package com.sebastian_daschner.jaxrs_analyzer.analysis.bytecode.reduction;
 
-import com.sebastian_daschner.jaxrs_analyzer.model.Pair;
+import com.sebastian_daschner.jaxrs_analyzer.utils.Pair;
 import com.sebastian_daschner.jaxrs_analyzer.model.instructions.Instruction;
 
 import java.util.*;

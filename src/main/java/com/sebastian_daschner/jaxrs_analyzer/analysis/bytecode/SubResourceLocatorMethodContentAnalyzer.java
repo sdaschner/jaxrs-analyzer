@@ -14,18 +14,16 @@
  * limitations under the License.
  */
 
-package com.sebastian_daschner.jaxrs_analyzer.analysis.project.methods;
+package com.sebastian_daschner.jaxrs_analyzer.analysis.bytecode;
 
-import com.sebastian_daschner.jaxrs_analyzer.LogProvider;
+import com.sebastian_daschner.jaxrs_analyzer.analysis.JobRegistry;
 import com.sebastian_daschner.jaxrs_analyzer.analysis.bytecode.simulation.MethodPool;
 import com.sebastian_daschner.jaxrs_analyzer.analysis.bytecode.simulation.MethodSimulator;
-import com.sebastian_daschner.jaxrs_analyzer.analysis.project.classes.ClassAnalyzer;
+import com.sebastian_daschner.jaxrs_analyzer.model.JavaUtils;
 import com.sebastian_daschner.jaxrs_analyzer.model.instructions.Instruction;
 import com.sebastian_daschner.jaxrs_analyzer.model.methods.ProjectMethod;
 import com.sebastian_daschner.jaxrs_analyzer.model.results.ClassResult;
-import com.sebastian_daschner.jaxrs_analyzer.model.types.Type;
-import javassist.CtMethod;
-import javassist.NotFoundException;
+import com.sebastian_daschner.jaxrs_analyzer.model.results.MethodResult;
 
 import java.util.List;
 import java.util.Set;
@@ -40,24 +38,22 @@ import java.util.concurrent.locks.ReentrantLock;
 class SubResourceLocatorMethodContentAnalyzer extends MethodContentAnalyzer {
 
     private final Lock lock = new ReentrantLock();
-    private final ClassAnalyzer classAnalyzer = new ClassAnalyzer();
     private final MethodSimulator simulator = new MethodSimulator();
 
     /**
-     * Analyzes the sub-resource-locator method as a class result (which will be the content of a method result).
+     * Analyzes the sub-resource locator method as a class result (which will be the content of a method result).
      *
-     * @param method      The method
-     * @param classResult The class result
+     * @param methodResult The method result of the sub-resource locator (containing the instructions, and a sub-resource class result)
      */
-    void analyze(final CtMethod method, final ClassResult classResult) {
+    void analyze(final MethodResult methodResult) {
         lock.lock();
         try {
-            buildPackagePrefix(method);
+            buildPackagePrefix(methodResult.getParentResource().getOriginalClass());
 
-            determineReturnTypes(method).stream().map(Type::getCtClass).forEach(c -> classAnalyzer.analyzeSubResource(c, classResult));
-        } catch (Exception e) {
-            LogProvider.error("Could not analyze sub-resource class ");
-            LogProvider.debug(e);
+            determineReturnTypes(methodResult.getInstructions()).stream()
+                    // FEATURE handle several sub-resource impl's
+                    .reduce((l, r) -> JavaUtils.determineMostSpecificType(l, r))
+                    .ifPresent(t -> registerSubResourceJob(t, methodResult.getSubResource()));
         } finally {
             lock.unlock();
         }
@@ -66,11 +62,9 @@ class SubResourceLocatorMethodContentAnalyzer extends MethodContentAnalyzer {
     /**
      * Determines the possible return types of the sub-resource-locator by analyzing the bytecode.
      * This will analyze the concrete returned types (which then are further analyzed).
-     *
-     * @return The return types
      */
-    private Set<Type> determineReturnTypes(final CtMethod method) throws NotFoundException {
-        final List<Instruction> visitedInstructions = interpretRelevantInstructions(method);
+    private Set<String> determineReturnTypes(final List<Instruction> instructions) {
+        final List<Instruction> visitedInstructions = interpretRelevantInstructions(instructions);
 
         // find project defined methods in invoke occurrences
         final Set<ProjectMethod> projectMethods = findProjectMethods(visitedInstructions);
@@ -79,6 +73,11 @@ class SubResourceLocatorMethodContentAnalyzer extends MethodContentAnalyzer {
         projectMethods.stream().forEach(MethodPool.getInstance()::addProjectMethod);
 
         return simulator.simulate(visitedInstructions).getTypes();
+    }
+
+    private void registerSubResourceJob(final String type, final ClassResult classResult) {
+        final String className = JavaUtils.toClassName(type);
+        JobRegistry.getInstance().analyzeResourceClass(className, classResult);
     }
 
 }

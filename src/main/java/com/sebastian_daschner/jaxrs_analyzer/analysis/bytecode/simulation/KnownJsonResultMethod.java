@@ -21,12 +21,11 @@ import com.sebastian_daschner.jaxrs_analyzer.model.elements.JsonArray;
 import com.sebastian_daschner.jaxrs_analyzer.model.elements.JsonObject;
 import com.sebastian_daschner.jaxrs_analyzer.model.methods.IdentifiableMethod;
 import com.sebastian_daschner.jaxrs_analyzer.model.methods.MethodIdentifier;
-import com.sebastian_daschner.jaxrs_analyzer.model.types.Type;
 
 import java.util.List;
 import java.util.function.BiFunction;
 
-import static com.sebastian_daschner.jaxrs_analyzer.model.types.Types.*;
+import static com.sebastian_daschner.jaxrs_analyzer.model.Types.*;
 
 /**
  * Known JSON methods which apply logic to the result or to the return element.
@@ -147,7 +146,7 @@ enum KnownJsonResultMethod implements IdentifiableMethod {
 
     @Override
     public Element invoke(final Element object, final List<Element> arguments) {
-        if (arguments.size() != identifier.getParameters().size())
+        if (arguments.size() != identifier.getParameters())
             throw new IllegalArgumentException("Method arguments do not match expected signature!");
 
         return function.apply(object, arguments);
@@ -162,7 +161,7 @@ enum KnownJsonResultMethod implements IdentifiableMethod {
         return addToArray(object, arguments.get(0));
     }
 
-    private static Element addToArray(final Element object, final List<Element> arguments, final Type typeOverride) {
+    private static Element addToArray(final Element object, final List<Element> arguments, final String typeOverride) {
         final Element element = new Element(typeOverride);
         element.getPossibleValues().addAll(arguments.get(0).getPossibleValues());
         return addToArray(object, element);
@@ -181,7 +180,7 @@ enum KnownJsonResultMethod implements IdentifiableMethod {
         return mergeJsonStructure(object, arguments.get(0), element);
     }
 
-    private static Element mergeJsonStructure(final Element object, final List<Element> arguments, final Type typeOverride) {
+    private static Element mergeJsonStructure(final Element object, final List<Element> arguments, final String typeOverride) {
         final Element element = new Element(typeOverride);
         element.getPossibleValues().addAll(arguments.get(1).getPossibleValues());
         return mergeJsonStructure(object, arguments.get(0), element);

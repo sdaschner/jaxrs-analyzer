@@ -23,7 +23,6 @@ import com.sebastian_daschner.jaxrs_analyzer.model.elements.MethodHandle;
 import com.sebastian_daschner.jaxrs_analyzer.model.methods.IdentifiableMethod;
 import com.sebastian_daschner.jaxrs_analyzer.model.methods.Method;
 import com.sebastian_daschner.jaxrs_analyzer.model.methods.MethodIdentifier;
-import com.sebastian_daschner.jaxrs_analyzer.model.types.Type;
 
 import javax.ws.rs.core.*;
 import java.lang.annotation.Annotation;
@@ -35,10 +34,10 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static com.sebastian_daschner.jaxrs_analyzer.analysis.utils.JavaUtils.INITIALIZER_NAME;
+import static com.sebastian_daschner.jaxrs_analyzer.model.JavaUtils.INITIALIZER_NAME;
+import static com.sebastian_daschner.jaxrs_analyzer.model.Types.*;
 import static com.sebastian_daschner.jaxrs_analyzer.model.methods.MethodIdentifier.ofNonStatic;
 import static com.sebastian_daschner.jaxrs_analyzer.model.methods.MethodIdentifier.ofStatic;
-import static com.sebastian_daschner.jaxrs_analyzer.model.types.Types.*;
 
 /**
  * Known methods which apply logic to the result or to the return element.
@@ -51,13 +50,13 @@ enum KnownResponseResultMethod implements IdentifiableMethod {
 
     RESPONSE_BUILDER_BUILD(ofNonStatic(RESPONSE_BUILDER, "build", RESPONSE), (object, arguments) -> object),
 
-    RESPONSE_BUILDER_CACHE_CONTROL(ofNonStatic(RESPONSE_BUILDER, "cacheControl", RESPONSE_BUILDER, new Type(CacheControl.class.getName())), (object, arguments) ->
+    RESPONSE_BUILDER_CACHE_CONTROL(ofNonStatic(RESPONSE_BUILDER, "cacheControl", RESPONSE_BUILDER, CacheControl.class.getName()), (object, arguments) ->
             addHeader(object, HttpHeaders.CACHE_CONTROL)),
 
     RESPONSE_BUILDER_CONTENT_LOCATION(ofNonStatic(RESPONSE_BUILDER, "contentLocation", RESPONSE_BUILDER, URI), (object, arguments) ->
             addHeader(object, HttpHeaders.CONTENT_LOCATION)),
 
-    RESPONSE_BUILDER_COOKIE(ofNonStatic(RESPONSE_BUILDER, "cookie", RESPONSE_BUILDER, new Type(NewCookie[].class.getName())), (object, arguments) ->
+    RESPONSE_BUILDER_COOKIE(ofNonStatic(RESPONSE_BUILDER, "cookie", RESPONSE_BUILDER, NewCookie[].class.getName()), (object, arguments) ->
             addHeader(object, HttpHeaders.SET_COOKIE)),
 
     RESPONSE_BUILDER_ENCODING(ofNonStatic(RESPONSE_BUILDER, "encoding", RESPONSE_BUILDER, STRING), (object, arguments) ->
@@ -66,7 +65,7 @@ enum KnownResponseResultMethod implements IdentifiableMethod {
     RESPONSE_BUILDER_ENTITY(ofNonStatic(RESPONSE_BUILDER, "entity", RESPONSE_BUILDER, OBJECT), (object, arguments) ->
             addEntity(object, arguments.get(0))),
 
-    RESPONSE_BUILDER_ENTITY_ANNOTATION(ofNonStatic(RESPONSE_BUILDER, "entity", RESPONSE_BUILDER, OBJECT, new Type(Annotation[].class.getName())), (object, arguments) ->
+    RESPONSE_BUILDER_ENTITY_ANNOTATION(ofNonStatic(RESPONSE_BUILDER, "entity", RESPONSE_BUILDER, OBJECT, Annotation[].class.getName()), (object, arguments) ->
             addEntity(object, arguments.get(0))),
 
     RESPONSE_BUILDER_EXPIRES(ofNonStatic(RESPONSE_BUILDER, "expires", RESPONSE_BUILDER, DATE), (object, arguments) ->
@@ -78,7 +77,7 @@ enum KnownResponseResultMethod implements IdentifiableMethod {
         return object;
     }),
 
-    RESPONSE_BUILDER_LANGUAGE_LOCALE(ofNonStatic(RESPONSE_BUILDER, "language", RESPONSE_BUILDER, new Type(Locale.class.getName())), (object, arguments) ->
+    RESPONSE_BUILDER_LANGUAGE_LOCALE(ofNonStatic(RESPONSE_BUILDER, "language", RESPONSE_BUILDER, Locale.class.getName()), (object, arguments) ->
             addHeader(object, HttpHeaders.CONTENT_LANGUAGE)),
 
     RESPONSE_BUILDER_LANGUAGE_STRING(ofNonStatic(RESPONSE_BUILDER, "language", RESPONSE_BUILDER, STRING), (object, arguments) ->
@@ -93,7 +92,7 @@ enum KnownResponseResultMethod implements IdentifiableMethod {
     RESPONSE_BUILDER_LINK_STRING(ofNonStatic(RESPONSE_BUILDER, "link", RESPONSE_BUILDER, STRING, STRING), (object, arguments) ->
             addHeader(object, HttpHeaders.LINK)),
 
-    RESPONSE_BUILDER_LINKS(ofNonStatic(RESPONSE_BUILDER, "links", RESPONSE_BUILDER, new Type(Link[].class.getName())), (object, arguments) ->
+    RESPONSE_BUILDER_LINKS(ofNonStatic(RESPONSE_BUILDER, "links", RESPONSE_BUILDER, Link[].class.getName()), (object, arguments) ->
             addHeader(object, HttpHeaders.LINK)),
 
     RESPONSE_BUILDER_LOCATION(ofNonStatic(RESPONSE_BUILDER, "location", RESPONSE_BUILDER, URI), (object, arguments) ->
@@ -117,7 +116,7 @@ enum KnownResponseResultMethod implements IdentifiableMethod {
     RESPONSE_BUILDER_TAG_STRING(ofNonStatic(RESPONSE_BUILDER, "tag", RESPONSE_BUILDER, STRING), (object, arguments) ->
             addHeader(object, HttpHeaders.ETAG)),
 
-    RESPONSE_BUILDER_TYPE(ofNonStatic(RESPONSE_BUILDER, "type", RESPONSE_BUILDER, new Type(MediaType.class.getName())), (object, arguments) -> {
+    RESPONSE_BUILDER_TYPE(ofNonStatic(RESPONSE_BUILDER, "type", RESPONSE_BUILDER, MediaType.class.getName()), (object, arguments) -> {
         arguments.get(0).getPossibleValues().stream()
                 .map(m -> (MediaType) m).map(m -> m.getType() + '/' + m.getSubtype()).forEach(t -> addContentType(object, t));
         return object;
@@ -138,7 +137,7 @@ enum KnownResponseResultMethod implements IdentifiableMethod {
     RESPONSE_BUILDER_VARIANTS_LIST(ofNonStatic(RESPONSE_BUILDER, "variants", RESPONSE_BUILDER, LIST), (object, arguments) ->
             addHeader(object, HttpHeaders.VARY)),
 
-    RESPONSE_BUILDER_VARIANTS_ARRAY(ofNonStatic(RESPONSE_BUILDER, "variants", RESPONSE_BUILDER, new Type(Variant[].class.getName())), (object, arguments) ->
+    RESPONSE_BUILDER_VARIANTS_ARRAY(ofNonStatic(RESPONSE_BUILDER, "variants", RESPONSE_BUILDER, Variant[].class.getName()), (object, arguments) ->
             addHeader(object, HttpHeaders.VARY)),
 
     // static methods in Response --------------------------
@@ -176,7 +175,7 @@ enum KnownResponseResultMethod implements IdentifiableMethod {
         return addHeader(object, HttpHeaders.CONTENT_ENCODING);
     }),
 
-    RESPONSE_OK_MEDIATYPE(ofStatic(RESPONSE, "ok", RESPONSE_BUILDER, OBJECT, new Type(MediaType.class.getName())), (notAvailable, arguments) -> {
+    RESPONSE_OK_MEDIATYPE(ofStatic(RESPONSE, "ok", RESPONSE_BUILDER, OBJECT, MediaType.class.getName()), (notAvailable, arguments) -> {
         final Element object = new Element(RESPONSE, new HttpResponse());
         addStatus(object, Response.Status.OK.getStatusCode());
         arguments.get(1).getPossibleValues().stream().map(m -> (MediaType) m)
@@ -346,9 +345,9 @@ enum KnownResponseResultMethod implements IdentifiableMethod {
 
     // other methods --------------------------
 
-    RESOURCE_CONTEXT_INIT(ofNonStatic(RESOURCE_CONTEXT, "getResource", OBJECT, new Type(Class.class.getName())),
+    RESOURCE_CONTEXT_INIT(ofNonStatic(RESOURCE_CONTEXT, "getResource", OBJECT, Class.class.getName()),
             (object, arguments) -> new Element(arguments.get(0).getPossibleValues().stream()
-                    .filter(s -> s instanceof String).map(s -> new Type((String) s)).collect(Collectors.toSet()))
+                    .filter(s -> s instanceof String).map(s -> (String) s).collect(Collectors.toSet()))
     ),
 
     RESOURCE_CONTEXT_GET(ofNonStatic(RESOURCE_CONTEXT, "initResource", OBJECT, OBJECT),
@@ -393,7 +392,7 @@ enum KnownResponseResultMethod implements IdentifiableMethod {
         return null;
     }),
 
-    STREAM_MAP(ofNonStatic(STREAM, "map", STREAM, new Type(Function.class.getName())), (object, arguments) -> {
+    STREAM_MAP(ofNonStatic(STREAM, "map", STREAM, Function.class.getName()), (object, arguments) -> {
         if (arguments.get(0) instanceof MethodHandle) {
             return ((MethodHandle) arguments.get(0)).invoke(null, Collections.singletonList(object));
         }
@@ -412,7 +411,7 @@ enum KnownResponseResultMethod implements IdentifiableMethod {
 
     @Override
     public Element invoke(final Element object, final List<Element> arguments) {
-        if (arguments.size() != identifier.getParameters().size())
+        if (arguments.size() != identifier.getParameters())
             throw new IllegalArgumentException("Method arguments do not match expected signature!");
 
         return function.apply(object, arguments);

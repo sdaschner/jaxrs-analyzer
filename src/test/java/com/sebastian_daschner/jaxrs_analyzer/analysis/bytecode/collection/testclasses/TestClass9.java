@@ -16,13 +16,12 @@
 
 package com.sebastian_daschner.jaxrs_analyzer.analysis.bytecode.collection.testclasses;
 
+import com.sebastian_daschner.jaxrs_analyzer.model.Types;
 import com.sebastian_daschner.jaxrs_analyzer.model.instructions.GetStaticInstruction;
 import com.sebastian_daschner.jaxrs_analyzer.model.instructions.Instruction;
 import com.sebastian_daschner.jaxrs_analyzer.model.instructions.InvokeInstruction;
 import com.sebastian_daschner.jaxrs_analyzer.model.instructions.ReturnInstruction;
 import com.sebastian_daschner.jaxrs_analyzer.model.methods.MethodIdentifier;
-import com.sebastian_daschner.jaxrs_analyzer.model.types.Types;
-import com.sebastian_daschner.jaxrs_analyzer.model.types.Type;
 
 import javax.ws.rs.core.Response;
 import java.util.LinkedList;
@@ -38,7 +37,7 @@ public class TestClass9 {
         final List<Instruction> instructions = new LinkedList<>();
 
         // constant folding
-        instructions.add(new GetStaticInstruction(new Type("javax.ws.rs.core.Response$Status"), "BAD_REQUEST", Types.RESPONSE_STATUS));
+        instructions.add(new GetStaticInstruction("javax.ws.rs.core.Response$Status", "BAD_REQUEST", Types.RESPONSE_STATUS, Response.Status.BAD_REQUEST));
         instructions.add(new InvokeInstruction(MethodIdentifier.ofStatic(Types.RESPONSE, "status", Types.RESPONSE_BUILDER, Types.RESPONSE_STATUS)));
         instructions.add(new InvokeInstruction(MethodIdentifier.ofNonStatic(Types.RESPONSE_BUILDER, "build", Types.RESPONSE)));
         instructions.add(new ReturnInstruction());
