@@ -13,6 +13,9 @@ Java 8 is needed for the Analyzer.
 == Maven Plugin
 The Analyzer can be added to your project via https://github.com/sdaschner/jaxrs-analyzer-maven-plugin[Maven plugin].
 
+== Gradle Plugin
+For `Gradle` based projects - third-party https://github.com/eshepelyuk/gradle-jaxrs-analyzer-plugin[Gradle plugin] could be used.
+
 == Standalone
 Instead of using the Maven plugin, the tool can also run directly from the jar file.
 You can download the latest version https://github.com/sdaschner/jaxrs-analyzer/releases[here].
