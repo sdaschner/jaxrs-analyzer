@@ -3,12 +3,16 @@ package com.sebastian_daschner.jaxrs_analyzer.analysis.bytecode.collection;
 import com.sebastian_daschner.jaxrs_analyzer.LogProvider;
 import com.sebastian_daschner.jaxrs_analyzer.model.instructions.*;
 import com.sebastian_daschner.jaxrs_analyzer.model.methods.MethodIdentifier;
+import org.objectweb.asm.Handle;
 import org.objectweb.asm.Label;
+import org.objectweb.asm.Opcodes;
 
 import java.lang.reflect.Field;
 
-import static jdk.internal.org.objectweb.asm.util.Printer.OPCODES;
+import static com.sebastian_daschner.jaxrs_analyzer.model.Types.*;
+import static com.sebastian_daschner.jaxrs_analyzer.model.methods.MethodIdentifier.of;
 import static org.objectweb.asm.Opcodes.*;
+import static org.objectweb.asm.util.Printer.OPCODES;
 
 /**
  * @author Sebastian Daschner
@@ -19,18 +23,21 @@ public final class InstructionBuilder {
         throw new UnsupportedOperationException();
     }
 
-    public static Instruction buildFieldInstruction(final int opcode, final String owner, final String name, final String desc) {
-        final String containingClass = org.objectweb.asm.Type.getObjectType(owner).getClassName();
+    public static Instruction buildFieldInstruction(final int opcode, final String ownerClass, final String name, final String desc) {
+        // TODO remove
+        if (org.objectweb.asm.Type.getObjectType(ownerClass).getClassName().equals(ownerClass.replace('.', '/')))
+            throw new AssertionError("!");
+
         final String opcodeName = OPCODES[opcode];
 
         switch (opcode) {
             case GETSTATIC:
-                final Object value = getStaticValue(name, containingClass);
-                return new GetStaticInstruction(containingClass, name, desc, value);
+                final Object value = getStaticValue(name, ownerClass);
+                return new GetStaticInstruction(ownerClass, name, desc, value);
             case PUTSTATIC:
                 return new SizeChangingInstruction(opcodeName, 0, 1);
             case GETFIELD:
-                return new GetFieldInstruction(containingClass, name, desc);
+                return new GetFieldInstruction(ownerClass, name, desc);
             case PUTFIELD:
                 return new SizeChangingInstruction(opcodeName, 0, 2);
             default:
@@ -43,33 +50,33 @@ public final class InstructionBuilder {
 
         switch (opcode) {
             case ICONST_0:
-                return new PushInstruction(0);
+                return new PushInstruction(0, PRIMITIVE_INT);
             case ICONST_1:
-                return new PushInstruction(1);
+                return new PushInstruction(1, PRIMITIVE_INT);
             case ICONST_2:
-                return new PushInstruction(2);
+                return new PushInstruction(2, PRIMITIVE_INT);
             case ICONST_3:
-                return new PushInstruction(3);
+                return new PushInstruction(3, PRIMITIVE_INT);
             case ICONST_4:
-                return new PushInstruction(4);
+                return new PushInstruction(4, PRIMITIVE_INT);
             case ICONST_5:
-                return new PushInstruction(5);
+                return new PushInstruction(5, PRIMITIVE_INT);
             case ICONST_M1:
-                return new PushInstruction(-1);
+                return new PushInstruction(-1, PRIMITIVE_INT);
             case DCONST_0:
-                return new PushInstruction(0d);
+                return new PushInstruction(0d, PRIMITIVE_DOUBLE);
             case DCONST_1:
-                return new PushInstruction(1d);
+                return new PushInstruction(1d, PRIMITIVE_DOUBLE);
             case FCONST_0:
-                return new PushInstruction(1f);
+                return new PushInstruction(1f, PRIMITIVE_FLOAT);
             case FCONST_1:
-                return new PushInstruction(1f);
+                return new PushInstruction(1f, PRIMITIVE_FLOAT);
             case FCONST_2:
-                return new PushInstruction(2f);
+                return new PushInstruction(2f, PRIMITIVE_FLOAT);
             case LCONST_0:
-                return new PushInstruction(0L);
+                return new PushInstruction(0L, PRIMITIVE_LONG);
             case LCONST_1:
-                return new PushInstruction(1L);
+                return new PushInstruction(1L, PRIMITIVE_LONG);
             case IALOAD:
             case LALOAD:
             case FALOAD:
@@ -227,12 +234,46 @@ public final class InstructionBuilder {
             case INVOKEINTERFACE:
             case INVOKEVIRTUAL:
             case INVOKESPECIAL:
-                return new InvokeInstruction(MethodIdentifier.of(containingClass, name, desc, false));
+                return new InvokeInstruction(of(containingClass, name, desc, false));
             case INVOKESTATIC:
-                return new InvokeInstruction(MethodIdentifier.of(containingClass, name, desc, true));
+                return new InvokeInstruction(of(containingClass, name, desc, true));
             default:
                 throw new IllegalArgumentException("Unexpected opcode " + opcode);
         }
+    }
+
+    public static Instruction buildInvokeDynamic(final String className, final String name, final String desc, final Handle handle) {
+        final MethodIdentifier actualIdentifier = of(handle.getOwner(), handle.getName(), handle.getDesc(), handle.getTag() == Opcodes.H_INVOKESTATIC);
+
+        final MethodIdentifier dynamicIdentifier = of(className, name, desc, true);
+        return new InvokeDynamicInstruction(actualIdentifier, dynamicIdentifier);
+//    final int index = codeIterator.u16bitAt(position + 1);
+//        final int bootstrapIndex = pool.getInvokeDynamicBootstrap(index);
+//
+//        final int lambdaIndex = pool.getInvokeDynamicNameAndType(index);
+//        final String lambdaSignature = pool.getUtf8Info(pool.getNameAndTypeDescriptor(lambdaIndex));
+//        final String lambdaMethodName = pool.getUtf8Info(pool.getNameAndTypeName(lambdaIndex));
+//        final SignatureAttribute.MethodSignature methodSignature = SignatureAttribute.toMethodSignature(lambdaSignature);
+//        final Type lambdaReturnType = new Type(methodSignature.getReturnType());
+//        final Type[] lambdaParameters = Stream.of(methodSignature.getParameterTypes()).map(Type::new).toArray(Type[]::new);
+//
+//        final MethodIdentifier dynamicIdentifier = MethodIdentifier.ofStatic(new Type(pool.getClassName()), lambdaMethodName, lambdaReturnType, lambdaParameters);
+//
+//        final CtClass ctClass;
+//        try {
+//            ctClass = ClassPool.getDefault().get(pool.getClassName());
+//        } catch (NotFoundException e) {
+//            throw new IllegalStateException("Could not analyze bytecode");
+//        }
+//
+//        final BootstrapMethodsAttribute bootstrapMethods = (BootstrapMethodsAttribute) ctClass.getClassFile().getAttribute(JavaUtils.BOOTSTRAP_ATTRIBUTE_NAME);
+//
+//        final int actualMethodIndex = bootstrapMethods.getMethods()[bootstrapIndex].arguments[1];
+//        final int actualMethodRefIndex = pool.getMethodHandleIndex(actualMethodIndex);
+//        final boolean actualMethodStatic = pool.getMethodHandleKind(actualMethodIndex) == ConstPool.REF_invokeStatic;
+//
+//        MethodIdentifier actualIdentifier = buildInvokeInstruction(actualMethodRefIndex, actualMethodStatic).getIdentifier();
+//        return new InvokeDynamicInstruction(actualIdentifier, dynamicIdentifier);
     }
 
     public static Instruction buildJumpInstruction(int opcode) {
@@ -270,7 +311,7 @@ public final class InstructionBuilder {
         switch (opcode) {
             case BIPUSH:
             case SIPUSH:
-                return new PushInstruction(operand);
+                return new PushInstruction(operand, PRIMITIVE_INT);
             case NEWARRAY:
                 return new SizeChangingInstruction(OPCODES[NEWARRAY], 1, 1);
             default:
@@ -281,7 +322,7 @@ public final class InstructionBuilder {
     private static Object getStaticValue(String name, String containingClass) {
         final Field field;
         try {
-            field = Class.forName(containingClass).getDeclaredField(name);
+            field = Class.forName(containingClass.replace('/', '.')).getDeclaredField(name);
             field.setAccessible(true);
             return field.get(null);
         } catch (ReflectiveOperationException e) {

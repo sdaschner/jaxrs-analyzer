@@ -69,7 +69,7 @@ abstract class MethodContentAnalyzer {
         final String[] splitPackage = packageName.split("/");
 
         if (splitPackage.length >= PROJECT_PACKAGE_HIERARCHIES) {
-            projectPackagePrefix = IntStream.range(0, PROJECT_PACKAGE_HIERARCHIES).mapToObj(i -> splitPackage[i]).collect(Collectors.joining("."));
+            projectPackagePrefix = IntStream.range(0, PROJECT_PACKAGE_HIERARCHIES).mapToObj(i -> splitPackage[i]).collect(Collectors.joining("/"));
         } else {
             projectPackagePrefix = packageName;
         }

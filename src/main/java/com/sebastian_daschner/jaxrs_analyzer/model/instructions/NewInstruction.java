@@ -25,16 +25,16 @@ import java.util.Objects;
  */
 public class NewInstruction implements Instruction {
 
-    private final String createdType;
+    private final String className;
 
-    public NewInstruction(final String createdType) {
-        Objects.requireNonNull(createdType);
+    public NewInstruction(final String className) {
+        Objects.requireNonNull(className);
 
-        this.createdType = createdType;
+        this.className = className;
     }
 
-    public String getCreatedType() {
-        return createdType;
+    public String getClassName() {
+        return className;
     }
 
     @Override
@@ -54,18 +54,18 @@ public class NewInstruction implements Instruction {
 
         final NewInstruction that = (NewInstruction) o;
 
-        return createdType.equals(that.createdType);
+        return className.equals(that.className);
     }
 
     @Override
     public int hashCode() {
-        return createdType.hashCode();
+        return className.hashCode();
     }
 
     @Override
     public String toString() {
         return "NewInstruction{" +
-                "createdType='" + createdType + '\'' +
+                "className='" + className + '\'' +
                 '}';
     }
 

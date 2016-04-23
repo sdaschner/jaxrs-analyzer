@@ -36,19 +36,18 @@ public class TestClass3 {
 
     public static List<Instruction> getResult() {
         final List<Instruction> instructions = new LinkedList<>();
-        final String arithmeticException = ArithmeticException.class.getName();
 
         // constant folding
-        instructions.add(new PushInstruction(6));
+        instructions.add(new PushInstruction(6, Types.PRIMITIVE_INT));
         instructions.add(new LoadInstruction(1, Types.PRIMITIVE_INT, "number"));
-        instructions.add(new SizeChangingInstruction("idiv", 1, 2));
+        instructions.add(new SizeChangingInstruction("IDIV", 1, 2));
         instructions.add(new ReturnInstruction());
 
         instructions.add(new ExceptionHandlerInstruction());
-        instructions.add(new StoreInstruction(2, arithmeticException, "e"));
-        instructions.add(new LoadInstruction(2, arithmeticException, "e"));
-        instructions.add(new InvokeInstruction(MethodIdentifier.ofNonStatic(arithmeticException, "printStackTrace", Types.PRIMITIVE_VOID)));
-        instructions.add(new PushInstruction(0));
+        instructions.add(new StoreInstruction(2, Types.OBJECT));
+        instructions.add(new LoadInstruction(2, "Ljava/lang/ArithmeticException;", "e"));
+        instructions.add(new InvokeInstruction(MethodIdentifier.ofNonStatic("java/lang/ArithmeticException", "printStackTrace", Types.PRIMITIVE_VOID)));
+        instructions.add(new PushInstruction(0, Types.PRIMITIVE_INT));
         instructions.add(new ReturnInstruction());
 
         return instructions;

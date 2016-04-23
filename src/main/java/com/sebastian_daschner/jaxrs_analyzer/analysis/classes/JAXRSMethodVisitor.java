@@ -8,18 +8,25 @@ import com.sebastian_daschner.jaxrs_analyzer.model.results.ClassResult;
 import com.sebastian_daschner.jaxrs_analyzer.model.results.MethodResult;
 import org.objectweb.asm.AnnotationVisitor;
 
+import java.util.BitSet;
+import java.util.List;
+
 /**
  * @author Sebastian Daschner
  */
 class JAXRSMethodVisitor extends ProjectMethodVisitor {
 
     private final String signature;
+    private final List<String> parameters;
+    private final BitSet annotatedParameters;
 
-    JAXRSMethodVisitor(final ClassResult classResult, final String desc, final String signature) {
-        super(new MethodResult());
+    JAXRSMethodVisitor(final ClassResult classResult, final String className, final String desc, final String signature) {
+        super(new MethodResult(), className);
         this.signature = signature == null ? desc : signature;
+        parameters = JavaUtils.getParameters(this.signature);
         methodResult.setOriginalMethodSignature(this.signature);
         classResult.add(methodResult);
+        annotatedParameters = new BitSet(parameters.size());
     }
 
     @Override
@@ -55,7 +62,8 @@ class JAXRSMethodVisitor extends ProjectMethodVisitor {
 
     @Override
     public AnnotationVisitor visitParameterAnnotation(int parameter, String annotationDesc, boolean visible) {
-        final String parameterType = JavaUtils.getParameters(signature).get(parameter);
+        final String parameterType = parameters.get(parameter);
+        annotatedParameters.set(parameter);
 
         switch (annotationDesc) {
             case Types.PATH_PARAM:
@@ -73,12 +81,20 @@ class JAXRSMethodVisitor extends ProjectMethodVisitor {
             case Types.SUSPENDED:
                 throw new UnsupportedOperationException("Handling of " + annotationDesc + " not yet implemented");
             default:
+                annotatedParameters.clear(parameter);
                 return null;
         }
     }
 
     @Override
-    public void visitCode() {
+    public void visitEnd() {
+        super.visitEnd();
+        // determine request body parameter
+        if (annotatedParameters.cardinality() != parameters.size()) {
+            final String requestBodyType = parameters.get(annotatedParameters.nextClearBit(0));
+            methodResult.setRequestBodyType(requestBodyType);
+        }
+
         // TODO determine potential super methods which are annotated with JAX-RS annotations.
         if (methodResult.getHttpMethod() == null) {
             // method is a sub resource locator

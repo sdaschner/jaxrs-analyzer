@@ -44,9 +44,9 @@ public class TestClass9 {
 
     public static ClassResult getResult() {
         final MethodResult method = MethodResultBuilder.withResponses(HttpResponseBuilder.withStatues(200).build())
-                .andPath("{info}").andMethod(HttpMethod.GET).andRequestBodyType("java.util.Map<java.lang.String,java.lang.String>")
-                .andQueryParam("definitions", "java.util.Map<java.lang.String,java.lang.Integer>").build();
-        return ClassResultBuilder.withResourcePath("test").andMethods(method).build();
+                .andPath("{info}").andMethod(HttpMethod.GET).andRequestBodyType("Ljava/util/Map<Ljava/lang/String;Ljava/lang/String;>;")
+                .build();
+        return ClassResultBuilder.withResourcePath("test").andMethods(method).andQueryParam("definitions", "Ljava/util/Map<Ljava/lang/String;Ljava/lang/Integer;>;").build();
     }
 
 }

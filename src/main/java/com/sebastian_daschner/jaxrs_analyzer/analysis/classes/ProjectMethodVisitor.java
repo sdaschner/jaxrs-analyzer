@@ -6,6 +6,7 @@ import com.sebastian_daschner.jaxrs_analyzer.model.results.MethodResult;
 import org.objectweb.asm.*;
 
 import java.util.*;
+import java.util.stream.Stream;
 
 import static com.sebastian_daschner.jaxrs_analyzer.analysis.bytecode.collection.InstructionBuilder.*;
 import static com.sebastian_daschner.jaxrs_analyzer.model.instructions.Instruction.InstructionType.LOAD_PLACEHOLDER;
@@ -21,10 +22,13 @@ class ProjectMethodVisitor extends MethodVisitor {
     private final Set<Label> exceptionHandlers = new HashSet<>();
     private final List<Label> visitedLabels = new ArrayList<>();
     final MethodResult methodResult;
+    private final String className;
 
-    ProjectMethodVisitor(MethodResult methodResult) {
+    ProjectMethodVisitor(MethodResult methodResult, String className) {
         super(ASM5);
+        // TODO refactor to list of instructions only
         this.methodResult = methodResult;
+        this.className = className;
     }
 
     @Override
@@ -83,6 +87,7 @@ class ProjectMethodVisitor extends MethodVisitor {
             if (placeholder.getNumber() != index)
                 continue;
 
+            // TODO fix variable issue for variable which is active right after the label...
             if (isLabelActive(placeholder.getLabel(), start, end)) {
                 final String type = signature != null ? signature : desc;
                 iterator.set(placeholder.getType() == LOAD_PLACEHOLDER ? new LoadInstruction(index, type, name) : new StoreInstruction(index, type, name));
@@ -135,8 +140,10 @@ class ProjectMethodVisitor extends MethodVisitor {
 
     @Override
     public void visitInvokeDynamicInsn(String name, String desc, Handle bsm, Object... bsmArgs) {
-        // TODO
-        System.out.println("visitInvokeDynamicInsn");
+        final Handle handle = Stream.of(bsmArgs).filter(a -> a instanceof Handle).map(a -> (Handle) a)
+                .findAny().orElseThrow(() -> new IllegalStateException("No invoke dynamic handle found."));
+
+        methodResult.getInstructions().add(buildInvokeDynamic(className, name, desc, handle));
     }
 
     @Override
@@ -145,8 +152,31 @@ class ProjectMethodVisitor extends MethodVisitor {
     }
 
     @Override
-    public void visitLdcInsn(Object cst) {
-        methodResult.getInstructions().add(new PushInstruction(cst));
+    public void visitLdcInsn(Object object) {
+        methodResult.getInstructions().add(createLdcInstruction(object));
+    }
+
+    private PushInstruction createLdcInstruction(final Object object) {
+        // see MethodVisitor
+        if (object instanceof Integer) {
+            return new PushInstruction(object, Types.INTEGER);
+        }
+        if (object instanceof Float) {
+            return new PushInstruction(object, Types.FLOAT);
+        }
+        if (object instanceof Long) {
+            return new PushInstruction(object, Types.LONG);
+        }
+        if (object instanceof Double) {
+            return new PushInstruction(object, Types.DOUBLE);
+        }
+        if (object instanceof String) {
+            return new PushInstruction(object, Types.STRING);
+        }
+        if (object instanceof Type) {
+            return new PushInstruction(((Type) object).getDescriptor(), Types.CLASS);
+        }
+        return new PushInstruction(object, Type.getDescriptor(object.getClass()));
     }
 
     @Override

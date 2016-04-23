@@ -37,22 +37,22 @@ public class TestClass4 {
         final List<Instruction> instructions = new LinkedList<>();
 
         // constant folding
-        instructions.add(new PushInstruction(6));
+        instructions.add(new PushInstruction(6, Types.PRIMITIVE_INT));
         instructions.add(new LoadInstruction(1, Types.PRIMITIVE_INT, "number"));
-        instructions.add(new SizeChangingInstruction("idiv", 1, 2));
-        instructions.add(new StoreInstruction(2, Types.OBJECT, "variable$2"));
-        instructions.add(new GetStaticInstruction(System.class.getName(), "out", "java.io.PrintStream", System.out));
-        instructions.add(new PushInstruction("Computed"));
-        instructions.add(new InvokeInstruction(MethodIdentifier.ofNonStatic("java.io.PrintStream", "println", Types.PRIMITIVE_VOID, Types.STRING)));
-        instructions.add(new LoadInstruction(2, Types.OBJECT, "variable$2"));
+        instructions.add(new SizeChangingInstruction("IDIV", 1, 2));
+        instructions.add(new StoreInstruction(2, Types.OBJECT));
+        instructions.add(new GetStaticInstruction("java/lang/System", "out", "Ljava/io/PrintStream;", System.out));
+        instructions.add(new PushInstruction("Computed", Types.STRING));
+        instructions.add(new InvokeInstruction(MethodIdentifier.ofNonStatic("java/io/PrintStream", "println", Types.PRIMITIVE_VOID, Types.STRING)));
+        instructions.add(new LoadInstruction(2, Types.OBJECT));
         instructions.add(new ReturnInstruction());
 
         instructions.add(new ExceptionHandlerInstruction());
-        instructions.add(new StoreInstruction(3, Types.OBJECT, "variable$3"));
-        instructions.add(new GetStaticInstruction(System.class.getName(), "out", "java.io.PrintStream", System.out));
-        instructions.add(new PushInstruction("Computed"));
-        instructions.add(new InvokeInstruction(MethodIdentifier.ofNonStatic("java.io.PrintStream", "println", Types.PRIMITIVE_VOID, Types.STRING)));
-        instructions.add(new LoadInstruction(3, Types.OBJECT, "variable$3"));
+        instructions.add(new StoreInstruction(3, Types.OBJECT));
+        instructions.add(new GetStaticInstruction("java/lang/System", "out", "Ljava/io/PrintStream;", System.out));
+        instructions.add(new PushInstruction("Computed", Types.STRING));
+        instructions.add(new InvokeInstruction(MethodIdentifier.ofNonStatic("java/io/PrintStream", "println", Types.PRIMITIVE_VOID, Types.STRING)));
+        instructions.add(new LoadInstruction(3, Types.OBJECT));
         instructions.add(new ThrowInstruction());
 
         return instructions;

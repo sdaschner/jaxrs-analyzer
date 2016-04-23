@@ -37,9 +37,9 @@ public class TestClass9 {
         final List<Instruction> instructions = new LinkedList<>();
 
         // constant folding
-        instructions.add(new GetStaticInstruction("javax.ws.rs.core.Response$Status", "BAD_REQUEST", Types.RESPONSE_STATUS, Response.Status.BAD_REQUEST));
-        instructions.add(new InvokeInstruction(MethodIdentifier.ofStatic(Types.RESPONSE, "status", Types.RESPONSE_BUILDER, Types.RESPONSE_STATUS)));
-        instructions.add(new InvokeInstruction(MethodIdentifier.ofNonStatic(Types.RESPONSE_BUILDER, "build", Types.RESPONSE)));
+        instructions.add(new GetStaticInstruction("javax/ws/rs/core/Response$Status", "BAD_REQUEST", Types.RESPONSE_STATUS, Response.Status.BAD_REQUEST));
+        instructions.add(new InvokeInstruction(MethodIdentifier.ofStatic(Types.CLASS_RESPONSE, "status", Types.RESPONSE_BUILDER, Types.RESPONSE_STATUS)));
+        instructions.add(new InvokeInstruction(MethodIdentifier.ofNonStatic(Types.CLASS_RESPONSE_BUILDER, "build", Types.RESPONSE)));
         instructions.add(new ReturnInstruction());
 
         return instructions;

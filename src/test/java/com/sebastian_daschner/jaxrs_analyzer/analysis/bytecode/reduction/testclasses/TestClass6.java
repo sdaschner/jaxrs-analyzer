@@ -35,23 +35,23 @@ public class TestClass6 {
     public static List<Instruction> instructions() {
         final List<Instruction> instructions = new LinkedList<>();
 
-        instructions.add(new LoadInstruction(0, TestClass6.class.getCanonicalName(), "this"));
+        instructions.add(new LoadInstruction(0, 'L' + TestClass6.class.getCanonicalName().replace('.', '/') + ';', "this"));
         instructions.add(new DupInstruction());
-        instructions.add(new StoreInstruction(2, Types.OBJECT, "variable$2"));
-        instructions.add(new SizeChangingInstruction("monitorenter", 0, 1));
-        instructions.add(new LoadInstruction(2, Types.OBJECT, "variable$2"));
-        instructions.add(new SizeChangingInstruction("monitorexit", 0, 1));
+        instructions.add(new StoreInstruction(2, Types.OBJECT));
+        instructions.add(new SizeChangingInstruction("MONITORENTER", 0, 1));
+        instructions.add(new LoadInstruction(2, Types.OBJECT));
+        instructions.add(new SizeChangingInstruction("MONITOREXIT", 0, 1));
         instructions.add(new ExceptionHandlerInstruction());
-        instructions.add(new StoreInstruction(3, Types.OBJECT, "variable$3"));
-        instructions.add(new PushInstruction(6));
+        instructions.add(new StoreInstruction(3, Types.OBJECT));
+        instructions.add(new PushInstruction(6, Types.PRIMITIVE_INT));
         instructions.add(new LoadInstruction(1, Types.PRIMITIVE_INT, "number"));
-        instructions.add(new SizeChangingInstruction("idiv", 1, 2));
-        instructions.add(new InvokeInstruction(MethodIdentifier.ofStatic(Types.RESPONSE, "status", Types.RESPONSE_BUILDER, Types.PRIMITIVE_INT)));
-        instructions.add(new InvokeInstruction(MethodIdentifier.ofNonStatic(Types.RESPONSE_BUILDER, "build", Types.RESPONSE)));
-        instructions.add(new LoadInstruction(2, Types.OBJECT, "variable$2"));
-        instructions.add(new SizeChangingInstruction("monitorexit", 0, 1));
+        instructions.add(new SizeChangingInstruction("IDIV", 1, 2));
+        instructions.add(new InvokeInstruction(MethodIdentifier.ofStatic(Types.CLASS_RESPONSE, "status", Types.RESPONSE_BUILDER, Types.PRIMITIVE_INT)));
+        instructions.add(new InvokeInstruction(MethodIdentifier.ofNonStatic(Types.CLASS_RESPONSE_BUILDER, "build", Types.RESPONSE)));
+        instructions.add(new LoadInstruction(2, Types.OBJECT));
+        instructions.add(new SizeChangingInstruction("MONITOREXIT", 0, 1));
         instructions.add(new ReturnInstruction());
-        instructions.add(new LoadInstruction(3, Types.OBJECT, "variable$3"));
+        instructions.add(new LoadInstruction(3, Types.OBJECT));
         instructions.add(new ThrowInstruction());
 
         return instructions;

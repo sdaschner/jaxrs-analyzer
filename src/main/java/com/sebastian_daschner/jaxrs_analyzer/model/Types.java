@@ -14,6 +14,7 @@ public final class Types {
     }
 
     public static final String OBJECT = "Ljava/lang/Object;";
+    public static final String CLASS = "Ljava/lang/Class;";
 
     public static final String PATH = "Ljavax/ws/rs/Path;";
     public static final String APPLICATION_PATH = "Ljavax/ws/rs/ApplicationPath;";
@@ -64,7 +65,7 @@ public final class Types {
     public static final String URI = "Ljava/net/URI;";
     public static final String DATE = "Ljava/util/Date;";
     public static final String TEMPORAL_ACCESSOR = "Ljava/time/temporal/TemporalAccessor;";
-    public static final String STREAM = "Ljava/util/Stream;";
+    public static final String STREAM = "Ljava/util/stream/Stream;";
     public static final String SUPPLIER = "Ljava/util/function/Supplier;";
     public static final String BI_CONSUMER = "Ljava/util/function/BiConsumer;";
     public static final String CONSUMER = "Ljava/util/function/Consumer;";
@@ -72,11 +73,9 @@ public final class Types {
     public static final String RESPONSE = "Ljavax/ws/rs/core/Response;";
     public static final String RESPONSE_BUILDER = "Ljavax/ws/rs/core/Response$ResponseBuilder;";
     public static final String RESPONSE_STATUS = "Ljavax/ws/rs/core/Response$Status;";
-    public static final String RESOURCE_CONTEXT = "Ljavax/ws/rs/container/ResourceContext;";
     public static final String GENERIC_ENTITY = "Ljavax/ws/rs/core/GenericEntity;";
     public static final String VARIANT = "Ljavax/ws/rs/core/Variant;";
     public static final String ENTITY_TAG = "Ljavax/ws/rs/core/EntityTag;";
-    public static final String WEB_APPLICATION_EXCEPTION = "Ljavax/ws/rs/WebApplicationException;";
 
     public static final String JSON = "Ljavax/json/Json;";
     public static final String JSON_OBJECT_BUILDER = "Ljavax/json/JsonObjectBuilder;";
@@ -84,6 +83,33 @@ public final class Types {
     public static final String JSON_VALUE = "Ljavax/json/JsonValue;";
     public static final String JSON_OBJECT = "Ljavax/json/JsonObject;";
     public static final String JSON_ARRAY = "Ljavax/json/JsonArray;";
+
+    public static final String CLASS_PRIMITIVE_VOID = "void";
+    public static final String CLASS_PRIMITIVE_BOOLEAN = "boolean";
+    public static final String CLASS_PRIMITIVE_CHAR = "char";
+    public static final String CLASS_PRIMITIVE_INT = "int";
+    public static final String CLASS_PRIMITIVE_BYTE = "byte";
+    public static final String CLASS_PRIMITIVE_SHORT = "short";
+    public static final String CLASS_PRIMITIVE_DOUBLE = "double";
+    public static final String CLASS_PRIMITIVE_FLOAT = "float";
+    public static final String CLASS_PRIMITIVE_LONG = "long";
+
+    public static final String CLASS_RESPONSE = "javax/ws/rs/core/Response";
+    public static final String CLASS_RESPONSE_BUILDER = "javax/ws/rs/core/Response$ResponseBuilder";
+    public static final String CLASS_RESOURCE_CONTEXT = "javax/ws/rs/container/ResourceContext";
+    public static final String CLASS_WEB_APPLICATION_EXCEPTION = "javax/ws/rs/WebApplicationException";
+
+    public static final String CLASS_LIST = "java/util/List";
+    public static final String CLASS_SET = "java/util/Set";
+    public static final String CLASS_INTEGER = "java/lang/Integer";
+    public static final String CLASS_DOUBLE = "java/lang/Double";
+    public static final String CLASS_LONG = "java/lang/Long";
+    public static final String CLASS_STREAM = "java/util/stream/Stream";
+
+    public static final String CLASS_JSON = "javax/json/Json";
+    public static final String CLASS_JSON_OBJECT_BUILDER = "javax/json/JsonObjectBuilder";
+    public static final String CLASS_JSON_ARRAY_BUILDER = "javax/json/JsonArrayBuilder";
+    public static final String CLASS_JSON_OBJECT = "javax/json/JsonObject";
 
     public static final Set<String> PRIMITIVE_TYPES = new HashSet<>(Arrays.asList(PRIMITIVE_BOOLEAN, PRIMITIVE_VOID, PRIMITIVE_CHAR, PRIMITIVE_INT, PRIMITIVE_LONG,
             PRIMITIVE_SHORT, PRIMITIVE_BYTE, PRIMITIVE_DOUBLE, PRIMITIVE_FLOAT));

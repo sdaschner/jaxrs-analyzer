@@ -12,9 +12,6 @@ import java.util.List;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
-/**
- * @author Sebastian Daschner
- */
 public class JAXRSMethodVisitorTest {
 
     private JAXRSMethodVisitor cut;
@@ -23,7 +20,7 @@ public class JAXRSMethodVisitorTest {
     @Before
     public void setUp() {
         classResult = new ClassResult();
-        cut = new JAXRSMethodVisitor(classResult, null, null);
+        cut = new JAXRSMethodVisitor(classResult, "Foobar", "()V", null);
     }
 
     @Test

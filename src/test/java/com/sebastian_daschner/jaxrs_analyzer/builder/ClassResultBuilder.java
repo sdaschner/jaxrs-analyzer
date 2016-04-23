@@ -57,6 +57,36 @@ public class ClassResultBuilder {
         return this;
     }
 
+    public ClassResultBuilder andMatrixParam(final String name, final String type) {
+        classResult.getClassFields().getMatrixParams().put(name, type);
+        return this;
+    }
+
+    public ClassResultBuilder andQueryParam(final String name, final String type) {
+        classResult.getClassFields().getQueryParams().put(name, type);
+        return this;
+    }
+
+    public ClassResultBuilder andPathParam(final String name, final String type) {
+        classResult.getClassFields().getPathParams().put(name, type);
+        return this;
+    }
+
+    public ClassResultBuilder andCookieParam(final String name, final String type) {
+        classResult.getClassFields().getCookieParams().put(name, type);
+        return this;
+    }
+
+    public ClassResultBuilder andHeaderParam(final String name, final String type) {
+        classResult.getClassFields().getHeaderParams().put(name, type);
+        return this;
+    }
+
+    public ClassResultBuilder andFormParam(final String name, final String type) {
+        classResult.getClassFields().getFormParams().put(name, type);
+        return this;
+    }
+
     public ClassResult build() {
         return classResult;
     }

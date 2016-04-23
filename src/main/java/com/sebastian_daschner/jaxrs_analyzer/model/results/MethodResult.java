@@ -125,7 +125,8 @@ public class MethodResult {
         if (!responseMediaTypes.equals(that.responseMediaTypes)) return false;
         if (!methodParameters.equals(that.methodParameters)) return false;
         if (!responses.equals(that.responses)) return false;
-        if (!instructions.equals(that.instructions)) return false;
+        // TODO double-check
+//        if (!instructions.equals(that.instructions)) return false;
         if (path != null ? !path.equals(that.path) : that.path != null) return false;
         if (requestBodyType != null ? !requestBodyType.equals(that.requestBodyType) : that.requestBodyType != null)
             return false;
@@ -140,7 +141,7 @@ public class MethodResult {
         result = 31 * result + responseMediaTypes.hashCode();
         result = 31 * result + methodParameters.hashCode();
         result = 31 * result + responses.hashCode();
-        result = 31 * result + instructions.hashCode();
+//        result = 31 * result + instructions.hashCode();
         result = 31 * result + (path != null ? path.hashCode() : 0);
         result = 31 * result + (requestBodyType != null ? requestBodyType.hashCode() : 0);
         result = 31 * result + (httpMethod != null ? httpMethod.hashCode() : 0);
@@ -155,7 +156,7 @@ public class MethodResult {
                 ", responseMediaTypes=" + responseMediaTypes +
                 ", methodParameters=" + methodParameters +
                 ", responses=" + responses +
-                ", instructions=" + instructions +
+//                ", instructions=" + instructions +
                 ", path='" + path + '\'' +
                 ", requestBodyType='" + requestBodyType + '\'' +
                 ", httpMethod=" + httpMethod +

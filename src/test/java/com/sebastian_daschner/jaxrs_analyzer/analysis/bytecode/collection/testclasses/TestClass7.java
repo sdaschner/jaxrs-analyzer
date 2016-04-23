@@ -53,9 +53,9 @@ public class TestClass7 {
         final List<Instruction> instructions = new LinkedList<>();
 
         // constant folding
-        instructions.add(new PushInstruction(20));
-        instructions.add(new StoreInstruction(300, Types.PRIMITIVE_INT, "i299"));
-        instructions.add(new DefaultInstruction("iinc"));
+        instructions.add(new PushInstruction(20, Types.PRIMITIVE_INT));
+        instructions.add(new StoreInstruction(300, Types.OBJECT));
+        instructions.add(new DefaultInstruction("IINC"));
         instructions.add(new LoadInstruction(300, Types.PRIMITIVE_INT, "i299"));
         instructions.add(new ReturnInstruction());
 

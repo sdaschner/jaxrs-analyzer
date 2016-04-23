@@ -16,7 +16,6 @@
 
 package com.sebastian_daschner.jaxrs_analyzer.analysis.bytecode;
 
-import com.sebastian_daschner.jaxrs_analyzer.LogProvider;
 import com.sebastian_daschner.jaxrs_analyzer.analysis.bytecode.simulation.MethodPool;
 import com.sebastian_daschner.jaxrs_analyzer.analysis.bytecode.simulation.MethodSimulator;
 import com.sebastian_daschner.jaxrs_analyzer.model.JavaUtils;
@@ -62,7 +61,7 @@ class ResourceMethodContentAnalyzer extends MethodContentAnalyzer {
             // add project methods to global method pool
             projectMethods.stream().forEach(MethodPool.getInstance()::addProjectMethod);
 
-            final Element returnedElement = methodSimulator.simulate(visitedInstructions);
+            Element returnedElement = methodSimulator.simulate(visitedInstructions);
             final String returnType = JavaUtils.getReturnType(methodResult.getOriginalMethodSignature());
 
             // void resource methods are interpreted later; stop analyzing on error
@@ -70,10 +69,11 @@ class ResourceMethodContentAnalyzer extends MethodContentAnalyzer {
                 return;
             }
 
-            // TODO remove, test purposes
             if (returnedElement == null) {
-                LogProvider.debug("Non-void method, but no return element returned after analysis");
+//                LogProvider.debug("Non-void method, but no return element returned after analysis");
+                // happens for abstract methods
                 return;
+//                returnedElement = new Element(returnType);
             }
 
             final Set<Object> possibleObjects = returnedElement.getPossibleValues().stream().filter(o -> !(o instanceof HttpResponse))

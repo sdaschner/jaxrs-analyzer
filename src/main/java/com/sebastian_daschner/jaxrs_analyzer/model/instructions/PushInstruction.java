@@ -24,13 +24,19 @@ package com.sebastian_daschner.jaxrs_analyzer.model.instructions;
 public class PushInstruction implements Instruction {
 
     private final Object value;
+    private final String valueType;
 
-    public PushInstruction(final Object value) {
+    public PushInstruction(final Object value, final String valueType) {
         this.value = value;
+        this.valueType = valueType;
     }
 
     public Object getValue() {
         return value;
+    }
+
+    public String getValueType() {
+        return valueType;
     }
 
     @Override
@@ -50,18 +56,22 @@ public class PushInstruction implements Instruction {
 
         final PushInstruction that = (PushInstruction) o;
 
-        return !(value != null ? !value.equals(that.value) : that.value != null);
+        if (value != null ? !value.equals(that.value) : that.value != null) return false;
+        return valueType != null ? valueType.equals(that.valueType) : that.valueType == null;
     }
 
     @Override
     public int hashCode() {
-        return value != null ? value.hashCode() : 0;
+        int result = value != null ? value.hashCode() : 0;
+        result = 31 * result + (valueType != null ? valueType.hashCode() : 0);
+        return result;
     }
 
     @Override
     public String toString() {
         return "PushInstruction{" +
                 "value=" + value +
+                ", valueType='" + valueType + '\'' +
                 '}';
     }
 

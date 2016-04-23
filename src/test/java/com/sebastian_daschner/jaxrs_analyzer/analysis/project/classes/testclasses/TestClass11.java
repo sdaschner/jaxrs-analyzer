@@ -24,8 +24,8 @@ public class TestClass11 extends ATestClass11 {
     }
 
     public static ClassResult getResult() {
-        final MethodResult method = MethodResultBuilder.withResponses(HttpResponseBuilder.withStatues(200).andEntityTypes("javax.ws.rs.core.GenericEntity",
-                "javax.ws.rs.core.GenericEntity<java.util.List<java.lang.String>>").build())
+        final MethodResult method = MethodResultBuilder.withResponses(HttpResponseBuilder.withStatues(200).andEntityTypes("Ljavax/ws/rs/core/GenericEntity;",
+                "Ljavax/ws/rs/core/GenericEntity<Ljava/util/List<Ljava/lang/String;>;>;").build())
                 .andPath("{info}").andMethod(HttpMethod.POST).andRequestBodyType(Types.STRING).build();
         return ClassResultBuilder.withResourcePath("test").andMethods(method).build();
     }

@@ -16,7 +16,6 @@
 
 package com.sebastian_daschner.jaxrs_analyzer.analysis.bytecode.simulation;
 
-import com.sebastian_daschner.jaxrs_analyzer.model.JavaUtils;
 import com.sebastian_daschner.jaxrs_analyzer.model.Types;
 import com.sebastian_daschner.jaxrs_analyzer.model.elements.Element;
 import com.sebastian_daschner.jaxrs_analyzer.model.elements.MethodHandle;
@@ -29,6 +28,9 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+
+import static com.sebastian_daschner.jaxrs_analyzer.model.JavaUtils.determineLeastSpecificType;
+import static com.sebastian_daschner.jaxrs_analyzer.model.JavaUtils.toType;
 
 /**
  * Simulates the instructions of a method. This class is thread-safe.
@@ -81,8 +83,8 @@ public class MethodSimulator {
     private void simulate(final Instruction instruction) {
         switch (instruction.getType()) {
             case PUSH:
-                Object value = ((PushInstruction) instruction).getValue();
-                runtimeStack.push(new Element(JavaUtils.getType(value), value));
+                final PushInstruction pushInstruction = (PushInstruction) instruction;
+                runtimeStack.push(new Element(pushInstruction.getValueType(), pushInstruction.getValue()));
                 break;
             case METHOD_HANDLE:
                 simulateMethodHandle((InvokeDynamicInstruction) instruction);
@@ -96,7 +98,7 @@ public class MethodSimulator {
                 break;
             case GET_STATIC:
                 final GetStaticInstruction getStaticInstruction = (GetStaticInstruction) instruction;
-                value = getStaticInstruction.getValue();
+                final Object value = getStaticInstruction.getValue();
                 if (value != null)
                     runtimeStack.push(new Element(getStaticInstruction.getPropertyType(), value));
                 else
@@ -105,6 +107,7 @@ public class MethodSimulator {
             case LOAD:
                 final LoadInstruction loadInstruction = (LoadInstruction) instruction;
                 runtimeStack.push(localVariables.getOrDefault(loadInstruction.getNumber(), new Element(loadInstruction.getVariableType())));
+                runtimeStack.peek().getTypes().add(loadInstruction.getVariableType());
                 break;
             case STORE:
                 simulateStore((StoreInstruction) instruction);
@@ -114,7 +117,7 @@ public class MethodSimulator {
                 break;
             case NEW:
                 final NewInstruction newInstruction = (NewInstruction) instruction;
-                runtimeStack.push(new Element(newInstruction.getCreatedType()));
+                runtimeStack.push(new Element(toType(newInstruction.getClassName())));
                 break;
             case DUP:
                 runtimeStack.push(runtimeStack.peek());
@@ -178,6 +181,8 @@ public class MethodSimulator {
         final Element returnedElement = method.invoke(object, arguments);
         if (returnedElement != null)
             runtimeStack.push(returnedElement);
+        else if (!identifier.getReturnType().equals(Types.PRIMITIVE_VOID))
+            runtimeStack.push(new Element(identifier.getReturnType()));
     }
 
     /**
@@ -198,12 +203,14 @@ public class MethodSimulator {
     /**
      * Merges a stored element to the local variables.
      *
-     * @param index        The index of the variable
-     * @param variableType The type of the variable
-     * @param element      The element to merge
+     * @param index   The index of the variable
+     * @param type    The type of the variable or the element (whatever is more specific)
+     * @param element The element to merge
      */
-    private void mergeElementStore(final int index, final String variableType, final Element element) {
-        final Element created = new Element(variableType);
+    private void mergeElementStore(final int index, final String type, final Element element) {
+        // new element must be created for immutability
+        final String elementType = type.equals(Types.OBJECT) ? determineLeastSpecificType(element.getTypes().toArray(new String[element.getTypes().size()])) : type;
+        final Element created = new Element(elementType);
         created.merge(element);
         localVariables.merge(index, created, Element::merge);
     }

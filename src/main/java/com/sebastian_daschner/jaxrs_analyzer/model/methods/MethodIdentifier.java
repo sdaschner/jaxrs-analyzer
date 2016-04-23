@@ -16,7 +16,6 @@
 
 package com.sebastian_daschner.jaxrs_analyzer.model.methods;
 
-import com.sebastian_daschner.jaxrs_analyzer.LogProvider;
 import com.sebastian_daschner.jaxrs_analyzer.model.JavaUtils;
 
 import java.util.Objects;
@@ -98,8 +97,8 @@ public class MethodIdentifier {
         if (!methodName.equals(that.methodName)) return false;
 
         // TODO debug assumption
-        if (parameters == that.parameters && returnType.equals(that.returnType) && !signature.equals(that.signature))
-            LogProvider.error("warning: name, parameter size and return type matches for " + containingClass + '#' + methodName + " but not signature, desired?: " + signature + " <-> " + that.signature);
+//        if (parameters == that.parameters && returnType.equals(that.returnType) && !signature.equals(that.signature))
+//            LogProvider.error("warning: name, parameter size and return type matches for " + containingClass + '#' + methodName + " but not signature, desired?: " + signature + " <-> " + that.signature);
 
         return signature.equals(that.signature);
     }

@@ -16,10 +16,9 @@
 
 package com.sebastian_daschner.jaxrs_analyzer.analysis.project.classes.testclasses;
 
-import com.sebastian_daschner.jaxrs_analyzer.model.Types;
 import com.sebastian_daschner.jaxrs_analyzer.builder.ClassResultBuilder;
-import com.sebastian_daschner.jaxrs_analyzer.builder.HttpResponseBuilder;
 import com.sebastian_daschner.jaxrs_analyzer.builder.MethodResultBuilder;
+import com.sebastian_daschner.jaxrs_analyzer.model.Types;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.HttpMethod;
 import com.sebastian_daschner.jaxrs_analyzer.model.results.ClassResult;
 import com.sebastian_daschner.jaxrs_analyzer.model.results.MethodResult;
@@ -35,8 +34,8 @@ public interface TestClass6 {
     Model getInfo(final String info);
 
     static ClassResult getResult() {
-        final MethodResult method = MethodResultBuilder.withResponses(HttpResponseBuilder.newBuilder()
-                .andEntityTypes("com.sebastian_daschner.jaxrs_analyzer.analysis.project.classes.testclasses.TestClass6$Model").build())
+        final MethodResult method = MethodResultBuilder.withResponses()//HttpResponseBuilder.newBuilder()
+//                .andEntityTypes("com.sebastian_daschner.jaxrs_analyzer.analysis.project.classes.testclasses.TestClass6$Model").build())
                 .andPath("{info}").andMethod(HttpMethod.GET).andRequestBodyType(Types.STRING).build();
         return ClassResultBuilder.withResourcePath("test").andMethods(method).build();
     }
