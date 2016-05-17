@@ -110,17 +110,27 @@ class JavaTypeAnalyzer {
 
         final Map<String, TypeIdentifier> properties = new HashMap<>();
 
-        Stream.concat(relevantFields.stream().map(f -> mapField(f, type)), relevantGetters.stream().map(g -> mapGetter(g, type)))
-                .filter(Objects::nonNull).forEach(p -> {
-            properties.put(p.getLeft(), TypeIdentifier.ofType(p.getRight()));
-            analyze(p.getRight());
-        });
-
+        // calculate inherited properties in inheritance chain
         try {
+            // get interfaces
+            Arrays.stream(ctClass.getInterfaces())
+                .map(interfaceType -> this.analyzeClass(new Type(interfaceType.getName())))
+                .forEach(interfaceProperties -> {
+                    properties.putAll(interfaceProperties);
+                });
+
+            // get superclass
             final Type superType = new Type(ctClass.getSuperclass().getName());
             final Map<String, TypeIdentifier> superProperties = this.analyzeClass(superType);
 
             properties.putAll(superProperties);
+
+            // get class properties
+            Stream.concat(relevantFields.stream().map(f -> mapField(f, type)), relevantGetters.stream().map(g -> mapGetter(g, type)))
+                .filter(Objects::nonNull).forEach(p -> {
+                properties.put(p.getLeft(), TypeIdentifier.ofType(p.getRight()));
+                analyze(p.getRight());
+            });
         } catch (Exception e) {
             // TODO: more descriptive error
             // - this will occur if the superclass is not found in classpath
