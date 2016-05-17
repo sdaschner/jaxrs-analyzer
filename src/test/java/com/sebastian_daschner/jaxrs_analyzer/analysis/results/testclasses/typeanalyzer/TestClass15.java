@@ -26,8 +26,7 @@ public class TestClass15 extends SuperTestClass1 {
         final Map<String, TypeIdentifier> properties = new HashMap<>();
 
         properties.put("foobar", TypeUtils.STRING_IDENTIFIER);
-        // TODO un-comment
-//        properties.put("test", TypeUtils.STRING_IDENTIFIER);
+        properties.put("test", TypeUtils.STRING_IDENTIFIER);
 
         return Collections.singleton(TypeRepresentation.ofConcrete(expectedIdentifier(), properties));
     }

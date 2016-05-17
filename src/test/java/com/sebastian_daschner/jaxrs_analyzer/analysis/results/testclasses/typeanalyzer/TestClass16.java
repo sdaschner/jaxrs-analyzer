@@ -19,8 +19,7 @@ public class TestClass16 extends SuperTestClass2 {
 
         final TypeIdentifier superTestClass2 = TypeIdentifier.ofType(new Type(SuperTestClass2.class.getName()));
         final TypeIdentifier stringIdentifier = TypeUtils.STRING_IDENTIFIER;
-        // TODO un-comment
-//        properties.put("hello", stringIdentifier);
+        properties.put("hello", stringIdentifier);
         properties.put("world", stringIdentifier);
         properties.put("partner", superTestClass2);
 

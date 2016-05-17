@@ -24,8 +24,7 @@ public class TestClass18 extends SuperTestClass4 {
 
         final TypeIdentifier identifier = expectedIdentifier();
         properties.put("foobar", TypeUtils.STRING_IDENTIFIER);
-        // TODO un-comment
-//        properties.put("test", TypeUtils.STRING_IDENTIFIER);
+        properties.put("test", TypeUtils.STRING_IDENTIFIER);
         properties.put("partner", identifier);
 
         return Collections.singleton(TypeRepresentation.ofConcrete(identifier, properties));
