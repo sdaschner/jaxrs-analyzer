@@ -105,7 +105,6 @@ class JavaTypeAnalyzer {
 
         final XmlAccessType value = getXmlAccessType(ctClass);
 
-        // TODO analyze & test inheritance
         final List<CtField> relevantFields = Stream.of(ctClass.getDeclaredFields()).filter(f -> isRelevant(f, value)).collect(Collectors.toList());
         final List<CtMethod> relevantGetters = Stream.of(ctClass.getDeclaredMethods()).filter(m -> isRelevant(m, value)).collect(Collectors.toList());
 
@@ -116,6 +115,17 @@ class JavaTypeAnalyzer {
             properties.put(p.getLeft(), TypeIdentifier.ofType(p.getRight()));
             analyze(p.getRight());
         });
+
+        try {
+            final Type superType = new Type(ctClass.getSuperclass().getName());
+            final Map<String, TypeIdentifier> superProperties = this.analyzeClass(superType);
+
+            properties.putAll(superProperties);
+        } catch (Exception e) {
+            // TODO: more descriptive error
+            // - this will occur if the superclass is not found in classpath
+            throw new RuntimeException(e);
+        }
 
         return properties;
     }
