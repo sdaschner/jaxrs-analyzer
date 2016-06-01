@@ -286,12 +286,7 @@ public final class JavaUtils {
 
     public static String getReturnType(final String methodSignature, final String containedType) {
         final String type = methodSignature.substring(methodSignature.lastIndexOf(')') + 1);
-        if (type.charAt(0) == 'T') {
-            // TODO test
-            final String identifier = type.substring(1, type.indexOf(';'));
-            return getTypeVariables(containedType).getOrDefault(identifier, OBJECT);
-        }
-        return type;
+        return resolvePotentialTypeVariables(type, containedType);
     }
 
     private static Map<String, String> getTypeVariables(final String type) {
@@ -395,7 +390,7 @@ public final class JavaUtils {
 
     private static String resolvePotentialTypeVariables(final String signature, final String containedType) {
         // resolve type variables immediately
-        if (signature.charAt(0) == 'T' || signature.contains("<T") || signature.contains(";T")) {
+        if (signature.charAt(0) == 'T' || signature.contains("<T") || signature.contains(";T") || signature.contains(")T")) {
             // TODO test
             final Map<String, String> typeVariables = getTypeVariables(containedType);
             StringBuilder builder = new StringBuilder(signature);
@@ -406,12 +401,13 @@ public final class JavaUtils {
                     final int end = builder.indexOf(";", i);
                     final String identifier = builder.substring(i + 1, end);
                     final String resolvedVariableType = typeVariables.getOrDefault(identifier, OBJECT);
-                    builder.replace(i, end, resolvedVariableType);
+                    builder.replace(i, end + 1, resolvedVariableType);
                     i = end;
                     continue;
                 }
                 startType = builder.charAt(i) == '<' || builder.charAt(i) == ';';
             }
+            return builder.toString();
         }
         return signature;
     }
