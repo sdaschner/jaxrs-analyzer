@@ -84,6 +84,8 @@ public final class Types {
     public static final String JSON_OBJECT = "Ljavax/json/JsonObject;";
     public static final String JSON_ARRAY = "Ljavax/json/JsonArray;";
 
+    public static final String CLASS_OBJECT = "java/lang/Object";
+
     public static final String CLASS_PRIMITIVE_VOID = "void";
     public static final String CLASS_PRIMITIVE_BOOLEAN = "boolean";
     public static final String CLASS_PRIMITIVE_CHAR = "char";

@@ -16,14 +16,22 @@
 
 package com.sebastian_daschner.jaxrs_analyzer.analysis.results;
 
+import com.sebastian_daschner.jaxrs_analyzer.model.JavaUtils;
 import com.sebastian_daschner.jaxrs_analyzer.model.Types;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeIdentifier;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeRepresentation;
+import com.sebastian_daschner.jaxrs_analyzer.utils.Pair;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlTransient;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static com.sebastian_daschner.jaxrs_analyzer.model.JavaUtils.isAssignableTo;
 import static com.sebastian_daschner.jaxrs_analyzer.model.Types.COLLECTION;
@@ -71,10 +79,7 @@ class JavaTypeAnalyzer {
 
     private static boolean isJDKType(final String type) {
         // exclude java, javax, etc. packages
-        if (Types.PRIMITIVE_TYPES.contains(type))
-            return true;
-
-        return type.startsWith("Ljava/") || type.startsWith("Ljavax/");
+        return Types.PRIMITIVE_TYPES.contains(type) || type.startsWith("Ljava/") || type.startsWith("Ljavax/");
     }
 
     private TypeRepresentation analyzeInternal(final TypeIdentifier identifier, final String type) {
@@ -88,115 +93,108 @@ class JavaTypeAnalyzer {
 
     private Map<String, TypeIdentifier> analyzeClass(final String type) {
         // TODO load class -> check
-//        final CtClass ctClass = type.getCtClass();
-//        if (ctClass.isEnum() || isJDKType(type))
-//            return Collections.emptyMap();
+        final Class<?> loadedClass = JavaUtils.loadClass(JavaUtils.toClassName(type));
+        if (loadedClass == null || loadedClass.isEnum() || isJDKType(type))
+            return Collections.emptyMap();
 
-//        final XmlAccessType value = getXmlAccessType(ctClass);
+        final XmlAccessType value = getXmlAccessType(loadedClass);
 
         // TODO analyze & test inheritance
-//        final List<CtField> relevantFields = Stream.of(ctClass.getDeclaredFields()).filter(f -> isRelevant(f, value)).collect(Collectors.toList());
-//        final List<CtMethod> relevantGetters = Stream.of(ctClass.getDeclaredMethods()).filter(m -> isRelevant(m, value)).collect(Collectors.toList());
+        final List<Field> relevantFields = Stream.of(loadedClass.getDeclaredFields()).filter(f -> isRelevant(f, value)).collect(Collectors.toList());
+        final List<Method> relevantGetters = Stream.of(loadedClass.getDeclaredMethods()).filter(m -> isRelevant(m, value)).collect(Collectors.toList());
 
         final Map<String, TypeIdentifier> properties = new HashMap<>();
-//
-//        Stream.concat(relevantFields.stream().map(f -> mapField(f, type)), relevantGetters.stream().map(g -> mapGetter(g, type)))
-//                .filter(Objects::nonNull).forEach(p -> {
-//            properties.put(p.getLeft(), TypeIdentifier.ofType(p.getRight()));
-//            analyze(p.getRight());
-//        });
+
+        Stream.concat(relevantFields.stream().map(f -> mapField(f, type)), relevantGetters.stream().map(g -> mapGetter(g, type)))
+                .filter(Objects::nonNull).forEach(p -> {
+            properties.put(p.getLeft(), TypeIdentifier.ofType(p.getRight()));
+            analyze(p.getRight());
+        });
 
         return properties;
     }
 
-//    private XmlAccessType getXmlAccessType(CtClass ctClass) {
-//        try {
-//            CtClass current = ctClass;
-//
-//            while (current != null) {
-//                if (current.hasAnnotation(XmlAccessorType.class))
-//                    return ((XmlAccessorType) current.getAnnotation(XmlAccessorType.class)).value();
-//                current = current.getSuperclass();
-//            }
-//
-//        } catch (ClassNotFoundException | NotFoundException e) {
-//            LogProvider.error("Could not analyze JAXB annotation of type: " + e.getMessage());
-//            LogProvider.debug(e);
-//        }
-//
-//        return XmlAccessType.PUBLIC_MEMBER;
-//    }
+    private XmlAccessType getXmlAccessType(final Class<?> clazz) {
+        Class<?> current = clazz;
 
-//    private static boolean isRelevant(final CtField field, final XmlAccessType accessType) {
-//        if (JavaUtils.isSynthetic(field))
-//            return false;
-//
-//        if (field.hasAnnotation(XmlElement.class))
-//            return true;
-//
-//        final int modifiers = field.getModifiers();
-//        if (accessType == XmlAccessType.FIELD)
-//            // always take, unless static or transient
-//            return !Modifier.isTransient(modifiers) && !Modifier.isStatic(modifiers) && !field.hasAnnotation(XmlTransient.class);
-//        else if (accessType == XmlAccessType.PUBLIC_MEMBER)
-//            // only for public, non-static
-//            return Modifier.isPublic(modifiers) && !Modifier.isStatic(modifiers) && !field.hasAnnotation(XmlTransient.class);
-//
-//        return false;
-//    }
-//
-//    /**
-//     * Checks if the method is public and non-static and that the method is a Getter. Does not allow methods with ignored names.
-//     * Does also not take methods annotated with {@link XmlTransient}
-//     *
-//     * @param method The method
-//     * @return {@code true} if the method should be analyzed further
-//     */
-//    private static boolean isRelevant(final CtMethod method, final XmlAccessType accessType) {
-//        if (JavaUtils.isSynthetic(method) || !isGetter(method))
-//            return false;
-//
-//        if (method.hasAnnotation(XmlElement.class))
-//            return true;
-//
-//        if (accessType == XmlAccessType.PROPERTY)
-//            return !method.hasAnnotation(XmlTransient.class);
-//        else if (accessType == XmlAccessType.PUBLIC_MEMBER)
-//            return Modifier.isPublic(method.getModifiers()) && !method.hasAnnotation(XmlTransient.class);
-//
-//        return false;
-//    }
-//
-//    private static boolean isGetter(final CtMethod method) {
-//        if (Modifier.isStatic(method.getModifiers()))
-//            return false;
-//
-//        final String name = method.getName();
-//        if (Stream.of(NAMES_TO_IGNORE).anyMatch(n -> n.equals(name)))
-//            return false;
-//
-//        if (name.startsWith("get") && name.length() > 3)
-//            return !method.getSignature().endsWith(")V");
-//
-//        return name.startsWith("is") && name.length() > 2 && method.getSignature().endsWith(")Z");
-//    }
-//
-//    private static Pair<String, Type> mapField(final CtField field, final Type containedType) {
-//        final Type type = JavaUtils.getFieldType(field, containedType);
-//        if (type == null)
-//            return null;
-//
-//        return Pair.of(field.getName(), type);
-//    }
-//
-//    private static Pair<String, Type> mapGetter(final CtMethod method, final Type containedType) {
-////        final String returnType = JavaUtils.getReturnType(method, containedType);
-//        final Type returnType = null;
-//        if (returnType == null)
-//            return null;
-//
-//        return Pair.of(normalizeGetter(method.getName()), returnType);
-//    }
+        while (current != null) {
+            if (current.isAnnotationPresent(XmlAccessorType.class))
+                return current.getAnnotation(XmlAccessorType.class).value();
+            current = current.getSuperclass();
+        }
+
+        return XmlAccessType.PUBLIC_MEMBER;
+    }
+
+    private static boolean isRelevant(final Field field, final XmlAccessType accessType) {
+        if (field.isSynthetic())
+            return false;
+
+        if (field.isAnnotationPresent(XmlElement.class))
+            return true;
+
+        final int modifiers = field.getModifiers();
+        if (accessType == XmlAccessType.FIELD)
+            // always take, unless static or transient
+            return !Modifier.isTransient(modifiers) && !Modifier.isStatic(modifiers) && !field.isAnnotationPresent(XmlTransient.class);
+        else if (accessType == XmlAccessType.PUBLIC_MEMBER)
+            // only for public, non-static
+            return Modifier.isPublic(modifiers) && !Modifier.isStatic(modifiers) && !field.isAnnotationPresent(XmlTransient.class);
+
+        return false;
+    }
+
+    /**
+     * Checks if the method is public and non-static and that the method is a Getter. Does not allow methods with ignored names.
+     * Does also not take methods annotated with {@link XmlTransient}
+     *
+     * @param method The method
+     * @return {@code true} if the method should be analyzed further
+     */
+    private static boolean isRelevant(final Method method, final XmlAccessType accessType) {
+        if (method.isSynthetic() || !isGetter(method))
+            return false;
+
+        if (method.isAnnotationPresent(XmlElement.class))
+            return true;
+
+        if (accessType == XmlAccessType.PROPERTY)
+            return !method.isAnnotationPresent(XmlTransient.class);
+        else if (accessType == XmlAccessType.PUBLIC_MEMBER)
+            return Modifier.isPublic(method.getModifiers()) && !method.isAnnotationPresent(XmlTransient.class);
+
+        return false;
+    }
+
+    private static boolean isGetter(final Method method) {
+        if (Modifier.isStatic(method.getModifiers()))
+            return false;
+
+        final String name = method.getName();
+        if (Stream.of(NAMES_TO_IGNORE).anyMatch(n -> n.equals(name)))
+            return false;
+
+        if (name.startsWith("get") && name.length() > 3)
+            return method.getReturnType() != void.class;
+
+        return name.startsWith("is") && name.length() > 2 && method.getReturnType() == boolean.class;
+    }
+
+    private static Pair<String, String> mapField(final Field field, final String containedType) {
+        final String type = JavaUtils.getFieldDescriptor(field, containedType);
+        if (type == null)
+            return null;
+
+        return Pair.of(field.getName(), type);
+    }
+
+    private static Pair<String, String> mapGetter(final Method method, final String containedType) {
+        final String returnType = JavaUtils.getReturnType(JavaUtils.getMethodSignature(method), containedType);
+        if (returnType == null)
+            return null;
+
+        return Pair.of(normalizeGetter(method.getName()), returnType);
+    }
 
     /**
      * Converts a getter name to the property name (without the "get" or "is" and lowercase).

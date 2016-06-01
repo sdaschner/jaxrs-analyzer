@@ -40,14 +40,14 @@ public class TestClass4 {
     public static Set<TypeRepresentation> expectedTypeRepresentations() {
         final Map<String, TypeIdentifier> properties = new HashMap<>();
 
-        properties.put("first", TypeIdentifier.ofType("java.time.LocalDate"));
+        properties.put("first", TypeIdentifier.ofType("Ljava/time/LocalDate;"));
         properties.put("second", TypeIdentifier.ofType(Types.DATE));
 
         return Collections.singleton(TypeRepresentation.ofConcrete(expectedIdentifier(), properties));
     }
 
     public static TypeIdentifier expectedIdentifier() {
-        return TypeIdentifier.ofType(TestClass4.class.getName());
+        return TypeIdentifier.ofType("Lcom/sebastian_daschner/jaxrs_analyzer/analysis/results/testclasses/typeanalyzer/TestClass4;");
     }
 
 }

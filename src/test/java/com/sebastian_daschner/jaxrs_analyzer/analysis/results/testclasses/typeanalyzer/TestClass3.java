@@ -46,9 +46,9 @@ public class TestClass3 {
     public static Set<TypeRepresentation> expectedTypeRepresentations() {
         final Map<String, TypeIdentifier> properties = new HashMap<>();
 
-        final TypeIdentifier innerClassIdentifier = TypeIdentifier.ofType(InnerClass.class.getName());
-        final TypeIdentifier typeIdentifier = TypeIdentifier.ofType(Type.class.getName());
-        final TypeIdentifier anotherInnerIdentifier = TypeIdentifier.ofType(AnotherInner.class.getName());
+        final TypeIdentifier innerClassIdentifier = TypeIdentifier.ofType("Lcom/sebastian_daschner/jaxrs_analyzer/analysis/results/testclasses/typeanalyzer/TestClass3$InnerClass;");
+        final TypeIdentifier typeIdentifier = TypeIdentifier.ofType("Lcom/sebastian_daschner/jaxrs_analyzer/analysis/results/testclasses/typeanalyzer/TestClass3$Type;");
+        final TypeIdentifier anotherInnerIdentifier = TypeIdentifier.ofType("Lcom/sebastian_daschner/jaxrs_analyzer/analysis/results/testclasses/typeanalyzer/TestClass3$AnotherInner;");
 
         properties.put("first", innerClassIdentifier);
         properties.put("second", typeIdentifier);
@@ -63,7 +63,7 @@ public class TestClass3 {
     }
 
     public static TypeIdentifier expectedIdentifier() {
-        return TypeIdentifier.ofType(TestClass3.class.getName());
+        return TypeIdentifier.ofType("Lcom/sebastian_daschner/jaxrs_analyzer/analysis/results/testclasses/typeanalyzer/TestClass3;");
     }
 
     public AnotherInner getThirrd() {

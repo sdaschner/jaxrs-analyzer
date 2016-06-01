@@ -39,7 +39,7 @@ public class TestClass12 {
     public static Set<TypeRepresentation> expectedTypeRepresentations() {
         final Map<String, TypeIdentifier> properties = new HashMap<>();
 
-        final TypeIdentifier innerTestIdentifier = TypeIdentifier.ofType(InnerTestClass.class.getName());
+        final TypeIdentifier innerTestIdentifier = TypeIdentifier.ofType("Lcom/sebastian_daschner/jaxrs_analyzer/analysis/results/testclasses/typeanalyzer/TestClass12$InnerTestClass;");
         properties.put("first", TypeIdentifier.ofType(Types.PRIMITIVE_INT));
         properties.put("child", innerTestIdentifier);
 
@@ -56,7 +56,7 @@ public class TestClass12 {
     }
 
     public static TypeIdentifier expectedIdentifier() {
-        return TypeIdentifier.ofType(TestClass12.class.getName());
+        return TypeIdentifier.ofType("Lcom/sebastian_daschner/jaxrs_analyzer/analysis/results/testclasses/typeanalyzer/TestClass12;");
     }
 
 }

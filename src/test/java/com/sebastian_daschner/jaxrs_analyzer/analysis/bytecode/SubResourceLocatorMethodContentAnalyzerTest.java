@@ -6,6 +6,7 @@ import com.sebastian_daschner.jaxrs_analyzer.model.JavaUtils;
 import com.sebastian_daschner.jaxrs_analyzer.model.methods.MethodIdentifier;
 import com.sebastian_daschner.jaxrs_analyzer.model.results.ClassResult;
 import com.sebastian_daschner.jaxrs_analyzer.model.results.MethodResult;
+import org.junit.AfterClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -30,6 +31,7 @@ import static org.mockito.Mockito.*;
 @RunWith(Parameterized.class)
 public class SubResourceLocatorMethodContentAnalyzerTest {
 
+    private static JobRegistry originalJobRegistry;
     private final SubResourceLocatorMethodContentAnalyzer classUnderTest;
     private final String testClassSimpleName;
     private final String testClassName;
@@ -94,9 +96,15 @@ public class SubResourceLocatorMethodContentAnalyzerTest {
         verify(jobRegistry, times(expectedClassNames.size())).analyzeResourceClass(any(), any());
     }
 
+    @AfterClass
+    public static void tearDown() throws NoSuchFieldException, IllegalAccessException {
+        injectJobRegistry(originalJobRegistry);
+    }
+
     private static void injectJobRegistry(final JobRegistry jobRegistry) throws NoSuchFieldException, IllegalAccessException {
         final Field field = JobRegistry.class.getDeclaredField("INSTANCE");
         field.setAccessible(true);
+        originalJobRegistry = JobRegistry.getInstance();
         Field modifiersField = Field.class.getDeclaredField("modifiers");
         modifiersField.setAccessible(true);
         modifiersField.setInt(field, field.getModifiers() & ~Modifier.FINAL);

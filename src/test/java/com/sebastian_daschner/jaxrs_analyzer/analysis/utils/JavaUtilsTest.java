@@ -104,6 +104,33 @@ public class JavaUtilsTest {
     }
 
     @Test
+    public void testIsAssignableToCollection() {
+        final String type = "Ljava/util/List<Ljava/lang/String;>;";
+        assertFalse(isAssignableTo(Types.COLLECTION, type));
+        assertTrue(isAssignableTo(type, Types.COLLECTION));
+    }
+
+    @Test
+    public void testIsAssignableToOddParameterizedTypes() {
+        final String type = "Ljava/util/List<Ljava/lang/String;>;";
+        final String subType = "Ljava/util/LinkedList<Ljava/lang/String;>;";
+        final String rawType = "Ljava/util/List;";
+        final String rawSubType = "Ljava/util/LinkedList;";
+        assertFalse(isAssignableTo(type, subType));
+        assertTrue(isAssignableTo(subType, type));
+        assertTrue(isAssignableTo(type, rawType));
+        assertTrue(isAssignableTo(rawType, type));
+        assertFalse(isAssignableTo(type, rawSubType));
+        assertTrue(isAssignableTo(rawSubType, type));
+        assertTrue(isAssignableTo(subType, rawType));
+        assertFalse(isAssignableTo(rawType, subType));
+        assertTrue(isAssignableTo(subType, rawSubType));
+        assertTrue(isAssignableTo(rawSubType, subType));
+        assertFalse(isAssignableTo(rawType, rawSubType));
+        assertTrue(isAssignableTo(rawSubType, rawType));
+    }
+
+    @Test
     public void testDetermineMostSpecificTypeOnlyOne() {
         final String actualType = determineMostSpecificType(Types.LIST);
         assertEquals(Types.LIST, actualType);

@@ -61,7 +61,7 @@ public class TestClass1 {
     }
 
     public static TypeIdentifier expectedIdentifier() {
-        return TypeIdentifier.ofType(TestClass1.class.getName());
+        return TypeIdentifier.ofType("Lcom/sebastian_daschner/jaxrs_analyzer/analysis/results/testclasses/typeanalyzer/TestClass1;");
     }
 
 }

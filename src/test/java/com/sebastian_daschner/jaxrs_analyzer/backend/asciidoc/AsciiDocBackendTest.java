@@ -1,12 +1,15 @@
 package com.sebastian_daschner.jaxrs_analyzer.backend.asciidoc;
 
-import com.sebastian_daschner.jaxrs_analyzer.model.Types;
 import com.sebastian_daschner.jaxrs_analyzer.backend.Backend;
 import com.sebastian_daschner.jaxrs_analyzer.builder.ResourceMethodBuilder;
 import com.sebastian_daschner.jaxrs_analyzer.builder.ResourcesBuilder;
 import com.sebastian_daschner.jaxrs_analyzer.builder.ResponseBuilder;
-import com.sebastian_daschner.jaxrs_analyzer.model.rest.*;
-import junit.framework.TestCase;
+import com.sebastian_daschner.jaxrs_analyzer.model.Types;
+import com.sebastian_daschner.jaxrs_analyzer.model.rest.HttpMethod;
+import com.sebastian_daschner.jaxrs_analyzer.model.rest.Project;
+import com.sebastian_daschner.jaxrs_analyzer.model.rest.Resources;
+import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeIdentifier;
+import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeRepresentation;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -16,8 +19,10 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 
+import static org.junit.Assert.assertEquals;
+
 @RunWith(Parameterized.class)
-public class AsciiDocBackendTest extends TestCase {
+public class AsciiDocBackendTest {
 
     private final Backend cut;
     private final Resources resources;

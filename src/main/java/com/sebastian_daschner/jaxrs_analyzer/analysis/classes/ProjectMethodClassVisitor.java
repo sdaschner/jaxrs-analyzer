@@ -9,6 +9,7 @@ import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.MethodVisitor;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 import static org.objectweb.asm.Opcodes.*;
 
@@ -54,7 +55,7 @@ public class ProjectMethodClassVisitor extends ClassVisitor {
     @Override
     public void visitEnd() {
         // if method hasn't been found it may be on a super class (invoke_virtual)
-        if (!methodFound && !superName.equals(Types.OBJECT)) {
+        if (!methodFound && !superName.equals(Types.CLASS_OBJECT)) {
             try {
                 final ClassReader classReader = new ClassReader(superName);
                 final ClassVisitor visitor = new ProjectMethodClassVisitor(methodResult, identifier);

@@ -46,14 +46,14 @@ public class TestClass10 {
         final Map<String, TypeIdentifier> properties = new HashMap<>();
 
         properties.put("first", TypeIdentifier.ofType(Types.PRIMITIVE_BOOLEAN));
-        properties.put("second", TypeIdentifier.ofType("java.util.Map"));
-        properties.put("third", TypeIdentifier.ofType("java.util.Map<java.lang.String,java.lang.String>"));
+        properties.put("second", TypeIdentifier.ofType("Ljava/util/Map;"));
+        properties.put("third", TypeIdentifier.ofType("Ljava/util/Map<Ljava/lang/String;Ljava/lang/String;>;"));
 
         return Collections.singleton(TypeRepresentation.ofConcrete(expectedIdentifier(), properties));
     }
 
     public static TypeIdentifier expectedIdentifier() {
-        return TypeIdentifier.ofType(TestClass10.class.getName());
+        return TypeIdentifier.ofType("Lcom/sebastian_daschner/jaxrs_analyzer/analysis/results/testclasses/typeanalyzer/TestClass10;");
     }
 
 }

@@ -9,7 +9,7 @@ public final class TypeUtils {
     public static final TypeIdentifier OBJECT_IDENTIFIER = TypeIdentifier.ofType(Types.OBJECT);
     public static final TypeIdentifier STRING_IDENTIFIER = TypeIdentifier.ofType(Types.STRING);
     public static final TypeIdentifier INT_IDENTIFIER = TypeIdentifier.ofType(Types.PRIMITIVE_INT);
-    public static final TypeIdentifier STRING_LIST_IDENTIFIER = TypeIdentifier.ofType("java.util.List<java.lang.String>");
+    public static final TypeIdentifier STRING_LIST_IDENTIFIER = TypeIdentifier.ofType("Ljava/util/List<Ljava/lang/String;>;");
 
     private TypeUtils() {
         throw new UnsupportedOperationException();

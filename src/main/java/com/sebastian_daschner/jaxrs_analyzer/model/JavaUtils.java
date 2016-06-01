@@ -21,10 +21,11 @@ import org.objectweb.asm.Type;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.TypeVariable;
 import java.util.*;
 import java.util.stream.Stream;
 
-import static com.sebastian_daschner.jaxrs_analyzer.model.Types.OBJECT;
+import static com.sebastian_daschner.jaxrs_analyzer.model.Types.*;
 
 /**
  * Contains Java and Javassist utility functionality.
@@ -182,7 +183,12 @@ public final class JavaUtils {
         if (leftClass == null || rightClass == null)
             return false;
 
-        return rightClass.isAssignableFrom(leftClass) && (firstTypeArray || getTypeParameters(leftType).equals(getTypeParameters(rightType)));
+        final boolean bothTypesParameterized = hasTypeParameters(leftType) && hasTypeParameters(rightType);
+        return rightClass.isAssignableFrom(leftClass) && (firstTypeArray || !bothTypesParameterized || getTypeParameters(leftType).equals(getTypeParameters(rightType)));
+    }
+
+    private static boolean hasTypeParameters(final String type) {
+        return type.indexOf('<') >= 0;
     }
 
     /**
@@ -195,29 +201,34 @@ public final class JavaUtils {
     public static String toClassName(final String type) {
         switch (type.charAt(0)) {
             case 'V':
-                return Types.CLASS_PRIMITIVE_VOID;
+                return CLASS_PRIMITIVE_VOID;
             case 'Z':
-                return Types.CLASS_PRIMITIVE_BOOLEAN;
+                return CLASS_PRIMITIVE_BOOLEAN;
             case 'C':
-                return Types.CLASS_PRIMITIVE_CHAR;
+                return CLASS_PRIMITIVE_CHAR;
             case 'B':
-                return Types.CLASS_PRIMITIVE_BYTE;
+                return CLASS_PRIMITIVE_BYTE;
             case 'S':
-                return Types.CLASS_PRIMITIVE_SHORT;
+                return CLASS_PRIMITIVE_SHORT;
             case 'I':
-                return Types.CLASS_PRIMITIVE_INT;
+                return CLASS_PRIMITIVE_INT;
             case 'F':
-                return Types.CLASS_PRIMITIVE_FLOAT;
+                return CLASS_PRIMITIVE_FLOAT;
             case 'J':
-                return Types.CLASS_PRIMITIVE_LONG;
+                return CLASS_PRIMITIVE_LONG;
             case 'D':
-                return Types.CLASS_PRIMITIVE_DOUBLE;
+                return CLASS_PRIMITIVE_DOUBLE;
             case 'L':
                 final int typeParamStart = type.indexOf('<');
                 final int endIndex = typeParamStart >= 0 ? typeParamStart : type.indexOf(';');
                 return type.substring(1, endIndex);
             case '[':
+            case '+':
+            case '-':
                 return toClassName(type.substring(1));
+            case 'T':
+                // TODO handle type variables
+                return CLASS_OBJECT;
             default:
                 throw new IllegalArgumentException("Not a type signature: " + type);
         }
@@ -270,32 +281,54 @@ public final class JavaUtils {
      * Returns the return type of the given method signature. Parametrized types are supported.
      */
     public static String getReturnType(final String methodSignature) {
+        return getReturnType(methodSignature, null);
+    }
+
+    public static String getReturnType(final String methodSignature, final String containedType) {
         final String type = methodSignature.substring(methodSignature.lastIndexOf(')') + 1);
-        // TODO resolve type variables
-        if (type.charAt(0) == 'T')
-            return Types.OBJECT;
+        if (type.charAt(0) == 'T') {
+            // TODO test
+            final String identifier = type.substring(1, type.indexOf(';'));
+            return getTypeVariables(containedType).getOrDefault(identifier, OBJECT);
+        }
         return type;
+    }
+
+    private static Map<String, String> getTypeVariables(final String type) {
+        final Map<String, String> variables = new HashMap<>();
+        final List<String> actualTypeParameters = getTypeParameters(type);
+        final Class<?> loadedClass = loadClass(toClassName(type));
+        if (loadedClass == null) {
+            LogProvider.debug("could not load class for type " + type);
+            return Collections.emptyMap();
+        }
+
+        final TypeVariable<? extends Class<?>>[] typeParameters = loadedClass.getTypeParameters();
+        for (int i = 0; i < typeParameters.length; i++) {
+            variables.put(typeParameters[i].getName(), actualTypeParameters.get(i));
+        }
+        return variables;
     }
 
     public static Class<?> loadClass(final String className) {
         switch (className) {
-            case Types.CLASS_PRIMITIVE_VOID:
+            case CLASS_PRIMITIVE_VOID:
                 return int.class;
-            case Types.CLASS_PRIMITIVE_BOOLEAN:
+            case CLASS_PRIMITIVE_BOOLEAN:
                 return boolean.class;
-            case Types.CLASS_PRIMITIVE_CHAR:
+            case CLASS_PRIMITIVE_CHAR:
                 return char.class;
-            case Types.CLASS_PRIMITIVE_BYTE:
+            case CLASS_PRIMITIVE_BYTE:
                 return byte.class;
-            case Types.CLASS_PRIMITIVE_SHORT:
+            case CLASS_PRIMITIVE_SHORT:
                 return short.class;
-            case Types.CLASS_PRIMITIVE_INT:
+            case CLASS_PRIMITIVE_INT:
                 return int.class;
-            case Types.CLASS_PRIMITIVE_FLOAT:
+            case CLASS_PRIMITIVE_FLOAT:
                 return float.class;
-            case Types.CLASS_PRIMITIVE_LONG:
+            case CLASS_PRIMITIVE_LONG:
                 return long.class;
-            case Types.CLASS_PRIMITIVE_DOUBLE:
+            case CLASS_PRIMITIVE_DOUBLE:
                 return double.class;
         }
 
@@ -323,11 +356,11 @@ public final class JavaUtils {
         final List<String> parameters = getParameters(signature);
         return Stream.of(loadedClass.getDeclaredMethods()).filter(m -> m.getName().equals(methodName)
                 && m.getParameterCount() == parameters.size()
-                && getMethodDescriptor(m).equals(signature)
+                && Objects.equals(getMethodSignature(m), signature)
         ).findAny().orElse(null);
     }
 
-    private static String getMethodDescriptor(final Method method) {
+    public static String getMethodSignature(final Method method) {
         try {
             final Field signatureField = method.getClass().getDeclaredField("signature");
             signatureField.setAccessible(true);
@@ -339,8 +372,48 @@ public final class JavaUtils {
         } catch (ReflectiveOperationException e) {
             LogProvider.error("Could not access method " + method);
             LogProvider.debug(e);
-            return "";
+            return null;
         }
+    }
+
+    public static String getFieldDescriptor(final Field field, final String containedType) {
+        try {
+            final Field signatureField = field.getClass().getDeclaredField("signature");
+            signatureField.setAccessible(true);
+            String signature = (String) signatureField.get(field);
+            if (signature != null) {
+                return resolvePotentialTypeVariables(signature, containedType);
+
+            }
+            return Type.getDescriptor(field.getType());
+        } catch (ReflectiveOperationException e) {
+            LogProvider.error("Could not access field " + field);
+            LogProvider.debug(e);
+            return null;
+        }
+    }
+
+    private static String resolvePotentialTypeVariables(final String signature, final String containedType) {
+        // resolve type variables immediately
+        if (signature.charAt(0) == 'T' || signature.contains("<T") || signature.contains(";T")) {
+            // TODO test
+            final Map<String, String> typeVariables = getTypeVariables(containedType);
+            StringBuilder builder = new StringBuilder(signature);
+            boolean startType = true;
+
+            for (int i = 0; i < builder.length(); i++) {
+                if (startType && builder.charAt(i) == 'T') {
+                    final int end = builder.indexOf(";", i);
+                    final String identifier = builder.substring(i + 1, end);
+                    final String resolvedVariableType = typeVariables.getOrDefault(identifier, OBJECT);
+                    builder.replace(i, end, resolvedVariableType);
+                    i = end;
+                    continue;
+                }
+                startType = builder.charAt(i) == '<' || builder.charAt(i) == ';';
+            }
+        }
+        return signature;
     }
 
     /**
@@ -366,7 +439,7 @@ public final class JavaUtils {
         while (iterator.hasNext()) {
             final String arg = iterator.next();
             if (arg.charAt(0) == 'T')
-                iterator.set(Types.OBJECT);
+                iterator.set(OBJECT);
         }
 
         return args;
@@ -427,6 +500,8 @@ public final class JavaUtils {
                 }
                 return getNextType(buf, off, len);
             case 'L':
+                // TODO resolve type variables
+            case 'T':
                 return getNextType(buf, off, 0);
             default:
                 throw new IllegalArgumentException("Illegal signature provided: " + new String(buf));
@@ -435,7 +510,7 @@ public final class JavaUtils {
 
     private static String getNextType(char[] buf, int off, int len) {
         int depth = 0;
-        if (buf[off + len] == 'L')
+        if (buf[off + len] == 'L' || buf[off + len] == 'T')
             while (buf[off + len] != ';' || depth != 0) {
                 if (buf[off + len] == '<')
                     depth++;

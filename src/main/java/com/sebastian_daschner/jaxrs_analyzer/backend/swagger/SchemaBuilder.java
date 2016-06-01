@@ -16,10 +16,10 @@
 
 package com.sebastian_daschner.jaxrs_analyzer.backend.swagger;
 
-import com.sebastian_daschner.jaxrs_analyzer.utils.Pair;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeIdentifier;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeRepresentation;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeRepresentationVisitor;
+import com.sebastian_daschner.jaxrs_analyzer.utils.Pair;
 
 import javax.json.Json;
 import javax.json.JsonObject;
@@ -152,7 +152,8 @@ class SchemaBuilder {
     }
 
     private String buildDefinition(final String typeName) {
-        final String definition = typeName.startsWith(TypeIdentifier.DYNAMIC_TYPE_PREFIX) ? "JsonObject" : typeName.substring(typeName.lastIndexOf('.') + 1);
+        final String definition = typeName.startsWith(TypeIdentifier.DYNAMIC_TYPE_PREFIX) ? "JsonObject" :
+                typeName.substring(typeName.lastIndexOf('/') + 1, typeName.length() - 1);
 
         final Pair<String, JsonObject> containedEntry = jsonDefinitions.get(definition);
         if (containedEntry == null || containedEntry.getLeft() != null && containedEntry.getLeft().equals(typeName))
