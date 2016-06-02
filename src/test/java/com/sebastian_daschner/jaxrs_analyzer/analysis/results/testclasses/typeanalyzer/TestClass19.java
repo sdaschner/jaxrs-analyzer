@@ -10,7 +10,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-public class TestClass15 extends SuperTestClass1 {
+public class TestClass19 extends SuperTestClass5 {
 
     private String foobar;
 
@@ -27,17 +27,19 @@ public class TestClass15 extends SuperTestClass1 {
 
         properties.put("foobar", TypeUtils.STRING_IDENTIFIER);
         properties.put("test", TypeUtils.STRING_IDENTIFIER);
+        properties.put("hello", TypeUtils.STRING_IDENTIFIER);
+        properties.put("overidden", TypeUtils.STRING_IDENTIFIER);
 
         return Collections.singleton(TypeRepresentation.ofConcrete(expectedIdentifier(), properties));
     }
 
     public static TypeIdentifier expectedIdentifier() {
-        return TypeIdentifier.ofType(new Type(TestClass15.class.getName()));
+        return TypeIdentifier.ofType(new Type(TestClass19.class.getName()));
     }
 
 }
 
-class SuperTestClass1 {
+class SuperTestClass5 extends SuperTestClass6 {
 
     private String test;
 
@@ -48,5 +50,25 @@ class SuperTestClass1 {
     public void setTest(String test) {
         this.test = test;
     }
+
+    public String getOveridden() {
+        return "Overidden return value";
+    }
+
+}
+
+abstract class SuperTestClass6 {
+
+    private String hello;
+
+    public String getHello() {
+        return hello;
+    }
+
+    public void setHello(String hello) {
+        this.hello = hello;
+    }
+
+    public abstract Object getOveridden();
 
 }

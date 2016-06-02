@@ -10,7 +10,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-public class TestClass15 extends SuperTestClass1 {
+public class TestClass20 implements Interface1, Interface2 {
 
     private String foobar;
 
@@ -26,27 +26,49 @@ public class TestClass15 extends SuperTestClass1 {
         final Map<String, TypeIdentifier> properties = new HashMap<>();
 
         properties.put("foobar", TypeUtils.STRING_IDENTIFIER);
-        properties.put("test", TypeUtils.STRING_IDENTIFIER);
+        properties.put("test1", TypeUtils.STRING_IDENTIFIER);
+        properties.put("test2", TypeUtils.STRING_IDENTIFIER);
+        properties.put("test3", TypeUtils.STRING_IDENTIFIER);
+        properties.put("test4", TypeUtils.STRING_IDENTIFIER);
 
         return Collections.singleton(TypeRepresentation.ofConcrete(expectedIdentifier(), properties));
     }
 
     public static TypeIdentifier expectedIdentifier() {
-        return TypeIdentifier.ofType(new Type(TestClass15.class.getName()));
+        return TypeIdentifier.ofType(new Type(TestClass20.class.getName()));
     }
+
+    @Override
+    public String getTest1() {
+        return null;
+    }
+
+    @Override
+    public String getTest2() {
+        return null;
+    }
+}
+
+interface Interface1 {
+
+    String getTest1();
 
 }
 
-class SuperTestClass1 {
+interface Interface2 extends Interface3 {
 
-    private String test;
+    String getTest2();
 
-    public String getTest() {
-        return test;
+    default String getTest3() {
+        return "string default";
     }
+}
 
-    public void setTest(String test) {
-        this.test = test;
+interface Interface3 {
+
+    Object getTest3();
+
+    default String getTest4() {
+        return "default";
     }
-
 }

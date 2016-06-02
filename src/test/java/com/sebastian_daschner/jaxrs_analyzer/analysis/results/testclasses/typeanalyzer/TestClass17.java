@@ -33,8 +33,7 @@ public class TestClass17 extends SuperTestClass3 {
 
         final TypeIdentifier superTestClass3 = TypeIdentifier.ofType(new Type(SuperTestClass3.class.getName()));
         final TypeIdentifier stringIdentifier = TypeUtils.STRING_IDENTIFIER;
-        // TODO un-comment
-//        properties.put("hello", stringIdentifier);
+        properties.put("hello", stringIdentifier);
         properties.put("world", stringIdentifier);
         properties.put("partner", superTestClass3);
 

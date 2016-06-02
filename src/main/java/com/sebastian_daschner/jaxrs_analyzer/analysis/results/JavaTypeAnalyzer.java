@@ -105,17 +105,37 @@ class JavaTypeAnalyzer {
 
         final XmlAccessType value = getXmlAccessType(ctClass);
 
-        // TODO analyze & test inheritance
         final List<CtField> relevantFields = Stream.of(ctClass.getDeclaredFields()).filter(f -> isRelevant(f, value)).collect(Collectors.toList());
         final List<CtMethod> relevantGetters = Stream.of(ctClass.getDeclaredMethods()).filter(m -> isRelevant(m, value)).collect(Collectors.toList());
 
         final Map<String, TypeIdentifier> properties = new HashMap<>();
 
-        Stream.concat(relevantFields.stream().map(f -> mapField(f, type)), relevantGetters.stream().map(g -> mapGetter(g, type)))
+        // calculate inherited properties in inheritance chain
+        try {
+            // get interfaces
+            Arrays.stream(ctClass.getInterfaces())
+                .map(interfaceType -> this.analyzeClass(new Type(interfaceType.getName())))
+                .forEach(interfaceProperties -> {
+                    properties.putAll(interfaceProperties);
+                });
+
+            // get superclass
+            final Type superType = new Type(ctClass.getSuperclass().getName());
+            final Map<String, TypeIdentifier> superProperties = this.analyzeClass(superType);
+
+            properties.putAll(superProperties);
+
+            // get class properties
+            Stream.concat(relevantFields.stream().map(f -> mapField(f, type)), relevantGetters.stream().map(g -> mapGetter(g, type)))
                 .filter(Objects::nonNull).forEach(p -> {
-            properties.put(p.getLeft(), TypeIdentifier.ofType(p.getRight()));
-            analyze(p.getRight());
-        });
+                properties.put(p.getLeft(), TypeIdentifier.ofType(p.getRight()));
+                analyze(p.getRight());
+            });
+        } catch (Exception e) {
+            // TODO: more descriptive error
+            // - this will occur if the superclass is not found in classpath
+            throw new RuntimeException(e);
+        }
 
         return properties;
     }
