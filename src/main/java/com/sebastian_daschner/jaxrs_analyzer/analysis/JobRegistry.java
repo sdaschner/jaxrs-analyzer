@@ -24,6 +24,7 @@ public class JobRegistry {
      * Adds the (sub-)resource class name to the analysis list with the associated class result.
      */
     public void analyzeResourceClass(final String className, final ClassResult classResult) {
+        // TODO check if class has already been analyzed
         unhandledClasses.add(Pair.of(className, classResult));
     }
 

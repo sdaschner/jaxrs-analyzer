@@ -73,20 +73,21 @@ public class JAXRSClassVisitor extends ClassVisitor {
         final boolean legalModifiers = ((access & ACC_SYNTHETIC) | (access & ACC_STATIC) | (access & ACC_NATIVE)) == 0;
         final String methodSignature = signature == null ? desc : signature;
 
-        if (legalModifiers && !"<init>".equals(name))
+        if (legalModifiers && !"<init>".equals(name)) {
+            final MethodResult methodResult = new MethodResult();
             if (hasJAXRSAnnotations(classResult.getOriginalClass(), name, methodSignature))
-                return new JAXRSMethodVisitor(classResult, classResult.getOriginalClass(), desc, signature);
+                return new JAXRSMethodVisitor(classResult, classResult.getOriginalClass(), desc, signature, methodResult, true);
             else {
                 final Method annotatedSuperMethod = searchAnnotatedSuperMethod(classResult.getOriginalClass(), name, methodSignature);
                 if (annotatedSuperMethod != null) {
                     try {
-                        return new JAXRSMethodVisitor(classResult, classResult.getOriginalClass(), desc, signature);
+                        return new JAXRSMethodVisitor(classResult, classResult.getOriginalClass(), desc, signature, methodResult, false);
                     } finally {
-                        classResult.getMethods().stream().filter(m -> m.getOriginalMethodSignature().equals(methodSignature)).
-                                findAny().ifPresent(m -> visitJAXRSSuperMethod(annotatedSuperMethod, m));
+                        classResult.getMethods().stream().filter(m -> m.equals(methodResult)).findAny().ifPresent(m -> visitJAXRSSuperMethod(annotatedSuperMethod, m));
                     }
                 }
             }
+        }
         return null;
     }
 

@@ -17,9 +17,9 @@
 package com.sebastian_daschner.jaxrs_analyzer.analysis;
 
 import com.sebastian_daschner.jaxrs_analyzer.LogProvider;
-import com.sebastian_daschner.jaxrs_analyzer.model.Types;
 import com.sebastian_daschner.jaxrs_analyzer.builder.ResourceMethodBuilder;
 import com.sebastian_daschner.jaxrs_analyzer.builder.ResponseBuilder;
+import com.sebastian_daschner.jaxrs_analyzer.model.Types;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.*;
 import org.junit.Before;
 import org.junit.Test;
@@ -142,16 +142,16 @@ public class ProjectAnalyzerTest {
 
         final TypeIdentifier stringIdentifier = TypeIdentifier.ofType(Types.STRING);
 
-        final TypeIdentifier modelIdentifier = TypeIdentifier.ofType("com.sebastian_daschner.jaxrs_test.Model");
+        final TypeIdentifier modelIdentifier = TypeIdentifier.ofType("Lcom/sebastian_daschner/jaxrs_test/Model;");
         properties = new HashMap<>();
         properties.put("id", TypeIdentifier.ofType(Types.PRIMITIVE_LONG));
         properties.put("name", stringIdentifier);
         final TypeRepresentation modelRepresentation = TypeRepresentation.ofConcrete(modelIdentifier, properties);
         resources.getTypeRepresentations().put(modelIdentifier, modelRepresentation);
 
-        final TypeIdentifier modelListIdentifier = TypeIdentifier.ofType("java.util.List<com.sebastian_daschner.jaxrs_test.Model>");
+        final TypeIdentifier modelListIdentifier = TypeIdentifier.ofType("Ljava/util/List<+Lcom/sebastian_daschner/jaxrs_test/Model;>;");
         resources.getTypeRepresentations().put(modelListIdentifier, TypeRepresentation.ofCollection(modelListIdentifier, modelRepresentation));
-        final TypeIdentifier stringArrayListIdentifier = TypeIdentifier.ofType("java.util.ArrayList<java.lang.String>");
+        final TypeIdentifier stringArrayListIdentifier = TypeIdentifier.ofType("Ljava/util/ArrayList<Ljava/lang/String;>;");
         resources.getTypeRepresentations().put(stringArrayListIdentifier, TypeRepresentation.ofCollection(stringArrayListIdentifier, TypeRepresentation.ofConcrete(stringIdentifier)));
 
         resources.setBasePath("rest");
@@ -180,9 +180,11 @@ public class ProjectAnalyzerTest {
                 .andAcceptMediaTypes("application/json").andResponseMediaTypes("application/json")
                 .andPathParam("id", Types.STRING).build();
         ResourceMethod secondDelete = ResourceMethodBuilder.withMethod(HttpMethod.DELETE)
-                .andAcceptMediaTypes("application/json").andResponseMediaTypes("application/json").andPathParam("id", Types.STRING)
+                .andAcceptMediaTypes("application/json").andResponseMediaTypes("application/json")
+                .andPathParam("id", "Ljava/util/Map<Ljava/lang/String;Ljava/util/List<Ljava/lang/String;>;>;")
                 .andResponse(204, ResponseBuilder.newBuilder().build())
-                .andResponse(404, ResponseBuilder.newBuilder().andHeaders("X-Message").build()).build();
+                .andResponse(404, ResponseBuilder.newBuilder().andHeaders("X-Message").build())
+                .andResponse(500, ResponseBuilder.newBuilder().build()).build();
         addMethods(resources, "test/{id}", secondGet, secondDelete);
 
         // test/{id}/test

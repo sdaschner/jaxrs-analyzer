@@ -28,21 +28,14 @@ public class ResourceMethod {
     private final Set<String> requestMediaTypes = new HashSet<>();
     private final Set<String> responseMediaTypes = new HashSet<>();
     private final Map<Integer, Response> responses = new HashMap<>();
+    private final MethodParameters methodParameters = new MethodParameters();
 
-    private final MethodParameters methodParameters;
     private final HttpMethod method;
     private TypeIdentifier requestBody;
 
     public ResourceMethod(final HttpMethod method) {
-        this(method, new MethodParameters());
-    }
-
-    public ResourceMethod(final HttpMethod method, final MethodParameters methodParameters) {
         Objects.requireNonNull(method);
-        Objects.requireNonNull(methodParameters);
-
         this.method = method;
-        this.methodParameters = methodParameters;
     }
 
     public Set<String> getRequestMediaTypes() {

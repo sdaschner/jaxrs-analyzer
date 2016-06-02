@@ -19,10 +19,13 @@ class JAXRSMethodVisitor extends ProjectMethodVisitor {
     private final String signature;
     private final List<String> parameters;
     private final BitSet annotatedParameters;
+    private final boolean methodAnnotated;
 
-    JAXRSMethodVisitor(final ClassResult classResult, final String className, final String desc, final String signature) {
-        super(new MethodResult(), className);
+    JAXRSMethodVisitor(final ClassResult classResult, final String className, final String desc, final String signature, final MethodResult methodResult,
+                       final boolean methodAnnotated) {
+        super(methodResult, className);
         this.signature = signature == null ? desc : signature;
+        this.methodAnnotated = methodAnnotated;
         parameters = JavaUtils.getParameters(this.signature);
         methodResult.setOriginalMethodSignature(this.signature);
         classResult.add(methodResult);
@@ -90,7 +93,7 @@ class JAXRSMethodVisitor extends ProjectMethodVisitor {
     public void visitEnd() {
         super.visitEnd();
         // determine request body parameter
-        if (annotatedParameters.cardinality() != parameters.size()) {
+        if (methodAnnotated && annotatedParameters.cardinality() != parameters.size()) {
             final String requestBodyType = parameters.get(annotatedParameters.nextClearBit(0));
             methodResult.setRequestBodyType(requestBodyType);
         }

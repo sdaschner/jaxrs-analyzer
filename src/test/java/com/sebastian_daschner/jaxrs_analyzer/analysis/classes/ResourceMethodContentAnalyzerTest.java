@@ -22,6 +22,7 @@ import com.sebastian_daschner.jaxrs_analyzer.analysis.bytecode.BytecodeAnalyzer;
 import com.sebastian_daschner.jaxrs_analyzer.model.JavaUtils;
 import com.sebastian_daschner.jaxrs_analyzer.model.elements.HttpResponse;
 import com.sebastian_daschner.jaxrs_analyzer.model.results.ClassResult;
+import com.sebastian_daschner.jaxrs_analyzer.model.results.MethodResult;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -92,7 +93,7 @@ public class ResourceMethodContentAnalyzerTest {
                 @Override
                 public MethodVisitor visitMethod(final int access, final String name, final String desc, final String signature, final String[] exceptions) {
                     if ("method".equals(name))
-                        return new JAXRSMethodVisitor(classResult, classResult.getOriginalClass(), desc, signature);
+                        return new JAXRSMethodVisitor(classResult, classResult.getOriginalClass(), desc, signature, new MethodResult(), true);
                     return null;
                 }
             };

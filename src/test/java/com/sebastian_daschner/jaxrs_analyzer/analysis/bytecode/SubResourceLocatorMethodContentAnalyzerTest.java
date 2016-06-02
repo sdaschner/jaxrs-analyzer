@@ -6,6 +6,7 @@ import com.sebastian_daschner.jaxrs_analyzer.model.JavaUtils;
 import com.sebastian_daschner.jaxrs_analyzer.model.methods.MethodIdentifier;
 import com.sebastian_daschner.jaxrs_analyzer.model.results.ClassResult;
 import com.sebastian_daschner.jaxrs_analyzer.model.results.MethodResult;
+import net.jcip.annotations.NotThreadSafe;
 import org.junit.AfterClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -38,6 +39,8 @@ public class SubResourceLocatorMethodContentAnalyzerTest {
     private final Set<String> expectedClassNames;
     private final JobRegistry jobRegistry;
     private String signature;
+
+
 
     public SubResourceLocatorMethodContentAnalyzerTest(final String testClassSimpleName, final String testClassName, final String signature, final Set<String> expectedClassNames)
             throws ReflectiveOperationException {

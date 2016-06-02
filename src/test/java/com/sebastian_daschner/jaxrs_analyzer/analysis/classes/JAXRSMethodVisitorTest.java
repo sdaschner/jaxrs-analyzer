@@ -2,6 +2,7 @@ package com.sebastian_daschner.jaxrs_analyzer.analysis.classes;
 
 import com.sebastian_daschner.jaxrs_analyzer.model.instructions.Instruction;
 import com.sebastian_daschner.jaxrs_analyzer.model.results.ClassResult;
+import com.sebastian_daschner.jaxrs_analyzer.model.results.MethodResult;
 import org.junit.Before;
 import org.junit.Test;
 import org.objectweb.asm.Label;
@@ -20,7 +21,7 @@ public class JAXRSMethodVisitorTest {
     @Before
     public void setUp() {
         classResult = new ClassResult();
-        cut = new JAXRSMethodVisitor(classResult, "Foobar", "()V", null);
+        cut = new JAXRSMethodVisitor(classResult, "Foobar", "()V", null, new MethodResult(), true);
     }
 
     @Test

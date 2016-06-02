@@ -1,10 +1,10 @@
 package com.sebastian_daschner.jaxrs_analyzer.backend.plaintext;
 
-import com.sebastian_daschner.jaxrs_analyzer.model.Types;
 import com.sebastian_daschner.jaxrs_analyzer.backend.Backend;
 import com.sebastian_daschner.jaxrs_analyzer.builder.ResourceMethodBuilder;
 import com.sebastian_daschner.jaxrs_analyzer.builder.ResourcesBuilder;
 import com.sebastian_daschner.jaxrs_analyzer.builder.ResponseBuilder;
+import com.sebastian_daschner.jaxrs_analyzer.model.Types;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.*;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -141,7 +141,7 @@ public class PlainTextBackendTest {
                         "   Response Body: javax.json.Json\n" +
                         "    [{\"key\":\"string\"}]\n\n\n");
 
-        identifier = TypeIdentifier.ofType("com.sebastian_daschner.test.Model");
+        identifier = TypeIdentifier.ofType("Lcom/sebastian_daschner/test/Model;");
         properties = new HashMap<>();
         properties.put("name", stringIdentifier);
         properties.put("value", intIdentifier);
@@ -162,8 +162,8 @@ public class PlainTextBackendTest {
                         "   Response Body: com.sebastian_daschner.test.Model\n" +
                         "    {\"name\":\"string\",\"value\":0}\n\n\n");
 
-        identifier = TypeIdentifier.ofType("java.util.List<com.sebastian_daschner.test.Model>");
-        nestedIdentifier = TypeIdentifier.ofType("com.sebastian_daschner.test.Model");
+        identifier = TypeIdentifier.ofType("Ljava/util/List<Lcom/sebastian_daschner/test/Model;>;");
+        nestedIdentifier = TypeIdentifier.ofType("Lcom/sebastian_daschner/test/Model;");
         properties = new HashMap<>();
         properties.put("name", stringIdentifier);
         properties.put("value", intIdentifier);

@@ -18,6 +18,8 @@ package com.sebastian_daschner.jaxrs_analyzer.model;
 
 import com.sebastian_daschner.jaxrs_analyzer.LogProvider;
 import org.objectweb.asm.Type;
+import org.objectweb.asm.signature.SignatureReader;
+import org.objectweb.asm.util.TraceSignatureVisitor;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -244,6 +246,18 @@ public final class JavaUtils {
     }
 
     /**
+     * Converts the given type signature to a human readable type string.
+     * <p>
+     * Example: {@code Ljava/util/Map<Ljava/lang/String;Ljava/lang/String;>; -> java.util.Map<java.lang.String, java.lang.String>}
+     */
+    public static String toReadableType(final String type) {
+        final SignatureReader reader = new SignatureReader(type);
+        final TraceSignatureVisitor visitor = new TraceSignatureVisitor(0);
+        reader.acceptType(visitor);
+        return visitor.getDeclaration();
+    }
+
+    /**
      * Returns the JVM type signature of the given object.
      */
     public static String getType(final Object value) {
@@ -351,7 +365,8 @@ public final class JavaUtils {
         final List<String> parameters = getParameters(signature);
         return Stream.of(loadedClass.getDeclaredMethods()).filter(m -> m.getName().equals(methodName)
                 && m.getParameterCount() == parameters.size()
-                && Objects.equals(getMethodSignature(m), signature)
+                // return types are not taken into account (could be overloaded method w/ different return type)
+                && Objects.equals(getParameters(getMethodSignature(m)), parameters)
         ).findAny().orElse(null);
     }
 
@@ -418,6 +433,9 @@ public final class JavaUtils {
     public static List<String> getParameters(final String methodDesc) {
 //        final String[] types = resolveMethodSignature(methodDesc);
 //        return IntStream.range(0, types.length).mapToObj(i -> types[i]).collect(Collectors.toList());
+        if (methodDesc == null)
+            return Collections.emptyList();
+
         final char[] buffer = methodDesc.toCharArray();
         final List<String> args = new ArrayList<>();
 

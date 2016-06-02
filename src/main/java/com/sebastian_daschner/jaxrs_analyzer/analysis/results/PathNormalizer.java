@@ -16,9 +16,9 @@
 
 package com.sebastian_daschner.jaxrs_analyzer.analysis.results;
 
-import com.sebastian_daschner.jaxrs_analyzer.utils.StringUtils;
 import com.sebastian_daschner.jaxrs_analyzer.model.results.ClassResult;
 import com.sebastian_daschner.jaxrs_analyzer.model.results.MethodResult;
+import com.sebastian_daschner.jaxrs_analyzer.utils.StringUtils;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -67,16 +67,19 @@ final class PathNormalizer {
         final List<String> paths = new LinkedList<>();
         MethodResult currentMethod = methodResult;
 
-        do {
+        while (true) {
             addNonBlank(currentMethod.getPath(), paths);
             final ClassResult parentClass = currentMethod.getParentResource();
 
             if (parentClass == null)
                 break;
 
-            addNonBlank(parentClass.getResourcePath(), paths);
             currentMethod = parentClass.getParentSubResourceLocator();
-        } while (currentMethod != null);
+            if (currentMethod == null) {
+                addNonBlank(parentClass.getResourcePath(), paths);
+                break;
+            }
+        }
 
         Collections.reverse(paths);
         return paths;

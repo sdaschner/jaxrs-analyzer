@@ -1,10 +1,10 @@
 package com.sebastian_daschner.jaxrs_analyzer.backend.asciidoc;
 
-import com.sebastian_daschner.jaxrs_analyzer.utils.StringUtils;
-import com.sebastian_daschner.jaxrs_analyzer.model.Types;
 import com.sebastian_daschner.jaxrs_analyzer.backend.Backend;
 import com.sebastian_daschner.jaxrs_analyzer.backend.JsonRepresentationAppender;
+import com.sebastian_daschner.jaxrs_analyzer.model.Types;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.*;
+import com.sebastian_daschner.jaxrs_analyzer.utils.StringUtils;
 
 import java.util.Comparator;
 import java.util.Map;
@@ -15,6 +15,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
 
 import static com.sebastian_daschner.jaxrs_analyzer.backend.ComparatorUtils.mapKeyComparator;
+import static com.sebastian_daschner.jaxrs_analyzer.model.JavaUtils.toReadableType;
 
 /**
  * A backend implementation which produces an AsciiDoc representation of the JAX-RS project.
@@ -149,9 +150,9 @@ public class AsciiDocBackend implements Backend {
     private String toTypeOrCollection(final TypeIdentifier type) {
         final TypeRepresentation representation = resources.getTypeRepresentations().get(type);
         if (representation != null && !representation.getComponentType().equals(type) && !type.getType().equals(Types.JSON)) {
-            return "Collection of `" + representation.getComponentType().getType() + '`';
+            return "Collection of `" + toReadableType(representation.getComponentType().getType()) + '`';
         }
-        return '`' + type.getType() + '`';
+        return '`' + toReadableType(type.getType()) + '`';
     }
 
     private static String toString(final Set<String> set) {

@@ -37,6 +37,19 @@ public class MethodParameters {
     private final Map<String, String> headerParams = new HashMap<>();
     private final Map<String, String> formParams = new HashMap<>();
 
+    /**
+     * Adds all the given parameters to the various parameters of this instance.
+     * Replaces previous identical parameter names.
+     */
+    public void merge(final MethodParameters methodParameters) {
+        matrixParams.putAll(methodParameters.matrixParams);
+        queryParams.putAll(methodParameters.queryParams);
+        pathParams.putAll(methodParameters.pathParams);
+        cookieParams.putAll(methodParameters.cookieParams);
+        headerParams.putAll(methodParameters.headerParams);
+        formParams.putAll(methodParameters.formParams);
+    }
+
     public Map<String, String> getMatrixParams() {
         return matrixParams;
     }

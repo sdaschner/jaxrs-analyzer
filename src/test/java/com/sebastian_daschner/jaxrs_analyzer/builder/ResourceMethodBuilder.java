@@ -36,8 +36,7 @@ public class ResourceMethodBuilder {
     }
 
     public ResourceMethodBuilder andRequestBodyType(final String type) {
-        // TODO
-//        method.setRequestBody(TypeIdentifier.ofType(type));
+        method.setRequestBody(TypeIdentifier.ofType(type));
         return this;
     }
 

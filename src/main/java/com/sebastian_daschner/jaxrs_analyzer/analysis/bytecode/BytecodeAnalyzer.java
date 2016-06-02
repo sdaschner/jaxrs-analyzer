@@ -14,9 +14,8 @@ public class BytecodeAnalyzer {
     /**
      * Analyzes the bytecode instructions of the method results and interprets JAX-RS relevant information.
      */
-    public ClassResult analyzeBytecode(final ClassResult classResult) {
+    public void analyzeBytecode(final ClassResult classResult) {
         classResult.getMethods().forEach(this::analyzeBytecode);
-        return classResult;
     }
 
     private void analyzeBytecode(final MethodResult methodResult) {

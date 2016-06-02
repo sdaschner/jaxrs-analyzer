@@ -92,11 +92,12 @@ public class ResultInterpreter {
      */
     private ResourceMethod interpretResourceMethod(final MethodResult methodResult, final ClassResult classResult) {
         // HTTP method and method parameters
-        final ResourceMethod resourceMethod = new ResourceMethod(methodResult.getHttpMethod(), methodResult.getMethodParameters());
+        final ResourceMethod resourceMethod = new ResourceMethod(methodResult.getHttpMethod());
+        resourceMethod.getMethodParameters().merge(classResult.getClassFields());
+        resourceMethod.getMethodParameters().merge(methodResult.getMethodParameters());
 
         if (methodResult.getRequestBodyType() != null) {
-            // TODO
-//            resourceMethod.setRequestBody(javaTypeAnalyzer.analyze(methodResult.getRequestBodyType()));
+            resourceMethod.setRequestBody(javaTypeAnalyzer.analyze(methodResult.getRequestBodyType()));
         }
 
         // add default status code due to JSR 339
