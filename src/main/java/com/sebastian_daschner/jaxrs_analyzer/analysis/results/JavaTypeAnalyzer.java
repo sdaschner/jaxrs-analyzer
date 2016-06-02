@@ -21,6 +21,7 @@ import com.sebastian_daschner.jaxrs_analyzer.model.Types;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeIdentifier;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeRepresentation;
 import com.sebastian_daschner.jaxrs_analyzer.utils.Pair;
+import org.objectweb.asm.Type;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -99,11 +100,14 @@ class JavaTypeAnalyzer {
 
         final XmlAccessType value = getXmlAccessType(loadedClass);
 
-        // TODO analyze & test inheritance
+        // TODO analyze & test annotation inheritance
         final List<Field> relevantFields = Stream.of(loadedClass.getDeclaredFields()).filter(f -> isRelevant(f, value)).collect(Collectors.toList());
         final List<Method> relevantGetters = Stream.of(loadedClass.getDeclaredMethods()).filter(m -> isRelevant(m, value)).collect(Collectors.toList());
 
         final Map<String, TypeIdentifier> properties = new HashMap<>();
+
+        final Stream<Class<?>> allSuperTypes = Stream.concat(Stream.of(loadedClass.getInterfaces()), Stream.of(loadedClass.getSuperclass()));
+        allSuperTypes.filter(Objects::nonNull).map(Type::getDescriptor).map(this::analyzeClass).forEach(properties::putAll);
 
         Stream.concat(relevantFields.stream().map(f -> mapField(f, type)), relevantGetters.stream().map(g -> mapGetter(g, type)))
                 .filter(Objects::nonNull).forEach(p -> {

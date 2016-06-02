@@ -3,7 +3,6 @@ package com.sebastian_daschner.jaxrs_analyzer.analysis.results.testclasses.typea
 import com.sebastian_daschner.jaxrs_analyzer.analysis.results.TypeUtils;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeIdentifier;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeRepresentation;
-import com.sebastian_daschner.jaxrs_analyzer.model.types.Type;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -35,7 +34,7 @@ public class TestClass20 implements Interface1, Interface2 {
     }
 
     public static TypeIdentifier expectedIdentifier() {
-        return TypeIdentifier.ofType(new Type(TestClass20.class.getName()));
+        return TypeIdentifier.ofType("Lcom/sebastian_daschner/jaxrs_analyzer/analysis/results/testclasses/typeanalyzer/TestClass20;");
     }
 
     @Override
