@@ -102,23 +102,25 @@ public class AsciiDocBackend implements Backend {
 
         final MethodParameters parameters = resourceMethod.getMethodParameters();
 
-        appendParams("*Path Param*: ", parameters.getPathParams());
-        appendParams("*Query Param*: ", parameters.getQueryParams());
-        appendParams("*Form Param*: ", parameters.getFormParams());
-        appendParams("*Header Param*: ", parameters.getHeaderParams());
-        appendParams("*Cookie Param*: ", parameters.getCookieParams());
-        appendParams("*Matrix Param*: ", parameters.getMatrixParams());
+        appendParams("Path Param", parameters.getPathParams());
+        appendParams("Query Param", parameters.getQueryParams());
+        appendParams("Form Param", parameters.getFormParams());
+        appendParams("Header Param", parameters.getHeaderParams());
+        appendParams("Cookie Param", parameters.getCookieParams());
+        appendParams("Matrix Param", parameters.getMatrixParams());
 
         builder.append('\n');
     }
 
     private void appendParams(final String name, final Map<String, String> parameters) {
-        parameters.entrySet().stream().sorted(mapKeyComparator()).forEach(entry -> builder.
-                append(name).
-                append(entry.getKey()).
-                append(", ").
-                append(entry.getValue()).
-                append(" + \n"));
+        parameters.entrySet().stream().sorted(mapKeyComparator()).forEach(entry -> builder
+                .append('*')
+                .append(name)
+                .append("*: `")
+                .append(entry.getKey())
+                .append("`, `")
+                .append(toReadableType(entry.getValue()))
+                .append("` + \n"));
     }
 
     private void appendResponse(final ResourceMethod resourceMethod) {

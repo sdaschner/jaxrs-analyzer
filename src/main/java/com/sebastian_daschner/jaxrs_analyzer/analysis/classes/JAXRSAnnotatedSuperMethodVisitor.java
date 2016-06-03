@@ -1,5 +1,6 @@
 package com.sebastian_daschner.jaxrs_analyzer.analysis.classes;
 
+import com.sebastian_daschner.jaxrs_analyzer.LogProvider;
 import com.sebastian_daschner.jaxrs_analyzer.analysis.classes.annotation.*;
 import com.sebastian_daschner.jaxrs_analyzer.model.JavaUtils;
 import com.sebastian_daschner.jaxrs_analyzer.model.Types;
@@ -67,21 +68,28 @@ class JAXRSAnnotatedSuperMethodVisitor extends MethodVisitor {
 
         switch (annotationDesc) {
             case Types.PATH_PARAM:
+                annotatedParameters.set(parameter);
                 return new PathParamAnnotationVisitor(methodResult, parameterType);
             case Types.QUERY_PARAM:
+                annotatedParameters.set(parameter);
                 return new QueryParamAnnotationVisitor(methodResult, parameterType);
             case Types.HEADER_PARAM:
+                annotatedParameters.set(parameter);
                 return new HeaderParamAnnotationVisitor(methodResult, parameterType);
             case Types.FORM_PARAM:
+                annotatedParameters.set(parameter);
                 return new FormParamAnnotationVisitor(methodResult, parameterType);
             case Types.COOKIE_PARAM:
+                annotatedParameters.set(parameter);
                 return new CookieParamAnnotationVisitor(methodResult, parameterType);
             case Types.MATRIX_PARAM:
+                annotatedParameters.set(parameter);
                 return new MatrixParamAnnotationVisitor(methodResult, parameterType);
             case Types.SUSPENDED:
-                throw new UnsupportedOperationException("Handling of " + annotationDesc + " not yet implemented");
+                LogProvider.debug("Handling of " + annotationDesc + " not yet implemented");
+            case Types.CONTEXT:
+                annotatedParameters.set(parameter);
             default:
-                annotatedParameters.clear(parameter);
                 return null;
         }
     }

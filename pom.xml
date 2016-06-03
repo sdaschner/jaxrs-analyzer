@@ -32,21 +32,11 @@
             <artifactId>javaee-api</artifactId>
             <version>7.0</version>
         </dependency>
-        <!--<dependency>-->
-        <!--<groupId>com.sebastian-daschner</groupId>-->
-        <!--<artifactId>jaxrs-analyzer-maven-plugin</artifactId>-->
-        <!--<version>0.10-SNAPSHOT</version>-->
-        <!--</dependency>-->
         <dependency>
             <groupId>org.ow2.asm</groupId>
             <artifactId>asm-all</artifactId>
             <version>5.0.4</version>
         </dependency>
-        <!--<dependency>-->
-        <!--<groupId>org.javassist</groupId>-->
-        <!--<artifactId>javassist</artifactId>-->
-        <!--<version>3.18.2-GA</version>-->
-        <!--</dependency>-->
         <dependency>
             <groupId>org.glassfish</groupId>
             <artifactId>javax.json</artifactId>

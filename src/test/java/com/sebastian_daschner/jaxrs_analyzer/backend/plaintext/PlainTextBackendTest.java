@@ -186,8 +186,8 @@ public class PlainTextBackendTest {
 
         add(data, ResourcesBuilder.withBase("rest")
                         .andTypeRepresentation(identifier, TypeRepresentation.ofCollection(identifier, TypeRepresentation.ofConcrete(nestedIdentifier, properties)))
-                        .andResource("res8", ResourceMethodBuilder.withMethod(HttpMethod.POST).andRequestBodyType(identifier).andAcceptMediaTypes("application/json")
-                                .andResponse(201, ResponseBuilder.newBuilder().andHeaders("Location").build()).build()).build(),
+                        .andResource("res8", ResourceMethodBuilder.withMethod(HttpMethod.POST).andRequestBodyType(identifier).andFormParam("form", nestedIdentifier.getType())
+                                .andAcceptMediaTypes("application/json").andResponse(201, ResponseBuilder.newBuilder().andHeaders("Location").build()).build()).build(),
                 "REST resources of project name:\n" +
                         "1.0\n" +
                         "\n" +
@@ -196,6 +196,7 @@ public class PlainTextBackendTest {
                         "  Content-Type: application/json\n" +
                         "  Request Body: Collection of com.sebastian_daschner.test.Model\n" +
                         "   [{\"name\":\"string\",\"value\":0}]\n" +
+                        "  Form Param: form, com.sebastian_daschner.test.Model\n" +
                         "\n" +
                         " Response:\n" +
                         "  Content-Type: */*\n" +
@@ -204,8 +205,8 @@ public class PlainTextBackendTest {
 
         add(data, ResourcesBuilder.withBase("rest")
                         .andTypeRepresentation(identifier, TypeRepresentation.ofCollection(identifier, TypeRepresentation.ofConcrete(nestedIdentifier, properties)))
-                        .andResource("res9", ResourceMethodBuilder.withMethod(HttpMethod.POST).andRequestBodyType(identifier).andAcceptMediaTypes("application/json")
-                                .andResponse(201, ResponseBuilder.newBuilder().andHeaders("Location").build()).build())
+                        .andResource("res9", ResourceMethodBuilder.withMethod(HttpMethod.POST).andRequestBodyType(identifier).andQueryParam("query", Types.PRIMITIVE_INT)
+                                .andAcceptMediaTypes("application/json").andResponse(201, ResponseBuilder.newBuilder().andHeaders("Location").build()).build())
                         .andResource("res10", ResourceMethodBuilder.withMethod(HttpMethod.GET).andResponse(200, ResponseBuilder.newBuilder().build()).build()).build(),
                 "REST resources of project name:\n" +
                         "1.0\n" +
@@ -222,6 +223,7 @@ public class PlainTextBackendTest {
                         "  Content-Type: application/json\n" +
                         "  Request Body: Collection of com.sebastian_daschner.test.Model\n" +
                         "   [{\"name\":\"string\",\"value\":0}]\n" +
+                        "  Query Param: query, int\n" +
                         "\n" +
                         " Response:\n" +
                         "  Content-Type: */*\n" +

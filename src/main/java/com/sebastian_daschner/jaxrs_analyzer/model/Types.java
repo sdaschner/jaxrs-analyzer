@@ -18,6 +18,7 @@ public final class Types {
 
     public static final String PATH = "Ljavax/ws/rs/Path;";
     public static final String APPLICATION_PATH = "Ljavax/ws/rs/ApplicationPath;";
+    public static final String CONTEXT = "Ljavax/ws/rs/core/Context;";
 
     public static final String CONSUMES = "Ljavax/ws/rs/Consumes;";
     public static final String PRODUCES = "Ljavax/ws/rs/Produces;";

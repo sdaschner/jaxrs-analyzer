@@ -134,7 +134,7 @@ public class PlainTextBackend implements Backend {
                 .append(name)
                 .append(e.getKey())
                 .append(", ")
-                .append(e.getValue())
+                .append(toReadableType(e.getValue()))
                 .append('\n'));
     }
 

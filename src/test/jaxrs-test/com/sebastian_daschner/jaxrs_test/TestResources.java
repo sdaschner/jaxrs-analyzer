@@ -98,7 +98,7 @@ public class TestResources {
 
     @DELETE
     @Path("{id}/test")
-    public Response anotherDelete(@PathParam("id") final String id) {
+    public Response anotherDelete(@PathParam("id") final String id, @QueryParam("query") final int query) {
         try {
             this.testStore.delete(id);
             return Response.noContent().build();

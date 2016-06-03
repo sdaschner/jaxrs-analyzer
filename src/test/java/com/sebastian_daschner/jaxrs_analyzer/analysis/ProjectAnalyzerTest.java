@@ -189,7 +189,7 @@ public class ProjectAnalyzerTest {
 
         // test/{id}/test
         ResourceMethod thirdDelete = ResourceMethodBuilder.withMethod(HttpMethod.DELETE)
-                .andAcceptMediaTypes("application/json").andResponseMediaTypes("application/json").andPathParam("id", Types.STRING)
+                .andAcceptMediaTypes("application/json").andResponseMediaTypes("application/json").andPathParam("id", Types.STRING).andQueryParam("query", Types.PRIMITIVE_INT)
                 .andResponse(204, ResponseBuilder.newBuilder().build()).build();
         addMethods(resources, "test/{id}/test", thirdDelete);
 
