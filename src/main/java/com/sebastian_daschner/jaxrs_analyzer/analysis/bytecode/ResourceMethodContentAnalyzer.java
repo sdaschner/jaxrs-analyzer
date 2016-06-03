@@ -41,7 +41,6 @@ import java.util.stream.Collectors;
 class ResourceMethodContentAnalyzer extends MethodContentAnalyzer {
 
     private final Lock lock = new ReentrantLock();
-    private final MethodSimulator methodSimulator = new MethodSimulator();
 
     /**
      * Analyzes the method (including own project methods).
@@ -61,7 +60,7 @@ class ResourceMethodContentAnalyzer extends MethodContentAnalyzer {
             // add project methods to global method pool
             projectMethods.stream().forEach(MethodPool.getInstance()::addProjectMethod);
 
-            Element returnedElement = methodSimulator.simulate(visitedInstructions);
+            Element returnedElement = new MethodSimulator().simulate(visitedInstructions);
             final String returnType = JavaUtils.getReturnType(methodResult.getOriginalMethodSignature());
 
             // void resource methods are interpreted later; stop analyzing on error
