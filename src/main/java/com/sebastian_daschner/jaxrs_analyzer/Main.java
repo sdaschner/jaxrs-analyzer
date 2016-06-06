@@ -19,6 +19,7 @@ import com.sebastian_daschner.jaxrs_analyzer.backend.Backend;
 import com.sebastian_daschner.jaxrs_analyzer.backend.swagger.SwaggerBackendBuilder;
 import com.sebastian_daschner.jaxrs_analyzer.backend.swagger.SwaggerScheme;
 
+import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.EnumSet;
@@ -162,7 +163,7 @@ public class Main {
     }
 
     private static List<Path> extractClassPaths(final String classPaths) {
-        final List<Path> paths = Stream.of(classPaths.split(":"))
+        final List<Path> paths = Stream.of(classPaths.split(File.pathSeparator))
                 .map(s -> s.replaceFirst("^~", System.getProperty("user.home")))
                 .map(Paths::get).collect(Collectors.toList());
         paths.forEach(p -> {
@@ -257,6 +258,6 @@ public class Main {
     }
 
     private enum BackendType {
-        SWAGGER, PLAINTEXT, ASCIIDOC;
+        SWAGGER, PLAINTEXT, ASCIIDOC
     }
 }
