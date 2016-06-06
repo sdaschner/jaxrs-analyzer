@@ -18,11 +18,11 @@ package com.sebastian_daschner.jaxrs_analyzer.analysis;
 
 import com.sebastian_daschner.jaxrs_analyzer.LogProvider;
 import com.sebastian_daschner.jaxrs_analyzer.analysis.bytecode.BytecodeAnalyzer;
-import com.sebastian_daschner.jaxrs_analyzer.analysis.results.ResultInterpreter;
 import com.sebastian_daschner.jaxrs_analyzer.analysis.classes.JAXRSClassVisitor;
-import com.sebastian_daschner.jaxrs_analyzer.utils.Pair;
+import com.sebastian_daschner.jaxrs_analyzer.analysis.results.ResultInterpreter;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.Resources;
 import com.sebastian_daschner.jaxrs_analyzer.model.results.ClassResult;
+import com.sebastian_daschner.jaxrs_analyzer.utils.Pair;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
 
@@ -42,6 +42,8 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.stream.Stream;
+
+import static com.sebastian_daschner.jaxrs_analyzer.model.JavaUtils.isAnnotationPresent;
 
 /**
  * Analyzes the JAX-RS project. This class is thread-safe.
@@ -107,7 +109,7 @@ public class ProjectAnalyzer {
     private boolean isJAXRSRootResource(String className) {
         try {
             final Class<?> clazz = urlClassLoader.loadClass(className);
-            return clazz.isAnnotationPresent(javax.ws.rs.Path.class) || clazz.isAnnotationPresent(ApplicationPath.class);
+            return isAnnotationPresent(clazz, javax.ws.rs.Path.class) || isAnnotationPresent(clazz, ApplicationPath.class);
         } catch (ClassNotFoundException e) {
             LogProvider.error("The class " + className + " could not be loaded!");
             LogProvider.debug(e);

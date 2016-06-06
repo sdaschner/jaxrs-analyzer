@@ -34,7 +34,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static com.sebastian_daschner.jaxrs_analyzer.model.JavaUtils.isAssignableTo;
+import static com.sebastian_daschner.jaxrs_analyzer.model.JavaUtils.*;
 import static com.sebastian_daschner.jaxrs_analyzer.model.Types.COLLECTION;
 
 /**
@@ -122,8 +122,8 @@ class JavaTypeAnalyzer {
         Class<?> current = clazz;
 
         while (current != null) {
-            if (current.isAnnotationPresent(XmlAccessorType.class))
-                return current.getAnnotation(XmlAccessorType.class).value();
+            if (isAnnotationPresent(current, XmlAccessorType.class))
+                return getAnnotation(current, XmlAccessorType.class).value();
             current = current.getSuperclass();
         }
 
@@ -134,16 +134,16 @@ class JavaTypeAnalyzer {
         if (field.isSynthetic())
             return false;
 
-        if (field.isAnnotationPresent(XmlElement.class))
+        if (isAnnotationPresent(field, XmlElement.class))
             return true;
 
         final int modifiers = field.getModifiers();
         if (accessType == XmlAccessType.FIELD)
             // always take, unless static or transient
-            return !Modifier.isTransient(modifiers) && !Modifier.isStatic(modifiers) && !field.isAnnotationPresent(XmlTransient.class);
+            return !Modifier.isTransient(modifiers) && !Modifier.isStatic(modifiers) && !isAnnotationPresent(field, XmlTransient.class);
         else if (accessType == XmlAccessType.PUBLIC_MEMBER)
             // only for public, non-static
-            return Modifier.isPublic(modifiers) && !Modifier.isStatic(modifiers) && !field.isAnnotationPresent(XmlTransient.class);
+            return Modifier.isPublic(modifiers) && !Modifier.isStatic(modifiers) && !isAnnotationPresent(field, XmlTransient.class);
 
         return false;
     }
@@ -159,13 +159,13 @@ class JavaTypeAnalyzer {
         if (method.isSynthetic() || !isGetter(method))
             return false;
 
-        if (method.isAnnotationPresent(XmlElement.class))
+        if (isAnnotationPresent(method, XmlElement.class))
             return true;
 
         if (accessType == XmlAccessType.PROPERTY)
-            return !method.isAnnotationPresent(XmlTransient.class);
+            return !isAnnotationPresent(method, XmlTransient.class);
         else if (accessType == XmlAccessType.PUBLIC_MEMBER)
-            return Modifier.isPublic(method.getModifiers()) && !method.isAnnotationPresent(XmlTransient.class);
+            return Modifier.isPublic(method.getModifiers()) && !isAnnotationPresent(method, XmlTransient.class);
 
         return false;
     }

@@ -62,13 +62,13 @@ public class JAXRSAnalyzer {
      */
     public void analyze() {
         final Resources resources = new ProjectAnalyzer(classPaths.toArray(new Path[classPaths.size()])).analyze(projectPaths.toArray(new Path[projectPaths.size()]));
-        final Project project = new Project(projectName, projectVersion, resources);
 
-        if (isEmpty(resources)) {
+        if (resources.isEmpty()) {
             LogProvider.info("Empty JAX-RS analysis result, omitting output");
             return;
         }
 
+        final Project project = new Project(projectName, projectVersion, resources);
         final String output = backend.render(project);
 
         if (outputLocation != null) {
@@ -76,10 +76,6 @@ public class JAXRSAnalyzer {
         } else {
             System.out.println(output);
         }
-    }
-
-    private boolean isEmpty(final Resources resources) {
-        return resources.getResources().isEmpty() || resources.getResources().stream().map(resources::getMethods).noneMatch(s -> !s.isEmpty());
     }
 
     private static void outputToFile(final String output, final Path outputLocation) {

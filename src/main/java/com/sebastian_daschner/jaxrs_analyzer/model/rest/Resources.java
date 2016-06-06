@@ -59,6 +59,13 @@ public class Resources {
         return Collections.unmodifiableSet(resources.get(resource));
     }
 
+    /**
+     * Checks if the resources contain reasonable data, i.e. actual methods mapped to resources.
+     */
+    public boolean isEmpty() {
+        return resources.isEmpty() || resources.values().stream().allMatch(Set::isEmpty);
+    }
+
     public Map<TypeIdentifier, TypeRepresentation> getTypeRepresentations() {
         return typeRepresentations;
     }
@@ -72,16 +79,15 @@ public class Resources {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+    public boolean equals(Object object) {
+        if (this == object) return true;
+        if (object == null || getClass() != object.getClass()) return false;
 
-        Resources resources1 = (Resources) o;
+        Resources that = (Resources) object;
 
-        if (!resources.equals(resources1.resources)) return false;
-        if (!typeRepresentations.equals(resources1.typeRepresentations)) return false;
-        return !(basePath != null ? !basePath.equals(resources1.basePath) : resources1.basePath != null);
-
+        if (!resources.equals(that.resources)) return false;
+        if (!typeRepresentations.equals(that.typeRepresentations)) return false;
+        return !(basePath != null ? !basePath.equals(that.basePath) : that.basePath != null);
     }
 
     @Override

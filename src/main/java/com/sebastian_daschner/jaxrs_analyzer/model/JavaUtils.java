@@ -21,6 +21,8 @@ import org.objectweb.asm.Type;
 import org.objectweb.asm.signature.SignatureReader;
 import org.objectweb.asm.util.TraceSignatureVisitor;
 
+import java.lang.annotation.Annotation;
+import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.TypeVariable;
@@ -50,6 +52,27 @@ public final class JavaUtils {
      */
     public static boolean isInitializerName(final String name) {
         return INITIALIZER_NAME.equals(name);
+    }
+
+    /**
+     * Returns the annotation or {@code null} if the element is not annotated with that type.
+     * <b>Note:</b> This step is necessary due to issues with external class loaders (e.g. Maven).
+     * The classes may not be identical and are therefore compared by FQ class name.
+     */
+    public static <A extends Annotation> A getAnnotation(final AnnotatedElement annotatedElement, final Class<A> annotationClass) {
+        final Optional<Annotation> annotation = Stream.of(annotatedElement.getAnnotations())
+                .filter(a -> a.annotationType().getName().equals(annotationClass.getName()))
+                .findAny();
+        return (A) annotation.orElse(null);
+    }
+
+    /**
+     * Checks if the annotation is present on the annotated element.
+     * <b>Note:</b> This step is necessary due to issues with external class loaders (e.g. Maven).
+     * The classes may not be identical and are therefore compared by FQ class name.
+     */
+    public static boolean isAnnotationPresent(final AnnotatedElement annotatedElement, final Class<?> annotationClass) {
+        return Stream.of(annotatedElement.getAnnotations()).map(Annotation::annotationType).map(Class::getName).anyMatch(n -> n.equals(annotationClass.getName()));
     }
 
     /**

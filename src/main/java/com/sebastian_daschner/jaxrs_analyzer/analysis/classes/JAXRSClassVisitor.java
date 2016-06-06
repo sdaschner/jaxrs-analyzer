@@ -13,11 +13,13 @@ import org.objectweb.asm.*;
 
 import javax.ws.rs.*;
 import java.io.IOException;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.*;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.stream.Stream;
 
+import static com.sebastian_daschner.jaxrs_analyzer.model.JavaUtils.isAnnotationPresent;
 import static org.objectweb.asm.Opcodes.*;
 
 /**
@@ -25,7 +27,7 @@ import static org.objectweb.asm.Opcodes.*;
  */
 public class JAXRSClassVisitor extends ClassVisitor {
 
-    private static final Class<?>[] RELEVANT_METHOD_ANNOTATIONS = {Path.class, GET.class, PUT.class, POST.class, DELETE.class, OPTIONS.class, HEAD.class};
+    private static final Class<? extends Annotation>[] RELEVANT_METHOD_ANNOTATIONS = new Class[]{Path.class, GET.class, PUT.class, POST.class, DELETE.class, OPTIONS.class, HEAD.class};
 
     private final ClassResult classResult;
 
@@ -131,11 +133,12 @@ public class JAXRSClassVisitor extends ClassVisitor {
 
     private static boolean hasJAXRSAnnotations(final Method method) {
         for (final Object annotation : method.getDeclaredAnnotations()) {
-            if (Stream.of(RELEVANT_METHOD_ANNOTATIONS).anyMatch(c -> c.isAssignableFrom(annotation.getClass())))
+            // TODO test both
+            if (Stream.of(RELEVANT_METHOD_ANNOTATIONS).map(a -> JavaUtils.getAnnotation(method, a))
+                    .filter(Objects::nonNull).anyMatch(a -> a.getClass().isAssignableFrom(annotation.getClass())))
                 return true;
 
-            // TODO test
-            if (annotation.getClass().isAnnotationPresent(HttpMethod.class))
+            if (isAnnotationPresent(annotation.getClass(), HttpMethod.class))
                 return true;
         }
         return false;

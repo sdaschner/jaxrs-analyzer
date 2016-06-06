@@ -3,7 +3,9 @@ Sebastian Daschner
 
 // new versions are placed on the top
 
-// == v0.10 (Current snapshot)
+== v0.10 (Current SNAPSHOT)
+- Changed internals to ASM
+- Improved analysis of POJO type inheritance
 
 == v0.9
 - Enhanced type resolution for generic types and generic methods
