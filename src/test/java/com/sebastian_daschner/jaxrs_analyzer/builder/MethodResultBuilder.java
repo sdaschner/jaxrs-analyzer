@@ -96,6 +96,11 @@ public class MethodResultBuilder {
         return this;
     }
 
+    public MethodResultBuilder andDefaultValue(final Integer index) {
+        methodResult.getMethodParameters().getDefaultValues().put(index, null);
+        return this;
+    }
+
     public MethodResult build() {
         return methodResult;
     }

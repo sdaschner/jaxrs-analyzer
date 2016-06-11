@@ -18,6 +18,7 @@ package com.sebastian_daschner.jaxrs_analyzer.model.rest;
 
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
@@ -31,11 +32,12 @@ public class MethodParameters {
      * The params contain the parameter names -> Java types
      */
     private final Map<String, String> matrixParams = new HashMap<>();
-    private final Map<String, String> queryParams = new HashMap<>();
+    private final Map<String, String> queryParams = new LinkedHashMap<>();
     private final Map<String, String> pathParams = new HashMap<>();
     private final Map<String, String> cookieParams = new HashMap<>();
     private final Map<String, String> headerParams = new HashMap<>();
     private final Map<String, String> formParams = new HashMap<>();
+    private final Map<Integer, String> defaultValues = new HashMap<>();
 
     /**
      * Adds all the given parameters to the various parameters of this instance.
@@ -48,6 +50,7 @@ public class MethodParameters {
         cookieParams.putAll(methodParameters.cookieParams);
         headerParams.putAll(methodParameters.headerParams);
         formParams.putAll(methodParameters.formParams);
+        defaultValues.putAll(methodParameters.defaultValues);
     }
 
     public Map<String, String> getMatrixParams() {
@@ -72,6 +75,10 @@ public class MethodParameters {
 
     public Map<String, String> getFormParams() {
         return formParams;
+    }
+
+    public Map<Integer, String> getDefaultValues() {
+        return defaultValues;
     }
 
     @Override

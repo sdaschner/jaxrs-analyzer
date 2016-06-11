@@ -87,6 +87,11 @@ public class ClassResultBuilder {
         return this;
     }
 
+    public ClassResultBuilder andDefaultValue(Integer index) {
+        classResult.getClassFields().getDefaultValues().put(index, null);
+        return this;
+    }
+
     public ClassResult build() {
         return classResult;
     }

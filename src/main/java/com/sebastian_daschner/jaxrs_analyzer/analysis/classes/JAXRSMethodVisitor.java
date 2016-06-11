@@ -87,6 +87,8 @@ class JAXRSMethodVisitor extends ProjectMethodVisitor {
             case Types.MATRIX_PARAM:
                 annotatedParameters.set(parameter);
                 return new MatrixParamAnnotationVisitor(methodResult, parameterType);
+            case Types.DEFAULT_VALUE:
+                return new DefaultValueAnnotationVisitor(methodResult, parameter);
             case Types.SUSPENDED:
                 LogProvider.debug("Handling of " + annotationDesc + " not yet implemented");
             case Types.CONTEXT:

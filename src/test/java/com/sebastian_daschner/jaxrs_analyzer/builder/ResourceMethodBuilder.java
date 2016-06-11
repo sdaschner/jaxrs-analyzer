@@ -90,6 +90,11 @@ public class ResourceMethodBuilder {
         return this;
     }
 
+    public ResourceMethodBuilder andDefaultValue(final Integer index) {
+        method.getMethodParameters().getDefaultValues().put(index, null);
+        return this;
+    }
+
     public ResourceMethod build() {
         return method;
     }

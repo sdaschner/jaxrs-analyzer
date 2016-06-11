@@ -30,8 +30,10 @@ import javax.ws.rs.core.Response;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.stream.IntStream;
 
 import static com.sebastian_daschner.jaxrs_analyzer.backend.ComparatorUtils.mapKeyComparator;
 import static java.util.Comparator.comparing;
@@ -142,10 +144,27 @@ public class SwaggerBackend implements Backend {
         final MethodParameters parameters = method.getMethodParameters();
         final JsonArrayBuilder parameterBuilder = Json.createArrayBuilder();
 
-        parameters.getPathParams().entrySet().stream().sorted(mapKeyComparator()).forEach(e -> parameterBuilder.add(buildParameter(e, "path")));
-        parameters.getHeaderParams().entrySet().stream().sorted(mapKeyComparator()).forEach(e -> parameterBuilder.add(buildParameter(e, "header")));
-        parameters.getQueryParams().entrySet().stream().sorted(mapKeyComparator()).forEach(e -> parameterBuilder.add(buildParameter(e, "query")));
-        parameters.getFormParams().entrySet().stream().sorted(mapKeyComparator()).forEach(e -> parameterBuilder.add(buildParameter(e, "formData")));
+        parameters.getPathParams().entrySet().stream().sorted(mapKeyComparator()).forEach(e -> parameterBuilder.add(buildParameter(e, "path", parameters.getDefaultValues().containsKey(e.getKey()))));
+        parameters.getHeaderParams().entrySet().stream().sorted(mapKeyComparator()).forEach(e -> parameterBuilder.add(buildParameter(e, "header", parameters.getDefaultValues().containsKey(e.getKey()))));
+
+        final Map.Entry<String, String>[] queryEntries = (Map.Entry<String,String>[])parameters.getQueryParams().entrySet()
+            .toArray(new Map.Entry[0]);
+        IntStream.range(0, queryEntries.length)
+            .boxed()
+            .map(i -> {
+                final QueryParameterInfo info = new QueryParameterInfo();
+                final Map.Entry<String, String> entry = queryEntries[i];
+
+                info.index = i;
+                info.entry = entry;
+                info.required = parameters.getDefaultValues().containsKey(i);
+
+                return info;
+            })
+            .sorted()
+            .forEach(info -> parameterBuilder.add(buildParameter(info.entry, "query", info.required)));
+
+        parameters.getFormParams().entrySet().stream().sorted(mapKeyComparator()).forEach(e -> parameterBuilder.add(buildParameter(e, "formData", parameters.getDefaultValues().containsKey(e.getKey()))));
 
         if (method.getRequestBody() != null) {
             parameterBuilder.add(Json.createObjectBuilder().add("name", "body").add("in", "body").add("required", true)
@@ -154,10 +173,10 @@ public class SwaggerBackend implements Backend {
         return parameterBuilder;
     }
 
-    private JsonObjectBuilder buildParameter(final Map.Entry<String, String> entry, final String context) {
+    private JsonObjectBuilder buildParameter(final Map.Entry<String, String> entry, final String context, final Boolean hasDefaultValue) {
         return Json.createObjectBuilder()
                 .add("name", entry.getKey()).add("in", context)
-                .add("required", true).add("type", SwaggerUtils.toSwaggerType(entry.getValue()).toString());
+                .add("required", !hasDefaultValue).add("type", SwaggerUtils.toSwaggerType(entry.getValue()).toString());
     }
 
     private JsonObjectBuilder buildResponses(final ResourceMethod method) {
@@ -192,4 +211,14 @@ public class SwaggerBackend implements Backend {
         return NAME;
     }
 
+    private class QueryParameterInfo implements Comparable<QueryParameterInfo> {
+        public Integer index;
+        public Map.Entry<String, String> entry;
+        public Boolean required;
+
+        @Override
+        public int compareTo(QueryParameterInfo info2) {
+            return this.entry.getKey().compareTo(info2. entry.getKey());
+        }
+    }
 }
