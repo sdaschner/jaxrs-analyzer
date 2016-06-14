@@ -49,14 +49,13 @@ public class TestClass14 {
             .withResponses(HttpResponseBuilder.withStatues(200).build())
             .andPath("{info}")
             .andMethod(HttpMethod.GET)
-            .andQueryParam("value", "Ljava/lang/Integer;")
-            .andDefaultValue(0)
+            .andQueryParam("value", "Ljava/lang/Integer;", false)
             .build();
 
         return ClassResultBuilder
             .withResourcePath("test")
             .andMethods(method)
-            .andQueryParam("id", "Ljava/lang/Integer;")
+            .andQueryParam("id", "Ljava/lang/Integer;", false)
             .build();
     }
 

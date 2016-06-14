@@ -70,25 +70,15 @@ class JAXRSMethodVisitor extends ProjectMethodVisitor {
 
         switch (annotationDesc) {
             case Types.PATH_PARAM:
-                annotatedParameters.set(parameter);
-                return new PathParamAnnotationVisitor(methodResult, parameterType);
             case Types.QUERY_PARAM:
-                annotatedParameters.set(parameter);
-                return new QueryParamAnnotationVisitor(methodResult, parameterType);
             case Types.HEADER_PARAM:
-                annotatedParameters.set(parameter);
-                return new HeaderParamAnnotationVisitor(methodResult, parameterType);
             case Types.FORM_PARAM:
-                annotatedParameters.set(parameter);
-                return new FormParamAnnotationVisitor(methodResult, parameterType);
             case Types.COOKIE_PARAM:
-                annotatedParameters.set(parameter);
-                return new CookieParamAnnotationVisitor(methodResult, parameterType);
             case Types.MATRIX_PARAM:
                 annotatedParameters.set(parameter);
-                return new MatrixParamAnnotationVisitor(methodResult, parameterType);
+                return new ParamAnnotationVisitor(methodResult, parameter, annotationDesc, parameterType);
             case Types.DEFAULT_VALUE:
-                return new DefaultValueAnnotationVisitor(methodResult, parameter);
+                return new DefaultValueAnnotationVisitor(methodResult, parameter, annotationDesc, parameterType);
             case Types.SUSPENDED:
                 LogProvider.debug("Handling of " + annotationDesc + " not yet implemented");
             case Types.CONTEXT:

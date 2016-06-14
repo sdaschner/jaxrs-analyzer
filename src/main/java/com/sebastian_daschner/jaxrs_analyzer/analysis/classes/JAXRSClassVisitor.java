@@ -66,7 +66,7 @@ public class JAXRSClassVisitor extends ClassVisitor {
     @Override
     public FieldVisitor visitField(int access, String name, String desc, String signature, Object value) {
         if ((access & ACC_STATIC) == 0)
-            return new JAXRSFieldVisitor(classResult, desc, signature);
+            return new JAXRSFieldVisitor(classResult, name, desc, signature);
         return null;
     }
 

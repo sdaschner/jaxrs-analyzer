@@ -112,14 +112,14 @@ public class AsciiDocBackend implements Backend {
         builder.append('\n');
     }
 
-    private void appendParams(final String name, final Map<String, String> parameters) {
+    private void appendParams(final String name, final Map<String, MethodParameter> parameters) {
         parameters.entrySet().stream().sorted(mapKeyComparator()).forEach(entry -> builder
                 .append('*')
                 .append(name)
                 .append("*: `")
                 .append(entry.getKey())
                 .append("`, `")
-                .append(toReadableType(entry.getValue()))
+                .append(toReadableType(entry.getValue().getSignature()))
                 .append("` + \n"));
     }
 

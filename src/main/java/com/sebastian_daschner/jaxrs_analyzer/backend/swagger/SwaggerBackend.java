@@ -17,10 +17,7 @@
 package com.sebastian_daschner.jaxrs_analyzer.backend.swagger;
 
 import com.sebastian_daschner.jaxrs_analyzer.backend.Backend;
-import com.sebastian_daschner.jaxrs_analyzer.model.rest.MethodParameters;
-import com.sebastian_daschner.jaxrs_analyzer.model.rest.Project;
-import com.sebastian_daschner.jaxrs_analyzer.model.rest.ResourceMethod;
-import com.sebastian_daschner.jaxrs_analyzer.model.rest.Resources;
+import com.sebastian_daschner.jaxrs_analyzer.model.rest.*;
 
 import javax.json.Json;
 import javax.json.JsonArrayBuilder;
@@ -144,27 +141,10 @@ public class SwaggerBackend implements Backend {
         final MethodParameters parameters = method.getMethodParameters();
         final JsonArrayBuilder parameterBuilder = Json.createArrayBuilder();
 
-        parameters.getPathParams().entrySet().stream().sorted(mapKeyComparator()).forEach(e -> parameterBuilder.add(buildParameter(e, "path", parameters.getDefaultValues().containsKey(e.getKey()))));
-        parameters.getHeaderParams().entrySet().stream().sorted(mapKeyComparator()).forEach(e -> parameterBuilder.add(buildParameter(e, "header", parameters.getDefaultValues().containsKey(e.getKey()))));
-
-        final Map.Entry<String, String>[] queryEntries = (Map.Entry<String,String>[])parameters.getQueryParams().entrySet()
-            .toArray(new Map.Entry[0]);
-        IntStream.range(0, queryEntries.length)
-            .boxed()
-            .map(i -> {
-                final QueryParameterInfo info = new QueryParameterInfo();
-                final Map.Entry<String, String> entry = queryEntries[i];
-
-                info.index = i;
-                info.entry = entry;
-                info.required = parameters.getDefaultValues().containsKey(i);
-
-                return info;
-            })
-            .sorted()
-            .forEach(info -> parameterBuilder.add(buildParameter(info.entry, "query", info.required)));
-
-        parameters.getFormParams().entrySet().stream().sorted(mapKeyComparator()).forEach(e -> parameterBuilder.add(buildParameter(e, "formData", parameters.getDefaultValues().containsKey(e.getKey()))));
+        parameters.getPathParams().entrySet().stream().sorted(mapKeyComparator()).forEach(e -> parameterBuilder.add(buildParameter(e, "path", e.getValue().isRequired())));
+        parameters.getHeaderParams().entrySet().stream().sorted(mapKeyComparator()).forEach(e -> parameterBuilder.add(buildParameter(e, "header", e.getValue().isRequired())));
+        parameters.getQueryParams().entrySet().stream().sorted(mapKeyComparator()).forEach(e -> parameterBuilder.add(buildParameter(e, "query", e.getValue().isRequired())));
+        parameters.getFormParams().entrySet().stream().sorted(mapKeyComparator()).forEach(e -> parameterBuilder.add(buildParameter(e, "formData", e.getValue().isRequired())));
 
         if (method.getRequestBody() != null) {
             parameterBuilder.add(Json.createObjectBuilder().add("name", "body").add("in", "body").add("required", true)
@@ -173,10 +153,10 @@ public class SwaggerBackend implements Backend {
         return parameterBuilder;
     }
 
-    private JsonObjectBuilder buildParameter(final Map.Entry<String, String> entry, final String context, final Boolean hasDefaultValue) {
+    private JsonObjectBuilder buildParameter(final Map.Entry<String, MethodParameter> entry, final String context, final Boolean required) {
         return Json.createObjectBuilder()
                 .add("name", entry.getKey()).add("in", context)
-                .add("required", !hasDefaultValue).add("type", SwaggerUtils.toSwaggerType(entry.getValue()).toString());
+                .add("required", required).add("type", SwaggerUtils.toSwaggerType(entry.getValue().getSignature()).toString());
     }
 
     private JsonObjectBuilder buildResponses(final ResourceMethod method) {

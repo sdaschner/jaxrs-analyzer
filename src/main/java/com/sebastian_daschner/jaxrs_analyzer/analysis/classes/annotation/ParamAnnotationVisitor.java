@@ -1,39 +1,71 @@
 package com.sebastian_daschner.jaxrs_analyzer.analysis.classes.annotation;
 
+import com.sebastian_daschner.jaxrs_analyzer.model.rest.MethodParameter;
 import com.sebastian_daschner.jaxrs_analyzer.model.results.ClassResult;
 import com.sebastian_daschner.jaxrs_analyzer.model.results.MethodResult;
-
-import java.util.Map;
 
 /**
  * @author Sebastian Daschner
  */
-abstract class ParamAnnotationVisitor extends ClassAndMethodAnnotationVisitor<String> {
+public class ParamAnnotationVisitor extends ClassAndMethodAnnotationVisitor<String> {
+    private final Integer index;
+    private final String fieldName;
 
     private final String signature;
+    private final String annotation;
 
-    ParamAnnotationVisitor(final MethodResult methodResult, final String signature) {
-        super(methodResult);
-        this.signature = signature;
-    }
-
-    ParamAnnotationVisitor(final ClassResult classResult, final String signature) {
+    public ParamAnnotationVisitor(final ClassResult classResult, final String fieldName, final String annotation, final String signature) {
         super(classResult);
+        this.index = null;
+        this.fieldName = fieldName;
         this.signature = signature;
+        this.annotation = annotation;
+    }
+
+    public ParamAnnotationVisitor(final MethodResult methodResult, final Integer index, final String annotation, final String signature) {
+        super(methodResult);
+        this.index = index;
+        this.fieldName = null;
+        this.signature = signature;
+        this.annotation = annotation;
     }
 
     @Override
-    protected final void visitValue(final String value, final ClassResult classResult) {
-        extractParamMap(classResult).put(value, signature);
+    protected void visitValue(String value, ClassResult classResult) {
+        // only support field annotations
+        if (fieldName == null) {
+            return;
+        }
+
+        MethodParameter parameter = classResult.getClassFields().getParameter(fieldName);
+
+        if (parameter == null) {
+            parameter = new MethodParameter(annotation, value, signature, true);
+        } else {
+            parameter = new MethodParameter(annotation, value, signature, parameter.isRequired());
+        }
+
+        classResult.getClassFields().setParameter(fieldName, parameter);
+
+        return;
     }
 
     @Override
-    protected final void visitValue(final String value, final MethodResult methodResult) {
-        extractParamMap(methodResult).put(value, signature);
+    protected void visitValue(String value, MethodResult methodResult) {
+        // only support method parameters
+        if (index == null) {
+            return;
+        }
+
+        MethodParameter parameter = methodResult.getMethodParameters().getParameter(index);
+
+        if (parameter == null) {
+            parameter = new MethodParameter(annotation, value, signature, true);
+        } else {
+            parameter = new MethodParameter(annotation, value, signature, parameter.isRequired());
+        }
+
+        methodResult.getMethodParameters().setParameter(index, parameter);
     }
-
-    abstract Map<String, String> extractParamMap(ClassResult classResult);
-
-    abstract Map<String, String> extractParamMap(MethodResult methodResult);
 
 }

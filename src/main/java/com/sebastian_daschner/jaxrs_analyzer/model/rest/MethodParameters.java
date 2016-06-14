@@ -17,9 +17,12 @@
 package com.sebastian_daschner.jaxrs_analyzer.model.rest;
 
 
+import com.sebastian_daschner.jaxrs_analyzer.model.Types;
+
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Represents REST resource method parameters.
@@ -29,56 +32,78 @@ import java.util.Map;
 public class MethodParameters {
 
     /*
-     * The params contain the parameter names -> Java types
+     * The params contain the field name or parameter index -> MethodParameter
      */
-    private final Map<String, String> matrixParams = new HashMap<>();
-    private final Map<String, String> queryParams = new LinkedHashMap<>();
-    private final Map<String, String> pathParams = new HashMap<>();
-    private final Map<String, String> cookieParams = new HashMap<>();
-    private final Map<String, String> headerParams = new HashMap<>();
-    private final Map<String, String> formParams = new HashMap<>();
-    private final Map<Integer, String> defaultValues = new HashMap<>();
+    private final Map<Object, MethodParameter> parameters = new HashMap<>();
 
     /**
      * Adds all the given parameters to the various parameters of this instance.
      * Replaces previous identical parameter names.
      */
     public void merge(final MethodParameters methodParameters) {
-        matrixParams.putAll(methodParameters.matrixParams);
-        queryParams.putAll(methodParameters.queryParams);
-        pathParams.putAll(methodParameters.pathParams);
-        cookieParams.putAll(methodParameters.cookieParams);
-        headerParams.putAll(methodParameters.headerParams);
-        formParams.putAll(methodParameters.formParams);
-        defaultValues.putAll(methodParameters.defaultValues);
+        parameters.putAll(methodParameters.parameters);
     }
 
-    public Map<String, String> getMatrixParams() {
-        return matrixParams;
+    public Stream<MethodParameter> getParamsByAnnotation(final String type) {
+        return this.parameters.entrySet().stream()
+            .filter(e -> e.getValue().getAnnotation().equals(type))
+            .map(e -> e.getValue());
     }
 
-    public Map<String, String> getQueryParams() {
-        return queryParams;
+    public Map<String, MethodParameter> getMatrixParams() {
+        return this.getParamsByAnnotation(Types.MATRIX_PARAM)
+            .collect(Collectors.toMap(
+                p -> p.getValue(),
+                p -> p
+            ));
     }
 
-    public Map<String, String> getPathParams() {
-        return pathParams;
+    public Map<String, MethodParameter> getQueryParams() {
+        return this.getParamsByAnnotation(Types.QUERY_PARAM)
+            .collect(Collectors.toMap(
+                p -> p.getValue(),
+                p -> p
+            ));
     }
 
-    public Map<String, String> getCookieParams() {
-        return cookieParams;
+    public Map<String, MethodParameter> getPathParams() {
+        return this.getParamsByAnnotation(Types.PATH_PARAM)
+            .collect(Collectors.toMap(
+                p -> p.getValue(),
+                p -> p
+            ));
     }
 
-    public Map<String, String> getHeaderParams() {
-        return headerParams;
+    public Map<String, MethodParameter> getCookieParams() {
+        return this.getParamsByAnnotation(Types.COOKIE_PARAM)
+            .collect(Collectors.toMap(
+                p -> p.getValue(),
+                p -> p
+            ));
     }
 
-    public Map<String, String> getFormParams() {
-        return formParams;
+    public Map<String, MethodParameter> getHeaderParams() {
+        return this.getParamsByAnnotation(Types.HEADER_PARAM)
+            .collect(Collectors.toMap(
+                p -> p.getValue(),
+                p -> p
+            ));
     }
 
-    public Map<Integer, String> getDefaultValues() {
-        return defaultValues;
+    public Map<String, MethodParameter> getFormParams() {
+        return this.getParamsByAnnotation(Types.FORM_PARAM)
+            .collect(Collectors.toMap(
+                p -> p.getValue(),
+                p -> p
+            ));
+    }
+
+    public MethodParameter getParameter(final Object index) {
+        return parameters.get(index);
+    }
+
+    public void setParameter(final Object index, final MethodParameter parameter) {
+        parameters.put(index, parameter);
     }
 
     @Override
@@ -88,35 +113,34 @@ public class MethodParameters {
 
         final MethodParameters that = (MethodParameters) o;
 
-        if (!cookieParams.equals(that.cookieParams)) return false;
-        if (!formParams.equals(that.formParams)) return false;
-        if (!headerParams.equals(that.headerParams)) return false;
-        if (!matrixParams.equals(that.matrixParams)) return false;
-        if (!pathParams.equals(that.pathParams)) return false;
-        return queryParams.equals(that.queryParams);
+        if (!getCookieParams().equals(that.getCookieParams())) return false;
+        if (!getFormParams().equals(that.getFormParams())) return false;
+        if (!getHeaderParams().equals(that.getHeaderParams())) return false;
+        if (!getMatrixParams().equals(that.getMatrixParams())) return false;
+        if (!getPathParams().equals(that.getPathParams())) return false;
+        return getQueryParams().equals(that.getQueryParams());
     }
 
     @Override
     public int hashCode() {
-        int result = matrixParams.hashCode();
-        result = 31 * result + queryParams.hashCode();
-        result = 31 * result + pathParams.hashCode();
-        result = 31 * result + cookieParams.hashCode();
-        result = 31 * result + headerParams.hashCode();
-        result = 31 * result + formParams.hashCode();
+        int result = getMatrixParams().hashCode();
+        result = 31 * result + getQueryParams().hashCode();
+        result = 31 * result + getPathParams().hashCode();
+        result = 31 * result + getCookieParams().hashCode();
+        result = 31 * result + getHeaderParams().hashCode();
+        result = 31 * result + getFormParams().hashCode();
         return result;
     }
 
     @Override
     public String toString() {
         return "MethodParameters{" +
-                "matrixParams=" + matrixParams +
-                ", queryParams=" + queryParams +
-                ", pathParams=" + pathParams +
-                ", cookieParams=" + cookieParams +
-                ", headerParams=" + headerParams +
-                ", formParams=" + formParams +
-                '}';
+            "matrixParams=" + getMatrixParams()+
+            ", queryParams=" + getQueryParams()+
+            ", pathParams=" + getPathParams()+
+            ", cookieParams=" + getCookieParams()+
+            ", headerParams=" + getHeaderParams()+
+            ", formParams=" + getFormParams()+
+            '}';
     }
-
 }

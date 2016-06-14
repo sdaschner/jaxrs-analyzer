@@ -129,12 +129,12 @@ public class PlainTextBackend implements Backend {
         builder.append('\n');
     }
 
-    private void appendParams(final String name, final Map<String, String> parameters) {
+    private void appendParams(final String name, final Map<String, MethodParameter> parameters) {
         parameters.entrySet().stream().sorted(mapKeyComparator()).forEach(e -> builder
                 .append(name)
                 .append(e.getKey())
                 .append(", ")
-                .append(toReadableType(e.getValue()))
+                .append(toReadableType(e.getValue().getSignature()))
                 .append('\n'));
     }
 

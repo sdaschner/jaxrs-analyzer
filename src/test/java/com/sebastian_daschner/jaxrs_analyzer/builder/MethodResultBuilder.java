@@ -16,8 +16,10 @@
 
 package com.sebastian_daschner.jaxrs_analyzer.builder;
 
+import com.sebastian_daschner.jaxrs_analyzer.model.Types;
 import com.sebastian_daschner.jaxrs_analyzer.model.elements.HttpResponse;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.HttpMethod;
+import com.sebastian_daschner.jaxrs_analyzer.model.rest.MethodParameter;
 import com.sebastian_daschner.jaxrs_analyzer.model.results.MethodResult;
 
 import java.util.Arrays;
@@ -26,6 +28,8 @@ import java.util.stream.Stream;
 public class MethodResultBuilder {
 
     private final MethodResult methodResult = new MethodResult();
+
+    private int parameter = 0;
 
     private MethodResultBuilder() {
         // prevent other instances
@@ -67,37 +71,68 @@ public class MethodResultBuilder {
     }
 
     public MethodResultBuilder andMatrixParam(final String name, final String type) {
-        methodResult.getMethodParameters().getMatrixParams().put(name, type);
+        andParam(Types.MATRIX_PARAM, name, type, true);
+        return this;
+    }
+
+    public MethodResultBuilder andMatrixParam(final String name, final String type, final Boolean required) {
+        andParam(Types.MATRIX_PARAM, name, type, required);
         return this;
     }
 
     public MethodResultBuilder andQueryParam(final String name, final String type) {
-        methodResult.getMethodParameters().getQueryParams().put(name, type);
+        andParam(Types.QUERY_PARAM, name, type, true);
+        return this;
+    }
+
+    public MethodResultBuilder andQueryParam(final String name, final String type, final Boolean required) {
+        andParam(Types.QUERY_PARAM, name, type, required);
         return this;
     }
 
     public MethodResultBuilder andPathParam(final String name, final String type) {
-        methodResult.getMethodParameters().getPathParams().put(name, type);
+        andParam(Types.PATH_PARAM, name, type, true);
+        return this;
+    }
+
+    public MethodResultBuilder andPathParam(final String name, final String type, final Boolean required) {
+        andParam(Types.PATH_PARAM, name, type, required);
         return this;
     }
 
     public MethodResultBuilder andCookieParam(final String name, final String type) {
-        methodResult.getMethodParameters().getCookieParams().put(name, type);
+        andParam(Types.COOKIE_PARAM, name, type, true);
+        return this;
+    }
+
+    public MethodResultBuilder andCookieParam(final String name, final String type, final Boolean required) {
+        andParam(Types.COOKIE_PARAM, name, type, required);
         return this;
     }
 
     public MethodResultBuilder andHeaderParam(final String name, final String type) {
-        methodResult.getMethodParameters().getHeaderParams().put(name, type);
+        andParam(Types.HEADER_PARAM, name, type, true);
+        return this;
+    }
+
+    public MethodResultBuilder andHeaderParam(final String name, final String type, final Boolean required) {
+        andParam(Types.HEADER_PARAM, name, type, required);
         return this;
     }
 
     public MethodResultBuilder andFormParam(final String name, final String type) {
-        methodResult.getMethodParameters().getFormParams().put(name, type);
+        andParam(Types.FORM_PARAM, name, type, true);
         return this;
     }
 
-    public MethodResultBuilder andDefaultValue(final Integer index) {
-        methodResult.getMethodParameters().getDefaultValues().put(index, null);
+    public MethodResultBuilder andFormParam(final String name, final String type, final Boolean required) {
+        andParam(Types.FORM_PARAM, name, type, required);
+        return this;
+    }
+
+    public MethodResultBuilder andParam(final String annotation, final String name, final String type, final Boolean required) {
+        methodResult.getMethodParameters().setParameter(parameter, new MethodParameter(annotation, name, type, required));
+        parameter++;
         return this;
     }
 
