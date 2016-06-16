@@ -16,7 +16,7 @@
 
 package com.sebastian_daschner.jaxrs_analyzer.model.results;
 
-import com.sebastian_daschner.jaxrs_analyzer.model.rest.MethodParameters;
+import com.sebastian_daschner.jaxrs_analyzer.model.rest.MethodParameter;
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -32,7 +32,7 @@ public class ClassResult {
     private String applicationPath;
     private String resourcePath;
     private String originalClass;
-    private final MethodParameters classFields = new MethodParameters();
+    private final Set<MethodParameter> classFields = new HashSet<>();
     private final Set<MethodResult> methods = new HashSet<>();
     private final Set<String> requestMediaTypes = new HashSet<>();
     private final Set<String> responseMediaTypes = new HashSet<>();
@@ -62,7 +62,7 @@ public class ClassResult {
         this.originalClass = originalClass;
     }
 
-    public MethodParameters getClassFields() {
+    public Set<MethodParameter> getClassFields() {
         return classFields;
     }
 

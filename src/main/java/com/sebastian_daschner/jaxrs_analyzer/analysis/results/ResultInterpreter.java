@@ -18,12 +18,14 @@ package com.sebastian_daschner.jaxrs_analyzer.analysis.results;
 
 import com.sebastian_daschner.jaxrs_analyzer.model.JavaUtils;
 import com.sebastian_daschner.jaxrs_analyzer.model.elements.HttpResponse;
+import com.sebastian_daschner.jaxrs_analyzer.model.rest.MethodParameter;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.ResourceMethod;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.Resources;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.Response;
 import com.sebastian_daschner.jaxrs_analyzer.model.results.ClassResult;
 import com.sebastian_daschner.jaxrs_analyzer.model.results.MethodResult;
 
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -93,8 +95,8 @@ public class ResultInterpreter {
     private ResourceMethod interpretResourceMethod(final MethodResult methodResult, final ClassResult classResult) {
         // HTTP method and method parameters
         final ResourceMethod resourceMethod = new ResourceMethod(methodResult.getHttpMethod());
-        resourceMethod.getMethodParameters().merge(classResult.getClassFields());
-        resourceMethod.getMethodParameters().merge(methodResult.getMethodParameters());
+        updateMethodParameters(resourceMethod.getMethodParameters(), classResult.getClassFields());
+        updateMethodParameters(resourceMethod.getMethodParameters(), methodResult.getMethodParameters());
 
         if (methodResult.getRequestBodyType() != null) {
             resourceMethod.setRequestBody(javaTypeAnalyzer.analyze(methodResult.getRequestBodyType()));
@@ -108,6 +110,19 @@ public class ResultInterpreter {
         addMediaTypes(methodResult, classResult, resourceMethod);
 
         return resourceMethod;
+    }
+
+    /**
+     * Updates {@code parameters} to contain the {@code additional} parameters as well.
+     * Preexisting parameters with identical names are overridden.
+     */
+    private void updateMethodParameters(final Set<MethodParameter> parameters, final Set<MethodParameter> additional) {
+        additional.stream().forEach(a -> {
+            // remove preexisting parameters with identical names
+            final Optional<MethodParameter> existingParameter = parameters.stream().filter(p -> p.getName().equals(a.getName())).findAny();
+            existingParameter.ifPresent(parameters::remove);
+            parameters.add(a);
+        });
     }
 
     private void addDefaultResponses(final MethodResult methodResult) {

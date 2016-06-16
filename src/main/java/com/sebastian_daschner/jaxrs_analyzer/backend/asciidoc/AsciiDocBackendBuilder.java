@@ -10,7 +10,7 @@ import com.sebastian_daschner.jaxrs_analyzer.backend.Backend;
 public class AsciiDocBackendBuilder implements Backend.BackendBuilder {
 
     @Override
-    public AsciiDocBackend build() {
+    public Backend build() {
         return new AsciiDocBackend();
     }
 

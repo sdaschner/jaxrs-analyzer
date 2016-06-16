@@ -22,7 +22,6 @@ import com.sebastian_daschner.jaxrs_analyzer.model.Types;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.*;
 import com.sebastian_daschner.jaxrs_analyzer.utils.StringUtils;
 
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.locks.Lock;
@@ -30,6 +29,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
 
 import static com.sebastian_daschner.jaxrs_analyzer.backend.ComparatorUtils.mapKeyComparator;
+import static com.sebastian_daschner.jaxrs_analyzer.backend.ComparatorUtils.parameterComparator;
 import static com.sebastian_daschner.jaxrs_analyzer.model.JavaUtils.toReadableType;
 import static java.util.Comparator.comparing;
 
@@ -38,7 +38,7 @@ import static java.util.Comparator.comparing;
  *
  * @author Sebastian Daschner
  */
-public class PlainTextBackend implements Backend {
+class PlainTextBackend implements Backend {
 
     private static final String NAME = "Plain text";
     private static final String REST_HEADER = "REST resources of ";
@@ -117,24 +117,26 @@ public class PlainTextBackend implements Backend {
             builder.append("  No body\n");
         }
 
-        final MethodParameters parameters = resourceMethod.getMethodParameters();
+        final Set<MethodParameter> parameters = resourceMethod.getMethodParameters();
 
-        appendParams("  Path Param: ", parameters.getPathParams());
-        appendParams("  Query Param: ", parameters.getQueryParams());
-        appendParams("  Form Param: ", parameters.getFormParams());
-        appendParams("  Header Param: ", parameters.getHeaderParams());
-        appendParams("  Cookie Param: ", parameters.getCookieParams());
-        appendParams("  Matrix Param: ", parameters.getMatrixParams());
+        appendParams("  Path Param: ", parameters, ParameterType.PATH);
+        appendParams("  Query Param: ", parameters, ParameterType.QUERY);
+        appendParams("  Form Param: ", parameters, ParameterType.FORM);
+        appendParams("  Header Param: ", parameters, ParameterType.HEADER);
+        appendParams("  Cookie Param: ", parameters, ParameterType.COOKIE);
+        appendParams("  Matrix Param: ", parameters, ParameterType.MATRIX);
 
         builder.append('\n');
     }
 
-    private void appendParams(final String name, final Map<String, String> parameters) {
-        parameters.entrySet().stream().sorted(mapKeyComparator()).forEach(e -> builder
+    private void appendParams(final String name, final Set<MethodParameter> parameters, final ParameterType parameterType) {
+        parameters.stream().filter(p -> p.getParameterType() == parameterType)
+                .sorted(parameterComparator()).forEach(p -> builder
                 .append(name)
-                .append(e.getKey())
+                .append(p.getName())
                 .append(", ")
-                .append(toReadableType(e.getValue()))
+                .append(toReadableType(p.getType()))
+                // TODO add default value
                 .append('\n'));
     }
 

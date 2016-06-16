@@ -5,7 +5,7 @@ import com.sebastian_daschner.jaxrs_analyzer.model.results.ClassResult;
 /**
  * @author Sebastian Daschner
  */
-public class ApplicationPathAnnotationVisitor extends ValueAnnotationVisitor<String> {
+public class ApplicationPathAnnotationVisitor extends ValueAnnotationVisitor {
 
     private final ClassResult classResult;
 

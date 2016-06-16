@@ -8,32 +8,32 @@ import java.util.Objects;
 /**
  * @author Sebastian Daschner
  */
-public abstract class ClassAndMethodAnnotationVisitor<T> extends ValueAnnotationVisitor<T> {
+abstract class ClassAndMethodAnnotationVisitor extends ValueAnnotationVisitor {
 
     private final ClassResult classResult;
     private final MethodResult methodResult;
 
-    protected ClassAndMethodAnnotationVisitor(ClassResult classResult) {
+    ClassAndMethodAnnotationVisitor(final ClassResult classResult) {
         this(classResult, null);
         Objects.requireNonNull(classResult);
     }
 
-    protected ClassAndMethodAnnotationVisitor(MethodResult methodResult) {
+    ClassAndMethodAnnotationVisitor(final MethodResult methodResult) {
         this(null, methodResult);
         Objects.requireNonNull(methodResult);
     }
 
-    private ClassAndMethodAnnotationVisitor(ClassResult classResult, MethodResult methodResult) {
+    private ClassAndMethodAnnotationVisitor(final ClassResult classResult, final MethodResult methodResult) {
         this.classResult = classResult;
         this.methodResult = methodResult;
     }
 
-    protected abstract void visitValue(T value, ClassResult classResult);
+    protected abstract void visitValue(String value, ClassResult classResult);
 
-    protected abstract void visitValue(T value, MethodResult methodResult);
+    protected abstract void visitValue(String value, MethodResult methodResult);
 
     @Override
-    protected final void visitValue(T value) {
+    protected final void visitValue(final String value) {
         if (classResult != null)
             visitValue(value, classResult);
         else

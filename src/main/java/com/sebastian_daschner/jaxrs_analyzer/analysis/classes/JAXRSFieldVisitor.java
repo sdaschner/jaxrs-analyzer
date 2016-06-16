@@ -1,8 +1,11 @@
 package com.sebastian_daschner.jaxrs_analyzer.analysis.classes;
 
 import com.sebastian_daschner.jaxrs_analyzer.LogProvider;
-import com.sebastian_daschner.jaxrs_analyzer.analysis.classes.annotation.*;
+import com.sebastian_daschner.jaxrs_analyzer.analysis.classes.annotation.DefaultValueAnnotationVisitor;
+import com.sebastian_daschner.jaxrs_analyzer.analysis.classes.annotation.ParamAnnotationVisitor;
 import com.sebastian_daschner.jaxrs_analyzer.model.Types;
+import com.sebastian_daschner.jaxrs_analyzer.model.rest.MethodParameter;
+import com.sebastian_daschner.jaxrs_analyzer.model.rest.ParameterType;
 import com.sebastian_daschner.jaxrs_analyzer.model.results.ClassResult;
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.FieldVisitor;
@@ -14,35 +17,56 @@ import org.objectweb.asm.Opcodes;
 class JAXRSFieldVisitor extends FieldVisitor {
 
     private final ClassResult classResult;
-    private final String desc;
     private final String signature;
+    private MethodParameter parameter;
 
     JAXRSFieldVisitor(final ClassResult classResult, final String desc, final String signature) {
         super(Opcodes.ASM5);
         this.classResult = classResult;
-        this.desc = desc;
-        this.signature = signature;
+        this.signature = signature == null ? desc : signature;
     }
 
     @Override
     public AnnotationVisitor visitAnnotation(final String desc, final boolean visible) {
         switch (desc) {
             case Types.PATH_PARAM:
-                return new PathParamAnnotationVisitor(classResult, signature == null ? this.desc : signature);
+                return paramAnnotationVisitor(ParameterType.PATH);
             case Types.QUERY_PARAM:
-                return new QueryParamAnnotationVisitor(classResult, signature == null ? this.desc : signature);
+                return paramAnnotationVisitor(ParameterType.QUERY);
             case Types.HEADER_PARAM:
-                return new HeaderParamAnnotationVisitor(classResult, signature == null ? this.desc : signature);
+                return paramAnnotationVisitor(ParameterType.HEADER);
             case Types.FORM_PARAM:
-                return new FormParamAnnotationVisitor(classResult, signature == null ? this.desc : signature);
+                return paramAnnotationVisitor(ParameterType.FORM);
             case Types.COOKIE_PARAM:
-                return new CookieParamAnnotationVisitor(classResult, signature == null ? this.desc : signature);
+                return paramAnnotationVisitor(ParameterType.COOKIE);
             case Types.MATRIX_PARAM:
-                return new MatrixParamAnnotationVisitor(classResult, signature == null ? this.desc : signature);
+                return paramAnnotationVisitor(ParameterType.MATRIX);
+            case Types.DEFAULT_VALUE:
+                return defaultAnnotationVisitor();
             default:
                 LogProvider.debug("Annotation not handled: " + desc);
                 return null;
         }
+    }
+
+    private AnnotationVisitor paramAnnotationVisitor(final ParameterType parameterType) {
+        if (parameter == null)
+            parameter = new MethodParameter(signature, parameterType);
+        else
+            parameter.setParameterType(parameterType);
+        return new ParamAnnotationVisitor(parameter);
+    }
+
+    private AnnotationVisitor defaultAnnotationVisitor() {
+        if (parameter == null)
+            parameter = new MethodParameter(signature);
+        return new DefaultValueAnnotationVisitor(parameter);
+    }
+
+    @Override
+    public void visitEnd() {
+        if (parameter != null)
+            classResult.getClassFields().add(parameter);
     }
 
 }

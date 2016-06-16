@@ -16,10 +16,7 @@
 
 package com.sebastian_daschner.jaxrs_analyzer.builder;
 
-import com.sebastian_daschner.jaxrs_analyzer.model.rest.HttpMethod;
-import com.sebastian_daschner.jaxrs_analyzer.model.rest.ResourceMethod;
-import com.sebastian_daschner.jaxrs_analyzer.model.rest.Response;
-import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeIdentifier;
+import com.sebastian_daschner.jaxrs_analyzer.model.rest.*;
 
 import java.util.Arrays;
 
@@ -61,32 +58,67 @@ public class ResourceMethodBuilder {
     }
 
     public ResourceMethodBuilder andMatrixParam(final String name, final String type) {
-        method.getMethodParameters().getMatrixParams().put(name, type);
+        andParam(ParameterType.MATRIX, name, type, null);
+        return this;
+    }
+
+    public ResourceMethodBuilder andMatrixParam(final String name, final String type, final String defaultValue) {
+        andParam(ParameterType.MATRIX, name, type, defaultValue);
         return this;
     }
 
     public ResourceMethodBuilder andQueryParam(final String name, final String type) {
-        method.getMethodParameters().getQueryParams().put(name, type);
+        andParam(ParameterType.QUERY, name, type, null);
+        return this;
+    }
+
+    public ResourceMethodBuilder andQueryParam(final String name, final String type, final String defaultValue) {
+        andParam(ParameterType.QUERY, name, type, defaultValue);
         return this;
     }
 
     public ResourceMethodBuilder andPathParam(final String name, final String type) {
-        method.getMethodParameters().getPathParams().put(name, type);
+        andParam(ParameterType.PATH, name, type, null);
+        return this;
+    }
+
+    public ResourceMethodBuilder andPathParam(final String name, final String type, final String defaultValue) {
+        andParam(ParameterType.PATH, name, type, defaultValue);
         return this;
     }
 
     public ResourceMethodBuilder andCookieParam(final String name, final String type) {
-        method.getMethodParameters().getCookieParams().put(name, type);
+        andParam(ParameterType.COOKIE, name, type, null);
+        return this;
+    }
+
+    public ResourceMethodBuilder andCookieParam(final String name, final String type, final String defaultValue) {
+        andParam(ParameterType.COOKIE, name, type, defaultValue);
         return this;
     }
 
     public ResourceMethodBuilder andHeaderParam(final String name, final String type) {
-        method.getMethodParameters().getHeaderParams().put(name, type);
+        andParam(ParameterType.HEADER, name, type, null);
+        return this;
+    }
+
+    public ResourceMethodBuilder andHeaderParam(final String name, final String type, final String defaultValue) {
+        andParam(ParameterType.HEADER, name, type, defaultValue);
         return this;
     }
 
     public ResourceMethodBuilder andFormParam(final String name, final String type) {
-        method.getMethodParameters().getFormParams().put(name, type);
+        andParam(ParameterType.FORM, name, type, null);
+        return this;
+    }
+
+    public ResourceMethodBuilder andFormParam(final String name, final String type, final String defaultValue) {
+        andParam(ParameterType.FORM, name, type, defaultValue);
+        return this;
+    }
+
+    public ResourceMethodBuilder andParam(final ParameterType parameterType, final String name, final String type, final String defaultValue) {
+        method.getMethodParameters().add(new MethodParameter(type, parameterType, name, defaultValue));
         return this;
     }
 

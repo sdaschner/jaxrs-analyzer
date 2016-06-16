@@ -6,20 +6,20 @@ import org.objectweb.asm.Opcodes;
 /**
  * @author Sebastian Daschner
  */
-abstract class ValueAnnotationVisitor<T> extends AnnotationVisitor {
+abstract class ValueAnnotationVisitor extends AnnotationVisitor {
 
     private static final String NAME = "value";
 
-    protected ValueAnnotationVisitor() {
+    ValueAnnotationVisitor() {
         super(Opcodes.ASM5);
     }
 
-    protected abstract void visitValue(T value);
+    protected abstract void visitValue(String value);
 
     @Override
     public void visit(String name, Object value) {
         if (NAME.equals(name)) {
-            visitValue((T) value);
+            visitValue((String) value);
         }
     }
 
@@ -28,7 +28,7 @@ abstract class ValueAnnotationVisitor<T> extends AnnotationVisitor {
         return new AnnotationVisitor(Opcodes.ASM5) {
             @Override
             public void visit(String name, Object value) {
-                visitValue((T) value);
+                visitValue((String) value);
             }
         };
     }

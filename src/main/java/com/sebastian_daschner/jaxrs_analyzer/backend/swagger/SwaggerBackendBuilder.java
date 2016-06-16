@@ -54,7 +54,7 @@ public class SwaggerBackendBuilder implements Backend.BackendBuilder {
     }
 
     @Override
-    public SwaggerBackend build() {
+    public Backend build() {
         return new SwaggerBackend(options);
     }
 

@@ -19,7 +19,7 @@ package com.sebastian_daschner.jaxrs_analyzer.model.results;
 import com.sebastian_daschner.jaxrs_analyzer.model.elements.HttpResponse;
 import com.sebastian_daschner.jaxrs_analyzer.model.instructions.Instruction;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.HttpMethod;
-import com.sebastian_daschner.jaxrs_analyzer.model.rest.MethodParameters;
+import com.sebastian_daschner.jaxrs_analyzer.model.rest.MethodParameter;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -35,7 +35,7 @@ public class MethodResult {
 
     private final Set<String> requestMediaTypes = new HashSet<>();
     private final Set<String> responseMediaTypes = new HashSet<>();
-    private final MethodParameters methodParameters = new MethodParameters();
+    private final Set<MethodParameter> methodParameters = new HashSet<>();
     private final Set<HttpResponse> responses = new HashSet<>();
     private final List<Instruction> instructions = new ArrayList<>();
     private String path;
@@ -53,7 +53,7 @@ public class MethodResult {
         return responseMediaTypes;
     }
 
-    public MethodParameters getMethodParameters() {
+    public Set<MethodParameter> getMethodParameters() {
         return methodParameters;
     }
 

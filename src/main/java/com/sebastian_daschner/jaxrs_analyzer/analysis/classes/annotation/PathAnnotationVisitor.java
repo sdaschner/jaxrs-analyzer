@@ -6,7 +6,7 @@ import com.sebastian_daschner.jaxrs_analyzer.model.results.MethodResult;
 /**
  * @author Sebastian Daschner
  */
-public class PathAnnotationVisitor extends ClassAndMethodAnnotationVisitor<String> {
+public class PathAnnotationVisitor extends ClassAndMethodAnnotationVisitor {
 
     public PathAnnotationVisitor(final ClassResult classResult) {
         super(classResult);

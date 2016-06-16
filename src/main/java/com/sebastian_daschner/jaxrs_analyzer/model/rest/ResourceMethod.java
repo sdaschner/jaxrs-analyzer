@@ -28,7 +28,7 @@ public class ResourceMethod {
     private final Set<String> requestMediaTypes = new HashSet<>();
     private final Set<String> responseMediaTypes = new HashSet<>();
     private final Map<Integer, Response> responses = new HashMap<>();
-    private final MethodParameters methodParameters = new MethodParameters();
+    private final Set<MethodParameter> methodParameters = new HashSet<>();
 
     private final HttpMethod method;
     private TypeIdentifier requestBody;
@@ -50,7 +50,7 @@ public class ResourceMethod {
         return responses;
     }
 
-    public MethodParameters getMethodParameters() {
+    public Set<MethodParameter> getMethodParameters() {
         return methodParameters;
     }
 

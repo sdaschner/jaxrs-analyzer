@@ -16,6 +16,8 @@
 
 package com.sebastian_daschner.jaxrs_analyzer.builder;
 
+import com.sebastian_daschner.jaxrs_analyzer.model.rest.MethodParameter;
+import com.sebastian_daschner.jaxrs_analyzer.model.rest.ParameterType;
 import com.sebastian_daschner.jaxrs_analyzer.model.results.ClassResult;
 import com.sebastian_daschner.jaxrs_analyzer.model.results.MethodResult;
 
@@ -58,32 +60,67 @@ public class ClassResultBuilder {
     }
 
     public ClassResultBuilder andMatrixParam(final String name, final String type) {
-        classResult.getClassFields().getMatrixParams().put(name, type);
+        andParam(ParameterType.MATRIX, name, type, null);
+        return this;
+    }
+
+    public ClassResultBuilder andMatrixParam(final String name, final String type, final String defaultValue) {
+        andParam(ParameterType.MATRIX, name, type, defaultValue);
         return this;
     }
 
     public ClassResultBuilder andQueryParam(final String name, final String type) {
-        classResult.getClassFields().getQueryParams().put(name, type);
+        andParam(ParameterType.QUERY, name, type, null);
+        return this;
+    }
+
+    public ClassResultBuilder andQueryParam(final String name, final String type, final String defaultValue) {
+        andParam(ParameterType.QUERY, name, type, defaultValue);
         return this;
     }
 
     public ClassResultBuilder andPathParam(final String name, final String type) {
-        classResult.getClassFields().getPathParams().put(name, type);
+        andParam(ParameterType.PATH, name, type, null);
+        return this;
+    }
+
+    public ClassResultBuilder andPathParam(final String name, final String type, final String defaultValue) {
+        andParam(ParameterType.PATH, name, type, defaultValue);
         return this;
     }
 
     public ClassResultBuilder andCookieParam(final String name, final String type) {
-        classResult.getClassFields().getCookieParams().put(name, type);
+        andParam(ParameterType.COOKIE, name, type, null);
+        return this;
+    }
+
+    public ClassResultBuilder andCookieParam(final String name, final String type, final String defaultValue) {
+        andParam(ParameterType.COOKIE, name, type, defaultValue);
         return this;
     }
 
     public ClassResultBuilder andHeaderParam(final String name, final String type) {
-        classResult.getClassFields().getHeaderParams().put(name, type);
+        andParam(ParameterType.HEADER, name, type, null);
+        return this;
+    }
+
+    public ClassResultBuilder andHeaderParam(final String name, final String type, final String defaultValue) {
+        andParam(ParameterType.HEADER, name, type, defaultValue);
         return this;
     }
 
     public ClassResultBuilder andFormParam(final String name, final String type) {
-        classResult.getClassFields().getFormParams().put(name, type);
+        andParam(ParameterType.FORM, name, type, null);
+        return this;
+    }
+
+    public ClassResultBuilder andFormParam(final String name, final String type, final String defaultValue) {
+        andParam(ParameterType.FORM, name, type, defaultValue);
+        return this;
+    }
+
+    private ClassResultBuilder andParam(final ParameterType parameterType, final String name, final String type, final String defaultValue) {
+        classResult.getClassFields().add(new MethodParameter(type, parameterType, name, defaultValue));
         return this;
     }
 

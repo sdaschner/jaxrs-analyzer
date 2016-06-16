@@ -17,23 +17,21 @@
 package com.sebastian_daschner.jaxrs_analyzer.backend.swagger;
 
 import com.sebastian_daschner.jaxrs_analyzer.backend.Backend;
-import com.sebastian_daschner.jaxrs_analyzer.model.rest.MethodParameters;
-import com.sebastian_daschner.jaxrs_analyzer.model.rest.Project;
-import com.sebastian_daschner.jaxrs_analyzer.model.rest.ResourceMethod;
-import com.sebastian_daschner.jaxrs_analyzer.model.rest.Resources;
+import com.sebastian_daschner.jaxrs_analyzer.model.rest.*;
 
 import javax.json.Json;
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 import javax.ws.rs.core.Response;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 import static com.sebastian_daschner.jaxrs_analyzer.backend.ComparatorUtils.mapKeyComparator;
+import static com.sebastian_daschner.jaxrs_analyzer.backend.ComparatorUtils.parameterComparator;
 import static java.util.Comparator.comparing;
 
 /**
@@ -41,7 +39,7 @@ import static java.util.Comparator.comparing;
  *
  * @author Sebastian Daschner
  */
-public class SwaggerBackend implements Backend {
+class SwaggerBackend implements Backend {
 
     private static final String NAME = "Swagger";
     private static final String SWAGGER_VERSION = "2.0";
@@ -139,13 +137,13 @@ public class SwaggerBackend implements Backend {
     }
 
     private JsonArrayBuilder buildParameters(final ResourceMethod method) {
-        final MethodParameters parameters = method.getMethodParameters();
+        final Set<MethodParameter> parameters = method.getMethodParameters();
         final JsonArrayBuilder parameterBuilder = Json.createArrayBuilder();
 
-        parameters.getPathParams().entrySet().stream().sorted(mapKeyComparator()).forEach(e -> parameterBuilder.add(buildParameter(e, "path")));
-        parameters.getHeaderParams().entrySet().stream().sorted(mapKeyComparator()).forEach(e -> parameterBuilder.add(buildParameter(e, "header")));
-        parameters.getQueryParams().entrySet().stream().sorted(mapKeyComparator()).forEach(e -> parameterBuilder.add(buildParameter(e, "query")));
-        parameters.getFormParams().entrySet().stream().sorted(mapKeyComparator()).forEach(e -> parameterBuilder.add(buildParameter(e, "formData")));
+        buildParameters(parameters, ParameterType.PATH, parameterBuilder);
+        buildParameters(parameters, ParameterType.HEADER, parameterBuilder);
+        buildParameters(parameters, ParameterType.QUERY, parameterBuilder);
+        buildParameters(parameters, ParameterType.FORM, parameterBuilder);
 
         if (method.getRequestBody() != null) {
             parameterBuilder.add(Json.createObjectBuilder().add("name", "body").add("in", "body").add("required", true)
@@ -154,10 +152,18 @@ public class SwaggerBackend implements Backend {
         return parameterBuilder;
     }
 
-    private JsonObjectBuilder buildParameter(final Map.Entry<String, String> entry, final String context) {
-        return Json.createObjectBuilder()
-                .add("name", entry.getKey()).add("in", context)
-                .add("required", true).add("type", SwaggerUtils.toSwaggerType(entry.getValue()).toString());
+    private void buildParameters(final Set<MethodParameter> parameters, final ParameterType parameterType, final JsonArrayBuilder builder) {
+        parameters.stream().filter(p -> p.getParameterType() == parameterType)
+                .sorted(parameterComparator())
+                .forEach(e -> {
+                    final String swaggerParameterType = getSwaggerParameterType(parameterType);
+                    if (swaggerParameterType != null)
+                        builder.add(Json.createObjectBuilder()
+                                .add("name", e.getName())
+                                .add("in", swaggerParameterType)
+                                .add("required", e.getDefaultValue() == null)
+                                .add("type", SwaggerUtils.toSwaggerType(e.getType()).toString()));
+                });
     }
 
     private JsonObjectBuilder buildResponses(final ResourceMethod method) {
@@ -190,6 +196,22 @@ public class SwaggerBackend implements Backend {
     @Override
     public String getName() {
         return NAME;
+    }
+
+    private static String getSwaggerParameterType(final ParameterType parameterType) {
+        switch (parameterType) {
+            case QUERY:
+                return "query";
+            case PATH:
+                return "path";
+            case HEADER:
+                return "header";
+            case FORM:
+                return "formData";
+            default:
+                // TODO handle others (possible w/ Swagger?)
+                return null;
+        }
     }
 
 }

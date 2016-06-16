@@ -10,7 +10,7 @@ import com.sebastian_daschner.jaxrs_analyzer.backend.Backend;
 public class PlainTextBackendBuilder implements Backend.BackendBuilder {
 
     @Override
-    public PlainTextBackend build() {
+    public Backend build() {
         return new PlainTextBackend();
     }
 

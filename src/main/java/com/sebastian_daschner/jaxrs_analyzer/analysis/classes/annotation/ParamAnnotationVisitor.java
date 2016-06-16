@@ -1,39 +1,21 @@
 package com.sebastian_daschner.jaxrs_analyzer.analysis.classes.annotation;
 
-import com.sebastian_daschner.jaxrs_analyzer.model.results.ClassResult;
-import com.sebastian_daschner.jaxrs_analyzer.model.results.MethodResult;
-
-import java.util.Map;
+import com.sebastian_daschner.jaxrs_analyzer.model.rest.MethodParameter;
 
 /**
  * @author Sebastian Daschner
  */
-abstract class ParamAnnotationVisitor extends ClassAndMethodAnnotationVisitor<String> {
+public class ParamAnnotationVisitor extends ValueAnnotationVisitor {
 
-    private final String signature;
+    private final MethodParameter parameter;
 
-    ParamAnnotationVisitor(final MethodResult methodResult, final String signature) {
-        super(methodResult);
-        this.signature = signature;
-    }
-
-    ParamAnnotationVisitor(final ClassResult classResult, final String signature) {
-        super(classResult);
-        this.signature = signature;
+    public ParamAnnotationVisitor(final MethodParameter parameter) {
+        this.parameter = parameter;
     }
 
     @Override
-    protected final void visitValue(final String value, final ClassResult classResult) {
-        extractParamMap(classResult).put(value, signature);
+    protected void visitValue(final String value) {
+        parameter.setName(value);
     }
-
-    @Override
-    protected final void visitValue(final String value, final MethodResult methodResult) {
-        extractParamMap(methodResult).put(value, signature);
-    }
-
-    abstract Map<String, String> extractParamMap(ClassResult classResult);
-
-    abstract Map<String, String> extractParamMap(MethodResult methodResult);
 
 }

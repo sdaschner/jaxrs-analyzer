@@ -31,6 +31,7 @@ public final class Types {
     public static final String OPTIONS = "Ljavax/ws/rs/OPTIONS;";
     public static final String SUSPENDED = "Ljavax/ws/rs/container/Suspended;";
 
+    public static final String DEFAULT_VALUE = "Ljavax/ws/rs/DefaultValue;";
     public static final String PATH_PARAM = "Ljavax/ws/rs/PathParam;";
     public static final String QUERY_PARAM = "Ljavax/ws/rs/QueryParam;";
     public static final String HEADER_PARAM = "Ljavax/ws/rs/HeaderParam;";
