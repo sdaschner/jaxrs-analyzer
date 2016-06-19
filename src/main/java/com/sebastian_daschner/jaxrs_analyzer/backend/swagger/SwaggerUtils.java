@@ -16,6 +16,10 @@
 
 package com.sebastian_daschner.jaxrs_analyzer.backend.swagger;
 
+import jdk.internal.org.objectweb.asm.Type;
+
+import java.lang.reflect.Modifier;
+
 import static com.sebastian_daschner.jaxrs_analyzer.model.Types.*;
 
 /**
@@ -52,7 +56,37 @@ final class SwaggerUtils {
 //        if (type.getCtClass().isArray())
 //            return SwaggerType.ARRAY;
 
-        return SwaggerType.OBJECT;
+        try {
+            return toSwaggerType(Class.forName(Type.getType(type).getClassName()));
+        } catch (ClassNotFoundException e) {
+            // TODO: log unexpected behaviour
+            return SwaggerType.OBJECT;
+        }
     }
 
+    static SwaggerType toSwaggerType(final Class<?> type) {
+        if (type != null) {
+            try {
+                type.getConstructor(String.class);
+                return SwaggerType.STRING;
+            } catch (NoSuchMethodException e) {
+            }
+
+            try {
+                if (Modifier.isStatic(type.getDeclaredMethod("valueOf", String.class).getModifiers())) {
+                    return SwaggerType.STRING;
+                }
+            } catch (NoSuchMethodException e) {
+            }
+
+            try {
+                if (Modifier.isStatic(type.getDeclaredMethod("fromString", String.class).getModifiers())) {
+                    return SwaggerType.STRING;
+                }
+            } catch (NoSuchMethodException e) {
+            }
+        }
+
+        return SwaggerType.OBJECT;
+    }
 }

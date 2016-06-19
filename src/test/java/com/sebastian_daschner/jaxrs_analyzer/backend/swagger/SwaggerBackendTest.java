@@ -22,6 +22,7 @@ import com.sebastian_daschner.jaxrs_analyzer.builder.ResourcesBuilder;
 import com.sebastian_daschner.jaxrs_analyzer.builder.ResponseBuilder;
 import com.sebastian_daschner.jaxrs_analyzer.model.Types;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.*;
+import jdk.internal.org.objectweb.asm.Type;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -200,6 +201,20 @@ public class SwaggerBackendTest {
                     .andResponse(200, ResponseBuilder.withResponseBody(TypeIdentifier.ofType(Types.STRING)).andHeaders("Location").build()).build()).build(),
             "{\"swagger\":\"2.0\",\"info\":{\"version\":\"1.0\",\"title\":\"project name\"},\"host\":\"example.com\",\"basePath\":\"/rest\",\"schemes\":[\"http\"],\"paths\":{\"/res17\":{\"get\":{\"consumes\":[\"application/json\"],\"produces\":[],\"parameters\":[{\"name\":\"name\",\"in\":\"query\",\"required\":false,\"type\":\"string\"},{\"name\":\"value\",\"in\":\"query\",\"required\":true,\"type\":\"integer\"}],\"responses\":{\"200\":{\"description\":\"OK\",\"headers\":{\"Location\":{\"type\":\"string\"}},\"schema\":{\"type\":\"string\"}}}}}},\"definitions\":{}}");
 
+        // JSR-339 tests
+        add(data, ResourcesBuilder.withBase("rest")
+            .andResource("res18", ResourceMethodBuilder
+                .withMethod(HttpMethod.GET)
+                .andQueryParam("q1", Type.getDescriptor(StringConstructorParam.class))
+                .andQueryParam("q2", Type.getDescriptor(StringValueOfParam.class))
+                .andPathParam("p1", Type.getDescriptor(StringFromStringParam.class))
+                .andPathParam("p2", Type.getDescriptor(NonApplicableParam.class))
+                .build()
+            )
+            .build(),
+            "{\"swagger\":\"2.0\",\"info\":{\"version\":\"1.0\",\"title\":\"project name\"},\"host\":\"example.com\",\"basePath\":\"/rest\",\"schemes\":[\"http\"],\"paths\":{\"/res18\":{\"get\":{\"consumes\":[],\"produces\":[],\"parameters\":[{\"name\":\"p1\",\"in\":\"path\",\"required\":true,\"type\":\"string\"},{\"name\":\"p2\",\"in\":\"path\",\"required\":true,\"type\":\"object\"},{\"name\":\"q1\",\"in\":\"query\",\"required\":true,\"type\":\"string\"},{\"name\":\"q2\",\"in\":\"query\",\"required\":true,\"type\":\"string\"}],\"responses\":{}}}},\"definitions\":{}}"
+        );
+
         return data;
     }
 
@@ -214,5 +229,37 @@ public class SwaggerBackendTest {
         objects[2] = options;
         data.add(objects);
     }
+}
 
+class StringConstructorParam {
+    public StringConstructorParam(String value) {
+    }
+}
+
+class StringValueOfParam {
+    public static StringValueOfParam valueOf(String value) {
+        return null;
+    }
+}
+
+class StringFromStringParam {
+    public static StringFromStringParam fromString(String value) {
+        return null;
+    }
+}
+
+class NonApplicableParam {
+    public NonApplicableParam() {
+    }
+
+    public NonApplicableParam(String value, String value2) {
+    }
+
+    public StringFromStringParam valueOf(String value) {
+        return null;
+    }
+
+    public StringFromStringParam fromString(String value) {
+        return null;
+    }
 }
