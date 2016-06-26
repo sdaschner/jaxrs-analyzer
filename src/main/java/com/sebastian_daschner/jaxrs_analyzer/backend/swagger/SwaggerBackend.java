@@ -18,6 +18,7 @@ package com.sebastian_daschner.jaxrs_analyzer.backend.swagger;
 
 import com.sebastian_daschner.jaxrs_analyzer.backend.Backend;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.*;
+import org.objectweb.asm.Type;
 
 import javax.json.Json;
 import javax.json.JsonArrayBuilder;
@@ -29,6 +30,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.stream.Stream;
 
 import static com.sebastian_daschner.jaxrs_analyzer.backend.ComparatorUtils.mapKeyComparator;
 import static com.sebastian_daschner.jaxrs_analyzer.backend.ComparatorUtils.parameterComparator;
@@ -157,12 +159,32 @@ class SwaggerBackend implements Backend {
                 .sorted(parameterComparator())
                 .forEach(e -> {
                     final String swaggerParameterType = getSwaggerParameterType(parameterType);
-                    if (swaggerParameterType != null)
-                        builder.add(Json.createObjectBuilder()
+                    if (swaggerParameterType != null) {
+                        try {
+                            // TODO: this needs refactoring
+                            final Class<?> type = Class.forName(Type.getType(e.getType()).getClassName());
+                            final JsonObjectBuilder param = Json.createObjectBuilder()
                                 .add("name", e.getName())
                                 .add("in", swaggerParameterType)
                                 .add("required", e.getDefaultValue() == null)
-                                .add("type", SwaggerUtils.toSwaggerType(e.getType()).toString()));
+                                .add("type", SwaggerUtils.toSwaggerType(e.getType()).toString());
+
+                            if (type.isEnum()) {
+                                final JsonArrayBuilder array = Json.createArrayBuilder();
+
+                                Stream.of(type.getEnumConstants())
+                                    .map(Object::toString)
+                                    .forEach(array::add);
+
+                                param.add("enum", array);
+                            }
+
+                            builder.add(param);
+                        } catch (ClassNotFoundException e1) {
+                            throw new RuntimeException(e1);
+                            // todo: all types should be provably available, but just in case we should warn spectacularly
+                        }
+                    }
                 });
     }
 

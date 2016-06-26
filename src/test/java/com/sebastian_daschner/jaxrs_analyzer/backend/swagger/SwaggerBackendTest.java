@@ -22,10 +22,10 @@ import com.sebastian_daschner.jaxrs_analyzer.builder.ResourcesBuilder;
 import com.sebastian_daschner.jaxrs_analyzer.builder.ResponseBuilder;
 import com.sebastian_daschner.jaxrs_analyzer.model.Types;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.*;
-import jdk.internal.org.objectweb.asm.Type;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
+import org.objectweb.asm.Type;
 
 import java.util.*;
 
@@ -215,6 +215,18 @@ public class SwaggerBackendTest {
             "{\"swagger\":\"2.0\",\"info\":{\"version\":\"1.0\",\"title\":\"project name\"},\"host\":\"example.com\",\"basePath\":\"/rest\",\"schemes\":[\"http\"],\"paths\":{\"/res18\":{\"get\":{\"consumes\":[],\"produces\":[],\"parameters\":[{\"name\":\"p1\",\"in\":\"path\",\"required\":true,\"type\":\"string\"},{\"name\":\"p2\",\"in\":\"path\",\"required\":true,\"type\":\"object\"},{\"name\":\"q1\",\"in\":\"query\",\"required\":true,\"type\":\"string\"},{\"name\":\"q2\",\"in\":\"query\",\"required\":true,\"type\":\"string\"}],\"responses\":{}}}},\"definitions\":{}}"
         );
 
+        // Enum type tests
+        add(data, ResourcesBuilder.withBase("rest")
+                .andResource("res19", ResourceMethodBuilder
+                    .withMethod(HttpMethod.GET)
+                    .andQueryParam("q1", Type.getDescriptor(LiteralEnum.class))
+                    .andQueryParam("q2", Type.getDescriptor(ComplexEnum.class))
+                    .build()
+                )
+                .build(),
+            "{\"swagger\":\"2.0\",\"info\":{\"version\":\"1.0\",\"title\":\"project name\"},\"host\":\"example.com\",\"basePath\":\"/rest\",\"schemes\":[\"http\"],\"paths\":{\"/res19\":{\"get\":{\"consumes\":[],\"produces\":[],\"parameters\":[{\"name\":\"q1\",\"in\":\"query\",\"required\":true,\"type\":\"string\",\"enum\":[\"APPLE\",\"BANANA\"]},{\"name\":\"q2\",\"in\":\"query\",\"required\":true,\"type\":\"string\",\"enum\":[\"APPLE\",\"BANANA\"]}],\"responses\":{}}}},\"definitions\":{}}"
+        );
+
         return data;
     }
 
@@ -231,6 +243,25 @@ public class SwaggerBackendTest {
     }
 }
 
+
+/* enums */
+enum LiteralEnum {
+    APPLE,
+    BANANA;
+}
+
+enum ComplexEnum {
+    APPLE("apple"),
+    BANANA("banana");
+
+    private String value;
+
+    ComplexEnum(String value) {
+        this.value = value;
+    }
+}
+
+/* jsr 339 types */
 class StringConstructorParam {
     public StringConstructorParam(String value) {
     }

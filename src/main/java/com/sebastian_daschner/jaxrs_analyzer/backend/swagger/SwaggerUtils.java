@@ -16,7 +16,7 @@
 
 package com.sebastian_daschner.jaxrs_analyzer.backend.swagger;
 
-import jdk.internal.org.objectweb.asm.Type;
+import org.objectweb.asm.Type;
 
 import java.lang.reflect.Modifier;
 
@@ -66,6 +66,10 @@ final class SwaggerUtils {
 
     static SwaggerType toSwaggerType(final Class<?> type) {
         if (type != null) {
+            if (type.isEnum()) {
+                return SwaggerType.STRING;
+            }
+
             try {
                 type.getConstructor(String.class);
                 return SwaggerType.STRING;
