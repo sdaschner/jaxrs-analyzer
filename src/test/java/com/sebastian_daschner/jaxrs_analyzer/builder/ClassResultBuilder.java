@@ -18,6 +18,7 @@ package com.sebastian_daschner.jaxrs_analyzer.builder;
 
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.MethodParameter;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.ParameterType;
+import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeIdentifier;
 import com.sebastian_daschner.jaxrs_analyzer.model.results.ClassResult;
 import com.sebastian_daschner.jaxrs_analyzer.model.results.MethodResult;
 
@@ -120,7 +121,10 @@ public class ClassResultBuilder {
     }
 
     private ClassResultBuilder andParam(final ParameterType parameterType, final String name, final String type, final String defaultValue) {
-        classResult.getClassFields().add(new MethodParameter(type, parameterType, name, defaultValue));
+        final MethodParameter methodParameter = new MethodParameter(TypeIdentifier.ofType(type), parameterType);
+        methodParameter.setName(name);
+        methodParameter.setDefaultValue(defaultValue);
+        classResult.getClassFields().add(methodParameter);
         return this;
     }
 

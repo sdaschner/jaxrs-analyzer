@@ -18,8 +18,7 @@ package com.sebastian_daschner.jaxrs_analyzer.model.rest;
 
 import com.sebastian_daschner.jaxrs_analyzer.model.Types;
 
-import java.util.Collections;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Represents a request/response body type including the properties which actually will be serialized (e.g. depending on the JAXB mapping).
@@ -95,6 +94,17 @@ public abstract class TypeRepresentation {
      */
     public static TypeRepresentation ofCollection(final TypeIdentifier identifier, final TypeRepresentation typeRepresentation) {
         return new CollectionTypeRepresentation(identifier, typeRepresentation);
+    }
+
+    /**
+     * Creates a type representation of an enum type plus the available enumeration values.
+     *
+     * @param identifier The type identifier
+     * @param enumValues The enum values
+     * @return The type representation
+     */
+    public static TypeRepresentation ofEnum(final TypeIdentifier identifier, final String... enumValues) {
+        return new EnumTypeRepresentation(identifier, new HashSet<>(Arrays.asList(enumValues)));
     }
 
     public static class ConcreteTypeRepresentation extends TypeRepresentation {
@@ -196,6 +206,37 @@ public abstract class TypeRepresentation {
             return "CollectionTypeRepresentation{" +
                     "identifier=" + getIdentifier() +
                     ",representation=" + representation +
+                    '}';
+        }
+    }
+
+    public static class EnumTypeRepresentation extends TypeRepresentation {
+
+        private final Set<String> enumValues;
+
+        private EnumTypeRepresentation(final TypeIdentifier identifier, final Set<String> enumValues) {
+            super(identifier);
+            this.enumValues = enumValues;
+        }
+
+        public Set<String> getEnumValues() {
+            return enumValues;
+        }
+
+        @Override
+        public void accept(final TypeRepresentationVisitor visitor) {
+            visitor.visit(this);
+        }
+
+        @Override
+        public TypeIdentifier getComponentType() {
+            return getIdentifier();
+        }
+
+        @Override
+        public String toString() {
+            return "EnumTypeRepresentation{" +
+                    "enumValues=" + enumValues +
                     '}';
         }
     }

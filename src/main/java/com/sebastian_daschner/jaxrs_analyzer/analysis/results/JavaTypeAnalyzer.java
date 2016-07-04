@@ -16,7 +16,6 @@
 
 package com.sebastian_daschner.jaxrs_analyzer.analysis.results;
 
-import com.sebastian_daschner.jaxrs_analyzer.model.JavaUtils;
 import com.sebastian_daschner.jaxrs_analyzer.model.Types;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeIdentifier;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeRepresentation;
@@ -89,25 +88,27 @@ class JavaTypeAnalyzer {
             return TypeRepresentation.ofCollection(identifier, analyzeInternal(TypeIdentifier.ofType(containedType), containedType));
         }
 
-        return TypeRepresentation.ofConcrete(identifier, analyzeClass(type));
+        final Class<?> loadedClass = loadClassFromType(type);
+        if (loadedClass != null && loadedClass.isEnum())
+            return TypeRepresentation.ofEnum(identifier, Stream.of(loadedClass.getEnumConstants()).map(o -> (Enum<?>) o).map(Enum::name).toArray(String[]::new));
+
+        return TypeRepresentation.ofConcrete(identifier, analyzeClass(type, loadedClass));
     }
 
-    private Map<String, TypeIdentifier> analyzeClass(final String type) {
-        // TODO load class -> check
-        final Class<?> loadedClass = JavaUtils.loadClass(JavaUtils.toClassName(type));
-        if (loadedClass == null || loadedClass.isEnum() || isJDKType(type))
+    private Map<String, TypeIdentifier> analyzeClass(final String type, final Class<?> clazz) {
+        if (clazz == null || isJDKType(type))
             return Collections.emptyMap();
 
-        final XmlAccessType value = getXmlAccessType(loadedClass);
+        final XmlAccessType value = getXmlAccessType(clazz);
 
         // TODO analyze & test annotation inheritance
-        final List<Field> relevantFields = Stream.of(loadedClass.getDeclaredFields()).filter(f -> isRelevant(f, value)).collect(Collectors.toList());
-        final List<Method> relevantGetters = Stream.of(loadedClass.getDeclaredMethods()).filter(m -> isRelevant(m, value)).collect(Collectors.toList());
+        final List<Field> relevantFields = Stream.of(clazz.getDeclaredFields()).filter(f -> isRelevant(f, value)).collect(Collectors.toList());
+        final List<Method> relevantGetters = Stream.of(clazz.getDeclaredMethods()).filter(m -> isRelevant(m, value)).collect(Collectors.toList());
 
         final Map<String, TypeIdentifier> properties = new HashMap<>();
 
-        final Stream<Class<?>> allSuperTypes = Stream.concat(Stream.of(loadedClass.getInterfaces()), Stream.of(loadedClass.getSuperclass()));
-        allSuperTypes.filter(Objects::nonNull).map(Type::getDescriptor).map(this::analyzeClass).forEach(properties::putAll);
+        final Stream<Class<?>> allSuperTypes = Stream.concat(Stream.of(clazz.getInterfaces()), Stream.of(clazz.getSuperclass()));
+        allSuperTypes.filter(Objects::nonNull).map(Type::getDescriptor).map(t -> analyzeClass(t, loadClassFromType(t))).forEach(properties::putAll);
 
         Stream.concat(relevantFields.stream().map(f -> mapField(f, type)), relevantGetters.stream().map(g -> mapGetter(g, type)))
                 .filter(Objects::nonNull).forEach(p -> {
@@ -185,7 +186,7 @@ class JavaTypeAnalyzer {
     }
 
     private static Pair<String, String> mapField(final Field field, final String containedType) {
-        final String type = JavaUtils.getFieldDescriptor(field, containedType);
+        final String type = getFieldDescriptor(field, containedType);
         if (type == null)
             return null;
 
@@ -193,7 +194,7 @@ class JavaTypeAnalyzer {
     }
 
     private static Pair<String, String> mapGetter(final Method method, final String containedType) {
-        final String returnType = JavaUtils.getReturnType(JavaUtils.getMethodSignature(method), containedType);
+        final String returnType = getReturnType(getMethodSignature(method), containedType);
         if (returnType == null)
             return null;
 

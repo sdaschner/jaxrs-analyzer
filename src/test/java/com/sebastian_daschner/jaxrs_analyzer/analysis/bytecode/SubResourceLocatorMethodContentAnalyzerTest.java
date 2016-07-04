@@ -62,7 +62,7 @@ public class SubResourceLocatorMethodContentAnalyzerTest {
         for (final String testClass : testClasses) {
             final Object[] testData = new Object[4];
 
-            final Class<?> loadedClass = JavaUtils.loadClass(testClass);
+            final Class<?> loadedClass = JavaUtils.loadClassFromName(testClass);
             testData[0] = testClass.substring(testClass.lastIndexOf('/') + 1);
             testData[1] = testClass;
             testData[2] = Type.getMethodDescriptor(loadedClass.getDeclaredMethod("method"));

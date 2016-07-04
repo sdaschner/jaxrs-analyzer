@@ -61,7 +61,7 @@ public class RelevantInstructionReducerTest {
             data.add(testData);
 
             testData[0] = testClass;
-            final Class<?> loadedClass = JavaUtils.loadClass(testClass);
+            final Class<?> loadedClass = JavaUtils.loadClassFromName(testClass);
 
             // take "instructions"-method with higher priority
             for (Method method : loadedClass.getDeclaredMethods()) {
@@ -85,7 +85,7 @@ public class RelevantInstructionReducerTest {
     @Test
     public void test() throws IOException {
         // round trip to find the correct test method
-        final Method method = Stream.of(JavaUtils.loadClass(testClass).getDeclaredMethods()).filter(m -> m.getName().equals("method")).findAny().orElseThrow(NoSuchElementException::new);
+        final Method method = Stream.of(JavaUtils.loadClassFromName(testClass).getDeclaredMethods()).filter(m -> m.getName().equals("method")).findAny().orElseThrow(NoSuchElementException::new);
 
         final List<Instruction> visitedInstructions = classUnderTest.reduceInstructions(getInstructions(method));
 

@@ -11,4 +11,6 @@ public interface TypeRepresentationVisitor {
 
     void visit(TypeRepresentation.CollectionTypeRepresentation representation);
 
+    void visit(TypeRepresentation.EnumTypeRepresentation representation);
+
 }

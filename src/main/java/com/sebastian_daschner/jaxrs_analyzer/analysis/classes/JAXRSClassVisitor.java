@@ -109,7 +109,7 @@ public class JAXRSClassVisitor extends ClassVisitor {
     }
 
     private static List<Class<?>> determineSuperTypes(final String className) {
-        final Class<?> loadedClass = JavaUtils.loadClass(className);
+        final Class<?> loadedClass = JavaUtils.loadClassFromName(className);
         if (loadedClass == null)
             return Collections.emptyList();
 

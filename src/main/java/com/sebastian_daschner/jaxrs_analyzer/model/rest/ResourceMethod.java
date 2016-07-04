@@ -38,6 +38,22 @@ public class ResourceMethod {
         this.method = method;
     }
 
+    public HttpMethod getMethod() {
+        return method;
+    }
+
+    public Set<MethodParameter> getMethodParameters() {
+        return methodParameters;
+    }
+
+    public TypeIdentifier getRequestBody() {
+        return requestBody;
+    }
+
+    public void setRequestBody(final TypeIdentifier requestBody) {
+        this.requestBody = requestBody;
+    }
+
     public Set<String> getRequestMediaTypes() {
         return requestMediaTypes;
     }
@@ -48,22 +64,6 @@ public class ResourceMethod {
 
     public Map<Integer, Response> getResponses() {
         return responses;
-    }
-
-    public Set<MethodParameter> getMethodParameters() {
-        return methodParameters;
-    }
-
-    public HttpMethod getMethod() {
-        return method;
-    }
-
-    public TypeIdentifier getRequestBody() {
-        return requestBody;
-    }
-
-    public void setRequestBody(final TypeIdentifier requestBody) {
-        this.requestBody = requestBody;
     }
 
     @Override
@@ -78,7 +78,8 @@ public class ResourceMethod {
         if (!responses.equals(that.responses)) return false;
         if (!methodParameters.equals(that.methodParameters)) return false;
         if (method != that.method) return false;
-        return !(requestBody != null ? !requestBody.equals(that.requestBody) : that.requestBody != null);
+        return requestBody != null ? requestBody.equals(that.requestBody) : that.requestBody == null;
+
     }
 
     @Override
@@ -95,11 +96,11 @@ public class ResourceMethod {
     @Override
     public String toString() {
         return "ResourceMethod{" +
-                "requestMediaTypes=" + requestMediaTypes +
+                "method=" + method +
+                ", requestMediaTypes=" + requestMediaTypes +
                 ", responseMediaTypes=" + responseMediaTypes +
                 ", responses=" + responses +
                 ", methodParameters=" + methodParameters +
-                ", method=" + method +
                 ", requestBody=" + requestBody +
                 '}';
     }

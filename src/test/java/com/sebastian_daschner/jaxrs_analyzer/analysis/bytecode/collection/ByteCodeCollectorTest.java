@@ -62,7 +62,7 @@ public class ByteCodeCollectorTest {
             testData[1] = testClass;
 
             // evaluate static "getResult"-method
-            testData[2] = JavaUtils.loadClass(testClass).getDeclaredMethod("getResult").invoke(null);
+            testData[2] = JavaUtils.loadClassFromName(testClass).getDeclaredMethod("getResult").invoke(null);
 
             data.add(testData);
         }
@@ -73,7 +73,7 @@ public class ByteCodeCollectorTest {
     @Test
     public void test() throws IOException {
         // round trip to find the correct test method
-        final Method method = Stream.of(JavaUtils.loadClass(testClass).getDeclaredMethods()).filter(m -> m.getName().equals("method")).findAny().orElseThrow(NoSuchElementException::new);
+        final Method method = Stream.of(JavaUtils.loadClassFromName(testClass).getDeclaredMethods()).filter(m -> m.getName().equals("method")).findAny().orElseThrow(NoSuchElementException::new);
 
         final ClassReader classReader = new ClassReader(testClass);
         final MethodResult methodResult = new MethodResult();

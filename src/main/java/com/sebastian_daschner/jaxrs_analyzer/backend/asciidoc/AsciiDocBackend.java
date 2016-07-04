@@ -120,7 +120,7 @@ class AsciiDocBackend implements Backend {
                 .append("*: `")
                 .append(p.getName())
                 .append("`, `")
-                .append(toReadableType(p.getType()))
+                .append(toReadableType(p.getType().getType()))
                 // TODO add default value
                 .append("` + \n"));
     }

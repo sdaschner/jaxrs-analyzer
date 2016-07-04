@@ -20,6 +20,7 @@ import com.sebastian_daschner.jaxrs_analyzer.model.elements.HttpResponse;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.HttpMethod;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.MethodParameter;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.ParameterType;
+import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeIdentifier;
 import com.sebastian_daschner.jaxrs_analyzer.model.results.MethodResult;
 
 import java.util.Arrays;
@@ -129,7 +130,10 @@ public class MethodResultBuilder {
     }
 
     private MethodResultBuilder andParam(final ParameterType parameterType, final String name, final String type, final String defaultValue) {
-        methodResult.getMethodParameters().add(new MethodParameter(type, parameterType, name, defaultValue));
+        final MethodParameter methodParameter = new MethodParameter(TypeIdentifier.ofType(type), parameterType);
+        methodParameter.setName(name);
+        methodParameter.setDefaultValue(defaultValue);
+        methodResult.getMethodParameters().add(methodParameter);
         return this;
     }
 

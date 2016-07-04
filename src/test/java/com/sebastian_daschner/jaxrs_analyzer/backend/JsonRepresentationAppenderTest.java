@@ -43,6 +43,18 @@ public class JsonRepresentationAppenderTest {
     }
 
     @Test
+    public void testEnum() {
+        TypeRepresentation.ofEnum(STRING_IDENTIFIER, "Foo", "bar").accept(cut);
+        assertThat(builder.toString(), is("\"Foo\"|\"bar\""));
+    }
+
+    @Test
+    public void testEnumEmpty() {
+        TypeRepresentation.ofEnum(STRING_IDENTIFIER).accept(cut);
+        assertThat(builder.toString(), is("\"string\""));
+    }
+
+    @Test
     public void testVisitSimpleList() {
         final TypeRepresentation stringRepresentation = TypeRepresentation.ofConcrete(STRING_IDENTIFIER);
         final TypeRepresentation listRepresentation = TypeRepresentation.ofCollection(STRING_LIST_IDENTIFIER, stringRepresentation);
@@ -96,15 +108,19 @@ public class JsonRepresentationAppenderTest {
     @Test
     public void testVisitConcrete() {
         final TypeIdentifier identifier = TypeIdentifier.ofType("com.sebastian_daschner.test.Model");
+        final TypeIdentifier enumIdentifier = TypeIdentifier.ofType("com.sebastian_daschner.test.TestEnum");
         Map<String, TypeIdentifier> properties = new HashMap<>();
         properties.put("world", INT_IDENTIFIER);
         properties.put("hello", STRING_IDENTIFIER);
         properties.put("abc", STRING_IDENTIFIER);
+        properties.put("enumeration", enumIdentifier);
         final TypeRepresentation representation = TypeRepresentation.ofConcrete(identifier, properties);
+        final TypeRepresentation enumRepresentation = TypeRepresentation.ofEnum(identifier, "FOO", "BAR", "BAZ");
 
         representations.put(identifier, representation);
+        representations.put(enumIdentifier, enumRepresentation);
         representation.accept(cut);
-        assertThat(builder.toString(), is("{\"abc\":\"string\",\"hello\":\"string\",\"world\":0}"));
+        assertThat(builder.toString(), is("{\"abc\":\"string\",\"enumeration\":\"BAR\"|\"BAZ\"|\"FOO\",\"hello\":\"string\",\"world\":0}"));
     }
 
     @Test

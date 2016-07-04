@@ -7,6 +7,7 @@ import com.sebastian_daschner.jaxrs_analyzer.model.Types;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.HttpMethod;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.MethodParameter;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.ParameterType;
+import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeIdentifier;
 import com.sebastian_daschner.jaxrs_analyzer.model.results.ClassResult;
 import com.sebastian_daschner.jaxrs_analyzer.model.results.MethodResult;
 import org.objectweb.asm.AnnotationVisitor;
@@ -103,7 +104,7 @@ class JAXRSMethodVisitor extends ProjectMethodVisitor {
 
         MethodParameter methodParameter = methodParameters.get(index);
         if (methodParameter == null) {
-            methodParameter = new MethodParameter(type, parameterType);
+            methodParameter = new MethodParameter(TypeIdentifier.ofType(type), parameterType);
             methodParameters.put(index, methodParameter);
         } else {
             methodParameter.setParameterType(parameterType);
@@ -117,7 +118,7 @@ class JAXRSMethodVisitor extends ProjectMethodVisitor {
 
         MethodParameter methodParameter = methodParameters.get(index);
         if (methodParameter == null) {
-            methodParameter = new MethodParameter(type);
+            methodParameter = new MethodParameter(TypeIdentifier.ofType(type));
             methodParameters.put(index, methodParameter);
         }
 

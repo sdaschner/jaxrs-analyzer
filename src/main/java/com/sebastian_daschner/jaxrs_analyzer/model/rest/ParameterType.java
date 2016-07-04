@@ -1,7 +1,7 @@
 package com.sebastian_daschner.jaxrs_analyzer.model.rest;
 
 /**
- * The available parameter types. Needed for identification in {@link MethodParameters}.
+ * The available parameter types. Needed for identification in {@link MethodParameter}.
  *
  * @author Sebastian Daschner
  */

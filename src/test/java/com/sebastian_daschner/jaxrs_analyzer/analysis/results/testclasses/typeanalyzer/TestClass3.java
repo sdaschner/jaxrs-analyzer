@@ -57,7 +57,7 @@ public class TestClass3 {
         final TypeRepresentation testClass3 = TypeRepresentation.ofConcrete(expectedIdentifier(), properties);
         final TypeRepresentation innerClass = TypeRepresentation.ofConcrete(innerClassIdentifier, Collections.singletonMap("name", TypeUtils.STRING_IDENTIFIER));
         final TypeRepresentation anotherInner = TypeRepresentation.ofConcrete(anotherInnerIdentifier);
-        final TypeRepresentation type = TypeRepresentation.ofConcrete(typeIdentifier);
+        final TypeRepresentation type = TypeRepresentation.ofEnum(typeIdentifier, "ONE", "TWO", "THREE");
 
         return new HashSet<>(Arrays.asList(testClass3, innerClass, anotherInner, type));
     }

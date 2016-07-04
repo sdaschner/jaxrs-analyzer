@@ -7,9 +7,10 @@ import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeRepresentationVisito
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
-import static com.sebastian_daschner.jaxrs_analyzer.model.Types.*;
 import static com.sebastian_daschner.jaxrs_analyzer.backend.ComparatorUtils.mapKeyComparator;
+import static com.sebastian_daschner.jaxrs_analyzer.model.Types.*;
 
 /**
  * Adds the JSON representation of type identifiers to String builders.
@@ -62,6 +63,15 @@ public class JsonRepresentationAppender implements TypeRepresentationVisitor {
     public void visit(TypeRepresentation.CollectionTypeRepresentation representation) {
         builder.append('[');
         collectionDepth++;
+    }
+
+    @Override
+    public void visit(final TypeRepresentation.EnumTypeRepresentation representation) {
+        final String values = representation.getEnumValues().stream().sorted()
+                .map(s -> '"' + s + '"')
+                .collect(Collectors.joining("|"));
+
+        builder.append(values.isEmpty() ? "\"string\"" : values);
     }
 
     private static String toPrimitiveType(final TypeIdentifier value) {

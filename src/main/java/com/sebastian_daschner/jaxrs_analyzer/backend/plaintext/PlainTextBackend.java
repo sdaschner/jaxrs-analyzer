@@ -135,7 +135,7 @@ class PlainTextBackend implements Backend {
                 .append(name)
                 .append(p.getName())
                 .append(", ")
-                .append(toReadableType(p.getType()))
+                .append(toReadableType(p.getType().getType()))
                 // TODO add default value
                 .append('\n'));
     }

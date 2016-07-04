@@ -136,16 +136,16 @@ public class ProjectAnalyzerTest {
         }
     }
 
-    public static Resources getResources() {
+    private static Resources getResources() {
         final Resources resources = new Resources();
         Map<String, TypeIdentifier> properties;
 
         final TypeIdentifier stringIdentifier = TypeIdentifier.ofType(Types.STRING);
 
-        final TypeIdentifier modelIdentifier = TypeIdentifier.ofType("Lcom/sebastian_daschner/jaxrs_test/Model;");
         properties = new HashMap<>();
         properties.put("id", TypeIdentifier.ofType(Types.PRIMITIVE_LONG));
         properties.put("name", stringIdentifier);
+        final TypeIdentifier modelIdentifier = TypeIdentifier.ofType("Lcom/sebastian_daschner/jaxrs_test/Model;");
         final TypeRepresentation modelRepresentation = TypeRepresentation.ofConcrete(modelIdentifier, properties);
         resources.getTypeRepresentations().put(modelIdentifier, modelRepresentation);
 
@@ -181,7 +181,7 @@ public class ProjectAnalyzerTest {
                 .andPathParam("id", Types.STRING).build();
         ResourceMethod secondDelete = ResourceMethodBuilder.withMethod(HttpMethod.DELETE)
                 .andAcceptMediaTypes("application/json").andResponseMediaTypes("application/json")
-                .andPathParam("id", "Ljava/util/Map<Ljava/lang/String;Ljava/util/List<Ljava/lang/String;>;>;")
+                .andPathParam("id", "Ljava/lang/String;")
                 .andResponse(204, ResponseBuilder.newBuilder().build())
                 .andResponse(404, ResponseBuilder.newBuilder().andHeaders("X-Message").build())
                 .andResponse(500, ResponseBuilder.newBuilder().build()).build();

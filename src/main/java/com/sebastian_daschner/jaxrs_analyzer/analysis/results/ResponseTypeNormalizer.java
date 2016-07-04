@@ -35,24 +35,6 @@ final class ResponseTypeNormalizer {
     }
 
     /**
-     * Normalizes all known nested types.
-     *
-     * @param type The type
-     * @return The fully normalized type
-     */
-    static String normalize(final String type) {
-        String currentType = type;
-        String lastType;
-        do {
-            lastType = currentType;
-            currentType = normalizeCollection(currentType);
-            currentType = normalizeResponseWrapper(currentType);
-        } while (!lastType.equals(currentType));
-
-        return currentType;
-    }
-
-    /**
      * Normalizes the contained collection type.
      *
      * @param type The type

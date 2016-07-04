@@ -38,6 +38,7 @@ public class ResultInterpreter {
     private JavaTypeAnalyzer javaTypeAnalyzer;
     private Resources resources;
     private DynamicTypeAnalyzer dynamicTypeAnalyzer;
+    private StringParameterResolver stringParameterResolver;
 
     /**
      * Interprets the class results.
@@ -50,6 +51,7 @@ public class ResultInterpreter {
 
         javaTypeAnalyzer = new JavaTypeAnalyzer(resources.getTypeRepresentations());
         dynamicTypeAnalyzer = new DynamicTypeAnalyzer(resources.getTypeRepresentations());
+        stringParameterResolver = new StringParameterResolver(resources.getTypeRepresentations(), javaTypeAnalyzer);
 
         classResults.stream().filter(c -> c.getResourcePath() != null).forEach(this::interpretClassResult);
 
@@ -97,6 +99,7 @@ public class ResultInterpreter {
         final ResourceMethod resourceMethod = new ResourceMethod(methodResult.getHttpMethod());
         updateMethodParameters(resourceMethod.getMethodParameters(), classResult.getClassFields());
         updateMethodParameters(resourceMethod.getMethodParameters(), methodResult.getMethodParameters());
+        stringParameterResolver.replaceParametersTypes(resourceMethod.getMethodParameters());
 
         if (methodResult.getRequestBodyType() != null) {
             resourceMethod.setRequestBody(javaTypeAnalyzer.analyze(methodResult.getRequestBodyType()));

@@ -22,6 +22,7 @@ import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeRepresentationVisito
 import com.sebastian_daschner.jaxrs_analyzer.utils.Pair;
 
 import javax.json.Json;
+import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 import java.util.HashMap;
@@ -51,13 +52,13 @@ class SchemaBuilder {
     }
 
     /**
-     * Creates the schema object for the identifier.
+     * Creates the schema object builder for the identifier.
      * The actual definitions are retrieved via {@link SchemaBuilder#getDefinitions} after all types have been declared.
      *
      * @param identifier The identifier
-     * @return The schema JSON object
+     * @return The schema JSON object builder with the needed properties
      */
-    JsonObject build(final TypeIdentifier identifier) {
+    JsonObjectBuilder build(final TypeIdentifier identifier) {
         final SwaggerType type = SwaggerUtils.toSwaggerType(identifier.getType());
         switch (type) {
             case BOOLEAN:
@@ -67,7 +68,7 @@ class SchemaBuilder {
             case STRING:
                 final JsonObjectBuilder builder = Json.createObjectBuilder();
                 addPrimitive(builder, type);
-                return builder.build();
+                return builder;
         }
 
         final JsonObjectBuilder builder = Json.createObjectBuilder();
@@ -92,6 +93,12 @@ class SchemaBuilder {
                 inCollection = true;
             }
 
+            @Override
+            public void visit(final TypeRepresentation.EnumTypeRepresentation representation) {
+                builder.add("type", "string");
+                if (!representation.getEnumValues().isEmpty())
+                    builder.add("enum", representation.getEnumValues().stream().sorted().collect(Json::createArrayBuilder, JsonArrayBuilder::add, JsonArrayBuilder::add));
+            }
         };
 
         final TypeRepresentation representation = typeRepresentations.get(identifier);
@@ -99,7 +106,7 @@ class SchemaBuilder {
             builder.add("type", "object");
         else
             representation.accept(visitor);
-        return builder.build();
+        return builder;
     }
 
     /**

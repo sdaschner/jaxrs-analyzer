@@ -203,8 +203,8 @@ public final class JavaUtils {
             return false;
         }
 
-        final Class<?> leftClass = loadClass(toClassName(leftType));
-        final Class<?> rightClass = loadClass(toClassName(rightType));
+        final Class<?> leftClass = loadClassFromType(leftType);
+        final Class<?> rightClass = loadClassFromType(rightType);
         if (leftClass == null || rightClass == null)
             return false;
 
@@ -329,7 +329,7 @@ public final class JavaUtils {
     private static Map<String, String> getTypeVariables(final String type) {
         final Map<String, String> variables = new HashMap<>();
         final List<String> actualTypeParameters = getTypeParameters(type);
-        final Class<?> loadedClass = loadClass(toClassName(type));
+        final Class<?> loadedClass = loadClassFromType(type);
         if (loadedClass == null) {
             LogProvider.debug("could not load class for type " + type);
             return Collections.emptyMap();
@@ -342,7 +342,7 @@ public final class JavaUtils {
         return variables;
     }
 
-    public static Class<?> loadClass(final String className) {
+    public static Class<?> loadClassFromName(final String className) {
         switch (className) {
             case CLASS_PRIMITIVE_VOID:
                 return int.class;
@@ -376,8 +376,12 @@ public final class JavaUtils {
         }
     }
 
+    public static Class<?> loadClassFromType(final String type) {
+        return loadClassFromName(toClassName(type));
+    }
+
     public static Method findMethod(final String className, final String methodName, final String signature) {
-        final Class<?> loadedClass = loadClass(className);
+        final Class<?> loadedClass = loadClassFromName(className);
         if (loadedClass == null)
             return null;
 

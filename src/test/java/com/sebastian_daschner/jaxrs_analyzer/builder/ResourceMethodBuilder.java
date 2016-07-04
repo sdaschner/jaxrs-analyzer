@@ -118,7 +118,10 @@ public class ResourceMethodBuilder {
     }
 
     public ResourceMethodBuilder andParam(final ParameterType parameterType, final String name, final String type, final String defaultValue) {
-        method.getMethodParameters().add(new MethodParameter(type, parameterType, name, defaultValue));
+        final MethodParameter methodParameter = new MethodParameter(TypeIdentifier.ofType(type), parameterType);
+        methodParameter.setName(name);
+        methodParameter.setDefaultValue(defaultValue);
+        method.getMethodParameters().add(methodParameter);
         return this;
     }
 

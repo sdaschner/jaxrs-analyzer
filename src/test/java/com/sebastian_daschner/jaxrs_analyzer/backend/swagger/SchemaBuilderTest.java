@@ -11,16 +11,14 @@ import javax.json.JsonObject;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.sebastian_daschner.jaxrs_analyzer.analysis.results.TypeUtils.*;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 
 public class SchemaBuilderTest {
 
-    private static final TypeIdentifier STRING_IDENTIFIER = TypeIdentifier.ofType(Types.STRING);
-    private static final TypeIdentifier INT_IDENTIFIER = TypeIdentifier.ofType(Types.PRIMITIVE_INT);
     private static final TypeIdentifier INTEGER_IDENTIFIER = TypeIdentifier.ofType(Types.INTEGER);
     private static final TypeIdentifier INT_LIST_IDENTIFIER = TypeIdentifier.ofType("Ljava/util/List<Ljava/lang/Integer;>;");
-    private static final TypeIdentifier OBJECT_IDENTIFIER = TypeIdentifier.ofType(Types.OBJECT);
 
     private SchemaBuilder cut;
     private final Map<TypeIdentifier, TypeRepresentation> representations = new HashMap<>();
@@ -34,7 +32,7 @@ public class SchemaBuilderTest {
     public void testSimpleDefinitions() {
         representations.put(INT_LIST_IDENTIFIER, TypeRepresentation.ofCollection(INTEGER_IDENTIFIER, TypeRepresentation.ofConcrete(INTEGER_IDENTIFIER)));
 
-        final TypeIdentifier modelIdentifier = TypeIdentifier.ofType("Lcom/sebastian_daschner/test/Model;");
+        final TypeIdentifier modelIdentifier = MODEL_IDENTIFIER;
         final Map<String, TypeIdentifier> modelProperties = new HashMap<>();
 
         modelProperties.put("test1", INT_IDENTIFIER);
@@ -59,8 +57,8 @@ public class SchemaBuilderTest {
         representations.put(OBJECT_IDENTIFIER, TypeRepresentation.ofConcrete(OBJECT_IDENTIFIER, dynamicProperties));
 
         cut = new SchemaBuilder(representations);
-        assertThat(cut.build(modelIdentifier), is(Json.createObjectBuilder().add("$ref", "#/definitions/Model").build()));
-        assertThat(cut.build(OBJECT_IDENTIFIER), is(Json.createObjectBuilder().add("$ref", "#/definitions/Object").build()));
+        assertThat(cut.build(modelIdentifier).build(), is(Json.createObjectBuilder().add("$ref", "#/definitions/Model").build()));
+        assertThat(cut.build(OBJECT_IDENTIFIER).build(), is(Json.createObjectBuilder().add("$ref", "#/definitions/Object").build()));
 
         final JsonObject definitions = cut.getDefinitions();
         assertThat(definitions, is(Json.createObjectBuilder()
@@ -98,8 +96,8 @@ public class SchemaBuilderTest {
 
         cut = new SchemaBuilder(representations);
 
-        assertThat(cut.build(lockIdentifier), is(Json.createObjectBuilder().add("$ref", "#/definitions/Lock").build()));
-        assertThat(cut.build(anotherLockIdentifier), is(Json.createObjectBuilder().add("$ref", "#/definitions/Lock_2").build()));
+        assertThat(cut.build(lockIdentifier).build(), is(Json.createObjectBuilder().add("$ref", "#/definitions/Lock").build()));
+        assertThat(cut.build(anotherLockIdentifier).build(), is(Json.createObjectBuilder().add("$ref", "#/definitions/Lock_2").build()));
 
         final JsonObject definitions = cut.getDefinitions();
         assertThat(definitions, is(Json.createObjectBuilder()
@@ -128,7 +126,7 @@ public class SchemaBuilderTest {
 
         cut = new SchemaBuilder(representations);
 
-        assertThat(cut.build(identifier), is(Json.createObjectBuilder().add("$ref", "#/definitions/JsonObject").build()));
+        assertThat(cut.build(identifier).build(), is(Json.createObjectBuilder().add("$ref", "#/definitions/JsonObject").build()));
 
         final JsonObject definitions = cut.getDefinitions();
         assertThat(definitions, is(Json.createObjectBuilder()
@@ -141,22 +139,21 @@ public class SchemaBuilderTest {
 
     @Test
     public void testMultipleDifferentDefinitions() {
-        final TypeIdentifier modelIdentifier = TypeIdentifier.ofType("Lcom/sebastian_daschner/test/Model;");
         final Map<String, TypeIdentifier> properties = new HashMap<>();
 
         properties.put("test1", INT_IDENTIFIER);
         properties.put("hello1", STRING_IDENTIFIER);
         properties.put("array1", INT_LIST_IDENTIFIER);
 
-        representations.put(modelIdentifier, TypeRepresentation.ofConcrete(modelIdentifier, properties));
+        representations.put(MODEL_IDENTIFIER, TypeRepresentation.ofConcrete(MODEL_IDENTIFIER, properties));
         representations.put(INT_LIST_IDENTIFIER, TypeRepresentation.ofCollection(INTEGER_IDENTIFIER, TypeRepresentation.ofConcrete(INTEGER_IDENTIFIER)));
 
         cut = new SchemaBuilder(representations);
 
-        assertThat(cut.build(modelIdentifier), is(Json.createObjectBuilder().add("$ref", "#/definitions/Model").build()));
-        assertThat(cut.build(TypeIdentifier.ofType(Types.OBJECT)), is(Json.createObjectBuilder().add("type", "object").build()));
-        final TypeIdentifier secondModelIdentifier = TypeIdentifier.ofType("Lcom/sebastian_daschner/test/Model;");
-        assertThat(cut.build(secondModelIdentifier), is(Json.createObjectBuilder().add("$ref", "#/definitions/Model").build()));
+        assertThat(cut.build(MODEL_IDENTIFIER).build(), is(Json.createObjectBuilder().add("$ref", "#/definitions/Model").build()));
+        assertThat(cut.build(TypeIdentifier.ofType(Types.OBJECT)).build(), is(Json.createObjectBuilder().add("type", "object").build()));
+        // build with different type identifier instance
+        assertThat(cut.build(TypeIdentifier.ofType("Lcom/sebastian_daschner/test/Model;")).build(), is(Json.createObjectBuilder().add("$ref", "#/definitions/Model").build()));
 
         final JsonObject definitions = cut.getDefinitions();
         assertThat(definitions, is(Json.createObjectBuilder()
@@ -187,9 +184,9 @@ public class SchemaBuilderTest {
 
         cut = new SchemaBuilder(representations);
 
-        assertThat(cut.build(firstIdentifier), is(Json.createObjectBuilder().add("$ref", "#/definitions/JsonObject").build()));
-        assertThat(cut.build(firstIdentifier), is(Json.createObjectBuilder().add("$ref", "#/definitions/JsonObject").build()));
-        assertThat(cut.build(secondIdentifier), is(Json.createObjectBuilder().add("$ref", "#/definitions/JsonObject_2").build()));
+        assertThat(cut.build(firstIdentifier).build(), is(Json.createObjectBuilder().add("$ref", "#/definitions/JsonObject").build()));
+        assertThat(cut.build(firstIdentifier).build(), is(Json.createObjectBuilder().add("$ref", "#/definitions/JsonObject").build()));
+        assertThat(cut.build(secondIdentifier).build(), is(Json.createObjectBuilder().add("$ref", "#/definitions/JsonObject_2").build()));
 
         final JsonObject definitions = cut.getDefinitions();
         assertThat(definitions, is(Json.createObjectBuilder()
@@ -200,6 +197,31 @@ public class SchemaBuilderTest {
                         .add("test1", type("integer"))))
                 .add("JsonObject_2", Json.createObjectBuilder().add("properties", Json.createObjectBuilder()
                         .add("nested", Json.createObjectBuilder().add("$ref", "#/definitions/JsonObject"))))
+                .build()));
+    }
+
+    @Test
+    public void testEnumDefinitions() {
+        final TypeIdentifier enumIdentifier = TypeIdentifier.ofType("Lcom/sebastian_daschner/test/Enumeration;");
+        final Map<String, TypeIdentifier> modelProperties = new HashMap<>();
+
+        modelProperties.put("foobar", enumIdentifier);
+        modelProperties.put("hello1", STRING_IDENTIFIER);
+
+        representations.put(MODEL_IDENTIFIER, TypeRepresentation.ofConcrete(MODEL_IDENTIFIER, modelProperties));
+        representations.put(enumIdentifier, TypeRepresentation.ofEnum(enumIdentifier, "THIRD", "FIRST", "SECOND"));
+
+        cut = new SchemaBuilder(representations);
+
+        assertThat(cut.build(MODEL_IDENTIFIER).build(), is(Json.createObjectBuilder().add("$ref", "#/definitions/Model").build()));
+        assertThat(cut.build(enumIdentifier).build(), is(Json.createObjectBuilder().add("type", "string")
+                .add("enum", Json.createArrayBuilder().add("FIRST").add("SECOND").add("THIRD")).build()));
+
+        final JsonObject definitions = cut.getDefinitions();
+        assertThat(definitions, is(Json.createObjectBuilder()
+                .add("Model", Json.createObjectBuilder().add("properties", Json.createObjectBuilder()
+                        .add("foobar", Json.createObjectBuilder().add("type", "string").add("enum", Json.createArrayBuilder().add("FIRST").add("SECOND").add("THIRD")))
+                        .add("hello1", type("string"))))
                 .build()));
     }
 

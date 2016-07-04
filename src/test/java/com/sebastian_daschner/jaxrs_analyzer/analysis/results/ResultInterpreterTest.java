@@ -16,8 +16,8 @@
 
 package com.sebastian_daschner.jaxrs_analyzer.analysis.results;
 
-import com.sebastian_daschner.jaxrs_analyzer.model.Types;
 import com.sebastian_daschner.jaxrs_analyzer.builder.*;
+import com.sebastian_daschner.jaxrs_analyzer.model.Types;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.*;
 import com.sebastian_daschner.jaxrs_analyzer.model.results.ClassResult;
 import com.sebastian_daschner.jaxrs_analyzer.model.results.MethodResult;
@@ -83,33 +83,6 @@ public class ResultInterpreterTest {
         final MethodResult subResourceMethod = MethodResultBuilder.withResponses(HttpResponseBuilder.withStatues(204).build()).andMethod(HttpMethod.POST).build();
         subResourceLocator.setSubResource(ClassResultBuilder.withResourcePath(null).andMethods(subResourceMethod).build());
         final ClassResult resClassResult = ClassResultBuilder.withResourcePath("test").andMethods(method, subResourceLocator).build();
-
-        final Set<ClassResult> results = new HashSet<>(Arrays.asList(appPathResult, resClassResult));
-
-        final Resources actualResult = classUnderTest.interpret(results);
-
-        assertEquals(expectedResult, actualResult);
-    }
-
-    @Test
-    public void testNormalizeGenericEntity() {
-        final Resources expectedResult = new Resources();
-        expectedResult.setBasePath("path");
-
-        final TypeIdentifier stringListIdentifier = TypeIdentifier.ofType("Ljava/util/List<Ljava/lang/String;>;");
-        final TypeRepresentation stringList = TypeRepresentation.ofCollection(stringListIdentifier, TypeRepresentation.ofConcrete(STRING_IDENTIFIER));
-        expectedResult.getTypeRepresentations().put(stringListIdentifier, stringList);
-
-        final ResourceMethod resourceGetMethod = ResourceMethodBuilder.withMethod(HttpMethod.GET)
-                .andResponse(200, ResponseBuilder.withResponseBody(stringListIdentifier).build())
-                .build();
-        expectedResult.addMethod("test", resourceGetMethod);
-
-        final ClassResult appPathResult = ClassResultBuilder.withApplicationPath("path").build();
-        final MethodResult method = MethodResultBuilder
-                .withResponses(HttpResponseBuilder.withStatues(200).andEntityTypes("Ljavax/ws/rs/core/GenericEntity<Ljava/util/List<Ljava/lang/String;>;>;").build())
-                .andMethod(HttpMethod.GET).build();
-        final ClassResult resClassResult = ClassResultBuilder.withResourcePath("test").andMethods(method).build();
 
         final Set<ClassResult> results = new HashSet<>(Arrays.asList(appPathResult, resClassResult));
 
@@ -231,7 +204,7 @@ public class ResultInterpreterTest {
     }
 
     @Test
-    public void testNormalizeList() {
+    public void testNormalize() {
         final Resources expectedResult = new Resources();
         expectedResult.setBasePath("path");
 

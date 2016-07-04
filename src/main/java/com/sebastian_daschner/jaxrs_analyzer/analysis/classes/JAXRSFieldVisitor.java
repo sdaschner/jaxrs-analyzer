@@ -6,6 +6,7 @@ import com.sebastian_daschner.jaxrs_analyzer.analysis.classes.annotation.ParamAn
 import com.sebastian_daschner.jaxrs_analyzer.model.Types;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.MethodParameter;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.ParameterType;
+import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeIdentifier;
 import com.sebastian_daschner.jaxrs_analyzer.model.results.ClassResult;
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.FieldVisitor;
@@ -51,7 +52,7 @@ class JAXRSFieldVisitor extends FieldVisitor {
 
     private AnnotationVisitor paramAnnotationVisitor(final ParameterType parameterType) {
         if (parameter == null)
-            parameter = new MethodParameter(signature, parameterType);
+            parameter = new MethodParameter(TypeIdentifier.ofType(signature), parameterType);
         else
             parameter.setParameterType(parameterType);
         return new ParamAnnotationVisitor(parameter);
@@ -59,7 +60,7 @@ class JAXRSFieldVisitor extends FieldVisitor {
 
     private AnnotationVisitor defaultAnnotationVisitor() {
         if (parameter == null)
-            parameter = new MethodParameter(signature);
+            parameter = new MethodParameter(TypeIdentifier.ofType(signature));
         return new DefaultValueAnnotationVisitor(parameter);
     }
 

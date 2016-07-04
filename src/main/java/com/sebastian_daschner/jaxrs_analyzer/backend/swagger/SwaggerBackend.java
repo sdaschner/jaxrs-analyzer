@@ -158,11 +158,10 @@ class SwaggerBackend implements Backend {
                 .forEach(e -> {
                     final String swaggerParameterType = getSwaggerParameterType(parameterType);
                     if (swaggerParameterType != null)
-                        builder.add(Json.createObjectBuilder()
+                        builder.add(schemaBuilder.build(e.getType())
                                 .add("name", e.getName())
                                 .add("in", swaggerParameterType)
-                                .add("required", e.getDefaultValue() == null)
-                                .add("type", SwaggerUtils.toSwaggerType(e.getType()).toString()));
+                                .add("required", e.getDefaultValue() == null));
                 });
     }
 
@@ -178,7 +177,7 @@ class SwaggerBackend implements Backend {
                     .add("headers", headers);
 
             if (e.getValue().getResponseBody() != null) {
-                final JsonObject schema = schemaBuilder.build(e.getValue().getResponseBody());
+                final JsonObject schema = schemaBuilder.build(e.getValue().getResponseBody()).build();
                 if (!schema.isEmpty())
                     response.add("schema", schema);
             }

@@ -65,7 +65,7 @@ public class ClassAnalyzerTest {
             testData[1] = testClass;
 
             // evaluate static "getResult"-method
-            testData[2] = JavaUtils.loadClass(testClass).getDeclaredMethod("getResult").invoke(null);
+            testData[2] = JavaUtils.loadClassFromName(testClass).getDeclaredMethod("getResult").invoke(null);
 
             data.add(testData);
         }

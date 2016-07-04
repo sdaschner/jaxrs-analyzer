@@ -36,23 +36,28 @@ final class SwaggerUtils {
      * @return The Swagger type
      */
     static SwaggerType toSwaggerType(final String type) {
-        if (STRING.equals(type))
-            return SwaggerType.STRING;
-
-        if (BOOLEAN.equals(type) || PRIMITIVE_BOOLEAN.equals(type))
-            return SwaggerType.BOOLEAN;
-
         if (INTEGER_TYPES.contains(type))
             return SwaggerType.INTEGER;
 
         if (DOUBLE_TYPES.contains(type))
             return SwaggerType.NUMBER;
 
-        // TODO
-//        if (type.getCtClass().isArray())
-//            return SwaggerType.ARRAY;
+        if (BOOLEAN.equals(type) || PRIMITIVE_BOOLEAN.equals(type))
+            return SwaggerType.BOOLEAN;
+
+        if (STRING.equals(type))
+            return SwaggerType.STRING;
 
         return SwaggerType.OBJECT;
     }
 
+//    public static void addSwaggerType(final String type, final JsonObjectBuilder param) {
+//        final SwaggerType swaggerType = toSwaggerType(type);
+//
+//        param.add("type", swaggerType.toString());
+//
+//        if (swaggerType == SwaggerType.ARRAY) {
+//            param.add("items", toSwaggerType());
+//        }
+//    }
 }

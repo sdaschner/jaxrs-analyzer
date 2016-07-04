@@ -8,25 +8,27 @@ package com.sebastian_daschner.jaxrs_analyzer.model.rest;
  */
 public class MethodParameter {
 
-    private String type;
+    // only String, primitive types, enums or collections of these (no nested levels) are allowed
+    private TypeIdentifier type;
     private ParameterType parameterType;
     private String name;
     private String defaultValue;
 
-    public MethodParameter(final String type) {
+    public MethodParameter(final TypeIdentifier type) {
         this.type = type;
     }
 
-    public MethodParameter(final String type, final ParameterType parameterType) {
+    public MethodParameter(final TypeIdentifier type, final ParameterType parameterType) {
         this.type = type;
         this.parameterType = parameterType;
     }
 
-    public MethodParameter(final String type, final ParameterType parameterType, final String name, final String defaultValue) {
+    public TypeIdentifier getType() {
+        return type;
+    }
+
+    public void setType(final TypeIdentifier type) {
         this.type = type;
-        this.parameterType = parameterType;
-        this.name = name;
-        this.defaultValue = defaultValue;
     }
 
     public ParameterType getParameterType() {
@@ -45,14 +47,6 @@ public class MethodParameter {
         this.name = name;
     }
 
-    public String getType() {
-        return type;
-    }
-
-    public void setType(final String type) {
-        this.type = type;
-    }
-
     public String getDefaultValue() {
         return defaultValue;
     }
@@ -68,18 +62,17 @@ public class MethodParameter {
 
         final MethodParameter that = (MethodParameter) o;
 
+        if (type != null ? !type.equals(that.type) : that.type != null) return false;
         if (parameterType != that.parameterType) return false;
         if (name != null ? !name.equals(that.name) : that.name != null) return false;
-        if (type != null ? !type.equals(that.type) : that.type != null) return false;
         return defaultValue != null ? defaultValue.equals(that.defaultValue) : that.defaultValue == null;
-
     }
 
     @Override
     public int hashCode() {
-        int result = parameterType != null ? parameterType.hashCode() : 0;
+        int result = type != null ? type.hashCode() : 0;
+        result = 31 * result + (parameterType != null ? parameterType.hashCode() : 0);
         result = 31 * result + (name != null ? name.hashCode() : 0);
-        result = 31 * result + (type != null ? type.hashCode() : 0);
         result = 31 * result + (defaultValue != null ? defaultValue.hashCode() : 0);
         return result;
     }
@@ -87,11 +80,10 @@ public class MethodParameter {
     @Override
     public String toString() {
         return "MethodParameter{" +
-                "defaultValue='" + defaultValue + '\'' +
-                ", type='" + type + '\'' +
+                "type=" + type +
                 ", parameterType=" + parameterType +
                 ", name='" + name + '\'' +
+                ", defaultValue='" + defaultValue + '\'' +
                 '}';
     }
-
 }

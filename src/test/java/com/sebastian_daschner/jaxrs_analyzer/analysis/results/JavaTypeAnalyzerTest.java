@@ -23,7 +23,6 @@ import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeRepresentation;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
-import org.objectweb.asm.Type;
 
 import javax.ws.rs.NotFoundException;
 import java.io.IOException;
@@ -63,7 +62,7 @@ public class JavaTypeAnalyzerTest {
                 continue;
 
             final Object[] testData = new Object[4];
-            final Class<?> loadedClass = JavaUtils.loadClass(testClass);
+            final Class<?> loadedClass = JavaUtils.loadClassFromName(testClass);
             testData[0] = testClass.substring(testClass.lastIndexOf('/') + 1);
             testData[1] = testClass;
             testData[2] = loadedClass.getDeclaredMethod("expectedIdentifier").invoke(null);
