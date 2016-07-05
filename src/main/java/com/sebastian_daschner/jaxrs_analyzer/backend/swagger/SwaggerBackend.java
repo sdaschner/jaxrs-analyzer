@@ -127,7 +127,8 @@ class SwaggerBackend implements Backend {
         final JsonArrayBuilder produces = Json.createArrayBuilder();
         method.getResponseMediaTypes().stream().sorted().forEach(produces::add);
 
-        final JsonObjectBuilder methodDescription = Json.createObjectBuilder().add("consumes", consumes).add("produces", produces)
+        final JsonObjectBuilder methodDescription = Json.createObjectBuilder().add("consumes", consumes)
+                .add("produces", produces).add("operationId", method.getName())
                 .add("parameters", buildParameters(method)).add("responses", buildResponses(method));
 
         if (options.isRenderTags())

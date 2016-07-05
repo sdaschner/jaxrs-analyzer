@@ -96,7 +96,7 @@ public class ResultInterpreter {
      */
     private ResourceMethod interpretResourceMethod(final MethodResult methodResult, final ClassResult classResult) {
         // HTTP method and method parameters
-        final ResourceMethod resourceMethod = new ResourceMethod(methodResult.getHttpMethod());
+        final ResourceMethod resourceMethod = new ResourceMethod(methodResult.getMethodName(), methodResult.getHttpMethod());
         updateMethodParameters(resourceMethod.getMethodParameters(), classResult.getClassFields());
         updateMethodParameters(resourceMethod.getMethodParameters(), methodResult.getMethodParameters());
         stringParameterResolver.replaceParametersTypes(resourceMethod.getMethodParameters());

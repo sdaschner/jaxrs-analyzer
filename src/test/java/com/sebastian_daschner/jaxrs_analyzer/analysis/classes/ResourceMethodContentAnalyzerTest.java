@@ -93,7 +93,7 @@ public class ResourceMethodContentAnalyzerTest {
                 @Override
                 public MethodVisitor visitMethod(final int access, final String name, final String desc, final String signature, final String[] exceptions) {
                     if ("method".equals(name))
-                        return new JAXRSMethodVisitor(classResult, classResult.getOriginalClass(), desc, signature, new MethodResult(), true);
+                        return new JAXRSMethodVisitor(classResult, classResult.getOriginalClass(), name, desc, signature, new MethodResult(), true);
                     return null;
                 }
             };

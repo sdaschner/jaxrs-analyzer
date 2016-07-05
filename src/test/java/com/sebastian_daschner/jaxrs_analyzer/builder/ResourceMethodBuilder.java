@@ -25,7 +25,7 @@ public class ResourceMethodBuilder {
     private final ResourceMethod method;
 
     private ResourceMethodBuilder(final HttpMethod method) {
-        this.method = new ResourceMethod(method);
+        this.method = new ResourceMethod("", method);
     }
 
     public static ResourceMethodBuilder withMethod(final HttpMethod method) {
