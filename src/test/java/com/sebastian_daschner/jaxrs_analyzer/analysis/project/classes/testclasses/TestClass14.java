@@ -49,6 +49,7 @@ public class TestClass14 {
         final MethodResult method = MethodResultBuilder
                 .withResponses(HttpResponseBuilder.withStatues(200).build())
                 .andPath("{info}")
+                .andMethodName("getInfo")
                 .andMethod(HttpMethod.GET)
                 .andQueryParam("value", Types.INTEGER, "1")
                 .build();

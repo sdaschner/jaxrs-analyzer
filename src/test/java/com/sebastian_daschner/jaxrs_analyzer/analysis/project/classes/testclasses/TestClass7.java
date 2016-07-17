@@ -34,7 +34,7 @@ public abstract class TestClass7 {
     public abstract void getInfo(final String info);
 
     public static ClassResult getResult() {
-        final MethodResult method = MethodResultBuilder.newBuilder().andPath("{info}").andMethod(HttpMethod.POST).andRequestBodyType(Types.STRING).build();
+        final MethodResult method = MethodResultBuilder.newBuilder().andPath("{info}").andMethodName("getInfo").andMethod(HttpMethod.POST).andRequestBodyType(Types.STRING).build();
         return ClassResultBuilder.withResourcePath("test").andMethods(method).build();
     }
 

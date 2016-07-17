@@ -48,7 +48,7 @@ public class AsciiDocBackendTest {
         TypeIdentifier identifier;
         Map<String, TypeIdentifier> properties = new HashMap<>();
 
-        add(data, ResourcesBuilder.withBase("rest").andResource("res1", ResourceMethodBuilder.withMethod(HttpMethod.GET)
+        add(data, ResourcesBuilder.withBase("rest").andResource("res1", ResourceMethodBuilder.withMethod("res1", HttpMethod.GET)
                         .andResponse(200, ResponseBuilder.withResponseBody(TypeIdentifier.ofType(Types.STRING)).andHeaders("Location").build()).build()).build(),
                 "= REST resources of project name\n" +
                         "1.0\n" +
@@ -70,7 +70,7 @@ public class AsciiDocBackendTest {
         properties.put("another", intIdentifier);
         add(data, ResourcesBuilder.withBase("rest")
                         .andTypeRepresentation(identifier, TypeRepresentation.ofConcrete(identifier, properties))
-                        .andResource("res1", ResourceMethodBuilder.withMethod(HttpMethod.GET)
+                        .andResource("res1", ResourceMethodBuilder.withMethod("res1", HttpMethod.GET)
                                 .andResponse(200, ResponseBuilder.withResponseBody(identifier).build()).build()).build(),
                 "= REST resources of project name\n" +
                         "1.0\n" +
@@ -93,7 +93,7 @@ public class AsciiDocBackendTest {
         properties.put("another", intIdentifier);
         add(data, ResourcesBuilder.withBase("rest")
                         .andTypeRepresentation(identifier, TypeRepresentation.ofCollection(identifier, TypeRepresentation.ofConcrete(TypeIdentifier.ofDynamic(), properties)))
-                        .andResource("res1", ResourceMethodBuilder.withMethod(HttpMethod.GET)
+                        .andResource("res1", ResourceMethodBuilder.withMethod("res1", HttpMethod.GET)
                                 .andResponse(200, ResponseBuilder.withResponseBody(identifier).build()).build()).build(),
                 "= REST resources of project name\n" +
                         "1.0\n" +
@@ -113,7 +113,7 @@ public class AsciiDocBackendTest {
         identifier = TypeIdentifier.ofDynamic();
         add(data, ResourcesBuilder.withBase("rest")
                         .andTypeRepresentation(identifier, TypeRepresentation.ofCollection(identifier, TypeRepresentation.ofConcrete(stringIdentifier)))
-                        .andResource("res1", ResourceMethodBuilder.withMethod(HttpMethod.GET)
+                        .andResource("res1", ResourceMethodBuilder.withMethod("res1", HttpMethod.GET)
                                 .andResponse(200, ResponseBuilder.withResponseBody(identifier).build()).build()).build(),
                 "= REST resources of project name\n" +
                         "1.0\n" +
@@ -135,7 +135,7 @@ public class AsciiDocBackendTest {
         properties.put("key", stringIdentifier);
         add(data, ResourcesBuilder.withBase("rest")
                         .andTypeRepresentation(identifier, TypeRepresentation.ofCollection(identifier, TypeRepresentation.ofConcrete(TypeIdentifier.ofDynamic(), properties)))
-                        .andResource("res1", ResourceMethodBuilder.withMethod(HttpMethod.GET)
+                        .andResource("res1", ResourceMethodBuilder.withMethod("res1", HttpMethod.GET)
                                 .andResponse(200, ResponseBuilder.withResponseBody(identifier).build()).build()).build(),
                 "= REST resources of project name\n" +
                         "1.0\n" +
@@ -157,7 +157,7 @@ public class AsciiDocBackendTest {
         properties.put("value", intIdentifier);
         add(data, ResourcesBuilder.withBase("rest")
                         .andTypeRepresentation(MODEL_IDENTIFIER, TypeRepresentation.ofConcrete(MODEL_IDENTIFIER, properties))
-                        .andResource("res1", ResourceMethodBuilder.withMethod(HttpMethod.GET)
+                        .andResource("res1", ResourceMethodBuilder.withMethod("res1", HttpMethod.GET)
                                 .andResponse(200, ResponseBuilder.withResponseBody(MODEL_IDENTIFIER).build()).build()).build(),
                 "= REST resources of project name\n" +
                         "1.0\n" +
@@ -180,7 +180,7 @@ public class AsciiDocBackendTest {
         properties.put("value", intIdentifier);
         add(data, ResourcesBuilder.withBase("rest")
                         .andTypeRepresentation(identifier, TypeRepresentation.ofCollection(identifier, TypeRepresentation.ofConcrete(MODEL_IDENTIFIER, properties)))
-                        .andResource("res1", ResourceMethodBuilder.withMethod(HttpMethod.GET)
+                        .andResource("res1", ResourceMethodBuilder.withMethod("res1", HttpMethod.GET)
                                 .andResponse(200, ResponseBuilder.withResponseBody(identifier).build()).build()).build(),
                 "= REST resources of project name\n" +
                         "1.0\n" +
@@ -199,7 +199,7 @@ public class AsciiDocBackendTest {
 
         add(data, ResourcesBuilder.withBase("rest")
                         .andTypeRepresentation(identifier, TypeRepresentation.ofCollection(identifier, TypeRepresentation.ofConcrete(MODEL_IDENTIFIER, properties)))
-                        .andResource("res1", ResourceMethodBuilder.withMethod(HttpMethod.POST).andRequestBodyType(identifier).andFormParam("form", MODEL_IDENTIFIER.getType())
+                        .andResource("res1", ResourceMethodBuilder.withMethod("res1", HttpMethod.POST).andRequestBodyType(identifier).andFormParam("form", MODEL_IDENTIFIER.getType())
                                 .andAcceptMediaTypes("application/json").andResponse(201, ResponseBuilder.newBuilder().andHeaders("Location").build()).build()).build(),
                 "= REST resources of project name\n" +
                         "1.0\n" +
@@ -220,9 +220,9 @@ public class AsciiDocBackendTest {
 
         add(data, ResourcesBuilder.withBase("rest")
                         .andTypeRepresentation(identifier, TypeRepresentation.ofCollection(identifier, TypeRepresentation.ofConcrete(MODEL_IDENTIFIER, properties)))
-                        .andResource("res1", ResourceMethodBuilder.withMethod(HttpMethod.POST).andRequestBodyType(identifier).andQueryParam("query", Types.PRIMITIVE_INT)
+                        .andResource("res1", ResourceMethodBuilder.withMethod("res1", HttpMethod.POST).andRequestBodyType(identifier).andQueryParam("query", Types.PRIMITIVE_INT)
                                 .andAcceptMediaTypes("application/json").andResponse(201, ResponseBuilder.newBuilder().andHeaders("Location").build()).build())
-                        .andResource("res2", ResourceMethodBuilder.withMethod(HttpMethod.GET).andResponse(200, ResponseBuilder.newBuilder().build()).build()).build(),
+                        .andResource("res2", ResourceMethodBuilder.withMethod("res1", HttpMethod.GET).andResponse(200, ResponseBuilder.newBuilder().build()).build()).build(),
                 "= REST resources of project name\n" +
                         "1.0\n" +
                         "\n" +
