@@ -40,7 +40,7 @@ public class TestClass1 {
 
     public static ClassResult getResult() {
         final MethodResult methodResult = MethodResultBuilder.withResponses(HttpResponseBuilder.newBuilder().andEntityTypes(Types.PRIMITIVE_INT).build())
-                .andMethod(HttpMethod.GET).build();
+                .andMethodName("method").andMethod(HttpMethod.GET).build();
         return ClassResultBuilder.withResourcePath("test").andMethods(methodResult).build();
     }
 

@@ -39,7 +39,7 @@ public class TestClass12<T> {
 
     public static ClassResult getResult() {
         final MethodResult method = MethodResultBuilder.withResponses(HttpResponseBuilder.withStatues(200).andHeaders("X-Info").build()).andPath("{info}")
-                .andMethod(HttpMethod.GET).andRequestBodyType(Types.OBJECT).build();
+                .andMethodName("getInfo").andMethod(HttpMethod.GET).andRequestBodyType(Types.OBJECT).build();
         return ClassResultBuilder.withResourcePath("test").andMethods(method).build();
     }
 

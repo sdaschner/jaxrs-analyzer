@@ -78,12 +78,12 @@ public class JAXRSClassVisitor extends ClassVisitor {
         if (legalModifiers && !"<init>".equals(name)) {
             final MethodResult methodResult = new MethodResult();
             if (hasJAXRSAnnotations(classResult.getOriginalClass(), name, methodSignature))
-                return new JAXRSMethodVisitor(classResult, classResult.getOriginalClass(), desc, signature, methodResult, true);
+                return new JAXRSMethodVisitor(classResult, classResult.getOriginalClass(), name, desc, signature, methodResult, true);
             else {
                 final Method annotatedSuperMethod = searchAnnotatedSuperMethod(classResult.getOriginalClass(), name, methodSignature);
                 if (annotatedSuperMethod != null) {
                     try {
-                        return new JAXRSMethodVisitor(classResult, classResult.getOriginalClass(), desc, signature, methodResult, false);
+                        return new JAXRSMethodVisitor(classResult, classResult.getOriginalClass(), name, desc, signature, methodResult, false);
                     } finally {
                         classResult.getMethods().stream().filter(m -> m.equals(methodResult)).findAny().ifPresent(m -> visitJAXRSSuperMethod(annotatedSuperMethod, m));
                     }

@@ -47,14 +47,14 @@ public class ResultInterpreterTest {
     public void testStandard() {
         final Resources expectedResult = new Resources();
         expectedResult.setBasePath("path");
-        final ResourceMethod resourceMethod = ResourceMethodBuilder.withMethod(HttpMethod.GET)
+        final ResourceMethod resourceMethod = ResourceMethodBuilder.withMethod("resourceMethod", HttpMethod.GET)
                 .andResponse(200, ResponseBuilder.withResponseBody(STRING_IDENTIFIER).build())
                 .build();
         expectedResult.addMethod("test", resourceMethod);
 
         final ClassResult appPathResult = ClassResultBuilder.withApplicationPath("path/").build();
         final MethodResult method = MethodResultBuilder.withResponses(HttpResponseBuilder.withStatues(200).andEntityTypes(Types.STRING).build())
-                .andMethod(HttpMethod.GET).build();
+                .andMethodName("resourceMethod").andMethod(HttpMethod.GET).build();
         final ClassResult resClassResult = ClassResultBuilder.withResourcePath("test").andMethods(method).build();
 
         final Set<ClassResult> results = new HashSet<>(Arrays.asList(appPathResult, resClassResult));
@@ -68,19 +68,20 @@ public class ResultInterpreterTest {
     public void testSubResource() {
         final Resources expectedResult = new Resources();
         expectedResult.setBasePath("path");
-        final ResourceMethod resourceGetMethod = ResourceMethodBuilder.withMethod(HttpMethod.GET)
+        final ResourceMethod resourceGetMethod = ResourceMethodBuilder.withMethod("resourceGetMethod", HttpMethod.GET)
                 .andResponse(200, ResponseBuilder.withResponseBody(STRING_IDENTIFIER).build())
                 .build();
         expectedResult.addMethod("test", resourceGetMethod);
-        final ResourceMethod resourcePostMethod = ResourceMethodBuilder.withMethod(HttpMethod.POST)
+        final ResourceMethod resourcePostMethod = ResourceMethodBuilder.withMethod("resourcePostMethod", HttpMethod.POST)
                 .andResponse(204, ResponseBuilder.newBuilder().build()).build();
         expectedResult.addMethod("test/sub", resourcePostMethod);
 
         final ClassResult appPathResult = ClassResultBuilder.withApplicationPath("/path").build();
         final MethodResult method = MethodResultBuilder.withResponses(HttpResponseBuilder.withStatues(200).andEntityTypes(Types.STRING).build())
-                .andMethod(HttpMethod.GET).build();
+                .andMethodName("resourceGetMethod").andMethod(HttpMethod.GET).build();
         final MethodResult subResourceLocator = MethodResultBuilder.newBuilder().andPath("sub").build();
-        final MethodResult subResourceMethod = MethodResultBuilder.withResponses(HttpResponseBuilder.withStatues(204).build()).andMethod(HttpMethod.POST).build();
+        final MethodResult subResourceMethod = MethodResultBuilder.withResponses(HttpResponseBuilder.withStatues(204).build())
+                .andMethodName("resourcePostMethod").andMethod(HttpMethod.POST).build();
         subResourceLocator.setSubResource(ClassResultBuilder.withResourcePath(null).andMethods(subResourceMethod).build());
         final ClassResult resClassResult = ClassResultBuilder.withResourcePath("test").andMethods(method, subResourceLocator).build();
 
@@ -96,7 +97,7 @@ public class ResultInterpreterTest {
         final Resources expectedResult = new Resources();
         expectedResult.setBasePath("path");
 
-        final ResourceMethod resourceGetMethod = ResourceMethodBuilder.withMethod(HttpMethod.GET)
+        final ResourceMethod resourceGetMethod = ResourceMethodBuilder.withMethod("resourceGetMethod", HttpMethod.GET)
                 .andResponse(200, ResponseBuilder.withResponseBody(STRING_IDENTIFIER).build())
                 .build();
         expectedResult.addMethod("test", resourceGetMethod);
@@ -104,7 +105,7 @@ public class ResultInterpreterTest {
         final ClassResult appPathResult = ClassResultBuilder.withApplicationPath("path").build();
         final MethodResult method = MethodResultBuilder
                 .withResponses(HttpResponseBuilder.withStatues(200).andEntityTypes("Ljavax/ws/rs/core/GenericEntity<Ljava/lang/String;>;").build())
-                .andMethod(HttpMethod.GET).build();
+                .andMethodName("resourceGetMethod").andMethod(HttpMethod.GET).build();
         final ClassResult resClassResult = ClassResultBuilder.withResourcePath("test").andMethods(method).build();
 
         final Set<ClassResult> results = new HashSet<>(Arrays.asList(appPathResult, resClassResult));
@@ -118,14 +119,14 @@ public class ResultInterpreterTest {
     public void testContentTypes() {
         final Resources expectedResult = new Resources();
         expectedResult.setBasePath("path");
-        final ResourceMethod resourceGetMethod = ResourceMethodBuilder.withMethod(HttpMethod.GET)
+        final ResourceMethod resourceGetMethod = ResourceMethodBuilder.withMethod("resourceGetMethod", HttpMethod.GET)
                 .andResponse(200, ResponseBuilder.withResponseBody(STRING_IDENTIFIER).build())
                 .andResponseMediaTypes("application/xml").build();
         expectedResult.addMethod("test", resourceGetMethod);
 
         final ClassResult appPathResult = ClassResultBuilder.withApplicationPath("path").build();
         final MethodResult method = MethodResultBuilder.withResponses(HttpResponseBuilder.withStatues(200).andEntityTypes(Types.STRING).build())
-                .andMethod(HttpMethod.GET).andResponseMediaTypes("application/xml").build();
+                .andMethodName("resourceGetMethod").andMethod(HttpMethod.GET).andResponseMediaTypes("application/xml").build();
         final ClassResult resClassResult = ClassResultBuilder.withResourcePath("test").andMethods(method).build();
 
         final Set<ClassResult> results = new HashSet<>(Arrays.asList(appPathResult, resClassResult));
@@ -139,7 +140,7 @@ public class ResultInterpreterTest {
     public void testOverrideAnnotationContentType() {
         final Resources expectedResult = new Resources();
         expectedResult.setBasePath("path");
-        final ResourceMethod resourceGetMethod = ResourceMethodBuilder.withMethod(HttpMethod.GET)
+        final ResourceMethod resourceGetMethod = ResourceMethodBuilder.withMethod("resourceGetMethod", HttpMethod.GET)
                 .andResponse(200, ResponseBuilder.withResponseBody(STRING_IDENTIFIER).build())
                 .andResponseMediaTypes("application/json").build();
         expectedResult.addMethod("test", resourceGetMethod);
@@ -147,7 +148,7 @@ public class ResultInterpreterTest {
         final ClassResult appPathResult = ClassResultBuilder.withApplicationPath("path").build();
         final MethodResult method = MethodResultBuilder.withResponses(HttpResponseBuilder.withStatues(200).andContentTypes("application/json")
                 .andEntityTypes(Types.STRING).build())
-                .andMethod(HttpMethod.GET).andResponseMediaTypes("application/xml", "application/json").build();
+                .andMethodName("resourceGetMethod").andMethod(HttpMethod.GET).andResponseMediaTypes("application/xml", "application/json").build();
         final ClassResult resClassResult = ClassResultBuilder.withResourcePath("test").andMethods(method).build();
 
         final Set<ClassResult> results = new HashSet<>(Arrays.asList(appPathResult, resClassResult));
@@ -161,14 +162,14 @@ public class ResultInterpreterTest {
     public void testNestedBasePath() {
         final Resources expectedResult = new Resources();
         expectedResult.setBasePath("path/nested");
-        final ResourceMethod resourceGetMethod = ResourceMethodBuilder.withMethod(HttpMethod.GET)
+        final ResourceMethod resourceGetMethod = ResourceMethodBuilder.withMethod("resourceGetMethod", HttpMethod.GET)
                 .andResponse(200, ResponseBuilder.withResponseBody(STRING_IDENTIFIER).build())
                 .andResponseMediaTypes("application/json").build();
         expectedResult.addMethod("test", resourceGetMethod);
 
         final ClassResult appPathResult = ClassResultBuilder.withApplicationPath("path/nested").build();
         final MethodResult method = MethodResultBuilder.withResponses(HttpResponseBuilder.withStatues(200).andEntityTypes(Types.STRING).build())
-                .andMethod(HttpMethod.GET).andResponseMediaTypes("application/json").build();
+                .andMethodName("resourceGetMethod").andMethod(HttpMethod.GET).andResponseMediaTypes("application/json").build();
         final ClassResult resClassResult = ClassResultBuilder.withResourcePath("test").andMethods(method).build();
 
         final Set<ClassResult> results = new HashSet<>(Arrays.asList(appPathResult, resClassResult));
@@ -182,18 +183,19 @@ public class ResultInterpreterTest {
     public void testDefaultStatusCodes() {
         final Resources expectedResult = new Resources();
         expectedResult.setBasePath("path");
-        final ResourceMethod resourceGetMethod = ResourceMethodBuilder.withMethod(HttpMethod.GET)
+        final ResourceMethod resourceGetMethod = ResourceMethodBuilder.withMethod("resourceGetMethod", HttpMethod.GET)
                 .andResponse(200, ResponseBuilder.withResponseBody(STRING_IDENTIFIER).build())
                 .andResponseMediaTypes("application/json").build();
-        final ResourceMethod resourcePostMethod = ResourceMethodBuilder.withMethod(HttpMethod.POST).andResponse(204, ResponseBuilder.newBuilder().build())
+        final ResourceMethod resourcePostMethod = ResourceMethodBuilder.withMethod("resourcePostMethod", HttpMethod.POST).andResponse(204, ResponseBuilder.newBuilder().build())
                 .andRequestBodyType(Types.STRING).build();
         expectedResult.addMethod("test", resourceGetMethod);
         expectedResult.addMethod("test", resourcePostMethod);
 
         final ClassResult appPathResult = ClassResultBuilder.withApplicationPath("path").build();
         final MethodResult getMethod = MethodResultBuilder.withResponses(HttpResponseBuilder.newBuilder().andEntityTypes(Types.STRING).build())
-                .andMethod(HttpMethod.GET).andResponseMediaTypes("application/json").build();
-        final MethodResult postMethod = MethodResultBuilder.newBuilder().andMethod(HttpMethod.POST).andRequestBodyType(Types.STRING).build();
+                .andMethodName("resourceGetMethod").andMethod(HttpMethod.GET).andResponseMediaTypes("application/json").build();
+        final MethodResult postMethod = MethodResultBuilder.newBuilder()
+                .andMethodName("resourcePostMethod").andMethod(HttpMethod.POST).andRequestBodyType(Types.STRING).build();
         final ClassResult resClassResult = ClassResultBuilder.withResourcePath("test").andMethods(getMethod, postMethod).build();
 
         final Set<ClassResult> results = new HashSet<>(Arrays.asList(appPathResult, resClassResult));
@@ -212,7 +214,7 @@ public class ResultInterpreterTest {
         final TypeRepresentation stringList = TypeRepresentation.ofCollection(stringListIdentifier, TypeRepresentation.ofConcrete(STRING_IDENTIFIER));
         expectedResult.getTypeRepresentations().put(stringListIdentifier, stringList);
 
-        final ResourceMethod resourceGetMethod = ResourceMethodBuilder.withMethod(HttpMethod.GET)
+        final ResourceMethod resourceGetMethod = ResourceMethodBuilder.withMethod("resourceGetMethod", HttpMethod.GET)
                 .andResponse(200, ResponseBuilder.withResponseBody(stringListIdentifier).build())
                 .build();
         expectedResult.addMethod("test", resourceGetMethod);
@@ -220,7 +222,7 @@ public class ResultInterpreterTest {
         final ClassResult appPathResult = ClassResultBuilder.withApplicationPath("path").build();
         final MethodResult method = MethodResultBuilder
                 .withResponses(HttpResponseBuilder.withStatues(200).andEntityTypes("Ljavax/ws/rs/core/GenericEntity<Ljava/util/List<Ljava/lang/String;>;>;").build())
-                .andMethod(HttpMethod.GET).build();
+                .andMethodName("resourceGetMethod").andMethod(HttpMethod.GET).build();
         final ClassResult resClassResult = ClassResultBuilder.withResourcePath("test").andMethods(method).build();
 
         final Set<ClassResult> results = new HashSet<>(Arrays.asList(appPathResult, resClassResult));
@@ -240,7 +242,7 @@ public class ResultInterpreterTest {
         expectedResult.getTypeRepresentations().put(identifier, TypeRepresentation.ofConcrete(identifier,
                 Collections.singletonMap("name", STRING_IDENTIFIER)));
 
-        final ResourceMethod resourceGetMethod = ResourceMethodBuilder.withMethod(HttpMethod.GET)
+        final ResourceMethod resourceGetMethod = ResourceMethodBuilder.withMethod("resourceGetMethod", HttpMethod.GET)
                 .andResponse(200, ResponseBuilder.withResponseBody(identifier).build())
                 .andResponse(204, ResponseBuilder.newBuilder().build())
                 .build();
@@ -250,7 +252,7 @@ public class ResultInterpreterTest {
         final MethodResult method = MethodResultBuilder
                 .withResponses(HttpResponseBuilder.withStatues(200).andEntityTypes(Types.OBJECT, configurationType).build(),
                         HttpResponseBuilder.withStatues(204).build())
-                .andMethod(HttpMethod.GET).build();
+                .andMethodName("resourceGetMethod").andMethod(HttpMethod.GET).build();
         final ClassResult resClassResult = ClassResultBuilder.withResourcePath("test").andMethods(method).build();
 
         final Set<ClassResult> results = new HashSet<>(Arrays.asList(appPathResult, resClassResult));

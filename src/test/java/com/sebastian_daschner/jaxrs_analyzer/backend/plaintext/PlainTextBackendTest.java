@@ -47,7 +47,7 @@ public class PlainTextBackendTest {
         TypeIdentifier identifier;
         Map<String, TypeIdentifier> properties = new HashMap<>();
 
-        add(data, ResourcesBuilder.withBase("rest").andResource("res1", ResourceMethodBuilder.withMethod(HttpMethod.GET)
+        add(data, ResourcesBuilder.withBase("rest").andResource("res1", ResourceMethodBuilder.withMethod("res1", HttpMethod.GET)
                         .andResponse(200, ResponseBuilder.withResponseBody(TypeIdentifier.ofType(Types.STRING)).andHeaders("Location").build()).build()).build(),
                 "REST resources of project name:\n" +
                         "1.0\n" +
@@ -67,7 +67,7 @@ public class PlainTextBackendTest {
         properties.put("another", intIdentifier);
         add(data, ResourcesBuilder.withBase("rest")
                         .andTypeRepresentation(identifier, TypeRepresentation.ofConcrete(identifier, properties))
-                        .andResource("res2", ResourceMethodBuilder.withMethod(HttpMethod.GET)
+                        .andResource("res2", ResourceMethodBuilder.withMethod("res2", HttpMethod.GET)
                                 .andResponse(200, ResponseBuilder.withResponseBody(identifier).build()).build()).build(),
                 "REST resources of project name:\n" +
                         "1.0\n" +
@@ -88,7 +88,7 @@ public class PlainTextBackendTest {
         properties.put("another", intIdentifier);
         add(data, ResourcesBuilder.withBase("rest")
                         .andTypeRepresentation(identifier, TypeRepresentation.ofCollection(identifier, TypeRepresentation.ofConcrete(TypeIdentifier.ofDynamic(), properties)))
-                        .andResource("res3", ResourceMethodBuilder.withMethod(HttpMethod.GET)
+                        .andResource("res3", ResourceMethodBuilder.withMethod("res3", HttpMethod.GET)
                                 .andResponse(200, ResponseBuilder.withResponseBody(identifier).build()).build()).build(),
                 "REST resources of project name:\n" +
                         "1.0\n" +
@@ -106,7 +106,7 @@ public class PlainTextBackendTest {
         identifier = TypeIdentifier.ofDynamic();
         add(data, ResourcesBuilder.withBase("rest")
                         .andTypeRepresentation(identifier, TypeRepresentation.ofCollection(identifier, TypeRepresentation.ofConcrete(stringIdentifier)))
-                        .andResource("res4", ResourceMethodBuilder.withMethod(HttpMethod.GET)
+                        .andResource("res4", ResourceMethodBuilder.withMethod("res4", HttpMethod.GET)
                                 .andResponse(200, ResponseBuilder.withResponseBody(identifier).build()).build()).build(),
                 "REST resources of project name:\n" +
                         "1.0\n" +
@@ -126,7 +126,7 @@ public class PlainTextBackendTest {
         properties.put("key", stringIdentifier);
         add(data, ResourcesBuilder.withBase("rest")
                         .andTypeRepresentation(identifier, TypeRepresentation.ofCollection(identifier, TypeRepresentation.ofConcrete(TypeIdentifier.ofDynamic(), properties)))
-                        .andResource("res5", ResourceMethodBuilder.withMethod(HttpMethod.GET)
+                        .andResource("res5", ResourceMethodBuilder.withMethod("res5", HttpMethod.GET)
                                 .andResponse(200, ResponseBuilder.withResponseBody(identifier).build()).build()).build(),
                 "REST resources of project name:\n" +
                         "1.0\n" +
@@ -146,7 +146,7 @@ public class PlainTextBackendTest {
         properties.put("value", intIdentifier);
         add(data, ResourcesBuilder.withBase("rest")
                         .andTypeRepresentation(MODEL_IDENTIFIER, TypeRepresentation.ofConcrete(MODEL_IDENTIFIER, properties))
-                        .andResource("res6", ResourceMethodBuilder.withMethod(HttpMethod.GET)
+                        .andResource("res6", ResourceMethodBuilder.withMethod("res6", HttpMethod.GET)
                                 .andResponse(200, ResponseBuilder.withResponseBody(MODEL_IDENTIFIER).build()).build()).build(),
                 "REST resources of project name:\n" +
                         "1.0\n" +
@@ -167,7 +167,7 @@ public class PlainTextBackendTest {
         properties.put("value", intIdentifier);
         add(data, ResourcesBuilder.withBase("rest")
                         .andTypeRepresentation(identifier, TypeRepresentation.ofCollection(identifier, TypeRepresentation.ofConcrete(MODEL_IDENTIFIER, properties)))
-                        .andResource("res7", ResourceMethodBuilder.withMethod(HttpMethod.GET)
+                        .andResource("res7", ResourceMethodBuilder.withMethod("res7", HttpMethod.GET)
                                 .andResponse(200, ResponseBuilder.withResponseBody(identifier).build()).build()).build(),
                 "REST resources of project name:\n" +
                         "1.0\n" +
@@ -184,7 +184,7 @@ public class PlainTextBackendTest {
 
         add(data, ResourcesBuilder.withBase("rest")
                         .andTypeRepresentation(identifier, TypeRepresentation.ofCollection(identifier, TypeRepresentation.ofConcrete(MODEL_IDENTIFIER, properties)))
-                        .andResource("res8", ResourceMethodBuilder.withMethod(HttpMethod.POST).andRequestBodyType(identifier).andFormParam("form", MODEL_IDENTIFIER.getType())
+                        .andResource("res8", ResourceMethodBuilder.withMethod("res8", HttpMethod.POST).andRequestBodyType(identifier).andFormParam("form", MODEL_IDENTIFIER.getType())
                                 .andAcceptMediaTypes("application/json").andResponse(201, ResponseBuilder.newBuilder().andHeaders("Location").build()).build()).build(),
                 "REST resources of project name:\n" +
                         "1.0\n" +
@@ -203,9 +203,9 @@ public class PlainTextBackendTest {
 
         add(data, ResourcesBuilder.withBase("rest")
                         .andTypeRepresentation(identifier, TypeRepresentation.ofCollection(identifier, TypeRepresentation.ofConcrete(MODEL_IDENTIFIER, properties)))
-                        .andResource("res9", ResourceMethodBuilder.withMethod(HttpMethod.POST).andRequestBodyType(identifier).andQueryParam("query", Types.PRIMITIVE_INT)
+                        .andResource("res9", ResourceMethodBuilder.withMethod("res9", HttpMethod.POST).andRequestBodyType(identifier).andQueryParam("query", Types.PRIMITIVE_INT)
                                 .andAcceptMediaTypes("application/json").andResponse(201, ResponseBuilder.newBuilder().andHeaders("Location").build()).build())
-                        .andResource("res10", ResourceMethodBuilder.withMethod(HttpMethod.GET).andResponse(200, ResponseBuilder.newBuilder().build()).build()).build(),
+                        .andResource("res10", ResourceMethodBuilder.withMethod("res10", HttpMethod.GET).andResponse(200, ResponseBuilder.newBuilder().build()).build()).build(),
                 "REST resources of project name:\n" +
                         "1.0\n" +
                         "\n" +

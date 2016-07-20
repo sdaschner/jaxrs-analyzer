@@ -54,6 +54,11 @@ public class MethodResultBuilder {
         return this;
     }
 
+    public MethodResultBuilder andMethodName(final String name) {
+        methodResult.setMethodName(name);
+        return this;
+    }
+
     public MethodResultBuilder andRequestMediaTypes(final String... mediaTypes) {
         methodResult.getRequestMediaTypes().addAll(Arrays.asList(mediaTypes));
         return this;

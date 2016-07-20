@@ -36,7 +36,7 @@ public interface TestClass6 {
     static ClassResult getResult() {
         final MethodResult method = MethodResultBuilder.withResponses()//HttpResponseBuilder.newBuilder()
 //                .andEntityTypes("com.sebastian_daschner.jaxrs_analyzer.analysis.project.classes.testclasses.TestClass6$Model").build())
-                .andPath("{info}").andMethod(HttpMethod.GET).andRequestBodyType(Types.STRING).build();
+                .andPath("{info}").andMethodName("getInfo").andMethod(HttpMethod.GET).andRequestBodyType(Types.STRING).build();
         return ClassResultBuilder.withResourcePath("test").andMethods(method).build();
     }
 

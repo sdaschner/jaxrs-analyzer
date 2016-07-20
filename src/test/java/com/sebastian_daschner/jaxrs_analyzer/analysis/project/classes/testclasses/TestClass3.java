@@ -47,6 +47,7 @@ public class TestClass3 {
         jsonObject.getStructure().put("duke", new Element(Types.INTEGER, 42));
         final MethodResult firstMethod = MethodResultBuilder.withResponses(HttpResponseBuilder.newBuilder().andEntityTypes(Types.JSON_OBJECT)
                 .andInlineEntities(jsonObject).build())
+                .andMethodName("method")
                 .andMethod(HttpMethod.GET).build();
         return ClassResultBuilder.withResourcePath("test").andResponseMediaTypes("application/json").andMethods(firstMethod).build();
     }

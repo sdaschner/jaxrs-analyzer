@@ -48,6 +48,7 @@ public class TestClass15 {
         final MethodResult method = MethodResultBuilder
                 .withResponses(HttpResponseBuilder.withStatues(200).build())
                 .andPath("{info}")
+                .andMethodName("getInfo")
                 .andMethod(HttpMethod.GET)
                 .andQueryParam("value", "Lcom/sebastian_daschner/jaxrs_analyzer/analysis/project/classes/testclasses/TestClass15$InnerTestClass15;", "FIRST")
                 .build();

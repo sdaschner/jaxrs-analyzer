@@ -35,7 +35,7 @@ public abstract class TestClass5 {
     public abstract Response getInfo(final String info);
 
     public static ClassResult getResult() {
-        final MethodResult method = MethodResultBuilder.newBuilder().andPath("{info}").andMethod(HttpMethod.GET).andRequestBodyType(Types.STRING).build();
+        final MethodResult method = MethodResultBuilder.newBuilder().andPath("{info}").andMethodName("getInfo").andMethod(HttpMethod.GET).andRequestBodyType(Types.STRING).build();
         return ClassResultBuilder.withResourcePath("test").andMethods(method).build();
     }
 

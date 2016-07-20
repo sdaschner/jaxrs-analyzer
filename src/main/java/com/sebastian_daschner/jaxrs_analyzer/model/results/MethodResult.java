@@ -39,6 +39,7 @@ public class MethodResult {
     private final Set<HttpResponse> responses = new HashSet<>();
     private final List<Instruction> instructions = new ArrayList<>();
     private String path;
+    private String methodName;
     private String requestBodyType;
     private String originalMethodSignature;
     private HttpMethod httpMethod;
@@ -71,6 +72,14 @@ public class MethodResult {
 
     public void setPath(final String path) {
         this.path = path;
+    }
+
+    public String getMethodName() {
+        return methodName;
+    }
+
+    public void setMethodName(String methodName) {
+        this.methodName = methodName;
     }
 
     public String getRequestBodyType() {
@@ -114,6 +123,7 @@ public class MethodResult {
         this.parentResource = parentResource;
     }
 
+
     @Override
     public boolean equals(final Object o) {
         if (this == o) return true;
@@ -127,6 +137,7 @@ public class MethodResult {
         if (!responses.equals(that.responses)) return false;
         // TODO double-check
 //        if (!instructions.equals(that.instructions)) return false;
+        if (methodName != null ? !methodName.equals(that.methodName) : that.methodName != null) return false;
         if (path != null ? !path.equals(that.path) : that.path != null) return false;
         if (requestBodyType != null ? !requestBodyType.equals(that.requestBodyType) : that.requestBodyType != null)
             return false;
@@ -142,6 +153,7 @@ public class MethodResult {
         result = 31 * result + methodParameters.hashCode();
         result = 31 * result + responses.hashCode();
 //        result = 31 * result + instructions.hashCode();
+        result = 31 * result + (methodName != null ? methodName.hashCode() : 0);
         result = 31 * result + (path != null ? path.hashCode() : 0);
         result = 31 * result + (requestBodyType != null ? requestBodyType.hashCode() : 0);
         result = 31 * result + (httpMethod != null ? httpMethod.hashCode() : 0);
@@ -152,17 +164,18 @@ public class MethodResult {
     @Override
     public String toString() {
         return "MethodResult{" +
-                "requestMediaTypes=" + requestMediaTypes +
-                ", responseMediaTypes=" + responseMediaTypes +
-                ", methodParameters=" + methodParameters +
-                ", responses=" + responses +
+            "requestMediaTypes=" + requestMediaTypes +
+            ", responseMediaTypes=" + responseMediaTypes +
+            ", methodParameters=" + methodParameters +
+            ", responses=" + responses +
 //                ", instructions=" + instructions +
-                ", path='" + path + '\'' +
-                ", requestBodyType='" + requestBodyType + '\'' +
-                ", httpMethod=" + httpMethod +
-                ", subResource=" + subResource +
-                ", parentResource=" + (parentResource == null ? "null" : "notNull") +
-                '}';
+            ", methodName='" + methodName + '\'' +
+            ", path='" + path + '\'' +
+            ", requestBodyType='" + requestBodyType + '\'' +
+            ", httpMethod=" + httpMethod +
+            ", subResource=" + subResource +
+            ", parentResource=" + (parentResource == null ? "null" : "notNull") +
+            '}';
     }
 
 }

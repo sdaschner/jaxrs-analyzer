@@ -21,7 +21,7 @@ public class JAXRSMethodVisitorTest {
     @Before
     public void setUp() {
         classResult = new ClassResult();
-        cut = new JAXRSMethodVisitor(classResult, "Foobar", "()V", null, new MethodResult(), true);
+        cut = new JAXRSMethodVisitor(classResult, "Foobar", "test", "()V", null, new MethodResult(), true);
     }
 
     @Test

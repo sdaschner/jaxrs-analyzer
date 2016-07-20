@@ -24,12 +24,12 @@ public class ResourceMethodBuilder {
 
     private final ResourceMethod method;
 
-    private ResourceMethodBuilder(final HttpMethod method) {
-        this.method = new ResourceMethod(method);
+    private ResourceMethodBuilder(final String name, final HttpMethod method) {
+        this.method = new ResourceMethod(name, method);
     }
 
-    public static ResourceMethodBuilder withMethod(final HttpMethod method) {
-        return new ResourceMethodBuilder(method);
+    public static ResourceMethodBuilder withMethod(final String name, final HttpMethod method) {
+        return new ResourceMethodBuilder(name, method);
     }
 
     public ResourceMethodBuilder andRequestBodyType(final String type) {

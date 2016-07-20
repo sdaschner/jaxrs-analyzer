@@ -31,16 +31,21 @@ public class ResourceMethod {
     private final Set<MethodParameter> methodParameters = new HashSet<>();
 
     private final HttpMethod method;
+    private final String name;
     private TypeIdentifier requestBody;
 
-    public ResourceMethod(final HttpMethod method) {
+    public ResourceMethod(final String name, final HttpMethod method) {
+        Objects.requireNonNull(name);
         Objects.requireNonNull(method);
+        this.name = name;
         this.method = method;
     }
 
     public HttpMethod getMethod() {
         return method;
     }
+
+    public String getName() { return name; }
 
     public Set<MethodParameter> getMethodParameters() {
         return methodParameters;
@@ -67,28 +72,33 @@ public class ResourceMethod {
     }
 
     @Override
-    public boolean equals(final Object o) {
+    public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        final ResourceMethod that = (ResourceMethod) o;
+        ResourceMethod that = (ResourceMethod) o;
 
-        if (!requestMediaTypes.equals(that.requestMediaTypes)) return false;
-        if (!responseMediaTypes.equals(that.responseMediaTypes)) return false;
-        if (!responses.equals(that.responses)) return false;
-        if (!methodParameters.equals(that.methodParameters)) return false;
+        if (requestMediaTypes != null ? !requestMediaTypes.equals(that.requestMediaTypes) : that.requestMediaTypes != null)
+            return false;
+        if (responseMediaTypes != null ? !responseMediaTypes.equals(that.responseMediaTypes) : that.responseMediaTypes != null)
+            return false;
+        if (responses != null ? !responses.equals(that.responses) : that.responses != null) return false;
+        if (methodParameters != null ? !methodParameters.equals(that.methodParameters) : that.methodParameters != null)
+            return false;
         if (method != that.method) return false;
-        return requestBody != null ? requestBody.equals(that.requestBody) : that.requestBody == null;
+        if (name != null ? !name.equals(that.name) : that.name != null) return false;
 
+        return requestBody != null ? requestBody.equals(that.requestBody) : that.requestBody == null;
     }
 
     @Override
     public int hashCode() {
-        int result = requestMediaTypes.hashCode();
-        result = 31 * result + responseMediaTypes.hashCode();
-        result = 31 * result + responses.hashCode();
-        result = 31 * result + methodParameters.hashCode();
-        result = 31 * result + method.hashCode();
+        int result = requestMediaTypes != null ? requestMediaTypes.hashCode() : 0;
+        result = 31 * result + (responseMediaTypes != null ? responseMediaTypes.hashCode() : 0);
+        result = 31 * result + (responses != null ? responses.hashCode() : 0);
+        result = 31 * result + (methodParameters != null ? methodParameters.hashCode() : 0);
+        result = 31 * result + (method != null ? method.hashCode() : 0);
+        result = 31 * result + (name != null ? name.hashCode() : 0);
         result = 31 * result + (requestBody != null ? requestBody.hashCode() : 0);
         return result;
     }
@@ -96,7 +106,8 @@ public class ResourceMethod {
     @Override
     public String toString() {
         return "ResourceMethod{" +
-                "method=" + method +
+                "name=" + name +
+                ", method=" + method +
                 ", requestMediaTypes=" + requestMediaTypes +
                 ", responseMediaTypes=" + responseMediaTypes +
                 ", responses=" + responses +
@@ -104,5 +115,4 @@ public class ResourceMethod {
                 ", requestBody=" + requestBody +
                 '}';
     }
-
 }

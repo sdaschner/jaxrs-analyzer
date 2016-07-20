@@ -26,7 +26,7 @@ public class TestClass10 extends ATestClass10 {
 
     public static ClassResult getResult() {
         final MethodResult method = MethodResultBuilder.withResponses(HttpResponseBuilder.withStatues(200).andEntityTypes(Types.STRING).andHeaders("X-Test").build())
-                .andPath("{info}").andMethod(HttpMethod.POST).andRequestBodyType(Types.STRING).build();
+                .andPath("{info}").andMethodName("getInfo").andMethod(HttpMethod.POST).andRequestBodyType(Types.STRING).build();
         return ClassResultBuilder.withResourcePath("test").andMethods(method).build();
     }
 
