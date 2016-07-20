@@ -120,7 +120,8 @@ class ProjectMethodVisitor extends MethodVisitor {
 
     @Override
     public void visitVarInsn(int opcode, int index) {
-        methodResult.getInstructions().add(buildLoadStoreInstruction(opcode, index, visitedLabels.get(visitedLabels.size() - 1)));
+        final Label label = !visitedLabels.isEmpty() ? visitedLabels.get(visitedLabels.size() - 1) : null;
+        methodResult.getInstructions().add(buildLoadStoreInstruction(opcode, index, label));
     }
 
     @Override

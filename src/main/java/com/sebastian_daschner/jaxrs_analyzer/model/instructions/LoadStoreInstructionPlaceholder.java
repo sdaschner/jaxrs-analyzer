@@ -2,8 +2,6 @@ package com.sebastian_daschner.jaxrs_analyzer.model.instructions;
 
 import org.objectweb.asm.Label;
 
-import java.util.Objects;
-
 /**
  * @author Sebastian Daschner
  */
@@ -14,7 +12,6 @@ public class LoadStoreInstructionPlaceholder implements Instruction {
     private final Label label;
 
     public LoadStoreInstructionPlaceholder(final InstructionType type, final int number, final Label label) {
-        Objects.requireNonNull(label);
         if (!(type == InstructionType.LOAD_PLACEHOLDER || type == InstructionType.STORE_PLACEHOLDER))
             throw new IllegalArgumentException("Only LOAD and STORE placeholders allowed!");
 
@@ -42,20 +39,23 @@ public class LoadStoreInstructionPlaceholder implements Instruction {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(final Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        LoadStoreInstructionPlaceholder that = (LoadStoreInstructionPlaceholder) o;
+        final LoadStoreInstructionPlaceholder that = (LoadStoreInstructionPlaceholder) o;
 
         if (number != that.number) return false;
-        return label.equals(that.label);
+        if (type != that.type) return false;
+        return label != null ? label.equals(that.label) : that.label == null;
     }
 
     @Override
     public int hashCode() {
-        int result = number;
-        result = 31 * result + label.hashCode();
+        int result = type.hashCode();
+        result = 31 * result + number;
+        result = 31 * result + (label != null ? label.hashCode() : 0);
         return result;
     }
+
 }

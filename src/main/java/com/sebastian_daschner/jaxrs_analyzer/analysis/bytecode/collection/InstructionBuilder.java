@@ -188,23 +188,18 @@ public final class InstructionBuilder {
     }
 
     public static Instruction buildLoadStoreInstruction(int opcode, int index, Label label) {
-//        final String variableType = (type != null) ? type : Types.OBJECT;
-//        final String variableName = (name != null) ? name : UNKNOWN_VARIABLE_NAME_PREFIX + index;
-
         switch (opcode) {
             case ILOAD:
             case LLOAD:
             case FLOAD:
             case DLOAD:
             case ALOAD:
-//                return new LoadInstruction(index, variableType, variableName);
                 return new LoadStoreInstructionPlaceholder(Instruction.InstructionType.LOAD_PLACEHOLDER, index, label);
             case ISTORE:
             case LSTORE:
             case FSTORE:
             case DSTORE:
             case ASTORE:
-//                return new StoreInstruction(index, variableType, variableName);
                 return new LoadStoreInstructionPlaceholder(Instruction.InstructionType.STORE_PLACEHOLDER, index, label);
             case RET:
                 return new DefaultInstruction(OPCODES[opcode]);
