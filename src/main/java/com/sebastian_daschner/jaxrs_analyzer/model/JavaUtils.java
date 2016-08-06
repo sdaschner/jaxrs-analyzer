@@ -336,7 +336,7 @@ public final class JavaUtils {
         }
 
         final TypeVariable<? extends Class<?>>[] typeParameters = loadedClass.getTypeParameters();
-        for (int i = 0; i < typeParameters.length; i++) {
+        for (int i = 0; i < actualTypeParameters.size(); i++) {
             variables.put(typeParameters[i].getName(), actualTypeParameters.get(i));
         }
         return variables;
