@@ -52,7 +52,7 @@ public class InjectableArgumentMethodSimulator extends MethodSimulator {
     public Element simulate(final List<Element> arguments, final List<Instruction> instructions, final MethodIdentifier identifier) {
         // prevent infinite loops on analysing recursion
         if (EXECUTED_PATH_METHODS.contains(identifier))
-            return Element.EMPTY;
+            return new Element();
 
         lock.lock();
         EXECUTED_PATH_METHODS.add(identifier);

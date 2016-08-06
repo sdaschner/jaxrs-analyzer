@@ -73,7 +73,7 @@ public class MethodHandle extends Element implements Method {
                     final Method method = MethodPool.getInstance().get(i);
                     if (!i.isStaticMethod()) {
                         final List<Element> actualArguments = new ArrayList<>(combinedArguments);
-                        final Element object = actualArguments.isEmpty() ? Element.EMPTY : actualArguments.remove(0);
+                        final Element object = actualArguments.isEmpty() ? new Element() : actualArguments.remove(0);
                         if (JavaUtils.isInitializerName(i.getMethodName())) {
                             return new Element(i.getContainingClass());
                         }

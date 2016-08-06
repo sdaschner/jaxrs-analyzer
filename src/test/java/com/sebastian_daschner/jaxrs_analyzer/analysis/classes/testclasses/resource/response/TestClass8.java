@@ -32,7 +32,8 @@ public class TestClass8 {
     public Response method(final String id) {
         try {
             final int status = innerTestClass.method(id.length());
-            return Response.status(status).build();
+            String string = innerTestClass.getModel(null);
+            return Response.status(status).header("X-Foo", string).build();
         } finally {
             Logger.getLogger("").info("deleted");
         }
@@ -42,6 +43,7 @@ public class TestClass8 {
         final HttpResponse result = new HttpResponse();
 
         result.getStatuses().add(404);
+        result.getHeaders().add("X-Foo");
 
         return Collections.singleton(result);
     }
@@ -49,6 +51,10 @@ public class TestClass8 {
     private class InnerTestClass6 {
 
         private EntityManager entityManager;
+
+        public String getModel(final String id) {
+            return new String(id);
+        }
 
         public int method(final int number) {
             synchronized (this) {

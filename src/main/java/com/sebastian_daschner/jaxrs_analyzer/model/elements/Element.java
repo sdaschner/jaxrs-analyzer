@@ -16,12 +16,12 @@
 
 package com.sebastian_daschner.jaxrs_analyzer.model.elements;
 
-import com.sebastian_daschner.jaxrs_analyzer.model.Types;
-
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
+
+import static com.sebastian_daschner.jaxrs_analyzer.model.Types.OBJECT;
 
 /**
  * Represents an element on the runtime stack.
@@ -30,13 +30,12 @@ import java.util.Set;
  */
 public class Element {
 
-    /**
-     * Unmodifiable placeholder for an empty element.
-     */
-    public static final Element EMPTY = new UnmodifiableElement(Types.OBJECT);
-
     private final Set<Object> possibleValues;
     private final Set<String> types;
+
+    public Element() {
+        this(Collections.singleton(OBJECT));
+    }
 
     public Element(final String type, final Object... values) {
         this(Collections.singleton(type), values);
@@ -99,26 +98,6 @@ public class Element {
                 "possibleValues=" + possibleValues +
                 ", types='" + types + '\'' +
                 '}';
-    }
-
-    /**
-     * Unmodifiable representation of a stack element.
-     */
-    private static class UnmodifiableElement extends Element {
-
-        public UnmodifiableElement(final String type) {
-            super(type);
-        }
-
-        @Override
-        public Set<Object> getPossibleValues() {
-            return Collections.unmodifiableSet(super.getPossibleValues());
-        }
-
-        @Override
-        public Set<String> getTypes() {
-            return Collections.unmodifiableSet(super.getTypes());
-        }
     }
 
 }

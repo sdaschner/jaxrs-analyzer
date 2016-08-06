@@ -242,7 +242,7 @@ public class MethodSimulator {
      */
     private void simulateSizeChange(final SizeChangingInstruction instruction) {
         IntStream.range(0, instruction.getNumberOfPops()).forEach(i -> runtimeStack.pop());
-        IntStream.range(0, instruction.getNumberOfPushes()).forEach(i -> runtimeStack.push(Element.EMPTY));
+        IntStream.range(0, instruction.getNumberOfPushes()).forEach(i -> runtimeStack.push(new Element()));
     }
 
     /**

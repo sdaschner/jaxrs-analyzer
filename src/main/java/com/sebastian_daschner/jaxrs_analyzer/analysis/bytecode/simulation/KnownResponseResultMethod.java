@@ -388,7 +388,7 @@ enum KnownResponseResultMethod implements IdentifiableMethod {
                     ((Method) arguments.get(1)).invoke(null, Arrays.asList(collectionElement, object));
                     return collectionElement;
                 }
-                return Element.EMPTY;
+                return new Element();
             }),
 
     STREAM_FOR_EACH(ofNonStatic(CLASS_STREAM, "forEach", PRIMITIVE_VOID, CONSUMER), (object, arguments) -> {
@@ -401,7 +401,7 @@ enum KnownResponseResultMethod implements IdentifiableMethod {
         if (arguments.get(0) instanceof MethodHandle) {
             return ((MethodHandle) arguments.get(0)).invoke(null, Collections.singletonList(object));
         }
-        return Element.EMPTY;
+        return new Element();
     });
 
     private final MethodIdentifier identifier;
