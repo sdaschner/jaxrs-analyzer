@@ -26,6 +26,9 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
+import javax.json.Json;
+import javax.json.JsonStructure;
+import java.io.StringReader;
 import java.util.*;
 
 import static com.sebastian_daschner.jaxrs_analyzer.analysis.results.TypeUtils.MODEL_IDENTIFIER;
@@ -49,7 +52,17 @@ public class SwaggerBackendTest {
         final Project project = new Project("project name", "1.0", resources);
         final String actualOutput = cut.render(project);
 
-        assertEquals(expectedOutput, actualOutput);
+        // TODO to fix test w/ different formattings
+//            assertEquals(expectedOutput, actualOutput);
+        System.out.println("actualOutput = '" + actualOutput + "'");
+
+        try (final StringReader expectedReader = new StringReader(expectedOutput);
+             final StringReader actualReader = new StringReader(actualOutput)
+        ) {
+            final JsonStructure expected = Json.createReader(expectedReader).read();
+            final JsonStructure actual = Json.createReader(actualReader).read();
+            assertEquals(expected, actual);
+        }
     }
 
     @Parameterized.Parameters

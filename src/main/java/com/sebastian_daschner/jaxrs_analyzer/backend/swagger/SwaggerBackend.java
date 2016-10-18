@@ -19,11 +19,12 @@ package com.sebastian_daschner.jaxrs_analyzer.backend.swagger;
 import com.sebastian_daschner.jaxrs_analyzer.backend.Backend;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.*;
 
-import javax.json.Json;
-import javax.json.JsonArrayBuilder;
-import javax.json.JsonObject;
-import javax.json.JsonObjectBuilder;
+import javax.json.*;
+import javax.json.stream.JsonGenerator;
 import javax.ws.rs.core.Response;
+import java.io.IOException;
+import java.io.StringWriter;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -32,6 +33,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import static com.sebastian_daschner.jaxrs_analyzer.backend.ComparatorUtils.mapKeyComparator;
 import static com.sebastian_daschner.jaxrs_analyzer.backend.ComparatorUtils.parameterComparator;
+import static java.util.Collections.singletonMap;
 import static java.util.Comparator.comparing;
 
 /**
@@ -78,7 +80,16 @@ class SwaggerBackend implements Backend {
         appendPaths();
         appendDefinitions();
 
-        return builder.build().toString();
+        try (final StringWriter writer = new StringWriter()) {
+            final Map<String, ?> config = singletonMap(JsonGenerator.PRETTY_PRINTING, true);
+            final JsonWriter jsonWriter = Json.createWriterFactory(config).createWriter(writer);
+            jsonWriter.write(builder.build());
+            jsonWriter.close();
+
+            return writer.toString();
+        } catch (IOException e) {
+            throw new RuntimeException("Could not write Swagger output", e);
+        }
     }
 
     private void appendHeader() {
