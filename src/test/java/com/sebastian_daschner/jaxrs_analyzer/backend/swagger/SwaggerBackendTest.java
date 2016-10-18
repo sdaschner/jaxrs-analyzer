@@ -54,7 +54,6 @@ public class SwaggerBackendTest {
 
         // TODO to fix test w/ different formattings
 //            assertEquals(expectedOutput, actualOutput);
-        System.out.println("actualOutput = '" + actualOutput + "'");
 
         try (final StringReader expectedReader = new StringReader(expectedOutput);
              final StringReader actualReader = new StringReader(actualOutput)
