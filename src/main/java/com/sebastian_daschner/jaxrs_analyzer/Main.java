@@ -252,7 +252,7 @@ public class Main {
         System.err.println("\nFollowing available backend specific options (only have effect if the corresponding backend is selected):\n");
         System.err.println(" --swaggerSchemes <scheme>[,schemes] The Swagger schemes: http (default), https, ws, wss");
         System.err.println(" --renderSwaggerTags Enables rendering of Swagger tags (default tag will be used per default)");
-        System.err.println(" --swaggerTagsPathOffset <path offset> The number at which path position the Swagger tags should be extracted (0 will be used per default)");
+        System.err.println(" --swaggerTagsPathOffset <path offset> The number at which path position the Swagger tags will be extracted (0 will be used per default)");
         System.err.println("\nExample: java -jar jaxrs-analyzer.jar -b swagger -n \"My Project\" -cp ~/libs/lib1.jar:~/libs/project/bin ~/project/target/classes");
         System.exit(1);
     }

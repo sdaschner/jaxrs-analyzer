@@ -3,9 +3,15 @@ Sebastian Daschner
 
 // new versions are placed on the top
 
-== v0.10 (Current SNAPSHOT)
+== v0.10
 - Changed internals to ASM
+- Improved type analysis
 - Improved analysis of POJO type inheritance
+- Supported Swagger tags
+- Added option to change Swagger schemes
+- Supported `@DefaultValue`
+- Improved entity body support for "`Stringifiable`" types
+- Changed Swagger output to pretty printed JSON
 
 == v0.9
 - Enhanced type resolution for generic types and generic methods

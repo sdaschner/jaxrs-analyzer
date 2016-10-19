@@ -10,6 +10,8 @@ Using the JSR 339 standard is sufficient.
 
 Java 8 is needed for the Analyzer.
 
+For usage see the https://github.com/sdaschner/jaxrs-analyzer/blob/master/Documentation.adoc[documentation].
+
 == Maven Plugin
 The Analyzer can be added to your project via https://github.com/sdaschner/jaxrs-analyzer-maven-plugin[Maven plugin].
 
@@ -19,8 +21,6 @@ For `Gradle` based projects - third-party https://github.com/eshepelyuk/gradle-j
 == Standalone
 Instead of using the Maven plugin, the tool can also run directly from the jar file.
 You can download the latest version https://github.com/sdaschner/jaxrs-analyzer/releases[here].
-
-For usage see the https://github.com/sdaschner/jaxrs-analyzer/blob/master/Documentation.adoc[documentation].
 
 == Backends
 The Analyzer supports Plaintext, AsciiDoc and Swagger as output format.
