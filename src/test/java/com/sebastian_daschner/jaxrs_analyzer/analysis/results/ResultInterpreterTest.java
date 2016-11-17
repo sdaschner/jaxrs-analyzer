@@ -79,10 +79,29 @@ public class ResultInterpreterTest {
         final ClassResult appPathResult = ClassResultBuilder.withApplicationPath("/path").build();
         final MethodResult method = MethodResultBuilder.withResponses(HttpResponseBuilder.withStatues(200).andEntityTypes(Types.STRING).build())
                 .andMethod(HttpMethod.GET).build();
-        final MethodResult subResourceLocator = MethodResultBuilder.newBuilder().andPath("sub").build();
+        final MethodResult subResourceLocator = MethodResultBuilder.newBuilder().andPath("/sub").build();
         final MethodResult subResourceMethod = MethodResultBuilder.withResponses(HttpResponseBuilder.withStatues(204).build()).andMethod(HttpMethod.POST).build();
         subResourceLocator.setSubResource(ClassResultBuilder.withResourcePath(null).andMethods(subResourceMethod).build());
-        final ClassResult resClassResult = ClassResultBuilder.withResourcePath("test").andMethods(method, subResourceLocator).build();
+        final ClassResult resClassResult = ClassResultBuilder.withResourcePath("/test").andMethods(method, subResourceLocator).build();
+
+        final Set<ClassResult> results = new HashSet<>(Arrays.asList(appPathResult, resClassResult));
+
+        final Resources actualResult = classUnderTest.interpret(results);
+
+        assertEquals(expectedResult, actualResult);
+    }
+
+    @Test
+    public void testRootResource() {
+        final Resources expectedResult = new Resources();
+        expectedResult.setBasePath("path");
+        final ResourceMethod resourcePostMethod = ResourceMethodBuilder.withMethod(HttpMethod.POST)
+                .andResponse(204, ResponseBuilder.newBuilder().build()).build();
+        expectedResult.addMethod("test", resourcePostMethod);
+
+        final ClassResult appPathResult = ClassResultBuilder.withApplicationPath("path").build();
+        final MethodResult subResourceMethod = MethodResultBuilder.withResponses(HttpResponseBuilder.withStatues(204).build()).andPath("/test").andMethod(HttpMethod.POST).build();
+        final ClassResult resClassResult = ClassResultBuilder.withResourcePath("/").andMethods(subResourceMethod).build();
 
         final Set<ClassResult> results = new HashSet<>(Arrays.asList(appPathResult, resClassResult));
 

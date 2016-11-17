@@ -58,7 +58,7 @@ final class PathNormalizer {
     }
 
     /**
-     * Determines all single paths of the method result. All parent class and method results are analyzed as well.
+     * Determines all single paths of the method result recursively. All parent class and method results are analyzed as well.
      *
      * @param methodResult The method result
      * @return All single path pieces
@@ -92,25 +92,54 @@ final class PathNormalizer {
      * @param strings The list
      */
     private static void addNonBlank(final String string, final List<String> strings) {
-        if (!StringUtils.isBlank(string))
+        if (!StringUtils.isBlank(string) && !"/".equals(string))
             strings.add(string);
     }
 
     /**
-     * Normalizes the given path (trims leading and trailing forward-slashes).
+     * Normalizes the given path, i.e. trims leading or trailing forward-slashes and removes path parameter matchers.
      *
      * @param path The path to normalize
      * @return The normalized path
      */
     private static String normalize(final String path) {
-        String normalized = path;
-        if (normalized.endsWith("/"))
-            normalized = normalized.substring(0, normalized.length() - 1);
+        final StringBuilder builder = new StringBuilder(path);
 
-        if (normalized.startsWith("/"))
-            normalized = normalized.substring(1);
+        int index = 0;
+        int colonIndex = -1;
+        char current = 0;
+        char last;
 
-        return normalized;
+        while (index < builder.length()) {
+            last = current;
+            current = builder.charAt(index);
+
+            switch (current) {
+                case '}':
+                    if (last == '\\')
+                        break;
+                    if (colonIndex != -1) {
+                        builder.delete(colonIndex, index);
+                        index = colonIndex;
+                        colonIndex = -1;
+                    }
+                    break;
+                case ':':
+                    if (colonIndex == -1) {
+                        colonIndex = index;
+                    }
+                    break;
+            }
+            if ((index == 0 || index == builder.length() - 1) && current == '/') {
+                builder.deleteCharAt(index);
+                if (index == builder.length())
+                    // check again for path end
+                    index--;
+            } else
+                index++;
+        }
+
+        return builder.toString();
     }
 
 }

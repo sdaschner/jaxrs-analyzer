@@ -64,7 +64,7 @@ public class ResultInterpreter {
      * @param classResult The class result
      */
     private void interpretClassResult(final ClassResult classResult) {
-        classResult.getMethods().stream().forEach(m -> interpretMethodResult(m, classResult));
+        classResult.getMethods().forEach(m -> interpretMethodResult(m, classResult));
     }
 
     /**
@@ -108,7 +108,7 @@ public class ResultInterpreter {
         // add default status code due to JSR 339
         addDefaultResponses(methodResult);
 
-        methodResult.getResponses().stream().forEach(r -> interpretResponse(r, resourceMethod));
+        methodResult.getResponses().forEach(r -> interpretResponse(r, resourceMethod));
 
         addMediaTypes(methodResult, classResult, resourceMethod);
 
@@ -120,7 +120,7 @@ public class ResultInterpreter {
      * Preexisting parameters with identical names are overridden.
      */
     private void updateMethodParameters(final Set<MethodParameter> parameters, final Set<MethodParameter> additional) {
-        additional.stream().forEach(a -> {
+        additional.forEach(a -> {
             // remove preexisting parameters with identical names
             final Optional<MethodParameter> existingParameter = parameters.stream().filter(p -> p.getName().equals(a.getName())).findAny();
             existingParameter.ifPresent(parameters::remove);
@@ -142,7 +142,7 @@ public class ResultInterpreter {
 
     private void interpretResponse(final HttpResponse httpResponse, final ResourceMethod method) {
         method.getResponseMediaTypes().addAll(httpResponse.getContentTypes());
-        httpResponse.getStatuses().stream().forEach(s -> {
+        httpResponse.getStatuses().forEach(s -> {
             Response response = httpResponse.getInlineEntities().stream().findAny()
                     .map(JsonMapper::map).map(dynamicTypeAnalyzer::analyze).map(Response::new).orElse(null);
 
