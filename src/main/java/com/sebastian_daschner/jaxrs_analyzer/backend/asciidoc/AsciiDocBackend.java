@@ -22,7 +22,7 @@ import static com.sebastian_daschner.jaxrs_analyzer.model.JavaUtils.toReadableTy
  *
  * @author Sebastian Daschner
  */
-class AsciiDocBackend implements Backend {
+public class AsciiDocBackend implements Backend {
 
     private static final String NAME = "AsciiDoc";
     private static final String DOCUMENT_TITLE = "= REST resources of ";
@@ -34,6 +34,10 @@ class AsciiDocBackend implements Backend {
     private String projectName;
     private String projectVersion;
     private TypeRepresentationVisitor visitor;
+
+    public AsciiDocBackend() {
+        super();
+    }
 
     @Override
     public String render(final Project project) {
