@@ -17,19 +17,29 @@
 package com.sebastian_daschner.jaxrs_analyzer.backend.swagger;
 
 import com.sebastian_daschner.jaxrs_analyzer.backend.Backend;
-import com.sebastian_daschner.jaxrs_analyzer.model.rest.*;
+import com.sebastian_daschner.jaxrs_analyzer.model.rest.MethodParameter;
+import com.sebastian_daschner.jaxrs_analyzer.model.rest.ParameterType;
+import com.sebastian_daschner.jaxrs_analyzer.model.rest.Project;
+import com.sebastian_daschner.jaxrs_analyzer.model.rest.ResourceMethod;
+import com.sebastian_daschner.jaxrs_analyzer.model.rest.Resources;
 
-import javax.json.*;
+import javax.json.Json;
+import javax.json.JsonArrayBuilder;
+import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
+import javax.json.JsonWriter;
 import javax.json.stream.JsonGenerator;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.io.StringWriter;
+import java.util.EnumSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.stream.Stream;
 
 import static com.sebastian_daschner.jaxrs_analyzer.backend.ComparatorUtils.mapKeyComparator;
 import static com.sebastian_daschner.jaxrs_analyzer.backend.ComparatorUtils.parameterComparator;
@@ -41,7 +51,12 @@ import static java.util.Comparator.comparing;
  *
  * @author Sebastian Daschner
  */
-class SwaggerBackend implements Backend {
+public class SwaggerBackend implements Backend {
+
+    public static final String SWAGGER_SCHEMES = "swaggerSchemes";
+    public static final String RENDER_SWAGGER_TAGS = "renderSwaggerTags";
+    public static final String SWAGGER_TAGS_PATH_OFFSET = "swaggerTagsPathOffset";
+    public static final String DOMAIN = "domain";
 
     private static final String NAME = "Swagger";
     private static final String SWAGGER_VERSION = "2.0";
@@ -53,6 +68,10 @@ class SwaggerBackend implements Backend {
     private SchemaBuilder schemaBuilder;
     private String projectName;
     private String projectVersion;
+
+    public SwaggerBackend() {
+        this(new SwaggerOptions());
+    }
 
     SwaggerBackend(final SwaggerOptions options) {
         this.options = options;
@@ -208,9 +227,59 @@ class SwaggerBackend implements Backend {
         builder.add("definitions", schemaBuilder.getDefinitions());
     }
 
+
+
+    private SwaggerScheme extractSwaggerScheme(final String scheme) {
+        switch (scheme.toLowerCase()) {
+            case "http":
+                return SwaggerScheme.HTTP;
+            case "https":
+                return SwaggerScheme.HTTPS;
+            case "ws":
+                return SwaggerScheme.WS;
+            case "wss":
+                return SwaggerScheme.WSS;
+            default:
+                throw new IllegalArgumentException("Unknown swagger scheme " + scheme);
+        }
+    }
+
     @Override
     public String getName() {
         return NAME;
+    }
+
+    @Override
+    public void configure(Map<String, String> config) {
+        if (config.containsKey(SWAGGER_TAGS_PATH_OFFSET)) {
+            Integer swaggerTagsPathOffset = Integer.parseInt(config.get(SWAGGER_TAGS_PATH_OFFSET));
+
+            if (swaggerTagsPathOffset < 0) {
+                System.err.println("Please provide positive integer number for option --swaggerTagsPathOffset\n");
+                throw new IllegalArgumentException("Please provide positive integer number for option --swaggerTagsPathOffset");
+            }
+
+            this.options.setTagsPathOffset(swaggerTagsPathOffset);
+        }
+
+        if(config.containsKey(DOMAIN)) {
+            this.options.setDomain(config.get(DOMAIN));
+        }
+
+        if (config.containsKey(SWAGGER_SCHEMES)) {
+            this.options.setSchemes(extractSwaggerSchemes(config.get(SWAGGER_SCHEMES)));
+        }
+
+        if (config.containsKey(RENDER_SWAGGER_TAGS)) {
+            this.options.setRenderTags(Boolean.parseBoolean(config.get(RENDER_SWAGGER_TAGS)));
+        }
+    }
+
+
+    private Set<SwaggerScheme> extractSwaggerSchemes(final String schemes) {
+        return Stream.of(schemes.split(","))
+                .map(this::extractSwaggerScheme)
+                .collect(() -> EnumSet.noneOf(SwaggerScheme.class), Set::add, Set::addAll);
     }
 
     private static String getSwaggerParameterType(final ParameterType parameterType) {

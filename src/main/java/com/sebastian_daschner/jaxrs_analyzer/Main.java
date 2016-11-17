@@ -16,6 +16,7 @@
 package com.sebastian_daschner.jaxrs_analyzer;
 
 import com.sebastian_daschner.jaxrs_analyzer.backend.Backend;
+import com.sebastian_daschner.jaxrs_analyzer.backend.swagger.SwaggerBackend;
 import com.sebastian_daschner.jaxrs_analyzer.backend.swagger.SwaggerBackendBuilder;
 import com.sebastian_daschner.jaxrs_analyzer.backend.swagger.SwaggerScheme;
 
@@ -23,8 +24,11 @@ import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.ServiceLoader;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -42,13 +46,10 @@ public class Main {
     private static final Set<Path> projectClassPaths = new HashSet<>();
     private static final Set<Path> projectSourcePaths = new HashSet<>();
     private static final Set<Path> classPaths = new HashSet<>();
+    private static final Map<String, String> attributes = new HashMap<>();
     private static String name = DEFAULT_NAME;
     private static String version = DEFAULT_VERSION;
-    private static BackendType backendType = BackendType.SWAGGER;
-    private static String domain;
-    private static Set<SwaggerScheme> swaggerSchemes;
-    private static Boolean renderSwaggerTags;
-    private static Integer swaggerTagsPathOffset;
+    private static String backendType = "swagger";
     private static Path outputFileLocation;
 
     /**
@@ -93,7 +94,8 @@ public class Main {
 
         validateArgs();
 
-        final Backend backend = constructBackend();
+        final Backend backend = constructBackend(backendType);
+        backend.configure(attributes);
 
         final JAXRSAnalyzer jaxrsAnalyzer = new JAXRSAnalyzer(projectClassPaths, projectSourcePaths, classPaths, name, version, backend, outputFileLocation);
         jaxrsAnalyzer.analyze();
@@ -123,19 +125,22 @@ public class Main {
                             version = args[++i];
                             break;
                         case "-d":
-                            domain = args[++i];
+                            attributes.put(SwaggerBackend.DOMAIN, args[++i]);
                             break;
                         case "-o":
                             outputFileLocation = Paths.get(args[++i]);
                             break;
                         case "--swaggerSchemes":
-                            swaggerSchemes = extractSwaggerSchemes(args[++i]);
+                            attributes.put(SwaggerBackend.SWAGGER_SCHEMES, args[++i]);
                             break;
                         case "--renderSwaggerTags":
-                            renderSwaggerTags = true;
+                            attributes.put(SwaggerBackend.RENDER_SWAGGER_TAGS, "true");
                             break;
                         case "--swaggerTagsPathOffset":
-                            swaggerTagsPathOffset = Integer.valueOf(args[++i]);
+                            attributes.put(SwaggerBackend.SWAGGER_TAGS_PATH_OFFSET, args[++i]);
+                            break;
+                        case "-a":
+                            addAttribute(args[++i]);
                             break;
                         default:
                             throw new IllegalArgumentException("Unknown option " + args[i]);
@@ -154,17 +159,20 @@ public class Main {
         }
     }
 
-    private static BackendType extractBackend(final String name) {
-        switch (name.toLowerCase()) {
-            case "swagger":
-                return BackendType.SWAGGER;
-            case "plaintext":
-                return BackendType.PLAINTEXT;
-            case "asciidoc":
-                return BackendType.ASCIIDOC;
-            default:
-                throw new IllegalArgumentException("Unknown backend " + name);
+    static Map<String, String> addAttribute(String attribute) {
+        int separatorIndex = attribute.indexOf('=');
+
+        if (separatorIndex < 0) {
+            attributes.put(attribute, "");
+        } else {
+            attributes.put(attribute.substring(0, separatorIndex).trim(), attribute.substring(separatorIndex + 1).trim());
         }
+
+        return attributes;
+    }
+
+    private static String extractBackend(final String name) {
+        return name.toLowerCase();
     }
 
     private static List<Path> extractClassPaths(final String classPaths) {
@@ -179,32 +187,8 @@ public class Main {
         return paths;
     }
 
-    private static Set<SwaggerScheme> extractSwaggerSchemes(final String schemes) {
-        return Stream.of(schemes.split(","))
-                .map(Main::extractSwaggerScheme)
-                .collect(() -> EnumSet.noneOf(SwaggerScheme.class), Set::add, Set::addAll);
-    }
-
-    private static SwaggerScheme extractSwaggerScheme(final String scheme) {
-        switch (scheme.toLowerCase()) {
-            case "http":
-                return SwaggerScheme.HTTP;
-            case "https":
-                return SwaggerScheme.HTTPS;
-            case "ws":
-                return SwaggerScheme.WS;
-            case "wss":
-                return SwaggerScheme.WSS;
-            default:
-                throw new IllegalArgumentException("Unknown swagger scheme " + scheme);
-        }
-    }
 
     private static void validateArgs() {
-        if (swaggerTagsPathOffset != null && swaggerTagsPathOffset < 0) {
-            System.err.println("Please provide positive integer number for option --swaggerTagsPathOffset\n");
-            printUsageAndExit();
-        }
 
         if (projectClassPaths.isEmpty()) {
             System.err.println("Please provide at least one project path\n");
@@ -212,35 +196,17 @@ public class Main {
         }
     }
 
-    private static Backend constructBackend() {
-        switch (backendType) {
-            case SWAGGER:
-                return configureSwaggerBackend();
-            case PLAINTEXT:
-                return Backend.plainText().build();
-            case ASCIIDOC:
-                return Backend.asciiDoc().build();
-            default:
-                // can not happen
-                throw new IllegalArgumentException("Unknown backend type " + backendType);
-        }
-    }
+    static Backend constructBackend(String backendType) {
 
-    private static Backend configureSwaggerBackend() {
-        final SwaggerBackendBuilder builder = Backend.swagger();
+        final ServiceLoader<Backend> backends = ServiceLoader.load(Backend.class);
 
-        if (domain != null)
-            builder.domain(domain);
-        if (swaggerSchemes != null)
-            builder.schemes(swaggerSchemes);
-        if (renderSwaggerTags != null) {
-            if (swaggerTagsPathOffset != null)
-                builder.renderTags(renderSwaggerTags, swaggerTagsPathOffset);
-            else
-                builder.renderTags(renderSwaggerTags);
+        for (Backend backend : backends) {
+            if (backendType.equalsIgnoreCase(backend.getName())) {
+                return backend;
+            }
         }
 
-        return builder.build();
+        throw new IllegalArgumentException("Unknown backend type " + backendType);
     }
 
     private static void printUsageAndExit() {
@@ -255,6 +221,7 @@ public class Main {
         System.err.println(" -v <project version> The version of the project");
         System.err.println(" -d <project domain> The domain of the project");
         System.err.println(" -o <output file> The location of the analysis output (will be printed to standard out if omitted)");
+        System.err.println(" -a <attribute name>=<attribute value> Set custom attributes for backends.");
         System.err.println("\nFollowing available backend specific options (only have effect if the corresponding backend is selected):\n");
         System.err.println(" --swaggerSchemes <scheme>[,schemes] The Swagger schemes: http (default), https, ws, wss");
         System.err.println(" --renderSwaggerTags Enables rendering of Swagger tags (default tag will be used per default)");
@@ -263,7 +230,4 @@ public class Main {
         System.exit(1);
     }
 
-    private enum BackendType {
-        SWAGGER, PLAINTEXT, ASCIIDOC
-    }
 }

@@ -38,9 +38,9 @@ import static java.util.Comparator.comparing;
  *
  * @author Sebastian Daschner
  */
-class PlainTextBackend implements Backend {
+public class PlainTextBackend implements Backend {
 
-    private static final String NAME = "Plain text";
+    private static final String NAME = "PlainText";
     private static final String REST_HEADER = "REST resources of ";
     private static final String TYPE_WILDCARD = "*/*";
 
