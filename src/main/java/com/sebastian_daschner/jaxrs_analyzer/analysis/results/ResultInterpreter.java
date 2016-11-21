@@ -24,6 +24,7 @@ import com.sebastian_daschner.jaxrs_analyzer.model.rest.Resources;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.Response;
 import com.sebastian_daschner.jaxrs_analyzer.model.results.ClassResult;
 import com.sebastian_daschner.jaxrs_analyzer.model.results.MethodResult;
+import com.sebastian_daschner.jaxrs_analyzer.utils.StringUtils;
 
 import java.util.Optional;
 import java.util.Set;
@@ -96,7 +97,9 @@ public class ResultInterpreter {
      */
     private ResourceMethod interpretResourceMethod(final MethodResult methodResult, final ClassResult classResult) {
         // HTTP method and method parameters
-        final ResourceMethod resourceMethod = new ResourceMethod(methodResult.getHttpMethod());
+        final String description = methodResult.getMethodDoc() == null || StringUtils.isBlank(methodResult.getMethodDoc().commentText()) ?
+                null : methodResult.getMethodDoc().commentText();
+        final ResourceMethod resourceMethod = new ResourceMethod(methodResult.getHttpMethod(), description);
         updateMethodParameters(resourceMethod.getMethodParameters(), classResult.getClassFields());
         updateMethodParameters(resourceMethod.getMethodParameters(), methodResult.getMethodParameters());
         stringParameterResolver.replaceParametersTypes(resourceMethod.getMethodParameters());

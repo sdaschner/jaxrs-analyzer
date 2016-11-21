@@ -19,6 +19,7 @@ package com.sebastian_daschner.jaxrs_analyzer.analysis;
 import com.sebastian_daschner.jaxrs_analyzer.LogProvider;
 import com.sebastian_daschner.jaxrs_analyzer.analysis.bytecode.BytecodeAnalyzer;
 import com.sebastian_daschner.jaxrs_analyzer.analysis.classes.JAXRSClassVisitor;
+import com.sebastian_daschner.jaxrs_analyzer.analysis.javadoc.JavaDocAnalyzer;
 import com.sebastian_daschner.jaxrs_analyzer.analysis.results.ResultInterpreter;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.Resources;
 import com.sebastian_daschner.jaxrs_analyzer.model.results.ClassResult;
@@ -41,7 +42,6 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
-import java.util.stream.Stream;
 
 import static com.sebastian_daschner.jaxrs_analyzer.model.JavaUtils.isAnnotationPresent;
 
@@ -60,8 +60,10 @@ public class ProjectAnalyzer {
 
     private final Lock lock = new ReentrantLock();
     private final Set<String> classes = new HashSet<>();
+    private final Set<String> packages = new HashSet<>();
     private final ResultInterpreter resultInterpreter = new ResultInterpreter();
     private final BytecodeAnalyzer bytecodeAnalyzer = new BytecodeAnalyzer();
+    private final JavaDocAnalyzer javaDocAnalyzer = new JavaDocAnalyzer();
     private final URLClassLoader urlClassLoader = (URLClassLoader) ClassLoader.getSystemClassLoader();
 
     /**
@@ -69,20 +71,22 @@ public class ProjectAnalyzer {
      *
      * @param classPaths The locations of additional class paths (can be directories or jar-files)
      */
-    public ProjectAnalyzer(final Path... classPaths) {
-        Stream.of(classPaths).forEach(this::addToClassPool);
+    public ProjectAnalyzer(final Set<Path> classPaths) {
+        classPaths.forEach(this::addToClassPool);
+        addToClassPool(Paths.get(System.getProperty("java.home"), "..", "lib", "tools.jar"));
     }
 
     /**
      * Analyzes all classes in the given project path.
      *
-     * @param projectPaths The project paths
+     * @param projectClassPaths  The project class paths
+     * @param projectSourcePaths The project source file paths
      * @return The REST resource representations
      */
-    public Resources analyze(final Path... projectPaths) {
+    public Resources analyze(final Set<Path> projectClassPaths, final Set<Path> projectSourcePaths) {
         lock.lock();
         try {
-            Stream.of(projectPaths).forEach(this::addProjectPath);
+            projectClassPaths.forEach(this::addProjectPath);
 
             // analyze relevant classes
             final JobRegistry jobRegistry = JobRegistry.getInstance();
@@ -99,6 +103,8 @@ public class ProjectAnalyzer {
 
                 bytecodeAnalyzer.analyzeBytecode(classResult);
             }
+
+            javaDocAnalyzer.analyze(classResults, packages, projectSourcePaths);
 
             return resultInterpreter.interpret(classResults);
         } finally {
@@ -172,9 +178,12 @@ public class ProjectAnalyzer {
         try (final JarFile jarFile = new JarFile(location.toFile())) {
             final Enumeration<JarEntry> entries = jarFile.entries();
             while (entries.hasMoreElements()) {
-                final String entryName = entries.nextElement().getName();
+                final JarEntry entry = entries.nextElement();
+                final String entryName = entry.getName();
                 if (entryName.endsWith(".class"))
-                    classes.add(convertToQualifiedName(entryName));
+                    classes.add(toQualifiedClassName(entryName));
+                else if (entry.isDirectory())
+                    packages.add(entryName);
             }
         } catch (IOException e) {
             throw new IllegalArgumentException("Could not read jar-file '" + location + "', reason: " + e.getMessage());
@@ -192,8 +201,9 @@ public class ProjectAnalyzer {
             if (file.isDirectory())
                 addDirectoryClasses(location.resolve(file.getName()), subPath.resolve(file.getName()));
             else if (file.isFile() && file.getName().endsWith(".class")) {
+                packages.add(toQualifiedPackageName(subPath.toString()));
                 final String classFileName = subPath.resolve(file.getName()).toString();
-                classes.add(convertToQualifiedName(classFileName));
+                classes.add(toQualifiedClassName(classFileName));
             }
         }
     }
@@ -204,9 +214,19 @@ public class ProjectAnalyzer {
      * @param fileName The file name (e.g. a/package/AClass.class)
      * @return The fully-qualified class name (e.g. a.package.AClass)
      */
-    private static String convertToQualifiedName(final String fileName) {
+    private static String toQualifiedClassName(final String fileName) {
         final String replacedSeparators = fileName.replace(File.separatorChar, '.');
         return replacedSeparators.substring(0, replacedSeparators.length() - ".class".length());
+    }
+
+    /**
+     * Converts the given path name of a directory to the fully-qualified package name.
+     *
+     * @param pathName The directory name (e.g. a/package/)
+     * @return The fully-qualified package name (e.g. a.package)
+     */
+    private static String toQualifiedPackageName(final String pathName) {
+        return pathName.replace(File.separatorChar, '.');
     }
 
 }

@@ -27,6 +27,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.TypeVariable;
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.sebastian_daschner.jaxrs_analyzer.model.Types.*;
@@ -395,6 +396,11 @@ public final class JavaUtils {
                 // return types are not taken into account (could be overloaded method w/ different return type)
                 && Objects.equals(getParameters(getMethodSignature(m)), parameters)
         ).findAny().orElse(null);
+    }
+
+    public static String getMethodSignature(final String returnType, final String... parameterTypes) {
+        final String parameters = Stream.of(parameterTypes).collect(Collectors.joining());
+        return '(' + parameters + ')' + returnType;
     }
 
     public static String getMethodSignature(final Method method) {

@@ -29,13 +29,15 @@ public class ResourceMethod {
     private final Set<String> responseMediaTypes = new HashSet<>();
     private final Map<Integer, Response> responses = new HashMap<>();
     private final Set<MethodParameter> methodParameters = new HashSet<>();
+    private final String description;
 
     private final HttpMethod method;
     private TypeIdentifier requestBody;
 
-    public ResourceMethod(final HttpMethod method) {
+    public ResourceMethod(final HttpMethod method, final String description) {
         Objects.requireNonNull(method);
         this.method = method;
+        this.description = description;
     }
 
     public HttpMethod getMethod() {
@@ -66,6 +68,10 @@ public class ResourceMethod {
         return responses;
     }
 
+    public String getDescription() {
+        return description;
+    }
+
     @Override
     public boolean equals(final Object o) {
         if (this == o) return true;
@@ -78,6 +84,7 @@ public class ResourceMethod {
         if (!responses.equals(that.responses)) return false;
         if (!methodParameters.equals(that.methodParameters)) return false;
         if (method != that.method) return false;
+        if (description != null ? !description.equals(that.description) : that.description != null) return false;
         return requestBody != null ? requestBody.equals(that.requestBody) : that.requestBody == null;
 
     }
@@ -89,6 +96,7 @@ public class ResourceMethod {
         result = 31 * result + responses.hashCode();
         result = 31 * result + methodParameters.hashCode();
         result = 31 * result + method.hashCode();
+        result = 31 * result + (description != null ? description.hashCode() : 0);
         result = 31 * result + (requestBody != null ? requestBody.hashCode() : 0);
         return result;
     }
@@ -101,6 +109,7 @@ public class ResourceMethod {
                 ", responseMediaTypes=" + responseMediaTypes +
                 ", responses=" + responses +
                 ", methodParameters=" + methodParameters +
+                ", description=" + description +
                 ", requestBody=" + requestBody +
                 '}';
     }

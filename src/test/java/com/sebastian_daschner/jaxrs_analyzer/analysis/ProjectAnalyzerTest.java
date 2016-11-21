@@ -35,7 +35,7 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Stream;
 
-import static java.util.Collections.singletonList;
+import static java.util.Collections.*;
 import static org.junit.Assert.*;
 
 public class ProjectAnalyzerTest {
@@ -58,13 +58,13 @@ public class ProjectAnalyzerTest {
         assertTrue("Could not compile test project", compilationTask.call());
 
         path = Paths.get(testClassPath).toAbsolutePath();
-        classUnderTest = new ProjectAnalyzer(path);
+        classUnderTest = new ProjectAnalyzer(singleton(path));
     }
 
     @Test
     public void test() {
         final long startTime = System.currentTimeMillis();
-        final Resources actualResources = classUnderTest.analyze(path);
+        final Resources actualResources = classUnderTest.analyze(singleton(path), emptySet());
         System.out.println("Project analysis took " + (System.currentTimeMillis() - startTime) + " ms");
         final Resources expectedResources = getResources();
 
@@ -76,7 +76,7 @@ public class ProjectAnalyzerTest {
     }
 
     private static void assertResourceEquals(final Resources expectedResources, final Resources actualResources) {
-        actualResources.getResources().stream().forEach(r -> {
+        actualResources.getResources().forEach(r -> {
             final Set<ResourceMethod> expectedMethods = expectedResources.getMethods(r);
             final Set<ResourceMethod> actualMethods = actualResources.getMethods(r);
             final String resourceText = "Compared resource " + r;

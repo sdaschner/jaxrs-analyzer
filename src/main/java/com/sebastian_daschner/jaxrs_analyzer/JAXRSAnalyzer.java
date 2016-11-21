@@ -21,7 +21,8 @@ import java.util.Set;
  */
 public class JAXRSAnalyzer {
 
-    private final Set<Path> projectPaths = new HashSet<>();
+    private final Set<Path> projectClassPaths = new HashSet<>();
+    private final Set<Path> projectSourcePaths = new HashSet<>();
     private final Set<Path> classPaths = new HashSet<>();
     private final String projectName;
     private final String projectVersion;
@@ -31,25 +32,28 @@ public class JAXRSAnalyzer {
     /**
      * Constructs a JAX-RS Analyzer.
      *
-     * @param projectPaths   The paths of the projects to be analyzed (can either be directories or jar-files, at least one is mandatory)
-     * @param classPaths     The additional class paths (can either be directories or jar-files)
-     * @param projectName    The project name
-     * @param projectVersion The project version
-     * @param backend        The backend to render the output
-     * @param outputLocation The location of the output file (output will be printed to standard out if {@code null})
+     * @param projectClassPaths  The paths of the projects classes to be analyzed (can either be directories or jar-files, at least one is mandatory)
+     * @param projectSourcePaths The paths of the projects sources to be analyzed (can either be directories or jar-files, optional)
+     * @param classPaths         The additional class paths (can either be directories or jar-files)
+     * @param projectName        The project name
+     * @param projectVersion     The project version
+     * @param backend            The backend to render the output
+     * @param outputLocation     The location of the output file (output will be printed to standard out if {@code null})
      */
-    public JAXRSAnalyzer(final Set<Path> projectPaths, final Set<Path> classPaths, final String projectName, final String projectVersion,
+    public JAXRSAnalyzer(final Set<Path> projectClassPaths, final Set<Path> projectSourcePaths, final Set<Path> classPaths, final String projectName, final String projectVersion,
                          final Backend backend, final Path outputLocation) {
-        Objects.requireNonNull(projectPaths);
+        Objects.requireNonNull(projectClassPaths);
+        Objects.requireNonNull(projectSourcePaths);
         Objects.requireNonNull(classPaths);
         Objects.requireNonNull(projectName);
         Objects.requireNonNull(projectVersion);
         Objects.requireNonNull(backend);
 
-        if (projectPaths.isEmpty())
+        if (projectClassPaths.isEmpty())
             throw new IllegalArgumentException("At least one project path is mandatory");
 
-        this.projectPaths.addAll(projectPaths);
+        this.projectClassPaths.addAll(projectClassPaths);
+        this.projectSourcePaths.addAll(projectSourcePaths);
         this.classPaths.addAll(classPaths);
         this.projectName = projectName;
         this.projectVersion = projectVersion;
@@ -61,7 +65,7 @@ public class JAXRSAnalyzer {
      * Analyzes the JAX-RS project at the class path and produces the output as configured.
      */
     public void analyze() {
-        final Resources resources = new ProjectAnalyzer(classPaths.toArray(new Path[classPaths.size()])).analyze(projectPaths.toArray(new Path[projectPaths.size()]));
+        final Resources resources = new ProjectAnalyzer(classPaths).analyze(projectClassPaths, projectSourcePaths);
 
         if (resources.isEmpty()) {
             LogProvider.info("Empty JAX-RS analysis result, omitting output");

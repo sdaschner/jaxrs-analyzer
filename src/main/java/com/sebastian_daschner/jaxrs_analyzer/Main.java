@@ -39,7 +39,8 @@ public class Main {
     private static final String DEFAULT_NAME = "project";
     private static final String DEFAULT_VERSION = "0.1-SNAPSHOT";
 
-    private static final Set<Path> projectPaths = new HashSet<>();
+    private static final Set<Path> projectClassPaths = new HashSet<>();
+    private static final Set<Path> projectSourcePaths = new HashSet<>();
     private static final Set<Path> classPaths = new HashSet<>();
     private static String name = DEFAULT_NAME;
     private static String version = DEFAULT_VERSION;
@@ -61,6 +62,7 @@ public class Main {
      * <ul>
      * <li>{@code -b backend} The backend to choose: {@code swagger} (default), {@code plaintext}, {@code asciidoc}</li>
      * <li>{@code -cp class path[:class paths...]} The additional class paths which contain classes which are used in the project</li>
+     * <li>{@code -sp source path[:source paths...]} The optional source paths  needed for JavaDoc analysis</li>
      * <li>{@code -X} Debug enabled (prints error debugging information on Standard error out)</li>
      * <li>{@code -n project name} The name of the project</li>
      * <li>{@code -v project version} The version of the project</li>
@@ -93,7 +95,7 @@ public class Main {
 
         final Backend backend = constructBackend();
 
-        final JAXRSAnalyzer jaxrsAnalyzer = new JAXRSAnalyzer(projectPaths, classPaths, name, version, backend, outputFileLocation);
+        final JAXRSAnalyzer jaxrsAnalyzer = new JAXRSAnalyzer(projectClassPaths, projectSourcePaths, classPaths, name, version, backend, outputFileLocation);
         jaxrsAnalyzer.analyze();
     }
 
@@ -107,6 +109,9 @@ public class Main {
                             break;
                         case "-cp":
                             extractClassPaths(args[++i]).forEach(classPaths::add);
+                            break;
+                        case "-sp":
+                            extractClassPaths(args[++i]).forEach(projectSourcePaths::add);
                             break;
                         case "-X":
                             LogProvider.injectDebugLogger(System.err::println);
@@ -141,7 +146,7 @@ public class Main {
                         System.err.println("Location " + path.toFile() + " doesn't exist\n");
                         printUsageAndExit();
                     }
-                    projectPaths.add(path);
+                    projectClassPaths.add(path);
                 }
             }
         } catch (IndexOutOfBoundsException e) {
@@ -201,7 +206,7 @@ public class Main {
             printUsageAndExit();
         }
 
-        if (projectPaths.isEmpty()) {
+        if (projectClassPaths.isEmpty()) {
             System.err.println("Please provide at least one project path\n");
             printUsageAndExit();
         }
@@ -244,6 +249,7 @@ public class Main {
         System.err.println("Following available options:\n");
         System.err.println(" -b <backend> The backend to choose: swagger (default), plaintext, asciidoc");
         System.err.println(" -cp <class path>[:class paths] Additional class paths (separated with colon) which contain classes used in the project (may be directories or jar-files)");
+        System.err.println(" -sp <source path>[:source paths] Optional source paths (separated with colon) needed for JavaDoc analysis (may be directories or jar-files)");
         System.err.println(" -X Debug enabled (enabled error debugging information)");
         System.err.println(" -n <project name> The name of the project");
         System.err.println(" -v <project version> The version of the project");
