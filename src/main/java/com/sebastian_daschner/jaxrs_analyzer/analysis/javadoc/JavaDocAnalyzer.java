@@ -22,16 +22,18 @@ public class JavaDocAnalyzer {
     private static final Map<MethodIdentifier, MethodDoc> METHOD_DOCS = new ConcurrentHashMap<>();
     private static final Map<String, ClassDoc> CLASS_DOCS = new ConcurrentHashMap<>();
 
-    public void analyze(final Set<ClassResult> classResults, final Set<String> packages, final Set<Path> projectSourcePaths) {
-        invokeDoclet(packages, projectSourcePaths);
+    public void analyze(final Set<ClassResult> classResults, final Set<String> packages, final Set<Path> projectSourcePaths, final Set<Path> classPaths) {
+        invokeDoclet(packages, projectSourcePaths, classPaths);
 
         combineResults(classResults);
     }
 
-    private void invokeDoclet(final Set<String> packages, final Set<Path> projectSourcePaths) {
+    private void invokeDoclet(final Set<String> packages, final Set<Path> projectSourcePaths, final Set<Path> classPaths) {
         final String[] args = Stream.concat(
                 Stream.of("-sourcepath",
-                        projectSourcePaths.stream().map(Path::toString).collect(Collectors.joining(":")),
+                        joinPaths(projectSourcePaths),
+                        "-classpath",
+                        joinPaths(classPaths),
                         "-quiet",
                         "-doclet",
                         "com.sebastian_daschner.jaxrs_analyzer.analysis.javadoc.JAXRSDoclet"),
@@ -39,6 +41,10 @@ public class JavaDocAnalyzer {
                 .toArray(String[]::new);
 
         com.sun.tools.javadoc.Main.execute(args);
+    }
+
+    private String joinPaths(final Set<Path> projectSourcePaths) {
+        return projectSourcePaths.stream().map(Path::toString).collect(Collectors.joining(":"));
     }
 
     private void combineResults(final Set<ClassResult> classResults) {

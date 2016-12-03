@@ -3,6 +3,10 @@ Sebastian Daschner
 
 // new versions are placed on the top
 
+== v0.11
+- Added experimental JavaDoc analysis
+- Added backend SPI
+
 == v0.10
 - Changed internals to ASM
 - Improved type analysis

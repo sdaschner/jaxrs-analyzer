@@ -61,6 +61,7 @@ public class ProjectAnalyzer {
     private final Lock lock = new ReentrantLock();
     private final Set<String> classes = new HashSet<>();
     private final Set<String> packages = new HashSet<>();
+    private final Set<Path> classPool = new HashSet<>();
     private final ResultInterpreter resultInterpreter = new ResultInterpreter();
     private final BytecodeAnalyzer bytecodeAnalyzer = new BytecodeAnalyzer();
     private final JavaDocAnalyzer javaDocAnalyzer = new JavaDocAnalyzer();
@@ -104,7 +105,7 @@ public class ProjectAnalyzer {
                 bytecodeAnalyzer.analyzeBytecode(classResult);
             }
 
-            javaDocAnalyzer.analyze(classResults, packages, projectSourcePaths);
+            javaDocAnalyzer.analyze(classResults, packages, projectSourcePaths, classPool);
 
             return resultInterpreter.interpret(classResults);
         } finally {
@@ -143,6 +144,7 @@ public class ProjectAnalyzer {
     private void addToClassPool(final Path location) {
         if (!location.toFile().exists())
             throw new IllegalArgumentException("The location '" + location + "' does not exist!");
+        classPool.add(location);
         try {
             final Method method = URLClassLoader.class.getDeclaredMethod("addURL", URL.class);
             method.setAccessible(true);

@@ -70,7 +70,7 @@ public class MethodSimulator {
      * @return The return element of the method
      */
     Element simulateInternal(final List<Instruction> instructions) {
-        instructions.stream().forEach(this::simulate);
+        instructions.forEach(this::simulate);
 
         return returnElement;
     }
