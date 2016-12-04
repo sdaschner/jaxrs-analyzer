@@ -24,11 +24,6 @@ class JAXRSAnnotatedSuperMethodClassVisitor extends ClassVisitor {
     }
 
     @Override
-    public void visitSource(String source, String debug) {
-        // TODO can be used for JavaDoc parsing
-    }
-
-    @Override
     public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
         final boolean legalModifiers = ((access & ACC_SYNTHETIC) | (access & ACC_STATIC) | (access & ACC_NATIVE)) == 0;
 

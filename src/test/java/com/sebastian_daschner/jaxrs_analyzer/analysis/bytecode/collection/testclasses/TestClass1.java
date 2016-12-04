@@ -33,15 +33,15 @@ public class TestClass1 {
     public static List<Instruction> getResult() {
         final List<Instruction> instructions = new LinkedList<>();
 
-        instructions.add(new PushInstruction(200, Types.PRIMITIVE_INT));
-        instructions.add(new StoreInstruction(1, Types.OBJECT));
-        instructions.add(new PushInstruction(100, Types.PRIMITIVE_INT));
-        instructions.add(new StoreInstruction(2, Types.OBJECT));
-        instructions.add(new PushInstruction(300, Types.PRIMITIVE_INT));
-        instructions.add(new DupInstruction());
-        instructions.add(new StoreInstruction(2, Types.PRIMITIVE_INT, "anotherStatus"));
-        instructions.add(new StoreInstruction(1, Types.PRIMITIVE_INT, "status"));
-        instructions.add(new DefaultInstruction("RETURN"));
+        instructions.add(new PushInstruction(200, Types.PRIMITIVE_INT, null));
+        instructions.add(new StoreInstruction(1, Types.OBJECT, null));
+        instructions.add(new PushInstruction(100, Types.PRIMITIVE_INT, null));
+        instructions.add(new StoreInstruction(2, Types.OBJECT, null));
+        instructions.add(new PushInstruction(300, Types.PRIMITIVE_INT, null));
+        instructions.add(new DupInstruction(null));
+        instructions.add(new StoreInstruction(2, Types.PRIMITIVE_INT, "anotherStatus", null));
+        instructions.add(new StoreInstruction(1, Types.PRIMITIVE_INT, "status", null));
+        instructions.add(new DefaultInstruction("RETURN", null));
 
         return instructions;
     }

@@ -16,31 +16,33 @@
 
 package com.sebastian_daschner.jaxrs_analyzer.model.instructions;
 
+import org.objectweb.asm.Label;
+
 /**
  * Represents a byte code instruction.
  *
  * @author Sebastian Daschner
  */
-public interface Instruction {
+public abstract class Instruction {
 
-    /**
-     * Returns the difference of the runtime stack size when this instruction is executed.
-     *
-     * @return The stack size difference
-     */
-    int getStackSizeDifference();
+    private final Label label;
 
-    /**
-     * Returns the instruction type.
-     *
-     * @return The type
-     */
-    InstructionType getType();
+    public Instruction(final Label label) {
+        this.label = label;
+    }
+
+    public abstract int getStackSizeDifference();
+
+    public abstract InstructionType getType();
+
+    public Label getLabel() {
+        return label;
+    }
 
     /**
      * Represents the available types of {@link Instruction}s.
      */
-    enum InstructionType {
+    public enum InstructionType {
 
         PUSH, LOAD, STORE, INVOKE, RETURN, SIZE_CHANGE, GET_FIELD, GET_STATIC, NEW, DUP, THROW, METHOD_HANDLE, OTHER, LOAD_PLACEHOLDER, STORE_PLACEHOLDER
 

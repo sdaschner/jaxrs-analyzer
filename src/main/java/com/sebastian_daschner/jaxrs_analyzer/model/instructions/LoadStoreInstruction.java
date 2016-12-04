@@ -17,6 +17,7 @@
 package com.sebastian_daschner.jaxrs_analyzer.model.instructions;
 
 import com.sebastian_daschner.jaxrs_analyzer.utils.StringUtils;
+import org.objectweb.asm.Label;
 
 import java.util.Objects;
 
@@ -25,7 +26,7 @@ import java.util.Objects;
  *
  * @author Sebastian Daschner
  */
-public abstract class LoadStoreInstruction implements Instruction {
+public abstract class LoadStoreInstruction extends Instruction {
 
     /**
      * The variable name which is taken, if no information is found in the local variables attribute.
@@ -36,7 +37,8 @@ public abstract class LoadStoreInstruction implements Instruction {
     private final String variableType;
     private final String name;
 
-    protected LoadStoreInstruction(final int number, final String variableType) {
+    protected LoadStoreInstruction(final int number, final String variableType, final Label label) {
+        super(label);
         Objects.requireNonNull(variableType);
 
         this.number = number;
@@ -44,7 +46,8 @@ public abstract class LoadStoreInstruction implements Instruction {
         name = UNKNOWN_VARIABLE_NAME_PREFIX + number;
     }
 
-    protected LoadStoreInstruction(final int number, final String variableType, final String name) {
+    protected LoadStoreInstruction(final int number, final String variableType, final String name, final Label label) {
+        super(label);
         Objects.requireNonNull(variableType);
         StringUtils.requireNonBlank(name);
 
@@ -94,9 +97,9 @@ public abstract class LoadStoreInstruction implements Instruction {
     public String toString() {
         return "LoadStoreInstruction{" +
                 "type='" + getType() + '\'' +
-                ", number=" + number + '\'' +
-                ", variableType=" + variableType + '\'' +
-                ", name=" + name + '}';
+                ", number=" + number +
+                ", variableType=" + variableType +
+                ", name='" + name + "'}";
     }
 
 }

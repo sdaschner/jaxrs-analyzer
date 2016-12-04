@@ -35,11 +35,6 @@ public class ProjectMethodClassVisitor extends ClassVisitor {
     }
 
     @Override
-    public void visitSource(String source, String debug) {
-        // TODO can be used for JavaDoc parsing
-    }
-
-    @Override
     public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
         // TODO allow abstract?
         final boolean legalModifiers = (access & ACC_ABSTRACT | access & ACC_NATIVE) == 0;

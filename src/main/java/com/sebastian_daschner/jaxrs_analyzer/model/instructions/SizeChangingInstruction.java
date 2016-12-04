@@ -16,6 +16,8 @@
 
 package com.sebastian_daschner.jaxrs_analyzer.model.instructions;
 
+import org.objectweb.asm.Label;
+
 /**
  * Represents any instruction which changes the stack elements and is not covered
  * by other implementations of {@link Instruction}.
@@ -27,8 +29,8 @@ public class SizeChangingInstruction extends DefaultInstruction {
     private final int numberOfPushes;
     private final int numberOfPops;
 
-    public SizeChangingInstruction(final String description, final int numberOfPushes, final int numberOfPops) {
-        super(description);
+    public SizeChangingInstruction(final String description, final int numberOfPushes, final int numberOfPops, final Label label) {
+        super(description, label);
 
         if (numberOfPushes < 0 || numberOfPops < 0)
             throw new IllegalArgumentException("Number of pushes and pops cannot be negative");

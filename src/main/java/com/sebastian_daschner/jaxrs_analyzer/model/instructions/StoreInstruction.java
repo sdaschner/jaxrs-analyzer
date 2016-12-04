@@ -16,6 +16,8 @@
 
 package com.sebastian_daschner.jaxrs_analyzer.model.instructions;
 
+import org.objectweb.asm.Label;
+
 /**
  * Represents a XZY_STORE_X instruction (for any number).
  *
@@ -23,12 +25,12 @@ package com.sebastian_daschner.jaxrs_analyzer.model.instructions;
  */
 public class StoreInstruction extends LoadStoreInstruction {
 
-    public StoreInstruction(final int number, final String variableType) {
-        super(number, variableType);
+    public StoreInstruction(final int number, final String variableType, final Label label) {
+        super(number, variableType, label);
     }
 
-    public StoreInstruction(final int number, final String variableType, final String name) {
-        super(number, variableType, name);
+    public StoreInstruction(final int number, final String variableType, final String name, final Label label) {
+        super(number, variableType, name, label);
     }
 
     @Override

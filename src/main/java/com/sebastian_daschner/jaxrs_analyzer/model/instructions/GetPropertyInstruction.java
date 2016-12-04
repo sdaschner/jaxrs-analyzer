@@ -16,18 +16,21 @@
 
 package com.sebastian_daschner.jaxrs_analyzer.model.instructions;
 
+import org.objectweb.asm.Label;
+
 /**
  * Represents a GET_FIELD/STATIC instruction.
  *
  * @author Sebastian Daschner
  */
-public abstract class GetPropertyInstruction implements Instruction {
+public abstract class GetPropertyInstruction extends Instruction {
 
     private final String containingClass;
     private final String propertyName;
     private final String propertyType;
 
-    protected GetPropertyInstruction(final String containingClass, final String propertyName, final String propertyType) {
+    protected GetPropertyInstruction(final String containingClass, final String propertyName, final String propertyType, final Label label) {
+        super(label);
         this.containingClass = containingClass;
         this.propertyName = propertyName;
         this.propertyType = propertyType;

@@ -16,12 +16,18 @@
 
 package com.sebastian_daschner.jaxrs_analyzer.model.instructions;
 
+import org.objectweb.asm.Label;
+
 /**
  * Represents any RETURN instruction.
  *
  * @author Sebastian Daschner
  */
-public class ReturnInstruction implements Instruction {
+public class ReturnInstruction extends Instruction {
+
+    public ReturnInstruction(final Label label) {
+        super(label);
+    }
 
     @Override
     public InstructionType getType() {

@@ -38,17 +38,17 @@ public class TestClass3 {
         final List<Instruction> instructions = new LinkedList<>();
 
         // constant folding
-        instructions.add(new PushInstruction(6, Types.PRIMITIVE_INT));
-        instructions.add(new LoadInstruction(1, Types.PRIMITIVE_INT, "number"));
-        instructions.add(new SizeChangingInstruction("IDIV", 1, 2));
-        instructions.add(new ReturnInstruction());
+        instructions.add(new PushInstruction(6, Types.PRIMITIVE_INT, null));
+        instructions.add(new LoadInstruction(1, Types.PRIMITIVE_INT, "number", null, null));
+        instructions.add(new SizeChangingInstruction("IDIV", 1, 2, null));
+        instructions.add(new ReturnInstruction(null));
 
-        instructions.add(new ExceptionHandlerInstruction());
-        instructions.add(new StoreInstruction(2, Types.OBJECT));
-        instructions.add(new LoadInstruction(2, "Ljava/lang/ArithmeticException;", "e"));
-        instructions.add(new InvokeInstruction(MethodIdentifier.ofNonStatic("java/lang/ArithmeticException", "printStackTrace", Types.PRIMITIVE_VOID)));
-        instructions.add(new PushInstruction(0, Types.PRIMITIVE_INT));
-        instructions.add(new ReturnInstruction());
+        instructions.add(new ExceptionHandlerInstruction(null));
+        instructions.add(new StoreInstruction(2, Types.OBJECT, null));
+        instructions.add(new LoadInstruction(2, "Ljava/lang/ArithmeticException;", "e", null, null));
+        instructions.add(new InvokeInstruction(MethodIdentifier.ofNonStatic("java/lang/ArithmeticException", "printStackTrace", Types.PRIMITIVE_VOID), null));
+        instructions.add(new PushInstruction(0, Types.PRIMITIVE_INT, null));
+        instructions.add(new ReturnInstruction(null));
 
         return instructions;
     }

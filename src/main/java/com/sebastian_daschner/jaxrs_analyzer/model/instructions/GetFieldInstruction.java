@@ -16,6 +16,8 @@
 
 package com.sebastian_daschner.jaxrs_analyzer.model.instructions;
 
+import org.objectweb.asm.Label;
+
 /**
  * Represents a GET_FIELD instruction.
  *
@@ -23,8 +25,8 @@ package com.sebastian_daschner.jaxrs_analyzer.model.instructions;
  */
 public class GetFieldInstruction extends GetPropertyInstruction {
 
-    public GetFieldInstruction(final String containingClass, final String fieldName, final String fieldType) {
-        super(containingClass, fieldName, fieldType);
+    public GetFieldInstruction(final String containingClass, final String fieldName, final String fieldType, final Label label) {
+        super(containingClass, fieldName, fieldType, label);
     }
 
     @Override

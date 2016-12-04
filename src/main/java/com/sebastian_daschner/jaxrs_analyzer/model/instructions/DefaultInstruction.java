@@ -16,17 +16,20 @@
 
 package com.sebastian_daschner.jaxrs_analyzer.model.instructions;
 
+import org.objectweb.asm.Label;
+
 /**
  * Represents an instruction which is not covered by other implementations of
  * {@link Instruction}.
  *
  * @author Sebastian Daschner
  */
-public class DefaultInstruction implements Instruction {
+public class DefaultInstruction extends Instruction {
 
     private final String description;
 
-    public DefaultInstruction(final String description) {
+    public DefaultInstruction(final String description, final Label label) {
+        super(label);
         this.description = description;
     }
 

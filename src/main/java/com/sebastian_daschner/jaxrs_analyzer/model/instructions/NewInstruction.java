@@ -16,6 +16,8 @@
 
 package com.sebastian_daschner.jaxrs_analyzer.model.instructions;
 
+import org.objectweb.asm.Label;
+
 import java.util.Objects;
 
 /**
@@ -23,11 +25,12 @@ import java.util.Objects;
  *
  * @author Sebastian Daschner
  */
-public class NewInstruction implements Instruction {
+public class NewInstruction extends Instruction {
 
     private final String className;
 
-    public NewInstruction(final String className) {
+    public NewInstruction(final String className, final Label label) {
+        super(label);
         Objects.requireNonNull(className);
 
         this.className = className;

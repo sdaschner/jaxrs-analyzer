@@ -43,11 +43,6 @@ public class JAXRSClassVisitor extends ClassVisitor {
     }
 
     @Override
-    public void visitSource(String source, String debug) {
-        // TODO can be used for JavaDoc parsing
-    }
-
-    @Override
     public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
         switch (desc) {
             case Types.PATH:

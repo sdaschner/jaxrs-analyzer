@@ -37,12 +37,12 @@ public class TestClass8 {
         final List<Instruction> instructions = new LinkedList<>();
 
         // constant folding
-        instructions.add(new PushInstruction(2.0, Types.DOUBLE));
-        instructions.add(new DupInstruction());
-        instructions.add(new StoreInstruction(4, Types.OBJECT));
-        instructions.add(new StoreInstruction(2, Types.OBJECT));
-        instructions.add(new LoadInstruction(2, Types.PRIMITIVE_DOUBLE, "d1"));
-        instructions.add(new ReturnInstruction());
+        instructions.add(new PushInstruction(2.0, Types.DOUBLE, null));
+        instructions.add(new DupInstruction(null));
+        instructions.add(new StoreInstruction(4, Types.OBJECT, null));
+        instructions.add(new StoreInstruction(2, Types.OBJECT, null));
+        instructions.add(new LoadInstruction(2, Types.PRIMITIVE_DOUBLE, "d1", null, null));
+        instructions.add(new ReturnInstruction(null));
 
         return instructions;
     }

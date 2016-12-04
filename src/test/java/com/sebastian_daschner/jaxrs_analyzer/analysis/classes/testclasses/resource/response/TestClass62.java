@@ -24,8 +24,7 @@ import java.util.Collections;
 import java.util.Set;
 
 // https://github.com/sdaschner/jaxrs-analyzer/issues/80
-// TODO un-ignore
-public class IgnoredTestClass62 {
+public class TestClass62 {
 
     @GET
     public Response method() {

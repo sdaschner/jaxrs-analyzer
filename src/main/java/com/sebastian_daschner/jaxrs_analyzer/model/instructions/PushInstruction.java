@@ -16,17 +16,20 @@
 
 package com.sebastian_daschner.jaxrs_analyzer.model.instructions;
 
+import org.objectweb.asm.Label;
+
 /**
  * Represents any instruction which pushes a constant value to the stack.
  *
  * @author Sebastian Daschner
  */
-public class PushInstruction implements Instruction {
+public class PushInstruction extends Instruction {
 
     private final Object value;
     private final String valueType;
 
-    public PushInstruction(final Object value, final String valueType) {
+    public PushInstruction(final Object value, final String valueType, final Label label) {
+        super(label);
         this.value = value;
         this.valueType = valueType;
     }

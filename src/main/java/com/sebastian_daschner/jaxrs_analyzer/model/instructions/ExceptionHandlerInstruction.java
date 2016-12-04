@@ -16,6 +16,8 @@
 
 package com.sebastian_daschner.jaxrs_analyzer.model.instructions;
 
+import org.objectweb.asm.Label;
+
 /**
  * Represents a dummy instruction which acts as an exception handler.
  *
@@ -25,8 +27,8 @@ public class ExceptionHandlerInstruction extends SizeChangingInstruction {
 
     private static final String DESCRIPTION = "pseudoExceptionHandler";
 
-    public ExceptionHandlerInstruction() {
-        super(DESCRIPTION, 1, 0);
+    public ExceptionHandlerInstruction(final Label label) {
+        super(DESCRIPTION, 1, 0, label);
     }
 
     @Override

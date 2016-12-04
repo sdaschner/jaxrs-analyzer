@@ -16,12 +16,18 @@
 
 package com.sebastian_daschner.jaxrs_analyzer.model.instructions;
 
+import org.objectweb.asm.Label;
+
 /**
  * Represents a throw instruction.
  *
  * @author Sebastian Daschner
  */
-public class ThrowInstruction implements Instruction {
+public class ThrowInstruction extends Instruction {
+
+    public ThrowInstruction(final Label label) {
+        super(label);
+    }
 
     @Override
     public InstructionType getType() {

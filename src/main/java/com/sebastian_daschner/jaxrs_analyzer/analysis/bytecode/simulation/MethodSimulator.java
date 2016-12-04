@@ -22,7 +22,10 @@ import com.sebastian_daschner.jaxrs_analyzer.model.elements.MethodHandle;
 import com.sebastian_daschner.jaxrs_analyzer.model.instructions.*;
 import com.sebastian_daschner.jaxrs_analyzer.model.methods.Method;
 import com.sebastian_daschner.jaxrs_analyzer.model.methods.MethodIdentifier;
+import org.objectweb.asm.Label;
 
+import javax.ws.rs.core.MultivaluedHashMap;
+import javax.ws.rs.core.MultivaluedMap;
 import java.util.*;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -42,6 +45,8 @@ public class MethodSimulator {
     private final Lock lock = new ReentrantLock();
     private final MethodPool methodPool = MethodPool.getInstance();
     private final Stack<Element> runtimeStack = new Stack<>();
+    private final MultivaluedMap<Label, Integer> variableInvalidation = new MultivaluedHashMap<>();
+    private Label active;
 
     Map<Integer, Element> localVariables = new HashMap<>();
 
@@ -108,6 +113,7 @@ public class MethodSimulator {
                 final LoadInstruction loadInstruction = (LoadInstruction) instruction;
                 runtimeStack.push(localVariables.getOrDefault(loadInstruction.getNumber(), new Element(loadInstruction.getVariableType())));
                 runtimeStack.peek().getTypes().add(loadInstruction.getVariableType());
+                variableInvalidation.add(loadInstruction.getValidUntil(), loadInstruction.getNumber());
                 break;
             case STORE:
                 simulateStore((StoreInstruction) instruction);
@@ -135,6 +141,11 @@ public class MethodSimulator {
             default:
                 throw new IllegalArgumentException("Instruction without type!");
         }
+
+        if (instruction.getLabel() != active && variableInvalidation.containsKey(active)) {
+            variableInvalidation.get(active).forEach(localVariables::remove);
+        }
+        active = instruction.getLabel();
     }
 
     /**

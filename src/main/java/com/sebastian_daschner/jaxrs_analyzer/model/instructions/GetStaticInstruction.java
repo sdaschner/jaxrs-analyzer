@@ -16,6 +16,8 @@
 
 package com.sebastian_daschner.jaxrs_analyzer.model.instructions;
 
+import org.objectweb.asm.Label;
+
 /**
  * Represents a GET_STATIC instruction.
  *
@@ -25,8 +27,8 @@ public class GetStaticInstruction extends GetPropertyInstruction {
 
     private final Object value;
 
-    public GetStaticInstruction(final String containingClass, final String fieldName, final String fieldType, final Object value) {
-        super(containingClass, fieldName, fieldType);
+    public GetStaticInstruction(final String containingClass, final String fieldName, final String fieldType, final Object value, final Label label) {
+        super(containingClass, fieldName, fieldType, label);
         this.value = value;
     }
 

@@ -32,10 +32,10 @@ public class TestClass6 {
         final List<Instruction> instructions = new LinkedList<>();
 
         // constant folding
-        instructions.add(new PushInstruction(6, Types.PRIMITIVE_INT));
-        instructions.add(new LoadInstruction(1, Types.PRIMITIVE_INT, "number"));
-        instructions.add(new SizeChangingInstruction("IDIV", 1, 2));
-        instructions.add(new ReturnInstruction());
+        instructions.add(new PushInstruction(6, Types.PRIMITIVE_INT, null));
+        instructions.add(new LoadInstruction(1, Types.PRIMITIVE_INT, "number", null, null));
+        instructions.add(new SizeChangingInstruction("IDIV", 1, 2, null));
+        instructions.add(new ReturnInstruction(null));
 
         return instructions;
     }

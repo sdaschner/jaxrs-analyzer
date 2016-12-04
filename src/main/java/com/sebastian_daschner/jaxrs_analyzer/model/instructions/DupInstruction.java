@@ -16,12 +16,18 @@
 
 package com.sebastian_daschner.jaxrs_analyzer.model.instructions;
 
+import org.objectweb.asm.Label;
+
 /**
  * Represents a DUP instruction.
  *
  * @author Sebastian Daschner
  */
-public class DupInstruction implements Instruction {
+public class DupInstruction extends Instruction {
+
+    public DupInstruction(final Label label) {
+        super(label);
+    }
 
     @Override
     public int getStackSizeDifference() {

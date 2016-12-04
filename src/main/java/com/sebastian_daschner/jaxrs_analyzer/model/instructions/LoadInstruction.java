@@ -16,6 +16,8 @@
 
 package com.sebastian_daschner.jaxrs_analyzer.model.instructions;
 
+import org.objectweb.asm.Label;
+
 /**
  * Represents a XZY_LOAD_X instruction (for any number).
  *
@@ -23,12 +25,16 @@ package com.sebastian_daschner.jaxrs_analyzer.model.instructions;
  */
 public class LoadInstruction extends LoadStoreInstruction {
 
-    public LoadInstruction(final int number, final String variableType) {
-        super(number, variableType);
+    private final Label validUntil;
+
+    public LoadInstruction(final int number, final String variableType, final Label label, final Label validUntil) {
+        super(number, variableType, label);
+        this.validUntil = validUntil;
     }
 
-    public LoadInstruction(final int number, final String variableType, final String name) {
-        super(number, variableType, name);
+    public LoadInstruction(final int number, final String variableType, final String name, final Label label, final Label validUntil) {
+        super(number, variableType, name, label);
+        this.validUntil = validUntil;
     }
 
     @Override
@@ -39,6 +45,21 @@ public class LoadInstruction extends LoadStoreInstruction {
     @Override
     public InstructionType getType() {
         return InstructionType.LOAD;
+    }
+
+    public Label getValidUntil() {
+        return validUntil;
+    }
+
+    @Override
+    public String toString() {
+        return "LoadInstruction{" +
+                "type='" + getType() + '\'' +
+                ", number=" + getName() + '\'' +
+                ", variableType=" + getVariableType() + '\'' +
+                ", name=" + getName() +
+                ", validUntil=" + validUntil +
+                '}';
     }
 
 }

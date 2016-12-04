@@ -58,7 +58,7 @@ class ResourceMethodContentAnalyzer extends MethodContentAnalyzer {
             final Set<ProjectMethod> projectMethods = findProjectMethods(visitedInstructions);
 
             // add project methods to global method pool
-            projectMethods.stream().forEach(MethodPool.getInstance()::addProjectMethod);
+            projectMethods.forEach(MethodPool.getInstance()::addProjectMethod);
 
             Element returnedElement = new MethodSimulator().simulate(visitedInstructions);
             final String returnType = JavaUtils.getReturnType(methodResult.getOriginalMethodSignature());
@@ -69,10 +69,8 @@ class ResourceMethodContentAnalyzer extends MethodContentAnalyzer {
             }
 
             if (returnedElement == null) {
-//                LogProvider.debug("Non-void method, but no return element returned after analysis");
                 // happens for abstract methods
                 return;
-//                returnedElement = new Element(returnType);
             }
 
             final Set<Object> possibleObjects = returnedElement.getPossibleValues().stream().filter(o -> !(o instanceof HttpResponse))
