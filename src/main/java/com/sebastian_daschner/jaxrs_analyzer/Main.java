@@ -16,20 +16,12 @@
 package com.sebastian_daschner.jaxrs_analyzer;
 
 import com.sebastian_daschner.jaxrs_analyzer.backend.Backend;
-import com.sebastian_daschner.jaxrs_analyzer.backend.swagger.SwaggerBackend;
-import com.sebastian_daschner.jaxrs_analyzer.backend.swagger.SwaggerBackendBuilder;
-import com.sebastian_daschner.jaxrs_analyzer.backend.swagger.SwaggerScheme;
+import com.sebastian_daschner.jaxrs_analyzer.backend.swagger.SwaggerOptions;
 
 import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.EnumSet;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.ServiceLoader;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -94,7 +86,7 @@ public class Main {
 
         validateArgs();
 
-        final Backend backend = constructBackend(backendType);
+        final Backend backend = JAXRSAnalyzer.constructBackend(backendType);
         backend.configure(attributes);
 
         final JAXRSAnalyzer jaxrsAnalyzer = new JAXRSAnalyzer(projectClassPaths, projectSourcePaths, classPaths, name, version, backend, outputFileLocation);
@@ -125,19 +117,19 @@ public class Main {
                             version = args[++i];
                             break;
                         case "-d":
-                            attributes.put(SwaggerBackend.DOMAIN, args[++i]);
+                            attributes.put(SwaggerOptions.DOMAIN, args[++i]);
                             break;
                         case "-o":
                             outputFileLocation = Paths.get(args[++i]);
                             break;
                         case "--swaggerSchemes":
-                            attributes.put(SwaggerBackend.SWAGGER_SCHEMES, args[++i]);
+                            attributes.put(SwaggerOptions.SWAGGER_SCHEMES, args[++i]);
                             break;
                         case "--renderSwaggerTags":
-                            attributes.put(SwaggerBackend.RENDER_SWAGGER_TAGS, "true");
+                            attributes.put(SwaggerOptions.RENDER_SWAGGER_TAGS, "true");
                             break;
                         case "--swaggerTagsPathOffset":
-                            attributes.put(SwaggerBackend.SWAGGER_TAGS_PATH_OFFSET, args[++i]);
+                            attributes.put(SwaggerOptions.SWAGGER_TAGS_PATH_OFFSET, args[++i]);
                             break;
                         case "-a":
                             addAttribute(args[++i]);
@@ -187,26 +179,11 @@ public class Main {
         return paths;
     }
 
-
     private static void validateArgs() {
-
         if (projectClassPaths.isEmpty()) {
             System.err.println("Please provide at least one project path\n");
             printUsageAndExit();
         }
-    }
-
-    static Backend constructBackend(String backendType) {
-
-        final ServiceLoader<Backend> backends = ServiceLoader.load(Backend.class);
-
-        for (Backend backend : backends) {
-            if (backendType.equalsIgnoreCase(backend.getName())) {
-                return backend;
-            }
-        }
-
-        throw new IllegalArgumentException("Unknown backend type " + backendType);
     }
 
     private static void printUsageAndExit() {

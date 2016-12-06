@@ -1,6 +1,5 @@
 package com.sebastian_daschner.jaxrs_analyzer.analysis.classes;
 
-import com.sebastian_daschner.jaxrs_analyzer.LogProvider;
 import com.sebastian_daschner.jaxrs_analyzer.analysis.classes.annotation.DefaultValueAnnotationVisitor;
 import com.sebastian_daschner.jaxrs_analyzer.analysis.classes.annotation.ParamAnnotationVisitor;
 import com.sebastian_daschner.jaxrs_analyzer.model.Types;
@@ -45,7 +44,6 @@ class JAXRSFieldVisitor extends FieldVisitor {
             case Types.DEFAULT_VALUE:
                 return defaultAnnotationVisitor();
             default:
-                LogProvider.debug("Annotation not handled: " + desc);
                 return null;
         }
     }

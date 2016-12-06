@@ -12,7 +12,9 @@ import java.io.Writer;
 import java.nio.file.Path;
 import java.util.HashSet;
 import java.util.Objects;
+import java.util.ServiceLoader;
 import java.util.Set;
+import java.util.stream.StreamSupport;
 
 /**
  * Generates REST documentation of JAX-RS projects automatically by bytecode analysis.
@@ -90,6 +92,14 @@ public class JAXRSAnalyzer {
             LogProvider.error("Could not write to the specified output location, reason: " + e.getMessage());
             LogProvider.debug(e);
         }
+    }
+
+    public static Backend constructBackend(final String backendType) {
+        final ServiceLoader<Backend> backends = ServiceLoader.load(Backend.class);
+        return StreamSupport.stream(backends.spliterator(), false)
+                .filter(b -> backendType.equalsIgnoreCase(b.getName()))
+                .findAny()
+                .orElseThrow(() -> new IllegalArgumentException("Unknown backend type " + backendType));
     }
 
 }

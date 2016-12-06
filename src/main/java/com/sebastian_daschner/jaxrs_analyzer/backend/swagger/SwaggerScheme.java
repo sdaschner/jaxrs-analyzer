@@ -5,7 +5,7 @@ package com.sebastian_daschner.jaxrs_analyzer.backend.swagger;
  *
  * @author Sebastian Daschner
  */
-public enum SwaggerScheme {
+enum SwaggerScheme {
 
     HTTP, HTTPS, WS, WSS
 

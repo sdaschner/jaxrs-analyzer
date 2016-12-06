@@ -29,9 +29,13 @@ import org.junit.runners.Parameterized;
 import javax.json.Json;
 import javax.json.JsonStructure;
 import java.io.StringReader;
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.Map;
 
 import static com.sebastian_daschner.jaxrs_analyzer.analysis.results.TypeUtils.MODEL_IDENTIFIER;
+import static com.sebastian_daschner.jaxrs_analyzer.backend.swagger.SwaggerOptions.*;
 import static org.junit.Assert.assertEquals;
 
 @RunWith(Parameterized.class)
@@ -41,8 +45,9 @@ public class SwaggerBackendTest {
     private final Resources resources;
     private final String expectedOutput;
 
-    public SwaggerBackendTest(final Resources resources, final String expectedOutput, final SwaggerOptions options) {
-        cut = new SwaggerBackend(options);
+    public SwaggerBackendTest(final Resources resources, final String expectedOutput, final Map<String, String> options) {
+        cut = new SwaggerBackend();
+        cut.configure(options);
         this.resources = resources;
         this.expectedOutput = expectedOutput;
     }
@@ -78,8 +83,8 @@ public class SwaggerBackendTest {
                                 .andResponse(200, ResponseBuilder.withResponseBody(TypeIdentifier.ofType(Types.STRING)).andHeaders("Location").build()).build()).build(),
                 "{\"swagger\":\"2.0\",\"info\":{\"version\":\"1.0\",\"title\":\"project name\"},\"host\":\"example.com\",\"basePath\":\"/rest\",\"schemes\":[\"http\"],\"paths\":{\"/res1\":{\"get\":{\"consumes\":[],\"produces\":[],\"parameters\":[],\"responses\":{\"200\":{\"description\":\"OK\",\"headers\":{\"Location\":{\"type\":\"string\"}},\"schema\":{\"type\":\"string\"}}}}}},\"definitions\":{}}");
 
-        SwaggerOptions options = new SwaggerOptions();
-        options.setSchemes(EnumSet.of(SwaggerScheme.HTTPS, SwaggerScheme.WSS));
+        Map<String, String> options = new HashMap<>();
+        options.put(SWAGGER_SCHEMES, "https,wss");
         add(data, ResourcesBuilder.withBase("rest")
                         .andResource("res1", ResourceMethodBuilder.withMethod(HttpMethod.GET)
                                 .andResponse(200, ResponseBuilder.withResponseBody(TypeIdentifier.ofType(Types.STRING)).andHeaders("Location").build()).build()).build(),
@@ -146,11 +151,11 @@ public class SwaggerBackendTest {
                                 .andResponse(201, ResponseBuilder.newBuilder().andHeaders("Location").build()).build()).build(),
                 "{\"swagger\":\"2.0\",\"info\":{\"version\":\"1.0\",\"title\":\"project name\"},\"host\":\"example.com\",\"basePath\":\"/rest\",\"schemes\":[\"http\"],\"paths\":{\"/res8\":{\"post\":{\"consumes\":[\"application/json\"],\"produces\":[],\"parameters\":[{\"name\":\"body\",\"in\":\"body\",\"required\":true,\"schema\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/definitions/Model\"}}}],\"responses\":{\"201\":{\"description\":\"Created\",\"headers\":{\"Location\":{\"type\":\"string\"}}}}}}},\"definitions\":{\"Model\":{\"properties\":{\"name\":{\"type\":\"string\"},\"value\":{\"type\":\"integer\"}}}}}");
 
-        options = new SwaggerOptions();
-        options.setDomain("domain.tld");
-        options.setSchemes(EnumSet.of(SwaggerScheme.HTTP, SwaggerScheme.HTTPS));
-        options.setRenderTags(true);
-        options.setTagsPathOffset(0);
+        options = new HashMap<>();
+        options.put(DOMAIN, "domain.tld");
+        options.put(SWAGGER_SCHEMES, "http,https");
+        options.put(RENDER_SWAGGER_TAGS, "true");
+        options.put(SWAGGER_TAGS_PATH_OFFSET, "0");
         add(data, ResourcesBuilder.withBase("rest")
                         .andResource("res09", ResourceMethodBuilder.withMethod(HttpMethod.GET)
                                 .andResponse(200, ResponseBuilder.withResponseBody(TypeIdentifier.ofType(Types.STRING)).andHeaders("Location").build()).build())
@@ -162,9 +167,9 @@ public class SwaggerBackendTest {
                         + "},\"definitions\":{}}",
                 options);
 
-        options = new SwaggerOptions();
-        options.setRenderTags(true);
-        options.setTagsPathOffset(1);
+        options = new HashMap<>();
+        options.put(RENDER_SWAGGER_TAGS, "true");
+        options.put(SWAGGER_TAGS_PATH_OFFSET, "1");
         add(data, ResourcesBuilder.withBase("rest")
                         .andResource("v2/res11", ResourceMethodBuilder.withMethod(HttpMethod.GET)
                                 .andResponse(200, ResponseBuilder.withResponseBody(TypeIdentifier.ofType(Types.STRING)).andHeaders("Location").build()).build())
@@ -176,11 +181,11 @@ public class SwaggerBackendTest {
                         + "},\"definitions\":{}}",
                 options);
 
-        options = new SwaggerOptions();
-        options.setDomain("domain.tld");
-        options.setSchemes(EnumSet.of(SwaggerScheme.HTTP, SwaggerScheme.HTTPS));
-        options.setRenderTags(true);
-        options.setTagsPathOffset(42);
+        options = new HashMap<>();
+        options.put(DOMAIN, "domain.tld");
+        options.put(SWAGGER_SCHEMES, "http,https");
+        options.put(RENDER_SWAGGER_TAGS, "true");
+        options.put(SWAGGER_TAGS_PATH_OFFSET, "42");
         add(data, ResourcesBuilder.withBase("rest")
                         .andResource("v2/res13", ResourceMethodBuilder.withMethod(HttpMethod.GET)
                                 .andResponse(200, ResponseBuilder.withResponseBody(TypeIdentifier.ofType(Types.STRING)).andHeaders("Location").build()).build())
@@ -230,10 +235,10 @@ public class SwaggerBackendTest {
     }
 
     public static void add(final Collection<Object[]> data, final Resources resources, final String output) {
-        add(data, resources, output, new SwaggerOptions());
+        add(data, resources, output, new HashMap<>());
     }
 
-    public static void add(final Collection<Object[]> data, final Resources resources, final String output, final SwaggerOptions options) {
+    public static void add(final Collection<Object[]> data, final Resources resources, final String output, final Map<String, String> options) {
         final Object[] objects = new Object[3];
         objects[0] = resources;
         objects[1] = output;

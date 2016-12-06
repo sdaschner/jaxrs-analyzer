@@ -29,6 +29,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static com.sebastian_daschner.jaxrs_analyzer.backend.ComparatorUtils.mapKeyComparator;
+import static com.sebastian_daschner.jaxrs_analyzer.model.Types.*;
 
 /**
  * Creates Swagger schema type definitions.
@@ -59,7 +60,7 @@ class SchemaBuilder {
      * @return The schema JSON object builder with the needed properties
      */
     JsonObjectBuilder build(final TypeIdentifier identifier) {
-        final SwaggerType type = SwaggerUtils.toSwaggerType(identifier.getType());
+        final SwaggerType type = toSwaggerType(identifier.getType());
         switch (type) {
             case BOOLEAN:
             case INTEGER:
@@ -121,7 +122,7 @@ class SchemaBuilder {
     }
 
     private void add(final JsonObjectBuilder builder, final TypeRepresentation.ConcreteTypeRepresentation representation) {
-        final SwaggerType type = SwaggerUtils.toSwaggerType(representation.getIdentifier().getType());
+        final SwaggerType type = toSwaggerType(representation.getIdentifier().getType());
         switch (type) {
             case BOOLEAN:
             case INTEGER:
@@ -172,6 +173,43 @@ class SchemaBuilder {
         final int separatorIndex = definition.lastIndexOf('_');
         final int index = Integer.parseInt(definition.substring(separatorIndex + 1));
         return definition.substring(0, separatorIndex + 1) + (index + 1);
+    }
+
+    /**
+     * Converts the given Java type to the Swagger JSON type.
+     *
+     * @param type The Java type definition
+     * @return The Swagger type
+     */
+    private static SwaggerType toSwaggerType(final String type) {
+        if (INTEGER_TYPES.contains(type))
+            return SwaggerType.INTEGER;
+
+        if (DOUBLE_TYPES.contains(type))
+            return SwaggerType.NUMBER;
+
+        if (BOOLEAN.equals(type) || PRIMITIVE_BOOLEAN.equals(type))
+            return SwaggerType.BOOLEAN;
+
+        if (STRING.equals(type))
+            return SwaggerType.STRING;
+
+        return SwaggerType.OBJECT;
+    }
+
+    /**
+     * Represents the different Swagger types.
+     *
+     * @author Sebastian Daschner
+     */
+    private enum SwaggerType {
+
+        ARRAY, BOOLEAN, INTEGER, NULL, NUMBER, OBJECT, STRING;
+
+        @Override
+        public String toString() {
+            return super.toString().toLowerCase();
+        }
     }
 
 }

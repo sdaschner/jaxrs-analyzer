@@ -37,19 +37,19 @@ public class MainTest {
 
     @Test
     public void shouldLoadSwaggerFromJavaService() {
-        final Backend backend = Main.constructBackend("swagger");
+        final Backend backend = JAXRSAnalyzer.constructBackend("swagger");
         assertThat(backend, is(instanceOf(SwaggerBackend.class)));
     }
 
     @Test
     public void shouldLoadPlainTextFromJavaService() {
-        final Backend backend = Main.constructBackend("plaintext");
+        final Backend backend = JAXRSAnalyzer.constructBackend("plaintext");
         assertThat(backend, is(instanceOf(PlainTextBackend.class)));
     }
 
     @Test
     public void shouldLoadAsciiDocFromJavaService() {
-        final Backend backend = Main.constructBackend("asciidoc");
+        final Backend backend = JAXRSAnalyzer.constructBackend("asciidoc");
         assertThat(backend, is(instanceOf(AsciiDocBackend.class)));
     }
 
