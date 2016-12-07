@@ -97,8 +97,10 @@ class SchemaBuilder {
             @Override
             public void visit(final TypeRepresentation.EnumTypeRepresentation representation) {
                 builder.add("type", "string");
-                if (!representation.getEnumValues().isEmpty())
-                    builder.add("enum", representation.getEnumValues().stream().sorted().collect(Json::createArrayBuilder, JsonArrayBuilder::add, JsonArrayBuilder::add));
+                if (!representation.getEnumValues().isEmpty()) {
+                    final JsonArrayBuilder array = representation.getEnumValues().stream().sorted().collect(Json::createArrayBuilder, JsonArrayBuilder::add, JsonArrayBuilder::add);
+                    builder.add("enum", array);
+                }
             }
         };
 
@@ -140,7 +142,7 @@ class SchemaBuilder {
         final String definition = buildDefinition(identifier.getName());
 
         if (jsonDefinitions.containsKey(definition)) {
-            builder.add("$ref", "#/definitions/" + definition).build();
+            builder.add("$ref", "#/definitions/" + definition);
             return;
         }
 
@@ -152,11 +154,11 @@ class SchemaBuilder {
         properties.entrySet().stream().sorted(mapKeyComparator()).forEach(e -> nestedBuilder.add(e.getKey(), build(e.getValue())));
         jsonDefinitions.put(definition, Pair.of(identifier.getName(), Json.createObjectBuilder().add("properties", nestedBuilder).build()));
 
-        builder.add("$ref", "#/definitions/" + definition).build();
+        builder.add("$ref", "#/definitions/" + definition);
     }
 
     private void addPrimitive(final JsonObjectBuilder builder, final SwaggerType type) {
-        builder.add("type", type.toString()).build();
+        builder.add("type", type.toString());
     }
 
     private String buildDefinition(final String typeName) {

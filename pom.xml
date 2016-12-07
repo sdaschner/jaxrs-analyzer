@@ -49,8 +49,9 @@
         <dependency>
             <groupId>org.glassfish</groupId>
             <artifactId>javax.json</artifactId>
-            <version>1.0</version>
+            <version>1.1.0-SNAPSHOT</version>
         </dependency>
+
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
@@ -174,5 +175,14 @@
             </build>
         </profile>
     </profiles>
+
+    <repositories>
+        <repository>
+            <id>java.net-snapshot</id>
+            <name>Java.net Maven SNAPSHOT Repository</name>
+            <url>https://maven.java.net/content/repositories/snapshots/</url>
+            <snapshots/>
+        </repository>
+    </repositories>
 
 </project>

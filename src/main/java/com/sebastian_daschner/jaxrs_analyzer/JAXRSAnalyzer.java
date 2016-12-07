@@ -5,10 +5,9 @@ import com.sebastian_daschner.jaxrs_analyzer.backend.Backend;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.Project;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.Resources;
 
-import java.io.BufferedWriter;
-import java.io.FileWriter;
+import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.Writer;
+import java.io.OutputStream;
 import java.nio.file.Path;
 import java.util.HashSet;
 import java.util.Objects;
@@ -75,19 +74,29 @@ public class JAXRSAnalyzer {
         }
 
         final Project project = new Project(projectName, projectVersion, resources);
-        final String output = backend.render(project);
+        final byte[] output = backend.render(project);
 
         if (outputLocation != null) {
             outputToFile(output, outputLocation);
         } else {
-            System.out.println(output);
+            outputToConsole(output);
         }
     }
 
-    private static void outputToFile(final String output, final Path outputLocation) {
-        try (final Writer writer = new BufferedWriter(new FileWriter(outputLocation.toFile()))) {
-            writer.write(output);
-            writer.flush();
+    private void outputToConsole(final byte[] output) {
+        try {
+            System.out.write(output);
+            System.out.flush();
+        } catch (IOException e) {
+            LogProvider.error("Could not write the output, reason: " + e.getMessage());
+            LogProvider.debug(e);
+        }
+    }
+
+    private static void outputToFile(final byte[] output, final Path outputLocation) {
+        try (final OutputStream stream = new FileOutputStream(outputLocation.toFile())) {
+            stream.write(output);
+            stream.flush();
         } catch (IOException e) {
             LogProvider.error("Could not write to the specified output location, reason: " + e.getMessage());
             LogProvider.debug(e);

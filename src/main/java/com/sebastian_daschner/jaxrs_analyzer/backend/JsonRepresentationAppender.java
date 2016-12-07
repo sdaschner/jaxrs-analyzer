@@ -17,7 +17,7 @@ import static com.sebastian_daschner.jaxrs_analyzer.model.Types.*;
  *
  * @author Sebastian Daschner
  */
-public class JsonRepresentationAppender implements TypeRepresentationVisitor {
+class JsonRepresentationAppender implements TypeRepresentationVisitor {
 
     private final StringBuilder builder;
     private final Map<TypeIdentifier, TypeRepresentation> representations;
@@ -25,7 +25,7 @@ public class JsonRepresentationAppender implements TypeRepresentationVisitor {
     private int collectionDepth = 0;
     private Set<TypeIdentifier> visitedTypes = new HashSet<>();
 
-    public JsonRepresentationAppender(final StringBuilder builder, final Map<TypeIdentifier, TypeRepresentation> representations) {
+    JsonRepresentationAppender(final StringBuilder builder, final Map<TypeIdentifier, TypeRepresentation> representations) {
         this.builder = builder;
         this.representations = representations;
     }

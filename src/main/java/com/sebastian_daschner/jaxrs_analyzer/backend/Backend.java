@@ -31,9 +31,9 @@ public interface Backend {
      * Renders the REST resources of the given project.
      *
      * @param project The project to render including all information and resources
-     * @return The String representation
+     * @return The data
      */
-    String render(Project project);
+    byte[] render(Project project);
 
     /**
      * Returns a human readable name of the actual backend.

@@ -16,90 +16,40 @@
 
 package com.sebastian_daschner.jaxrs_analyzer.backend.plaintext;
 
-import com.sebastian_daschner.jaxrs_analyzer.backend.Backend;
-import com.sebastian_daschner.jaxrs_analyzer.backend.JsonRepresentationAppender;
+import com.sebastian_daschner.jaxrs_analyzer.backend.StringBackend;
 import com.sebastian_daschner.jaxrs_analyzer.model.Types;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.*;
 import com.sebastian_daschner.jaxrs_analyzer.utils.StringUtils;
 
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
 
 import static com.sebastian_daschner.jaxrs_analyzer.backend.ComparatorUtils.mapKeyComparator;
 import static com.sebastian_daschner.jaxrs_analyzer.backend.ComparatorUtils.parameterComparator;
 import static com.sebastian_daschner.jaxrs_analyzer.model.JavaUtils.toReadableType;
-import static java.util.Comparator.comparing;
 
 /**
  * A thread-safe backend which produces a plain text representation of the JAX-RS analysis.
  *
  * @author Sebastian Daschner
  */
-public class PlainTextBackend implements Backend {
+public class PlainTextBackend extends StringBackend {
 
     private static final String NAME = "PlainText";
     private static final String REST_HEADER = "REST resources of ";
     private static final String TYPE_WILDCARD = "*/*";
 
-    private final Lock lock = new ReentrantLock();
-    private StringBuilder builder;
-    private Resources resources;
-    private String projectName;
-    private String projectVersion;
-    private TypeRepresentationVisitor visitor;
-
     @Override
-    public String render(final Project project) {
-        lock.lock();
-        try {
-            // initialize fields
-            builder = new StringBuilder();
-            resources = project.getResources();
-            projectName = project.getName();
-            projectVersion = project.getVersion();
-            visitor = new JsonRepresentationAppender(builder, resources.getTypeRepresentations());
-
-            return renderInternal();
-        } finally {
-            lock.unlock();
-        }
-    }
-
-    private String renderInternal() {
-        appendHeader();
-
-        resources.getResources().stream().sorted().forEach(this::appendResource);
-
-        return builder.toString();
-    }
-
-    private void appendHeader() {
-        builder.append(REST_HEADER).append(projectName).append(":\n")
-                .append(projectVersion).append("\n\n");
-    }
-
-    private void appendResource(final String resource) {
-        resources.getMethods(resource).stream()
-                .sorted(comparing(ResourceMethod::getMethod))
-                .forEach(resourceMethod -> {
-                    appendMethod(resources.getBasePath(), resource, resourceMethod);
-                    appendRequest(resourceMethod);
-                    appendResponse(resourceMethod);
-                    appendResourceEnd();
-                });
-    }
-
-    private void appendMethod(final String baseUri, final String resource, final ResourceMethod resourceMethod) {
+    protected void appendMethod(final String baseUri, final String resource, final ResourceMethod resourceMethod) {
         builder.append(resourceMethod.getMethod()).append(' ');
         if (!StringUtils.isBlank(baseUri))
             builder.append(baseUri).append('/');
         builder.append(resource).append(":\n");
     }
 
-    private void appendRequest(final ResourceMethod resourceMethod) {
+    @Override
+    protected void appendRequest(final ResourceMethod resourceMethod) {
         builder.append(" Request:\n");
 
         if (resourceMethod.getRequestBody() != null) {
@@ -140,7 +90,8 @@ public class PlainTextBackend implements Backend {
                 .append('\n'));
     }
 
-    private void appendResponse(final ResourceMethod resourceMethod) {
+    @Override
+    protected void appendResponse(final ResourceMethod resourceMethod) {
         builder.append(" Response:\n");
 
         builder.append("  Content-Type: ");
@@ -167,7 +118,8 @@ public class PlainTextBackend implements Backend {
         });
     }
 
-    private void appendResourceEnd() {
+    @Override
+    protected void appendResourceEnd() {
         builder.append("\n");
     }
 
@@ -186,6 +138,11 @@ public class PlainTextBackend implements Backend {
     @Override
     public String getName() {
         return NAME;
+    }
+
+    @Override
+    protected void appendFirstLine() {
+        builder.append(REST_HEADER).append(projectName).append(":\n");
     }
 
 }

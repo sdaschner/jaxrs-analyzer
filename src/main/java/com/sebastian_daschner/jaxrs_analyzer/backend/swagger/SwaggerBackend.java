@@ -22,8 +22,8 @@ import com.sebastian_daschner.jaxrs_analyzer.model.rest.*;
 import javax.json.*;
 import javax.json.stream.JsonGenerator;
 import javax.ws.rs.core.Response;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.StringWriter;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -61,7 +61,7 @@ public class SwaggerBackend implements Backend {
     }
 
     @Override
-    public String render(final Project project) {
+    public byte[] render(final Project project) {
         lock.lock();
         try {
             // initialize fields
@@ -71,27 +71,26 @@ public class SwaggerBackend implements Backend {
             projectVersion = project.getVersion();
             schemaBuilder = new SchemaBuilder(resources.getTypeRepresentations());
 
-            return renderInternal();
+            final JsonObject output = modifyJson(renderInternal());
+
+            return serialize(output);
         } finally {
             lock.unlock();
         }
     }
 
-    private String renderInternal() {
+    private JsonObject modifyJson(final JsonObject json) {
+        if (options.getJsonPatch() == null)
+            return json;
+        return options.getJsonPatch().apply(json);
+    }
+
+    private JsonObject renderInternal() {
         appendHeader();
         appendPaths();
         appendDefinitions();
 
-        try (final StringWriter writer = new StringWriter()) {
-            final Map<String, ?> config = singletonMap(JsonGenerator.PRETTY_PRINTING, true);
-            final JsonWriter jsonWriter = Json.createWriterFactory(config).createWriter(writer);
-            jsonWriter.write(builder.build());
-            jsonWriter.close();
-
-            return writer.toString();
-        } catch (IOException e) {
-            throw new RuntimeException("Could not write Swagger output", e);
-        }
+        return builder.build();
     }
 
     private void appendHeader() {
@@ -99,7 +98,7 @@ public class SwaggerBackend implements Backend {
                 .add("version", projectVersion).add("title", projectName))
                 .add("host", options.getDomain()).add("basePath", '/' + resources.getBasePath())
                 .add("schemes", options.getSchemes().stream().map(Enum::name).map(String::toLowerCase).sorted()
-                        .collect(Json::createArrayBuilder, JsonArrayBuilder::add, JsonArrayBuilder::add));
+                        .collect(Json::createArrayBuilder, JsonArrayBuilder::add, JsonArrayBuilder::add).build());
         if (options.isRenderTags()) {
             final JsonArrayBuilder tags = Json.createArrayBuilder();
             resources.getResources().stream()
@@ -206,10 +205,10 @@ public class SwaggerBackend implements Backend {
         return responses;
     }
 
-
     private void appendDefinitions() {
         builder.add("definitions", schemaBuilder.getDefinitions());
     }
+
 
     @Override
     public String getName() {
@@ -229,6 +228,19 @@ public class SwaggerBackend implements Backend {
             default:
                 // TODO handle others (possible w/ Swagger?)
                 return null;
+        }
+    }
+
+    private static byte[] serialize(final JsonObject jsonObject) {
+        try (final ByteArrayOutputStream output = new ByteArrayOutputStream()) {
+            final Map<String, ?> config = singletonMap(JsonGenerator.PRETTY_PRINTING, true);
+            final JsonWriter jsonWriter = Json.createWriterFactory(config).createWriter(output);
+            jsonWriter.write(jsonObject);
+            jsonWriter.close();
+
+            return output.toByteArray();
+        } catch (IOException e) {
+            throw new RuntimeException("Could not write Swagger output", e);
         }
     }
 

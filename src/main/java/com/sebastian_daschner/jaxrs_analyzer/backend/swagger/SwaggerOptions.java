@@ -1,5 +1,12 @@
 package com.sebastian_daschner.jaxrs_analyzer.backend.swagger;
 
+import com.sebastian_daschner.jaxrs_analyzer.LogProvider;
+
+import javax.json.Json;
+import javax.json.JsonArray;
+import javax.json.JsonPatch;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.EnumSet;
 import java.util.Map;
 import java.util.Set;
@@ -16,6 +23,7 @@ public class SwaggerOptions {
     public static final String SWAGGER_SCHEMES = "swaggerSchemes";
     public static final String RENDER_SWAGGER_TAGS = "renderSwaggerTags";
     public static final String SWAGGER_TAGS_PATH_OFFSET = "swaggerTagsPathOffset";
+    public static final String JSON_PATCH = "jsonPatch";
 
     private static final String DEFAULT_DOMAIN = "example.com";
     private static final Set<SwaggerScheme> DEFAULT_SCHEMES = EnumSet.of(SwaggerScheme.HTTP);
@@ -43,6 +51,11 @@ public class SwaggerOptions {
      */
     private int tagsPathOffset = DEFAULT_TAGS_PATH_OFFSET;
 
+    /**
+     * The optional JSON patch (RFC 6902) that can modify the Swagger JSON output.
+     */
+    private JsonPatch jsonPatch;
+
     String getDomain() {
         return domain;
     }
@@ -57,6 +70,10 @@ public class SwaggerOptions {
 
     int getTagsPathOffset() {
         return tagsPathOffset;
+    }
+
+    JsonPatch getJsonPatch() {
+        return jsonPatch;
     }
 
     void configure(final Map<String, String> config) {
@@ -82,6 +99,10 @@ public class SwaggerOptions {
         if (config.containsKey(RENDER_SWAGGER_TAGS)) {
             renderTags = Boolean.parseBoolean(config.get(RENDER_SWAGGER_TAGS));
         }
+
+        if (config.containsKey(JSON_PATCH)) {
+            jsonPatch = readPatch(config.get(JSON_PATCH));
+        }
     }
 
     private Set<SwaggerScheme> extractSwaggerSchemes(final String schemes) {
@@ -102,6 +123,18 @@ public class SwaggerOptions {
                 return SwaggerScheme.WSS;
             default:
                 throw new IllegalArgumentException("Unknown swagger scheme " + scheme);
+        }
+    }
+
+    private static JsonPatch readPatch(final String patchFile) {
+        try {
+            final JsonArray patchArray = Json.createReader(Files.newBufferedReader(Paths.get(patchFile))).readArray();
+            return Json.createPatchBuilder(patchArray).build();
+        } catch (Exception e) {
+            LogProvider.error("Could not read JSON patch from the specified location, reason: " + e.getMessage());
+            LogProvider.error("Patch won't be applied");
+            LogProvider.debug(e);
+            return null;
         }
     }
 

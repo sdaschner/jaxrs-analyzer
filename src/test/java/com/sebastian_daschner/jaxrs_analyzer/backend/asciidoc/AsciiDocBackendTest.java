@@ -34,7 +34,7 @@ public class AsciiDocBackendTest {
     @Test
     public void test() {
         final Project project = new Project("project name", "1.0", resources);
-        final String actualOutput = cut.render(project);
+        final String actualOutput = new String(cut.render(project));
 
         assertEquals(expectedOutput, actualOutput);
     }
