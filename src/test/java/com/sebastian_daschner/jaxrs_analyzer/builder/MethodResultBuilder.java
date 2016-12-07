@@ -22,6 +22,7 @@ import com.sebastian_daschner.jaxrs_analyzer.model.rest.MethodParameter;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.ParameterType;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeIdentifier;
 import com.sebastian_daschner.jaxrs_analyzer.model.results.MethodResult;
+import com.sun.javadoc.MethodDoc;
 
 import java.util.Arrays;
 import java.util.stream.Stream;
@@ -42,6 +43,11 @@ public class MethodResultBuilder {
         final MethodResultBuilder builder = new MethodResultBuilder();
         Stream.of(responses).forEach(builder.methodResult.getResponses()::add);
         return builder;
+    }
+
+    public MethodResultBuilder andMethodDoc(final MethodDoc methodDoc) {
+        methodResult.setMethodDoc(methodDoc);
+        return this;
     }
 
     public MethodResultBuilder andPath(final String path) {

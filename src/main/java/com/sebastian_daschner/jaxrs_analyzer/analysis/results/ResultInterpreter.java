@@ -25,6 +25,8 @@ import com.sebastian_daschner.jaxrs_analyzer.model.rest.Response;
 import com.sebastian_daschner.jaxrs_analyzer.model.results.ClassResult;
 import com.sebastian_daschner.jaxrs_analyzer.model.results.MethodResult;
 import com.sebastian_daschner.jaxrs_analyzer.utils.StringUtils;
+import com.sun.javadoc.ClassDoc;
+import com.sun.javadoc.MethodDoc;
 
 import java.util.Optional;
 import java.util.Set;
@@ -96,12 +98,16 @@ public class ResultInterpreter {
      * @return The resource method which this method represents
      */
     private ResourceMethod interpretResourceMethod(final MethodResult methodResult, final ClassResult classResult) {
-        // HTTP method and method parameters
-        final String description = methodResult.getMethodDoc() == null || StringUtils.isBlank(methodResult.getMethodDoc().commentText()) ?
-                null : methodResult.getMethodDoc().commentText();
+        final MethodDoc methodDoc = methodResult.getMethodDoc();
+        // TODO
+        final ClassDoc classDoc=null;
+
+        final String description = methodDoc == null || StringUtils.isBlank(methodDoc.commentText()) ? null : methodDoc.commentText();
         final ResourceMethod resourceMethod = new ResourceMethod(methodResult.getHttpMethod(), description);
         updateMethodParameters(resourceMethod.getMethodParameters(), classResult.getClassFields());
         updateMethodParameters(resourceMethod.getMethodParameters(), methodResult.getMethodParameters());
+
+        addParameterDescriptions(resourceMethod.getMethodParameters(), methodDoc, classDoc);
         stringParameterResolver.replaceParametersTypes(resourceMethod.getMethodParameters());
 
         if (methodResult.getRequestBodyType() != null) {
@@ -116,6 +122,16 @@ public class ResultInterpreter {
         addMediaTypes(methodResult, classResult, resourceMethod);
 
         return resourceMethod;
+    }
+
+    private void addParameterDescriptions(final Set<MethodParameter> methodParameters, final MethodDoc methodDoc, final ClassDoc classDoc) {
+        methodParameters.forEach(p -> {
+//            if (methodDoc!=null)
+//                methodDoc.parameters()
+            // TODO check method parameters & class fields
+            // get parameter / field annotations -> has to match specific @*Param / type of MethodParameter
+            // -> if matches add description for MethodParameter
+        });
     }
 
     /**

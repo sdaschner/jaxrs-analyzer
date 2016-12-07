@@ -21,7 +21,10 @@ import com.sebastian_daschner.jaxrs_analyzer.model.Types;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.*;
 import com.sebastian_daschner.jaxrs_analyzer.model.results.ClassResult;
 import com.sebastian_daschner.jaxrs_analyzer.model.results.MethodResult;
+import com.sun.javadoc.MethodDoc;
+import com.sun.javadoc.ParamTag;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import javax.xml.bind.annotation.XmlAccessType;
@@ -33,6 +36,8 @@ import java.util.Set;
 
 import static com.sebastian_daschner.jaxrs_analyzer.analysis.results.TypeUtils.STRING_IDENTIFIER;
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class ResultInterpreterTest {
 
@@ -269,6 +274,40 @@ public class ResultInterpreterTest {
         final MethodResult method = MethodResultBuilder
                 .withResponses(HttpResponseBuilder.withStatues(200).andEntityTypes(Types.OBJECT, configurationType).build(),
                         HttpResponseBuilder.withStatues(204).build())
+                .andMethod(HttpMethod.GET).build();
+        final ClassResult resClassResult = ClassResultBuilder.withResourcePath("test").andMethods(method).build();
+
+        final Set<ClassResult> results = new HashSet<>(Arrays.asList(appPathResult, resClassResult));
+
+        final Resources actualResult = classUnderTest.interpret(results);
+
+        assertEquals(expectedResult, actualResult);
+    }
+
+    @Test
+    @Ignore
+    public void testDescriptions() {
+        final MethodDoc methodDocMock = mock(MethodDoc.class);
+        final ParamTag paramTagMock = mock(ParamTag.class);
+        final ParamTag[] paramTags = {paramTagMock};
+
+        when(methodDocMock.commentText()).thenReturn("Method description.");
+        when(methodDocMock.paramTags()).thenReturn(paramTags);
+        when(paramTagMock.parameterName()).thenReturn("query");
+        when(paramTagMock.parameterComment()).thenReturn("Query operation.");
+
+        final Resources expectedResult = new Resources();
+        expectedResult.setBasePath("path");
+        final ResourceMethod resourceMethod = ResourceMethodBuilder.withMethodAndDescription(HttpMethod.GET, "Method description.")
+                .andQueryParam("query", "Ljava/lang/String;", null, "Query operation.")
+                .andResponse(200, ResponseBuilder.withResponseBody(STRING_IDENTIFIER).build())
+                .build();
+        expectedResult.addMethod("test", resourceMethod);
+
+        final ClassResult appPathResult = ClassResultBuilder.withApplicationPath("path/").build();
+        final MethodResult method = MethodResultBuilder.withResponses(HttpResponseBuilder.withStatues(200).andEntityTypes(Types.STRING).build())
+                .andMethodDoc(methodDocMock)
+                .andQueryParam("query", "Ljava/lang/String;", null)
                 .andMethod(HttpMethod.GET).build();
         final ClassResult resClassResult = ClassResultBuilder.withResourcePath("test").andMethods(method).build();
 

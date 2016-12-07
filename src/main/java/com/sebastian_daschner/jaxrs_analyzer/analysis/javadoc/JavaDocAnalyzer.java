@@ -49,7 +49,7 @@ public class JavaDocAnalyzer {
 
     private void combineResults(final Set<ClassResult> classResults) {
 
-        // TODO handle class docs as well
+        // TODO class docs -> save to class results
 
         METHOD_DOCS.entrySet().forEach(e -> classResults.stream()
                 .map(c -> findMethodResult(e.getKey(), c))
