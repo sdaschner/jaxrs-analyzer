@@ -116,7 +116,7 @@ abstract class MethodContentAnalyzer {
         try {
             final ClassReader classReader = new ClassReader(identifier.getContainingClass());
             final MethodResult methodResult = new MethodResult();
-            methodResult.setOriginalMethodSignature(identifier.getSignature());
+            methodResult.setOriginalMethodSignature(identifier);
             final ClassVisitor visitor = new ProjectMethodClassVisitor(methodResult, identifier);
 
             classReader.accept(visitor, ClassReader.EXPAND_FRAMES);

@@ -7,6 +7,6 @@ package com.sebastian_daschner.jaxrs_analyzer.model.rest;
  */
 public enum ParameterType {
 
-    QUERY, PATH, HEADER, FORM, MATRIX, COOKIE
+    PATH, QUERY, HEADER, FORM, MATRIX, COOKIE
 
 }

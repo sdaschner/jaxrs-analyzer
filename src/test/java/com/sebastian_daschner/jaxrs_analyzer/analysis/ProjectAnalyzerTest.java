@@ -33,9 +33,11 @@ import java.net.MalformedURLException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static java.util.Collections.*;
+import static java.util.Collections.singleton;
+import static java.util.Collections.singletonList;
 import static org.junit.Assert.*;
 
 public class ProjectAnalyzerTest {
@@ -58,13 +60,19 @@ public class ProjectAnalyzerTest {
         assertTrue("Could not compile test project", compilationTask.call());
 
         path = Paths.get(testClassPath).toAbsolutePath();
-        classUnderTest = new ProjectAnalyzer(singleton(path));
+
+        final Set<Path> classPaths = Stream.of(System.getProperty("java.class.path").split(":"))
+                .map(Paths::get)
+                .collect(Collectors.toSet());
+
+        classPaths.add(path);
+        classUnderTest = new ProjectAnalyzer(classPaths);
     }
 
     @Test
     public void test() {
         final long startTime = System.currentTimeMillis();
-        final Resources actualResources = classUnderTest.analyze(singleton(path), emptySet());
+        final Resources actualResources = classUnderTest.analyze(singleton(path), singleton(path));
         System.out.println("Project analysis took " + (System.currentTimeMillis() - startTime) + " ms");
         final Resources expectedResources = getResources();
 
@@ -90,6 +98,7 @@ public class ProjectAnalyzerTest {
                 assertEquals(methodText, em.getResponseMediaTypes(), am.getResponseMediaTypes());
                 assertTypeIdentifierEquals(methodText, em.getRequestBody(), am.getRequestBody(), expectedResources.getTypeRepresentations(), actualResources.getTypeRepresentations());
                 assertEquals(methodText, em.getResponses().keySet(), am.getResponses().keySet());
+                assertEquals(methodText, em.getDescription(), am.getDescription());
                 am.getResponses().entrySet().forEach(ae -> {
                     final Response ar = ae.getValue();
                     final Response er = em.getResponses().get(ae.getKey());
@@ -169,7 +178,7 @@ public class ProjectAnalyzerTest {
         addMethods(resources, "test", firstGet, firstPost, firstPut);//, firstDelete);
 
         // test/{foobar}
-        ResourceMethod firstDelete = ResourceMethodBuilder.withMethod(HttpMethod.DELETE).andPathParam("foobar", Types.STRING)
+        ResourceMethod firstDelete = ResourceMethodBuilder.withMethodAndDescription(HttpMethod.DELETE, "Deletes a test.").andPathParam("foobar", Types.STRING, null, "The foo query")
                 .andAcceptMediaTypes("application/json").andResponseMediaTypes("application/json")
                 .andResponse(204, ResponseBuilder.newBuilder().build()).build();
         addMethods(resources, "test/{foobar}", firstDelete);
@@ -188,13 +197,14 @@ public class ProjectAnalyzerTest {
         addMethods(resources, "test/{id}", secondGet, secondDelete);
 
         // test/{id}/test
-        ResourceMethod thirdDelete = ResourceMethodBuilder.withMethod(HttpMethod.DELETE)
-                .andAcceptMediaTypes("application/json").andResponseMediaTypes("application/json").andPathParam("id", Types.STRING).andQueryParam("query", Types.PRIMITIVE_INT)
+        ResourceMethod thirdDelete = ResourceMethodBuilder.withMethodAndDescription(HttpMethod.DELETE, "Deletes another test.")
+                .andAcceptMediaTypes("application/json").andResponseMediaTypes("application/json")
+                .andPathParam("id", Types.STRING, null, "The ID").andQueryParam("query", Types.PRIMITIVE_INT, null, "The deletion query")
                 .andResponse(204, ResponseBuilder.newBuilder().build()).build();
         addMethods(resources, "test/{id}/test", thirdDelete);
 
         // test/test
-        ResourceMethod fourthGet = ResourceMethodBuilder.withMethod(HttpMethod.GET).andAcceptMediaTypes("application/json")
+        ResourceMethod fourthGet = ResourceMethodBuilder.withMethodAndDescription(HttpMethod.GET, "Returns a test string with plain text.").andAcceptMediaTypes("application/json")
                 .andResponseMediaTypes("text/plain").andResponse(200, ResponseBuilder.withResponseBody(stringIdentifier).build()).build();
         addMethods(resources, "test/test", fourthGet);
 

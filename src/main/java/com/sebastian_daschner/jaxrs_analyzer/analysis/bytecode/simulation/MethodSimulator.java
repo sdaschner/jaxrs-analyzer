@@ -154,7 +154,8 @@ public class MethodSimulator {
      * @param instruction The instruction to simulate
      */
     private void simulateMethodHandle(final InvokeDynamicInstruction instruction) {
-        final List<Element> arguments = IntStream.range(0, instruction.getDynamicIdentifier().getParameters()).mapToObj(t -> runtimeStack.pop()).collect(Collectors.toList());
+        final List<Element> arguments = IntStream.range(0, instruction.getDynamicIdentifier().getParameters().size())
+                .mapToObj(t -> runtimeStack.pop()).collect(Collectors.toList());
         Collections.reverse(arguments);
 
         if (!instruction.getDynamicIdentifier().isStaticMethod())
@@ -174,7 +175,7 @@ public class MethodSimulator {
         final List<Element> arguments = new LinkedList<>();
         MethodIdentifier identifier = instruction.getIdentifier();
 
-        IntStream.range(0, identifier.getParameters()).forEach(i -> arguments.add(runtimeStack.pop()));
+        IntStream.range(0, identifier.getParameters().size()).forEach(i -> arguments.add(runtimeStack.pop()));
         Collections.reverse(arguments);
 
         Element object = null;

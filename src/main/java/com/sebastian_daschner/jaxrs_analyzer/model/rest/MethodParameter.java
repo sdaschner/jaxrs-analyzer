@@ -8,7 +8,10 @@ package com.sebastian_daschner.jaxrs_analyzer.model.rest;
  */
 public class MethodParameter {
 
-    // only String, primitive types, enums or collections of these (no nested levels) are allowed
+    /**
+     * The type of the Java property (field or parameter).
+     * Only String, primitive types, enums or collections of these (no nested levels) are allowed.
+     */
     private TypeIdentifier type;
     private ParameterType parameterType;
     private String name;

@@ -18,6 +18,7 @@ package com.sebastian_daschner.jaxrs_analyzer.backend.swagger;
 
 import com.sebastian_daschner.jaxrs_analyzer.backend.Backend;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.*;
+import com.sebastian_daschner.jaxrs_analyzer.utils.StringUtils;
 
 import javax.json.*;
 import javax.json.stream.JsonGenerator;
@@ -174,11 +175,16 @@ public class SwaggerBackend implements Backend {
                 .sorted(parameterComparator())
                 .forEach(e -> {
                     final String swaggerParameterType = getSwaggerParameterType(parameterType);
-                    if (swaggerParameterType != null)
-                        builder.add(schemaBuilder.build(e.getType())
+                    if (swaggerParameterType != null) {
+                        final JsonObjectBuilder paramBuilder = schemaBuilder.build(e.getType())
                                 .add("name", e.getName())
                                 .add("in", swaggerParameterType)
-                                .add("required", e.getDefaultValue() == null));
+                                .add("required", e.getDefaultValue() == null);
+                        if (!StringUtils.isBlank(e.getDescription())) {
+                            paramBuilder.add("description", e.getDescription());
+                        }
+                        builder.add(paramBuilder);
+                    }
                 });
     }
 

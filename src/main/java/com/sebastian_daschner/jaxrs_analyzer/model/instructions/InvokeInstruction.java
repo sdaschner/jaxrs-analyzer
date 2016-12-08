@@ -41,7 +41,7 @@ public class InvokeInstruction extends Instruction {
         if (identifier.isStaticMethod())
             difference++;
 
-        difference -= identifier.getParameters();
+        difference -= identifier.getParameters().size();
 
         return difference;
     }

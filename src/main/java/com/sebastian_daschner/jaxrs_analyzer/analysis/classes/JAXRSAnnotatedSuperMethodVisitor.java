@@ -2,7 +2,6 @@ package com.sebastian_daschner.jaxrs_analyzer.analysis.classes;
 
 import com.sebastian_daschner.jaxrs_analyzer.LogProvider;
 import com.sebastian_daschner.jaxrs_analyzer.analysis.classes.annotation.*;
-import com.sebastian_daschner.jaxrs_analyzer.model.JavaUtils;
 import com.sebastian_daschner.jaxrs_analyzer.model.Types;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.HttpMethod;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.MethodParameter;
@@ -32,7 +31,7 @@ class JAXRSAnnotatedSuperMethodVisitor extends MethodVisitor {
     JAXRSAnnotatedSuperMethodVisitor(final MethodResult methodResult) {
         super(ASM5);
         this.methodResult = methodResult;
-        parameterTypes = JavaUtils.getParameters(methodResult.getOriginalMethodSignature());
+        parameterTypes = methodResult.getOriginalMethodSignature().getParameters();
         annotatedParameters = new BitSet(parameterTypes.size());
         methodParameters = new HashMap<>();
     }

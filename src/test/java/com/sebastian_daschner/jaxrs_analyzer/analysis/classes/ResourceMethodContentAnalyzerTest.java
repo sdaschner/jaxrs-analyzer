@@ -21,6 +21,7 @@ import com.sebastian_daschner.jaxrs_analyzer.LogProvider;
 import com.sebastian_daschner.jaxrs_analyzer.analysis.bytecode.BytecodeAnalyzer;
 import com.sebastian_daschner.jaxrs_analyzer.model.JavaUtils;
 import com.sebastian_daschner.jaxrs_analyzer.model.elements.HttpResponse;
+import com.sebastian_daschner.jaxrs_analyzer.model.methods.MethodIdentifier;
 import com.sebastian_daschner.jaxrs_analyzer.model.results.ClassResult;
 import com.sebastian_daschner.jaxrs_analyzer.model.results.MethodResult;
 import org.junit.BeforeClass;
@@ -92,8 +93,9 @@ public class ResourceMethodContentAnalyzerTest {
             final ClassVisitor visitor = new JAXRSClassVisitor(classResult) {
                 @Override
                 public MethodVisitor visitMethod(final int access, final String name, final String desc, final String signature, final String[] exceptions) {
+                    final MethodIdentifier identifier = MethodIdentifier.of(classResult.getOriginalClass(), name, signature == null ? desc : signature, false);
                     if ("method".equals(name))
-                        return new JAXRSMethodVisitor(classResult, classResult.getOriginalClass(), desc, signature, new MethodResult(), true);
+                        return new JAXRSMethodVisitor(identifier, classResult, new MethodResult(), true);
                     return null;
                 }
             };

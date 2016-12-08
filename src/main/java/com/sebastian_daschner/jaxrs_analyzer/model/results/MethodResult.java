@@ -18,6 +18,7 @@ package com.sebastian_daschner.jaxrs_analyzer.model.results;
 
 import com.sebastian_daschner.jaxrs_analyzer.model.elements.HttpResponse;
 import com.sebastian_daschner.jaxrs_analyzer.model.instructions.Instruction;
+import com.sebastian_daschner.jaxrs_analyzer.model.methods.MethodIdentifier;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.HttpMethod;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.MethodParameter;
 import com.sun.javadoc.MethodDoc;
@@ -41,7 +42,7 @@ public class MethodResult {
     private final List<Instruction> instructions = new ArrayList<>();
     private String path;
     private String requestBodyType;
-    private String originalMethodSignature;
+    private MethodIdentifier originalMethodSignature;
     private HttpMethod httpMethod;
     private ClassResult subResource;
     private ClassResult parentResource;
@@ -83,11 +84,11 @@ public class MethodResult {
         this.requestBodyType = requestBodyType;
     }
 
-    public String getOriginalMethodSignature() {
+    public MethodIdentifier getOriginalMethodSignature() {
         return originalMethodSignature;
     }
 
-    public void setOriginalMethodSignature(String originalMethodSignature) {
+    public void setOriginalMethodSignature(MethodIdentifier originalMethodSignature) {
         this.originalMethodSignature = originalMethodSignature;
     }
 

@@ -18,7 +18,6 @@ package com.sebastian_daschner.jaxrs_analyzer.analysis.bytecode;
 
 import com.sebastian_daschner.jaxrs_analyzer.analysis.bytecode.simulation.MethodPool;
 import com.sebastian_daschner.jaxrs_analyzer.analysis.bytecode.simulation.MethodSimulator;
-import com.sebastian_daschner.jaxrs_analyzer.model.JavaUtils;
 import com.sebastian_daschner.jaxrs_analyzer.model.Types;
 import com.sebastian_daschner.jaxrs_analyzer.model.elements.Element;
 import com.sebastian_daschner.jaxrs_analyzer.model.elements.HttpResponse;
@@ -61,7 +60,7 @@ class ResourceMethodContentAnalyzer extends MethodContentAnalyzer {
             projectMethods.forEach(MethodPool.getInstance()::addProjectMethod);
 
             Element returnedElement = new MethodSimulator().simulate(visitedInstructions);
-            final String returnType = JavaUtils.getReturnType(methodResult.getOriginalMethodSignature());
+            final String returnType = methodResult.getOriginalMethodSignature().getReturnType();
 
             // void resource methods are interpreted later; stop analyzing on error
             if (Types.PRIMITIVE_VOID.equals(returnType)) {

@@ -39,7 +39,7 @@ public class InvokeDynamicInstruction extends InvokeInstruction {
     @Override
     public int getStackSizeDifference() {
         // the method handle will be pushed on the stack
-        return 1 - dynamicIdentifier.getParameters();
+        return 1 - dynamicIdentifier.getParameters().size();
     }
 
     public MethodIdentifier getDynamicIdentifier() {

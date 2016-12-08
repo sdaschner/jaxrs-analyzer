@@ -7,6 +7,7 @@ import com.sebastian_daschner.jaxrs_analyzer.analysis.classes.annotation.PathAnn
 import com.sebastian_daschner.jaxrs_analyzer.analysis.classes.annotation.ProducesAnnotationVisitor;
 import com.sebastian_daschner.jaxrs_analyzer.model.JavaUtils;
 import com.sebastian_daschner.jaxrs_analyzer.model.Types;
+import com.sebastian_daschner.jaxrs_analyzer.model.methods.MethodIdentifier;
 import com.sebastian_daschner.jaxrs_analyzer.model.results.ClassResult;
 import com.sebastian_daschner.jaxrs_analyzer.model.results.MethodResult;
 import org.objectweb.asm.*;
@@ -39,7 +40,6 @@ public class JAXRSClassVisitor extends ClassVisitor {
     @Override
     public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
         classResult.setOriginalClass(name);
-        // TODO see superclasses / interfaces for potential annotations later
     }
 
     @Override
@@ -69,16 +69,17 @@ public class JAXRSClassVisitor extends ClassVisitor {
     public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
         final boolean legalModifiers = ((access & ACC_SYNTHETIC) | (access & ACC_STATIC) | (access & ACC_NATIVE)) == 0;
         final String methodSignature = signature == null ? desc : signature;
+        final MethodIdentifier identifier = MethodIdentifier.of(classResult.getOriginalClass(), name, methodSignature, false);
 
         if (legalModifiers && !"<init>".equals(name)) {
             final MethodResult methodResult = new MethodResult();
             if (hasJAXRSAnnotations(classResult.getOriginalClass(), name, methodSignature))
-                return new JAXRSMethodVisitor(classResult, classResult.getOriginalClass(), desc, signature, methodResult, true);
+                return new JAXRSMethodVisitor(identifier, classResult, methodResult, true);
             else {
                 final Method annotatedSuperMethod = searchAnnotatedSuperMethod(classResult.getOriginalClass(), name, methodSignature);
                 if (annotatedSuperMethod != null) {
                     try {
-                        return new JAXRSMethodVisitor(classResult, classResult.getOriginalClass(), desc, signature, methodResult, false);
+                        return new JAXRSMethodVisitor(identifier, classResult, methodResult, false);
                     } finally {
                         classResult.getMethods().stream().filter(m -> m.equals(methodResult)).findAny().ifPresent(m -> visitJAXRSSuperMethod(annotatedSuperMethod, m));
                     }

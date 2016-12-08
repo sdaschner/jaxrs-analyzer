@@ -31,6 +31,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.sebastian_daschner.jaxrs_analyzer.model.Types.*;
+import static java.util.Collections.emptyList;
+import static java.util.Collections.emptyMap;
 
 /**
  * Contains Java and Javassist utility functionality.
@@ -293,7 +295,7 @@ public final class JavaUtils {
      */
     public static List<String> getTypeParameters(final String type) {
         if (type.charAt(0) != 'L')
-            return Collections.emptyList();
+            return emptyList();
 
         int lastStart = type.indexOf('<') + 1;
         final List<String> parameters = new ArrayList<>();
@@ -328,12 +330,14 @@ public final class JavaUtils {
     }
 
     private static Map<String, String> getTypeVariables(final String type) {
+        if (type == null)
+            return emptyMap();
         final Map<String, String> variables = new HashMap<>();
         final List<String> actualTypeParameters = getTypeParameters(type);
         final Class<?> loadedClass = loadClassFromType(type);
         if (loadedClass == null) {
             LogProvider.debug("could not load class for type " + type);
-            return Collections.emptyMap();
+            return emptyMap();
         }
 
         final TypeVariable<? extends Class<?>>[] typeParameters = loadedClass.getTypeParameters();
@@ -467,7 +471,7 @@ public final class JavaUtils {
 //        final String[] types = resolveMethodSignature(methodDesc);
 //        return IntStream.range(0, types.length).mapToObj(i -> types[i]).collect(Collectors.toList());
         if (methodDesc == null)
-            return Collections.emptyList();
+            return emptyList();
 
         final char[] buffer = methodDesc.toCharArray();
         final List<String> args = new ArrayList<>();

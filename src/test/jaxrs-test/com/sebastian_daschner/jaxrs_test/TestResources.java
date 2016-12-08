@@ -39,6 +39,11 @@ public class TestResources {
     @Inject
     private TestStore testStore;
 
+    /**
+     * Returns a test string with plain text.
+     *
+     * @return Ignore this comment
+     */
     @GET
     @Path("test")
     @Produces(MediaType.TEXT_HTML)
@@ -51,7 +56,9 @@ public class TestResources {
         return this.testStore.getModels();
     }
 
-    public <T extends Comparable<? super T>> T foobar() {return null;}
+    public <T extends Comparable<? super T>> T foobar() {
+        return null;
+    }
 
     @POST
     public Response simplePost(String string) {
@@ -69,6 +76,11 @@ public class TestResources {
         return Response.accepted().build();
     }
 
+    /**
+     * Deletes a test.
+     *
+     * @param foobar The foo query
+     */
     @DELETE
     @Path("{foobar}")
     public void deleteTest(@PathParam("foobar") final String foobar) {
@@ -96,6 +108,13 @@ public class TestResources {
         }
     }
 
+    /**
+     * Deletes another test.
+     *
+     * @param id    The ID
+     * @param query The deletion query
+     * @return
+     */
     @DELETE
     @Path("{id}/test")
     public Response anotherDelete(@PathParam("id") final String id, @QueryParam("query") final int query) {

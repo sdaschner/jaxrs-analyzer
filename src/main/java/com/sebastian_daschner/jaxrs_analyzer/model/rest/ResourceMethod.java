@@ -86,7 +86,6 @@ public class ResourceMethod {
         if (method != that.method) return false;
         if (description != null ? !description.equals(that.description) : that.description != null) return false;
         return requestBody != null ? requestBody.equals(that.requestBody) : that.requestBody == null;
-
     }
 
     @Override

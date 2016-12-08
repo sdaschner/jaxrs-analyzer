@@ -23,6 +23,7 @@ import com.sebastian_daschner.jaxrs_analyzer.model.results.ClassResult;
 import com.sebastian_daschner.jaxrs_analyzer.model.results.MethodResult;
 import com.sun.javadoc.MethodDoc;
 import com.sun.javadoc.ParamTag;
+import com.sun.javadoc.Parameter;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -288,18 +289,15 @@ public class ResultInterpreterTest {
     @Ignore
     public void testDescriptions() {
         final MethodDoc methodDocMock = mock(MethodDoc.class);
-        final ParamTag paramTagMock = mock(ParamTag.class);
-        final ParamTag[] paramTags = {paramTagMock};
 
         when(methodDocMock.commentText()).thenReturn("Method description.");
-        when(methodDocMock.paramTags()).thenReturn(paramTags);
-        when(paramTagMock.parameterName()).thenReturn("query");
-        when(paramTagMock.parameterComment()).thenReturn("Query operation.");
+        when(methodDocMock.paramTags()).thenReturn(new ParamTag[0]);
+        when(methodDocMock.parameters()).thenReturn(new Parameter[0]);
 
         final Resources expectedResult = new Resources();
         expectedResult.setBasePath("path");
         final ResourceMethod resourceMethod = ResourceMethodBuilder.withMethodAndDescription(HttpMethod.GET, "Method description.")
-                .andQueryParam("query", "Ljava/lang/String;", null, "Query operation.")
+                .andQueryParam("query", "Ljava/lang/String;", null)
                 .andResponse(200, ResponseBuilder.withResponseBody(STRING_IDENTIFIER).build())
                 .build();
         expectedResult.addMethod("test", resourceMethod);

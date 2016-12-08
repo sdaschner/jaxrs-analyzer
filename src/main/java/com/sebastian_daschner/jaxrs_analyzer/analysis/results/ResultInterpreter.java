@@ -26,10 +26,15 @@ import com.sebastian_daschner.jaxrs_analyzer.model.results.ClassResult;
 import com.sebastian_daschner.jaxrs_analyzer.model.results.MethodResult;
 import com.sebastian_daschner.jaxrs_analyzer.utils.StringUtils;
 import com.sun.javadoc.ClassDoc;
+import com.sun.javadoc.Doc;
 import com.sun.javadoc.MethodDoc;
+import com.sun.javadoc.ParamTag;
 
 import java.util.Optional;
 import java.util.Set;
+
+import static com.sebastian_daschner.jaxrs_analyzer.analysis.results.JavaDocParameterResolver.findFieldDoc;
+import static com.sebastian_daschner.jaxrs_analyzer.analysis.results.JavaDocParameterResolver.findParameterDoc;
 
 /**
  * Interprets the analyzed project results to REST results.
@@ -100,7 +105,7 @@ public class ResultInterpreter {
     private ResourceMethod interpretResourceMethod(final MethodResult methodResult, final ClassResult classResult) {
         final MethodDoc methodDoc = methodResult.getMethodDoc();
         // TODO
-        final ClassDoc classDoc=null;
+        final ClassDoc classDoc = null;
 
         final String description = methodDoc == null || StringUtils.isBlank(methodDoc.commentText()) ? null : methodDoc.commentText();
         final ResourceMethod resourceMethod = new ResourceMethod(methodResult.getHttpMethod(), description);
@@ -126,11 +131,13 @@ public class ResultInterpreter {
 
     private void addParameterDescriptions(final Set<MethodParameter> methodParameters, final MethodDoc methodDoc, final ClassDoc classDoc) {
         methodParameters.forEach(p -> {
-//            if (methodDoc!=null)
-//                methodDoc.parameters()
-            // TODO check method parameters & class fields
-            // get parameter / field annotations -> has to match specific @*Param / type of MethodParameter
-            // -> if matches add description for MethodParameter
+            final Optional<ParamTag> tag = findParameterDoc(p, methodDoc);
+
+            final String description = tag.map(ParamTag::parameterComment)
+                    .orElseGet(() -> findFieldDoc(classDoc)
+                            .map(Doc::commentText).orElse(null));
+
+            p.setDescription(description);
         });
     }
 

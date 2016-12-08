@@ -100,6 +100,11 @@ public class ResourceMethodBuilder {
         return this;
     }
 
+    public ResourceMethodBuilder andPathParam(final String name, final String type, final String defaultValue, final String description) {
+        andParam(ParameterType.PATH, name, type, defaultValue, description);
+        return this;
+    }
+
     public ResourceMethodBuilder andCookieParam(final String name, final String type) {
         andParam(ParameterType.COOKIE, name, type, null, null);
         return this;

@@ -416,7 +416,7 @@ enum KnownResponseResultMethod implements IdentifiableMethod {
 
     @Override
     public Element invoke(final Element object, final List<Element> arguments) {
-        if (arguments.size() != identifier.getParameters())
+        if (arguments.size() != identifier.getParameters().size())
             throw new IllegalArgumentException("Method arguments do not match expected signature!");
 
         return function.apply(object, arguments);

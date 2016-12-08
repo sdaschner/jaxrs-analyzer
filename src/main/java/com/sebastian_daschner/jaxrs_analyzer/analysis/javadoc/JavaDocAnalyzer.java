@@ -29,6 +29,7 @@ public class JavaDocAnalyzer {
     }
 
     private void invokeDoclet(final Set<String> packages, final Set<Path> projectSourcePaths, final Set<Path> classPaths) {
+        // TODO only invoke on sources visited in visitSource
         final String[] args = Stream.concat(
                 Stream.of("-sourcepath",
                         joinPaths(projectSourcePaths),
@@ -61,7 +62,7 @@ public class JavaDocAnalyzer {
     private MethodResult findMethodResult(final MethodIdentifier identifier, final ClassResult classResult) {
         if (classResult.getOriginalClass().equals(identifier.getContainingClass()))
             return classResult.getMethods().stream()
-                    .filter(methodResult -> methodResult.getOriginalMethodSignature().equals(identifier.getSignature()))
+                    .filter(methodResult -> methodResult.getOriginalMethodSignature().equals(identifier))
                     .findAny().orElse(null);
 
         return classResult.getMethods().stream()
