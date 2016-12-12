@@ -27,6 +27,9 @@ public class SubResources implements SomeSubResource {
 
     private final String name;
 
+    /**
+     * The query param.
+     */
     @QueryParam("query")
     private String query;
 
@@ -34,12 +37,24 @@ public class SubResources implements SomeSubResource {
         this.name = name;
     }
 
+    /**
+     * Gets a sub resource.
+     *
+     * @param name The name
+     * @return
+     */
     @GET
     @Path("{name}")
     public String getSub(@PathParam("name") final String name) {
         return this.name + name;
     }
 
+    /**
+     * Creates a sub resource.
+     *
+     * @param entity The entity
+     * @return
+     */
     @POST
     public Response postSub(final String entity) {
         System.out.println("posted new: " + entity + " q: " + query);

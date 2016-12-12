@@ -36,7 +36,7 @@ public class ResourceMethodBuilder {
         return new ResourceMethodBuilder(method);
     }
 
-    public static ResourceMethodBuilder withMethodAndDescription(final HttpMethod method, final String description) {
+    public static ResourceMethodBuilder withMethod(final HttpMethod method, final String description) {
         return new ResourceMethodBuilder(method, description);
     }
 

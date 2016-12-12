@@ -22,9 +22,6 @@ final class JavaDocParameterResolver {
     }
 
     static Optional<ParamTag> findParameterDoc(final MethodParameter parameter, final MethodDoc methodDoc) {
-        if (methodDoc == null)
-            return Optional.empty();
-
         final Optional<String> paramName = Stream.of(methodDoc.parameters())
                 .filter(p -> hasAnnotation(parameter.getParameterType(), parameter.getName(), p.annotations()))
                 .map(Parameter::name)
@@ -35,6 +32,15 @@ final class JavaDocParameterResolver {
 
         return Stream.of(methodDoc.paramTags())
                 .filter(t -> t.parameterName().equals(paramName.get()))
+                .findAny();
+    }
+
+    static Optional<FieldDoc> findFieldDoc(final MethodParameter parameter, final ClassDoc classDoc) {
+        if (classDoc == null)
+            return Optional.empty();
+
+        return Stream.of(classDoc.fields(false))
+                .filter(f -> hasAnnotation(parameter.getParameterType(), parameter.getName(), f.annotations()))
                 .findAny();
     }
 
@@ -70,14 +76,6 @@ final class JavaDocParameterResolver {
             default:
                 return null;
         }
-    }
-
-    static Optional<FieldDoc> findFieldDoc(final ClassDoc classDoc) {
-        if (classDoc == null)
-            return Optional.empty();
-
-        // TODO implement
-        return Optional.empty();
     }
 
 }

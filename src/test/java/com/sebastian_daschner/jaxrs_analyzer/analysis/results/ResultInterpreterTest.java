@@ -296,7 +296,7 @@ public class ResultInterpreterTest {
 
         final Resources expectedResult = new Resources();
         expectedResult.setBasePath("path");
-        final ResourceMethod resourceMethod = ResourceMethodBuilder.withMethodAndDescription(HttpMethod.GET, "Method description.")
+        final ResourceMethod resourceMethod = ResourceMethodBuilder.withMethod(HttpMethod.GET, "Method description.")
                 .andQueryParam("query", "Ljava/lang/String;", null)
                 .andResponse(200, ResponseBuilder.withResponseBody(STRING_IDENTIFIER).build())
                 .build();

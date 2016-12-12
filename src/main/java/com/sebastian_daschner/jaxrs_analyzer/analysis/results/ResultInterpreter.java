@@ -25,7 +25,6 @@ import com.sebastian_daschner.jaxrs_analyzer.model.rest.Response;
 import com.sebastian_daschner.jaxrs_analyzer.model.results.ClassResult;
 import com.sebastian_daschner.jaxrs_analyzer.model.results.MethodResult;
 import com.sebastian_daschner.jaxrs_analyzer.utils.StringUtils;
-import com.sun.javadoc.ClassDoc;
 import com.sun.javadoc.Doc;
 import com.sun.javadoc.MethodDoc;
 import com.sun.javadoc.ParamTag;
@@ -104,15 +103,13 @@ public class ResultInterpreter {
      */
     private ResourceMethod interpretResourceMethod(final MethodResult methodResult, final ClassResult classResult) {
         final MethodDoc methodDoc = methodResult.getMethodDoc();
-        // TODO
-        final ClassDoc classDoc = null;
 
         final String description = methodDoc == null || StringUtils.isBlank(methodDoc.commentText()) ? null : methodDoc.commentText();
         final ResourceMethod resourceMethod = new ResourceMethod(methodResult.getHttpMethod(), description);
         updateMethodParameters(resourceMethod.getMethodParameters(), classResult.getClassFields());
         updateMethodParameters(resourceMethod.getMethodParameters(), methodResult.getMethodParameters());
 
-        addParameterDescriptions(resourceMethod.getMethodParameters(), methodDoc, classDoc);
+        addParameterDescriptions(resourceMethod.getMethodParameters(), methodDoc);
         stringParameterResolver.replaceParametersTypes(resourceMethod.getMethodParameters());
 
         if (methodResult.getRequestBodyType() != null) {
@@ -129,12 +126,15 @@ public class ResultInterpreter {
         return resourceMethod;
     }
 
-    private void addParameterDescriptions(final Set<MethodParameter> methodParameters, final MethodDoc methodDoc, final ClassDoc classDoc) {
+    private void addParameterDescriptions(final Set<MethodParameter> methodParameters, final MethodDoc methodDoc) {
+        if (methodDoc == null)
+            return;
+
         methodParameters.forEach(p -> {
             final Optional<ParamTag> tag = findParameterDoc(p, methodDoc);
 
             final String description = tag.map(ParamTag::parameterComment)
-                    .orElseGet(() -> findFieldDoc(classDoc)
+                    .orElseGet(() -> findFieldDoc(p, methodDoc.containingClass())
                             .map(Doc::commentText).orElse(null));
 
             p.setDescription(description);

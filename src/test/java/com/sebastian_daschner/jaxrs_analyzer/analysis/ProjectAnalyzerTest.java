@@ -178,7 +178,7 @@ public class ProjectAnalyzerTest {
         addMethods(resources, "test", firstGet, firstPost, firstPut);//, firstDelete);
 
         // test/{foobar}
-        ResourceMethod firstDelete = ResourceMethodBuilder.withMethodAndDescription(HttpMethod.DELETE, "Deletes a test.").andPathParam("foobar", Types.STRING, null, "The foo query")
+        ResourceMethod firstDelete = ResourceMethodBuilder.withMethod(HttpMethod.DELETE, "Deletes a test.").andPathParam("foobar", Types.STRING, null, "The foo query")
                 .andAcceptMediaTypes("application/json").andResponseMediaTypes("application/json")
                 .andResponse(204, ResponseBuilder.newBuilder().build()).build();
         addMethods(resources, "test/{foobar}", firstDelete);
@@ -197,14 +197,14 @@ public class ProjectAnalyzerTest {
         addMethods(resources, "test/{id}", secondGet, secondDelete);
 
         // test/{id}/test
-        ResourceMethod thirdDelete = ResourceMethodBuilder.withMethodAndDescription(HttpMethod.DELETE, "Deletes another test.")
+        ResourceMethod thirdDelete = ResourceMethodBuilder.withMethod(HttpMethod.DELETE, "Deletes another test.")
                 .andAcceptMediaTypes("application/json").andResponseMediaTypes("application/json")
                 .andPathParam("id", Types.STRING, null, "The ID").andQueryParam("query", Types.PRIMITIVE_INT, null, "The deletion query")
                 .andResponse(204, ResponseBuilder.newBuilder().build()).build();
         addMethods(resources, "test/{id}/test", thirdDelete);
 
         // test/test
-        ResourceMethod fourthGet = ResourceMethodBuilder.withMethodAndDescription(HttpMethod.GET, "Returns a test string with plain text.").andAcceptMediaTypes("application/json")
+        ResourceMethod fourthGet = ResourceMethodBuilder.withMethod(HttpMethod.GET, "Returns a test string with plain text.").andAcceptMediaTypes("application/json")
                 .andResponseMediaTypes("text/plain").andResponse(200, ResponseBuilder.withResponseBody(stringIdentifier).build()).build();
         addMethods(resources, "test/test", fourthGet);
 
@@ -231,7 +231,8 @@ public class ProjectAnalyzerTest {
         addMethods(resources, "complex/{info}", sixthGet);
 
         // complex/sub
-        ResourceMethod secondPost = ResourceMethodBuilder.withMethod(HttpMethod.POST).andRequestBodyType(Types.STRING).andQueryParam("query", Types.STRING)
+        ResourceMethod secondPost = ResourceMethodBuilder.withMethod(HttpMethod.POST, "Creates a sub resource.").andRequestBodyType(Types.STRING)
+                .andQueryParam("query", Types.STRING, null, "The query param.")
                 .andResponse(202, ResponseBuilder.newBuilder().andHeaders("X-Info").build()).build();
         addMethods(resources, "complex/sub", secondPost);
 
@@ -239,7 +240,8 @@ public class ProjectAnalyzerTest {
         addMethods(resources, "subsub", secondPost);
 
         // complex/sub/{name}
-        ResourceMethod seventhGet = ResourceMethodBuilder.withMethod(HttpMethod.GET).andPathParam("name", Types.STRING).andQueryParam("query", Types.STRING)
+        ResourceMethod seventhGet = ResourceMethodBuilder.withMethod(HttpMethod.GET, "Gets a sub resource.").andPathParam("name", Types.STRING, null, "The name")
+                .andQueryParam("query", Types.STRING, null, "The query param.")
                 .andResponse(200, ResponseBuilder.withResponseBody(stringIdentifier).build()).build();
         addMethods(resources, "complex/sub/{name}", seventhGet);
 
@@ -247,22 +249,26 @@ public class ProjectAnalyzerTest {
         addMethods(resources, "subsub/{name}", seventhGet);
 
         // complex/anotherSub
-        ResourceMethod thirdPost = ResourceMethodBuilder.withMethod(HttpMethod.POST).andRequestBodyType(Types.STRING).andQueryParam("query", Types.STRING)
+        ResourceMethod thirdPost = ResourceMethodBuilder.withMethod(HttpMethod.POST, "Creates a sub resource.").andRequestBodyType(Types.STRING)
+                .andQueryParam("query", Types.STRING, null, "The query param.")
                 .andResponse(202, ResponseBuilder.newBuilder().andHeaders("X-Info").build()).build();
         addMethods(resources, "complex/anotherSub", thirdPost);
 
         // complex/anotherSub/{name}
-        ResourceMethod tenthGet = ResourceMethodBuilder.withMethod(HttpMethod.GET).andPathParam("name", Types.STRING).andQueryParam("query", Types.STRING)
+        ResourceMethod tenthGet = ResourceMethodBuilder.withMethod(HttpMethod.GET, "Gets a sub resource.").andPathParam("name", Types.STRING, null, "The name")
+                .andQueryParam("query", Types.STRING, null, "The query param.")
                 .andResponse(200, ResponseBuilder.withResponseBody(stringIdentifier).build()).build();
         addMethods(resources, "complex/anotherSub/{name}", tenthGet);
 
         // complex/anotherSubres
-        ResourceMethod fourthPost = ResourceMethodBuilder.withMethod(HttpMethod.POST).andRequestBodyType(Types.STRING).andQueryParam("query", Types.STRING)
+        ResourceMethod fourthPost = ResourceMethodBuilder.withMethod(HttpMethod.POST, "Creates a sub resource.").andRequestBodyType(Types.STRING)
+                .andQueryParam("query", Types.STRING, null, "The query param.")
                 .andResponse(202, ResponseBuilder.newBuilder().andHeaders("X-Info").build()).build();
         addMethods(resources, "complex/anotherSubres", fourthPost);
 
         // complex/anotherSubres/{name}
-        ResourceMethod eleventhGet = ResourceMethodBuilder.withMethod(HttpMethod.GET).andPathParam("name", Types.STRING).andQueryParam("query", Types.STRING)
+        ResourceMethod eleventhGet = ResourceMethodBuilder.withMethod(HttpMethod.GET, "Gets a sub resource.").andPathParam("name", Types.STRING, null, "The name")
+                .andQueryParam("query", Types.STRING, null, "The query param.")
                 .andResponse(200, ResponseBuilder.withResponseBody(stringIdentifier).build()).build();
         addMethods(resources, "complex/anotherSubres/{name}", eleventhGet);
 

@@ -20,6 +20,7 @@ import java.util.stream.Stream;
 public class JavaDocAnalyzer {
 
     private static final Map<MethodIdentifier, MethodDoc> METHOD_DOCS = new ConcurrentHashMap<>();
+    // TODO use class results for POJO / JAXB enhancement
     private static final Map<String, ClassDoc> CLASS_DOCS = new ConcurrentHashMap<>();
 
     public void analyze(final Set<ClassResult> classResults, final Set<String> packages, final Set<Path> projectSourcePaths, final Set<Path> classPaths) {
@@ -49,14 +50,10 @@ public class JavaDocAnalyzer {
     }
 
     private void combineResults(final Set<ClassResult> classResults) {
-
-        // TODO class docs -> save to class results
-
         METHOD_DOCS.entrySet().forEach(e -> classResults.stream()
                 .map(c -> findMethodResult(e.getKey(), c))
                 .filter(Objects::nonNull)
-                .findAny()
-                .ifPresent(m -> m.setMethodDoc(e.getValue())));
+                .forEach(m -> m.setMethodDoc(e.getValue())));
     }
 
     private MethodResult findMethodResult(final MethodIdentifier identifier, final ClassResult classResult) {
