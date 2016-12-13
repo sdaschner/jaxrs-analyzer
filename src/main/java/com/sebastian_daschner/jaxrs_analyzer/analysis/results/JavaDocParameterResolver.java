@@ -17,13 +17,15 @@ import static com.sebastian_daschner.jaxrs_analyzer.model.Types.*;
  */
 final class JavaDocParameterResolver {
 
+    private static final String[] KNOWN_ANNOTATIONS = {PATH_PARAM, QUERY_PARAM, HEADER_PARAM, FORM_PARAM, COOKIE_PARAM, MATRIX_PARAM, DEFAULT_VALUE, SUSPENDED, CONTEXT};
+
     private JavaDocParameterResolver() {
         throw new UnsupportedOperationException();
     }
 
     static Optional<ParamTag> findParameterDoc(final MethodParameter parameter, final MethodDoc methodDoc) {
         final Optional<String> paramName = Stream.of(methodDoc.parameters())
-                .filter(p -> hasAnnotation(parameter.getParameterType(), parameter.getName(), p.annotations()))
+                .filter(p -> hasAnnotation(parameter, p.annotations()))
                 .map(Parameter::name)
                 .findAny();
 
@@ -40,14 +42,32 @@ final class JavaDocParameterResolver {
             return Optional.empty();
 
         return Stream.of(classDoc.fields(false))
-                .filter(f -> hasAnnotation(parameter.getParameterType(), parameter.getName(), f.annotations()))
+                .filter(f -> hasAnnotation(parameter, f.annotations()))
                 .findAny();
     }
 
-    private static boolean hasAnnotation(final ParameterType parameterType, final String name, final AnnotationDesc... annotations) {
+    static Optional<ParamTag> findRequestBodyDoc(final MethodDoc methodDoc) {
+        final Optional<String> paramName = Stream.of(methodDoc.parameters())
+                .filter(p -> isRequestBody(p.annotations()))
+                .map(Parameter::name)
+                .findAny();
+
+        return Stream.of(methodDoc.paramTags())
+                .filter(t -> t.parameterName().equals(paramName.get()))
+                .findAny();
+    }
+
+    private static boolean hasAnnotation(final MethodParameter parameter, final AnnotationDesc... annotations) {
         return Stream.of(annotations)
-                .filter(a -> annotationTypeMatches(a.annotationType().qualifiedTypeName(), parameterType))
-                .anyMatch(a -> annotationValueMatches(a.elementValues(), name));
+                .filter(a -> annotationTypeMatches(a.annotationType().qualifiedTypeName(), parameter.getParameterType()))
+                .anyMatch(a -> annotationValueMatches(a.elementValues(), parameter.getName()));
+    }
+
+    private static boolean isRequestBody(final AnnotationDesc... annotations) {
+        return Stream.of(annotations)
+                .map(AnnotationDesc::annotationType)
+                .map(AnnotationTypeDoc::qualifiedTypeName)
+                .noneMatch(t -> Stream.of(KNOWN_ANNOTATIONS).anyMatch(a -> t.equals(toReadableType(a))));
     }
 
     private static boolean annotationTypeMatches(final String qualifiedTypeName, final ParameterType parameterType) {

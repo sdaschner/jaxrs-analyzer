@@ -164,8 +164,14 @@ public class SwaggerBackend implements Backend {
         buildParameters(parameters, ParameterType.FORM, parameterBuilder);
 
         if (method.getRequestBody() != null) {
-            parameterBuilder.add(Json.createObjectBuilder().add("name", "body").add("in", "body").add("required", true)
-                    .add("schema", schemaBuilder.build(method.getRequestBody())));
+            final JsonObjectBuilder requestBuilder = Json.createObjectBuilder()
+                    .add("name", "body")
+                    .add("in", "body")
+                    .add("required", true)
+                    .add("schema", schemaBuilder.build(method.getRequestBody()));
+            if (!StringUtils.isBlank(method.getRequestBodyDescription()))
+                requestBuilder.add("description", method.getRequestBodyDescription());
+            parameterBuilder.add(requestBuilder);
         }
         return parameterBuilder;
     }

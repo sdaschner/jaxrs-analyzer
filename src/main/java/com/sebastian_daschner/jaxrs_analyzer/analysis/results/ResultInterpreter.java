@@ -32,8 +32,7 @@ import com.sun.javadoc.ParamTag;
 import java.util.Optional;
 import java.util.Set;
 
-import static com.sebastian_daschner.jaxrs_analyzer.analysis.results.JavaDocParameterResolver.findFieldDoc;
-import static com.sebastian_daschner.jaxrs_analyzer.analysis.results.JavaDocParameterResolver.findParameterDoc;
+import static com.sebastian_daschner.jaxrs_analyzer.analysis.results.JavaDocParameterResolver.*;
 
 /**
  * Interprets the analyzed project results to REST results.
@@ -114,6 +113,7 @@ public class ResultInterpreter {
 
         if (methodResult.getRequestBodyType() != null) {
             resourceMethod.setRequestBody(javaTypeAnalyzer.analyze(methodResult.getRequestBodyType()));
+            resourceMethod.setRequestBodyDescription(findRequestBodyDescription(methodDoc));
         }
 
         // add default status code due to JSR 339
@@ -139,6 +139,12 @@ public class ResultInterpreter {
 
             p.setDescription(description);
         });
+    }
+
+    private String findRequestBodyDescription(final MethodDoc methodDoc) {
+        if (methodDoc == null)
+            return null;
+        return findRequestBodyDoc(methodDoc).map(ParamTag::parameterComment).orElse(null);
     }
 
     /**

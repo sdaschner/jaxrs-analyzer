@@ -45,6 +45,12 @@ public class ResourceMethodBuilder {
         return this;
     }
 
+    public ResourceMethodBuilder andRequestBodyType(final String type, final String requestBodyDescription) {
+        method.setRequestBody(TypeIdentifier.ofType(type));
+        method.setRequestBodyDescription(requestBodyDescription);
+        return this;
+    }
+
     public ResourceMethodBuilder andRequestBodyType(final TypeIdentifier identifier) {
         method.setRequestBody(identifier);
         return this;

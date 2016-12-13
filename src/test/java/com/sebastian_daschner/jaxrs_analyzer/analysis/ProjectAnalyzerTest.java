@@ -99,6 +99,7 @@ public class ProjectAnalyzerTest {
                 assertTypeIdentifierEquals(methodText, em.getRequestBody(), am.getRequestBody(), expectedResources.getTypeRepresentations(), actualResources.getTypeRepresentations());
                 assertEquals(methodText, em.getResponses().keySet(), am.getResponses().keySet());
                 assertEquals(methodText, em.getDescription(), am.getDescription());
+                assertEquals(methodText, em.getRequestBodyDescription(), am.getRequestBodyDescription());
                 am.getResponses().entrySet().forEach(ae -> {
                     final Response ar = ae.getValue();
                     final Response er = em.getResponses().get(ae.getKey());
@@ -231,7 +232,7 @@ public class ProjectAnalyzerTest {
         addMethods(resources, "complex/{info}", sixthGet);
 
         // complex/sub
-        ResourceMethod secondPost = ResourceMethodBuilder.withMethod(HttpMethod.POST, "Creates a sub resource.").andRequestBodyType(Types.STRING)
+        ResourceMethod secondPost = ResourceMethodBuilder.withMethod(HttpMethod.POST, "Creates a sub resource.").andRequestBodyType(Types.STRING, "The entity")
                 .andQueryParam("query", Types.STRING, null, "The query param.")
                 .andResponse(202, ResponseBuilder.newBuilder().andHeaders("X-Info").build()).build();
         addMethods(resources, "complex/sub", secondPost);
@@ -249,7 +250,7 @@ public class ProjectAnalyzerTest {
         addMethods(resources, "subsub/{name}", seventhGet);
 
         // complex/anotherSub
-        ResourceMethod thirdPost = ResourceMethodBuilder.withMethod(HttpMethod.POST, "Creates a sub resource.").andRequestBodyType(Types.STRING)
+        ResourceMethod thirdPost = ResourceMethodBuilder.withMethod(HttpMethod.POST, "Creates a sub resource.").andRequestBodyType(Types.STRING, "The entity")
                 .andQueryParam("query", Types.STRING, null, "The query param.")
                 .andResponse(202, ResponseBuilder.newBuilder().andHeaders("X-Info").build()).build();
         addMethods(resources, "complex/anotherSub", thirdPost);
@@ -261,7 +262,7 @@ public class ProjectAnalyzerTest {
         addMethods(resources, "complex/anotherSub/{name}", tenthGet);
 
         // complex/anotherSubres
-        ResourceMethod fourthPost = ResourceMethodBuilder.withMethod(HttpMethod.POST, "Creates a sub resource.").andRequestBodyType(Types.STRING)
+        ResourceMethod fourthPost = ResourceMethodBuilder.withMethod(HttpMethod.POST, "Creates a sub resource.").andRequestBodyType(Types.STRING, "The entity")
                 .andQueryParam("query", Types.STRING, null, "The query param.")
                 .andResponse(202, ResponseBuilder.newBuilder().andHeaders("X-Info").build()).build();
         addMethods(resources, "complex/anotherSubres", fourthPost);
