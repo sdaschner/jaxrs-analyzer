@@ -293,7 +293,7 @@ public final class InstructionBuilder {
             field = Class.forName(containingClass.replace('/', '.')).getDeclaredField(name);
             field.setAccessible(true);
             return field.get(null);
-        } catch (ReflectiveOperationException e) {
+        } catch (Exception e) {
             LogProvider.error("Could not access static property, reason: " + e.getMessage());
             LogProvider.debug(e);
             return null;

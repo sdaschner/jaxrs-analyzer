@@ -70,7 +70,7 @@ class SubResourceLocatorMethodContentAnalyzer extends MethodContentAnalyzer {
         final Set<ProjectMethod> projectMethods = findProjectMethods(visitedInstructions);
 
         // add project methods to global method pool
-        projectMethods.stream().forEach(MethodPool.getInstance()::addProjectMethod);
+        projectMethods.forEach(MethodPool.getInstance()::addProjectMethod);
 
         return simulator.simulate(visitedInstructions).getTypes();
     }
