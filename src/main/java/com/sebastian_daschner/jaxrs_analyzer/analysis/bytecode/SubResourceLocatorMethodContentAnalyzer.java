@@ -20,6 +20,7 @@ import com.sebastian_daschner.jaxrs_analyzer.analysis.JobRegistry;
 import com.sebastian_daschner.jaxrs_analyzer.analysis.bytecode.simulation.MethodPool;
 import com.sebastian_daschner.jaxrs_analyzer.analysis.bytecode.simulation.MethodSimulator;
 import com.sebastian_daschner.jaxrs_analyzer.model.JavaUtils;
+import com.sebastian_daschner.jaxrs_analyzer.model.elements.Element;
 import com.sebastian_daschner.jaxrs_analyzer.model.instructions.Instruction;
 import com.sebastian_daschner.jaxrs_analyzer.model.methods.ProjectMethod;
 import com.sebastian_daschner.jaxrs_analyzer.model.results.ClassResult;
@@ -29,6 +30,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+
+import static java.util.Collections.singleton;
 
 /**
  * Analyzes sub-resource-locator methods. This class is thread-safe.
@@ -50,7 +53,7 @@ class SubResourceLocatorMethodContentAnalyzer extends MethodContentAnalyzer {
         try {
             buildPackagePrefix(methodResult.getParentResource().getOriginalClass());
 
-            determineReturnTypes(methodResult.getInstructions()).stream()
+            determineReturnTypes(methodResult).stream()
                     // FEATURE handle several sub-resource impl's
                     .reduce((l, r) -> JavaUtils.determineMostSpecificType(l, r))
                     .ifPresent(t -> registerSubResourceJob(t, methodResult.getSubResource()));
@@ -63,8 +66,8 @@ class SubResourceLocatorMethodContentAnalyzer extends MethodContentAnalyzer {
      * Determines the possible return types of the sub-resource-locator by analyzing the bytecode.
      * This will analyze the concrete returned types (which then are further analyzed).
      */
-    private Set<String> determineReturnTypes(final List<Instruction> instructions) {
-        final List<Instruction> visitedInstructions = interpretRelevantInstructions(instructions);
+    private Set<String> determineReturnTypes(final MethodResult result) {
+        final List<Instruction> visitedInstructions = interpretRelevantInstructions(result.getInstructions());
 
         // find project defined methods in invoke occurrences
         final Set<ProjectMethod> projectMethods = findProjectMethods(visitedInstructions);
@@ -72,7 +75,13 @@ class SubResourceLocatorMethodContentAnalyzer extends MethodContentAnalyzer {
         // add project methods to global method pool
         projectMethods.forEach(MethodPool.getInstance()::addProjectMethod);
 
-        return simulator.simulate(visitedInstructions).getTypes();
+        final Element returnedElement = simulator.simulate(visitedInstructions);
+        if (returnedElement == null) {
+            // happens for abstract methods or if there is no return
+            return singleton(result.getOriginalMethodSignature().getReturnType());
+        }
+
+        return returnedElement.getTypes();
     }
 
     private void registerSubResourceJob(final String type, final ClassResult classResult) {

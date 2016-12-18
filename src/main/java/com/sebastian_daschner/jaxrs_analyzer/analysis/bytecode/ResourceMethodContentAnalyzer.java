@@ -68,7 +68,7 @@ class ResourceMethodContentAnalyzer extends MethodContentAnalyzer {
             }
 
             if (returnedElement == null) {
-                // happens for abstract methods
+                // happens for abstract methods or if there is no return
                 return;
             }
 
