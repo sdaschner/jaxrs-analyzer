@@ -4,8 +4,10 @@ Sebastian Daschner
 // new versions are placed on the top
 
 == v0.11
-- Added experimental JavaDoc analysis
+- Added JavaDoc analysis for JAX-RS resources
 - Added backend SPI
+- Improved path parameter resolution for extended path regexes
+- Fixed local variable analysis for corner cases
 
 == v0.10
 - Changed internals to ASM
