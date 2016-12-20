@@ -1,5 +1,6 @@
 package com.sebastian_daschner.jaxrs_analyzer.analysis.javadoc;
 
+import com.sebastian_daschner.jaxrs_analyzer.LogProvider;
 import com.sebastian_daschner.jaxrs_analyzer.model.methods.MethodIdentifier;
 import com.sebastian_daschner.jaxrs_analyzer.model.results.ClassResult;
 import com.sebastian_daschner.jaxrs_analyzer.model.results.MethodResult;
@@ -24,12 +25,16 @@ public class JavaDocAnalyzer {
     private static final Map<String, ClassDoc> CLASS_DOCS = new ConcurrentHashMap<>();
 
     public void analyze(final Set<ClassResult> classResults, final Set<String> packages, final Set<Path> projectSourcePaths, final Set<Path> classPaths) {
-        invokeDoclet(packages, projectSourcePaths, classPaths);
-
-        combineResults(classResults);
+        try {
+            invokeDoclet(packages, projectSourcePaths, classPaths);
+            combineResults(classResults);
+        } catch (Exception e) {
+            LogProvider.error("could not analyze JavaDoc, reason: " + e.getMessage());
+            LogProvider.debug(e);
+        }
     }
 
-    private void invokeDoclet(final Set<String> packages, final Set<Path> projectSourcePaths, final Set<Path> classPaths) {
+    private void invokeDoclet(final Set<String> packages, final Set<Path> projectSourcePaths, final Set<Path> classPaths) throws Exception {
         // TODO only invoke on sources visited in visitSource
         final String[] args = Stream.concat(
                 Stream.of("-sourcepath",
@@ -42,7 +47,8 @@ public class JavaDocAnalyzer {
                 packages.stream())
                 .toArray(String[]::new);
 
-        com.sun.tools.javadoc.Main.execute(args);
+        final Class<?> javaDocMain = ClassLoader.getSystemClassLoader().loadClass("com.sun.tools.javadoc.Main");
+        javaDocMain.getMethod("execute", String[].class).invoke(null, (Object) args);
     }
 
     private String joinPaths(final Set<Path> projectSourcePaths) {

@@ -2,9 +2,7 @@ package com.sebastian_daschner.jaxrs_analyzer.analysis.javadoc;
 
 import com.sebastian_daschner.jaxrs_analyzer.model.JavaUtils;
 import com.sebastian_daschner.jaxrs_analyzer.model.methods.MethodIdentifier;
-import com.sun.javadoc.ClassDoc;
-import com.sun.javadoc.MethodDoc;
-import com.sun.javadoc.RootDoc;
+import com.sun.javadoc.*;
 
 import java.util.stream.Stream;
 

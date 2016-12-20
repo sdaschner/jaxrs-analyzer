@@ -10,4 +10,3 @@ dependency-reduced-pom.xml
 .idea/
 
 *.class
-!lib/**/*.class
