@@ -3,6 +3,9 @@ Sebastian Daschner
 
 // new versions are placed on the top
 
+== v0.12
+- Fixed JavaDoc related class loading
+
 == v0.11
 - Added JavaDoc analysis for JAX-RS resources
 - Added backend SPI

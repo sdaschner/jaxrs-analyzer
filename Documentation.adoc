@@ -13,7 +13,7 @@ Just add the latest release version of the JAX-RS Analyzer to your Maven pom.xml
 <plugin>
     <groupId>com.sebastian-daschner</groupId>
     <artifactId>jaxrs-analyzer-maven-plugin</artifactId>
-    <version>0.10</version>
+    <version>0.12</version>
     <executions>
         <execution>
             <goals>
