@@ -8,6 +8,7 @@ import com.sun.javadoc.ClassDoc;
 import com.sun.javadoc.MethodDoc;
 
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -35,6 +36,10 @@ public class JavaDocAnalyzer {
     }
 
     private void invokeDoclet(final Set<String> packages, final Set<Path> projectSourcePaths, final Set<Path> classPaths) throws Exception {
+        final String docletName = "com.sebastian_daschner.jaxrs_analyzer.analysis.javadoc.JAXRSDoclet";
+        final Class<?> doclet = ClassLoader.getSystemClassLoader().loadClass(docletName);
+        final String docletPath = Paths.get(doclet.getProtectionDomain().getCodeSource().getLocation().toURI()).toString();
+
         // TODO only invoke on sources visited in visitSource
         final String[] args = Stream.concat(
                 Stream.of("-sourcepath",
@@ -42,8 +47,10 @@ public class JavaDocAnalyzer {
                         "-classpath",
                         joinPaths(classPaths),
                         "-quiet",
+                        "-docletpath",
+                        docletPath,
                         "-doclet",
-                        "com.sebastian_daschner.jaxrs_analyzer.analysis.javadoc.JAXRSDoclet"),
+                        docletName),
                 packages.stream())
                 .toArray(String[]::new);
 
