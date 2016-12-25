@@ -3,6 +3,10 @@ Sebastian Daschner
 
 // new versions are placed on the top
 
+== v0.13
+- Support empty domain (https://github.com/sdaschner/jaxrs-analyzer/issues/42[#42^])
+- Output dir is now editable in maven plugin (https://github.com/sdaschner/jaxrs-analyzer-maven-plugin/issues/13[#13^])
+
 == v0.12
 - Fixed JavaDoc related class loading
 
