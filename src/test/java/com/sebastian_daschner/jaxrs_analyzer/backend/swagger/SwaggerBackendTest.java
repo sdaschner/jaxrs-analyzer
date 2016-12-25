@@ -69,6 +69,7 @@ public class SwaggerBackendTest {
         }
     }
 
+
     @Parameterized.Parameters
     public static Collection<Object[]> data() {
         final Collection<Object[]> data = new LinkedList<>();
@@ -81,10 +82,11 @@ public class SwaggerBackendTest {
         add(data, ResourcesBuilder.withBase("rest")
                         .andResource("res1", ResourceMethodBuilder.withMethod(HttpMethod.GET)
                                 .andResponse(200, ResponseBuilder.withResponseBody(TypeIdentifier.ofType(Types.STRING)).andHeaders("Location").build()).build()).build(),
-                "{\"swagger\":\"2.0\",\"info\":{\"version\":\"1.0\",\"title\":\"project name\"},\"host\":\"example.com\",\"basePath\":\"/rest\",\"schemes\":[\"http\"],\"paths\":{\"/res1\":{\"get\":{\"consumes\":[],\"produces\":[],\"parameters\":[],\"responses\":{\"200\":{\"description\":\"OK\",\"headers\":{\"Location\":{\"type\":\"string\"}},\"schema\":{\"type\":\"string\"}}}}}},\"definitions\":{}}");
+                "{\"swagger\":\"2.0\",\"info\":{\"version\":\"1.0\",\"title\":\"project name\"},\"host\":\"\",\"basePath\":\"/project name/rest\",\"schemes\":[\"http\"],\"paths\":{\"/res1\":{\"get\":{\"consumes\":[],\"produces\":[],\"parameters\":[],\"responses\":{\"200\":{\"description\":\"OK\",\"headers\":{\"Location\":{\"type\":\"string\"}},\"schema\":{\"type\":\"string\"}}}}}},\"definitions\":{}}",new HashMap<>());
 
         Map<String, String> options = new HashMap<>();
         options.put(SWAGGER_SCHEMES, "https,wss");
+        options.put(DOMAIN,"example.com");
         add(data, ResourcesBuilder.withBase("rest")
                         .andResource("res1", ResourceMethodBuilder.withMethod(HttpMethod.GET)
                                 .andResponse(200, ResponseBuilder.withResponseBody(TypeIdentifier.ofType(Types.STRING)).andHeaders("Location").build()).build()).build(),
@@ -169,6 +171,7 @@ public class SwaggerBackendTest {
 
         options = new HashMap<>();
         options.put(RENDER_SWAGGER_TAGS, "true");
+        options.put(DOMAIN, "example.com");
         options.put(SWAGGER_TAGS_PATH_OFFSET, "1");
         add(data, ResourcesBuilder.withBase("rest")
                         .andResource("v2/res11", ResourceMethodBuilder.withMethod(HttpMethod.GET)
@@ -235,7 +238,9 @@ public class SwaggerBackendTest {
     }
 
     public static void add(final Collection<Object[]> data, final Resources resources, final String output) {
-        add(data, resources, output, new HashMap<>());
+        Map<String, String> options = new HashMap<>();
+        options.put(DOMAIN,"example.com");
+        add(data, resources, output, options);
     }
 
     public static void add(final Collection<Object[]> data, final Resources resources, final String output, final Map<String, String> options) {
