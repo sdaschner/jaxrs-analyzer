@@ -25,7 +25,7 @@ public class SwaggerOptions {
     public static final String SWAGGER_TAGS_PATH_OFFSET = "swaggerTagsPathOffset";
     public static final String JSON_PATCH = "jsonPatch";
 
-    private static final String DEFAULT_DOMAIN = "example.com";
+    private static final String DEFAULT_DOMAIN = "";
     private static final Set<SwaggerScheme> DEFAULT_SCHEMES = EnumSet.of(SwaggerScheme.HTTP);
     private static final boolean DEFAULT_RENDER_TAGS = false;
     private static final int DEFAULT_TAGS_PATH_OFFSET = 0;
