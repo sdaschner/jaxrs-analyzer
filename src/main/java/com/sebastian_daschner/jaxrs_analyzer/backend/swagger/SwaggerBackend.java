@@ -104,7 +104,9 @@ public class SwaggerBackend implements Backend {
             final JsonArrayBuilder tags = Json.createArrayBuilder();
             resources.getResources().stream()
                     .map(this::extractTag).filter(Objects::nonNull)
-                    .distinct().sorted().forEach(tags::add);
+                    .distinct().sorted()
+                    .map(tag -> Json.createObjectBuilder().add("name", tag))
+                    .forEach(tags::add);
             builder.add("tags", tags);
         }
     }
