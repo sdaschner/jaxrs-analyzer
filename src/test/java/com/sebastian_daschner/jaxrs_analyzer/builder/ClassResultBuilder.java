@@ -128,6 +128,11 @@ public class ClassResultBuilder {
         return this;
     }
 
+    public ClassResultBuilder andDeprecated(final boolean deprecated) {
+        classResult.setDeprecated(deprecated);
+        return this;
+    }
+
     public ClassResult build() {
         return classResult;
     }

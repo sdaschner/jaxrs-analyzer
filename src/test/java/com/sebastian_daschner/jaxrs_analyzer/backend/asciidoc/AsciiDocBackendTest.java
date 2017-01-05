@@ -248,7 +248,27 @@ public class AsciiDocBackendTest {
                         "*Content-Type*: `\\*/*`\n" +
                         "\n" +
                         "==== `200 OK`\n\n");
-        return data;
+        // deprecated method test
+        add(data, ResourcesBuilder.withBase("rest")
+            .andResource("res19", ResourceMethodBuilder.withMethod(HttpMethod.GET).andDeprecated(true)
+                .andResponse(200, ResponseBuilder.withResponseBody(TypeIdentifier.ofType(Types.STRING)).andHeaders("Location").build()).build()).build(),
+            "= REST resources of project name\n" +
+                    "1.0\n" +
+                    "\n" +
+                    "== `GET rest/res19`\n" +
+                    "\n" +
+                    "CAUTION: deprecated\n" +
+                    "\n" +
+                    "=== Request\n" +
+                    "_No body_ + \n" +
+                    "\n" +
+                    "=== Response\n" +
+                    "*Content-Type*: `\\*/*`\n" +
+                    "\n" +
+                    "==== `200 OK`\n" +
+                    "*Header*: `Location` + \n" +
+                "*Response Body*: (`java.lang.String`) + \n\n");
+       return data;
     }
 
     public static void add(final Collection<Object[]> data, final Resources resources, final String output) {

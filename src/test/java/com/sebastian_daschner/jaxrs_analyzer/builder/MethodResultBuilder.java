@@ -143,6 +143,11 @@ public class MethodResultBuilder {
         return this;
     }
 
+    public MethodResultBuilder andDeprecated(final boolean deprecated) {
+        methodResult.setDeprecated(deprecated);
+        return this;
+    }
+
     public MethodResult build() {
         return methodResult;
     }

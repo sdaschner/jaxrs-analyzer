@@ -60,6 +60,9 @@ class JAXRSMethodVisitor extends ProjectMethodVisitor {
             case Types.OPTIONS:
                 methodResult.setHttpMethod(HttpMethod.OPTIONS);
                 break;
+            case Types.DEPRECATED:
+                methodResult.setDeprecated(true);
+                break;
             case Types.PATH:
                 return new PathAnnotationVisitor(methodResult);
             case Types.CONSUMES:

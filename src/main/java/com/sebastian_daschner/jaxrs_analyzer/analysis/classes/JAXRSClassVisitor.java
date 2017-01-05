@@ -53,9 +53,11 @@ public class JAXRSClassVisitor extends ClassVisitor {
                 return new ConsumesAnnotationVisitor(classResult);
             case Types.PRODUCES:
                 return new ProducesAnnotationVisitor(classResult);
-            default:
-                return null;
+            case Types.DEPRECATED:
+                classResult.setDeprecated(true);
+                break;
         }
+        return null;
     }
 
     @Override

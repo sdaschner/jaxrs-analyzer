@@ -34,6 +34,7 @@ public class ResourceMethod {
     private final HttpMethod method;
     private TypeIdentifier requestBody;
     private String requestBodyDescription;
+    private boolean deprecated;
 
     public ResourceMethod(final HttpMethod method, final String description) {
         Objects.requireNonNull(method);
@@ -69,6 +70,14 @@ public class ResourceMethod {
         return responses;
     }
 
+    public boolean isDeprecated() {
+        return deprecated;
+    }
+
+    public void setDeprecated(boolean deprecated) {
+        this.deprecated = deprecated;
+    }
+
     public String getDescription() {
         return description;
     }
@@ -93,6 +102,7 @@ public class ResourceMethod {
         if (!responses.equals(that.responses)) return false;
         if (!methodParameters.equals(that.methodParameters)) return false;
         if (method != that.method) return false;
+        if (deprecated != that.deprecated) return false;
         if (description != null ? !description.equals(that.description) : that.description != null) return false;
         if (requestBodyDescription != null ? !requestBodyDescription.equals(that.requestBodyDescription) : that.requestBodyDescription != null)
             return false;
@@ -106,6 +116,7 @@ public class ResourceMethod {
         result = 31 * result + responses.hashCode();
         result = 31 * result + methodParameters.hashCode();
         result = 31 * result + method.hashCode();
+        result = 31 * result + (deprecated ? 1231 : 1237);
         result = 31 * result + (description != null ? description.hashCode() : 0);
         result = 31 * result + (requestBodyDescription != null ? requestBodyDescription.hashCode() : 0);
         result = 31 * result + (requestBody != null ? requestBody.hashCode() : 0);

@@ -227,6 +227,22 @@ public class PlainTextBackendTest {
                         "  Content-Type: */*\n" +
                         "  Status Codes: 201\n" +
                         "   Header: Location\n\n\n");
+        add(data, ResourcesBuilder.withBase("rest")
+            .andResource("res19", ResourceMethodBuilder.withMethod(HttpMethod.GET).andDeprecated(true)
+                .andResponse(200, ResponseBuilder.withResponseBody(TypeIdentifier.ofType(Types.STRING)).andHeaders("Location").build()).build()).build(),
+            "REST resources of project name:\n" +
+                    "1.0\n" +
+                    "\n" +
+                    "GET rest/res19:\n" +
+                    " Deprecated\n" +
+                    " Request:\n" +
+                    "  No body\n" +
+                    "\n" +
+                    " Response:\n" +
+                    "  Content-Type: */*\n" +
+                    "  Status Codes: 200\n" +
+                    "   Header: Location\n" +
+                    "   Response Body: java.lang.String\n\n\n");
         return data;
     }
 

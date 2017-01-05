@@ -39,6 +39,8 @@ public final class Types {
     public static final String COOKIE_PARAM = "Ljavax/ws/rs/CookieParam;";
     public static final String MATRIX_PARAM = "Ljavax/ws/rs/MatrixParam;";
 
+    public static final String DEPRECATED = "Ljava/lang/Deprecated;";
+
     public static final String PRIMITIVE_VOID = "V";
     public static final String BOOLEAN = "Ljava/lang/Boolean;";
     public static final String PRIMITIVE_BOOLEAN = "Z";
