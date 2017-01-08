@@ -29,11 +29,9 @@ import com.sun.javadoc.ClassDoc;
 import com.sun.javadoc.Doc;
 import com.sun.javadoc.MethodDoc;
 import com.sun.javadoc.ParamTag;
-import com.sun.javadoc.Tag;
 
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Stream;
 
 import static com.sebastian_daschner.jaxrs_analyzer.analysis.results.JavaDocParameterResolver.*;
 
@@ -140,16 +138,12 @@ public class ResultInterpreter {
     }
 
     private boolean hasMethodDeprecationTag(MethodDoc doc) {
-        return containsDeprecationTag(doc.tags());
+        return doc.tags(DEPRECATED_TAG_NAME).length > 0;
     }
 
     private boolean hasClassDeprecationTag(MethodDoc methodDoc) {
         final ClassDoc doc = methodDoc.containingClass();
-        return doc != null && containsDeprecationTag(doc.tags());
-    }
-
-    private boolean containsDeprecationTag(final Tag[] tags) {
-        return Stream.of(tags).anyMatch(tag -> DEPRECATED_TAG_NAME.equals(tag.name()));
+        return doc != null && doc.tags(DEPRECATED_TAG_NAME).length > 0;
     }
 
     private void addParameterDescriptions(final Set<MethodParameter> methodParameters, final MethodDoc methodDoc) {
