@@ -7,6 +7,7 @@ import com.sebastian_daschner.jaxrs_analyzer.model.results.MethodResult;
 import com.sun.javadoc.ClassDoc;
 import com.sun.javadoc.MethodDoc;
 
+import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Map;
@@ -39,23 +40,23 @@ public class JavaDocAnalyzer {
         final String docletName = "com.sebastian_daschner.jaxrs_analyzer.analysis.javadoc.JAXRSDoclet";
         final Class<?> doclet = ClassLoader.getSystemClassLoader().loadClass(docletName);
         final String docletPath = Paths.get(doclet.getProtectionDomain().getCodeSource().getLocation().toURI()).toString();
+        final String encoding = System.getProperty("project.build.sourceEncoding", Charset.defaultCharset().name());
 
         // TODO only invoke on sources visited in visitSource
         final String[] args = Stream.concat(
-                Stream.of("-sourcepath",
-                        joinPaths(projectSourcePaths),
-                        "-classpath",
-                        joinPaths(classPaths),
-                        "-quiet",
-                        "-docletpath",
-                        docletPath,
-                        "-doclet",
-                        docletName),
-                packages.stream())
-                .toArray(String[]::new);
-
+                Stream.of("-sourcepath", joinPaths(projectSourcePaths),
+                    "-classpath", joinPaths(classPaths),
+                    "-quiet",
+                    "-docletpath", docletPath,
+                    "-doclet", docletName,
+                    "-encoding", encoding
+                ),
+                packages.stream()
+            ).toArray(String[]::new);
         final Class<?> javaDocMain = ClassLoader.getSystemClassLoader().loadClass("com.sun.tools.javadoc.Main");
-        javaDocMain.getMethod("execute", String[].class).invoke(null, (Object) args);
+        final int result = (int) javaDocMain.getMethod("execute", String[].class).invoke(null, (Object) args);
+        if (result != 0)
+            LogProvider.error("Error in javadoc analysis");
     }
 
     private String joinPaths(final Set<Path> projectSourcePaths) {
