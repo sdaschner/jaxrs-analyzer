@@ -61,6 +61,7 @@ public class Main {
      * <li>{@code -v project version} The version of the project</li>
      * <li>{@code -d project domain} The domain of the project</li>
      * <li>{@code -o output file} The location of the analysis output (will be printed to standard out if omitted)</li>
+     * <li>{@code -e encoding} The source file encoding</li>
      * </ul>
      * <p>
      * Following available backend specific options (only have effect if the corresponding backend is selected):
@@ -121,6 +122,9 @@ public class Main {
                             break;
                         case "-o":
                             outputFileLocation = Paths.get(args[++i]);
+                            break;
+                        case "-e":
+                            System.setProperty("project.build.sourceEncoding", args[++i]);
                             break;
                         case "--swaggerSchemes":
                             attributes.put(SwaggerOptions.SWAGGER_SCHEMES, args[++i]);
@@ -199,6 +203,7 @@ public class Main {
         System.err.println(" -d <project domain> The domain of the project");
         System.err.println(" -o <output file> The location of the analysis output (will be printed to standard out if omitted)");
         System.err.println(" -a <attribute name>=<attribute value> Set custom attributes for backends.");
+        System.err.println(" -e <encoding> The source file encoding");
         System.err.println("\nFollowing available backend specific options (only have effect if the corresponding backend is selected):\n");
         System.err.println(" --swaggerSchemes <scheme>[,schemes] The Swagger schemes: http (default), https, ws, wss");
         System.err.println(" --renderSwaggerTags Enables rendering of Swagger tags (default tag will be used per default)");
