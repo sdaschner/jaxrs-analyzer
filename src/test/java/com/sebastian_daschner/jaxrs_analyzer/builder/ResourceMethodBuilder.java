@@ -150,6 +150,11 @@ public class ResourceMethodBuilder {
         return this;
     }
 
+    public ResourceMethodBuilder andDeprecated(final boolean deprecated) {
+        method.setDeprecated(deprecated);
+        return this;
+    }
+
     public ResourceMethod build() {
         return method;
     }

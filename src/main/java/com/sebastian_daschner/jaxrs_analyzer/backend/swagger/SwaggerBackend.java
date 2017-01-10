@@ -150,6 +150,9 @@ public class SwaggerBackend implements Backend {
         builder.add("consumes", consumes).add("produces", produces)
                 .add("parameters", buildParameters(method)).add("responses", buildResponses(method));
 
+        if (method.isDeprecated())
+            builder.add("deprecated", true);
+
         if (options.isRenderTags())
             Optional.ofNullable(extractTag(s)).ifPresent(t -> builder.add("tags", Json.createArrayBuilder().add(t)));
 

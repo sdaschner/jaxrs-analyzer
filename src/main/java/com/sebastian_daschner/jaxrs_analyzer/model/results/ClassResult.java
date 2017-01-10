@@ -37,6 +37,7 @@ public class ClassResult {
     private final Set<String> requestMediaTypes = new HashSet<>();
     private final Set<String> responseMediaTypes = new HashSet<>();
     private MethodResult parentSubResourceLocator;
+    private boolean deprecated;
 
     public String getApplicationPath() {
         return applicationPath;
@@ -91,6 +92,14 @@ public class ClassResult {
         this.parentSubResourceLocator = parentSubResourceLocator;
     }
 
+    public boolean isDeprecated() {
+        return deprecated;
+    }
+
+    public void setDeprecated(boolean deprecated) {
+        this.deprecated = deprecated;
+    }
+
     @Override
     public boolean equals(final Object o) {
         if (this == o) return true;
@@ -104,6 +113,7 @@ public class ClassResult {
         if (!classFields.equals(that.classFields)) return false;
         if (!methods.equals(that.methods)) return false;
         if (resourcePath != null ? !resourcePath.equals(that.resourcePath) : that.resourcePath != null) return false;
+        if (deprecated != that.deprecated) return false;
         return responseMediaTypes.equals(that.responseMediaTypes);
     }
 
@@ -115,6 +125,7 @@ public class ClassResult {
         result = 31 * result + methods.hashCode();
         result = 31 * result + requestMediaTypes.hashCode();
         result = 31 * result + responseMediaTypes.hashCode();
+        result = 31 * result + (deprecated ? 1231 : 1237);
         return result;
     }
 
@@ -128,6 +139,7 @@ public class ClassResult {
                 ", requestMediaTypes=" + requestMediaTypes +
                 ", responseMediaTypes=" + responseMediaTypes +
                 ", parentSubResourceLocator=" + (parentSubResourceLocator == null ? "null" : "notNull") +
+                ", deprecated=" + deprecated +
                 '}';
     }
 

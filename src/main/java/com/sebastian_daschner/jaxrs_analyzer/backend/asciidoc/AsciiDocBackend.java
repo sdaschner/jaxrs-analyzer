@@ -30,6 +30,8 @@ public class AsciiDocBackend extends StringBackend {
         if (!StringUtils.isBlank(baseUri))
             builder.append(baseUri).append('/');
         builder.append(resource).append("`\n\n");
+        if (resourceMethod.isDeprecated())
+            builder.append("CAUTION: deprecated\n\n");
     }
 
     @Override

@@ -47,6 +47,7 @@ public class MethodResult {
     private ClassResult subResource;
     private ClassResult parentResource;
     private MethodDoc methodDoc;
+    private boolean deprecated;
 
     public Set<String> getRequestMediaTypes() {
         return requestMediaTypes;
@@ -125,6 +126,14 @@ public class MethodResult {
         this.methodDoc = methodDoc;
     }
 
+    public boolean isDeprecated() {
+        return deprecated;
+    }
+
+    public void setDeprecated(boolean deprecated) {
+        this.deprecated = deprecated;
+    }
+
     @Override
     public boolean equals(final Object o) {
         if (this == o) return true;
@@ -144,6 +153,7 @@ public class MethodResult {
         if (httpMethod != that.httpMethod) return false;
         if (subResource != null ? !subResource.equals(that.subResource) : that.subResource != null) return false;
         if (methodDoc != null ? !methodDoc.equals(that.methodDoc) : that.methodDoc != null) return false;
+        if (deprecated != that.deprecated) return false;
         return true;
     }
 
@@ -159,6 +169,7 @@ public class MethodResult {
         result = 31 * result + (httpMethod != null ? httpMethod.hashCode() : 0);
         result = 31 * result + (subResource != null ? subResource.hashCode() : 0);
         result = 31 * result + (methodDoc != null ? methodDoc.hashCode() : 0);
+        result = 31 * result + (deprecated ? 1231 : 1237);
         return result;
     }
 
@@ -176,6 +187,7 @@ public class MethodResult {
                 ", subResource=" + subResource +
                 ", methodDoc=" + methodDoc +
                 ", parentResource=" + (parentResource == null ? "null" : "notNull") +
+                ", deprecated=" + deprecated +
                 '}';
     }
 

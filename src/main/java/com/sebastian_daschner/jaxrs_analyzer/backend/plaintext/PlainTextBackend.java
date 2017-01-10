@@ -46,6 +46,8 @@ public class PlainTextBackend extends StringBackend {
         if (!StringUtils.isBlank(baseUri))
             builder.append(baseUri).append('/');
         builder.append(resource).append(":\n");
+        if (resourceMethod.isDeprecated())
+            builder.append(" Deprecated\n");
     }
 
     @Override

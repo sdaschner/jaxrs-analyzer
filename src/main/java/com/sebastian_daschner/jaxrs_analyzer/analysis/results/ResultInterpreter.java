@@ -25,6 +25,7 @@ import com.sebastian_daschner.jaxrs_analyzer.model.rest.Response;
 import com.sebastian_daschner.jaxrs_analyzer.model.results.ClassResult;
 import com.sebastian_daschner.jaxrs_analyzer.model.results.MethodResult;
 import com.sebastian_daschner.jaxrs_analyzer.utils.StringUtils;
+import com.sun.javadoc.ClassDoc;
 import com.sun.javadoc.Doc;
 import com.sun.javadoc.MethodDoc;
 import com.sun.javadoc.ParamTag;
@@ -41,6 +42,7 @@ import static com.sebastian_daschner.jaxrs_analyzer.analysis.results.JavaDocPara
  */
 public class ResultInterpreter {
 
+    private static final String DEPRECATED_TAG_NAME = "@deprecated";
     private JavaTypeAnalyzer javaTypeAnalyzer;
     private Resources resources;
     private DynamicTypeAnalyzer dynamicTypeAnalyzer;
@@ -123,7 +125,25 @@ public class ResultInterpreter {
 
         addMediaTypes(methodResult, classResult, resourceMethod);
 
+        if (methodResult.isDeprecated() || classResult.isDeprecated() || hasDeprecationTag(methodDoc))
+            resourceMethod.setDeprecated(true);
+
         return resourceMethod;
+    }
+
+    private boolean hasDeprecationTag(MethodDoc doc) {
+        if (doc == null)
+            return false;
+        return hasMethodDeprecationTag(doc) || hasClassDeprecationTag(doc);
+    }
+
+    private boolean hasMethodDeprecationTag(MethodDoc doc) {
+        return doc.tags(DEPRECATED_TAG_NAME).length > 0;
+    }
+
+    private boolean hasClassDeprecationTag(MethodDoc methodDoc) {
+        final ClassDoc doc = methodDoc.containingClass();
+        return doc != null && doc.tags(DEPRECATED_TAG_NAME).length > 0;
     }
 
     private void addParameterDescriptions(final Set<MethodParameter> methodParameters, final MethodDoc methodDoc) {

@@ -234,6 +234,12 @@ public class SwaggerBackendTest {
                 "{\"swagger\":\"2.0\",\"info\":{\"version\":\"1.0\",\"title\":\"project name\"},\"host\":\"example.com\",\"basePath\":\"/rest\",\"schemes\":[\"http\"],\"paths\":{\"/res18\":{\"get\":{\"consumes\":[],\"produces\":[],\"parameters\":[{\"type\":\"string\",\"enum\":[\"APPLE\",\"BANANA\"],\"name\":\"q1\",\"in\":\"query\",\"required\":true},{\"type\":\"string\",\"enum\":[\"APPLE\",\"BANANA\"],\"name\":\"q2\",\"in\":\"query\",\"required\":true}],\"responses\":{}}}},\"definitions\":{}}"
         );
 
+        // deprecated method test
+        add(data, ResourcesBuilder.withBase("rest")
+            .andResource("res19", ResourceMethodBuilder.withMethod(HttpMethod.GET).andDeprecated(true)
+                .andResponse(200, ResponseBuilder.withResponseBody(TypeIdentifier.ofType(Types.STRING)).andHeaders("Location").build()).build()).build(),
+            "{\"swagger\":\"2.0\",\"info\":{\"version\":\"1.0\",\"title\":\"project name\"},\"host\":\"\",\"basePath\":\"/project name/rest\",\"schemes\":[\"http\"],\"paths\":{\"/res19\":{\"get\":{\"consumes\":[],\"produces\":[],\"parameters\":[],\"responses\":{\"200\":{\"description\":\"OK\",\"headers\":{\"Location\":{\"type\":\"string\"}},\"schema\":{\"type\":\"string\"}}},\"deprecated\":true}}},\"definitions\":{}}",new HashMap<>());
+
         return data;
     }
 
