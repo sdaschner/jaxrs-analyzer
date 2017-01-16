@@ -61,7 +61,7 @@ public class ProjectAnalyzerTest {
 
         path = Paths.get(testClassPath).toAbsolutePath();
 
-        final Set<Path> classPaths = Stream.of(System.getProperty("java.class.path").split(":"))
+        final Set<Path> classPaths = Stream.of(System.getProperty("java.class.path").split(File.pathSeparator))
                 .map(Paths::get)
                 .collect(Collectors.toSet());
 
