@@ -7,6 +7,7 @@ import com.sebastian_daschner.jaxrs_analyzer.model.results.MethodResult;
 import com.sun.javadoc.ClassDoc;
 import com.sun.javadoc.MethodDoc;
 
+import java.io.File;
 import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -60,7 +61,7 @@ public class JavaDocAnalyzer {
     }
 
     private String joinPaths(final Set<Path> projectSourcePaths) {
-        return projectSourcePaths.stream().map(Path::toString).collect(Collectors.joining(":"));
+        return projectSourcePaths.stream().map(Path::toString).collect(Collectors.joining(File.pathSeparator));
     }
 
     private void combineResults(final Set<ClassResult> classResults) {
