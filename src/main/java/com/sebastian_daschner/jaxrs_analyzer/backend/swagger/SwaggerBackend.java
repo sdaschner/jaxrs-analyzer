@@ -194,6 +194,9 @@ public class SwaggerBackend implements Backend {
                         if (!StringUtils.isBlank(e.getDescription())) {
                             paramBuilder.add("description", e.getDescription());
                         }
+                        if (!StringUtils.isBlank(e.getDefaultValue())) {
+                            paramBuilder.add("default", e.getDefaultValue());
+                        }
                         builder.add(paramBuilder);
                     }
                 });
