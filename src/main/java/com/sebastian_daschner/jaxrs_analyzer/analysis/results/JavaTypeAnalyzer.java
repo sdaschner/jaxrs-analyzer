@@ -16,6 +16,8 @@
 
 package com.sebastian_daschner.jaxrs_analyzer.analysis.results;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreType;
 import com.sebastian_daschner.jaxrs_analyzer.model.Types;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeIdentifier;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeRepresentation;
@@ -45,6 +47,7 @@ import static com.sebastian_daschner.jaxrs_analyzer.model.Types.COLLECTION;
 class JavaTypeAnalyzer {
 
     private final static String[] NAMES_TO_IGNORE = {"getClass"};
+    private static Set<String> ignoredFieldNames = new HashSet<>();
 
     /**
      * The type representation storage where all analyzed types have to be added. This will be created by the caller.
@@ -102,6 +105,7 @@ class JavaTypeAnalyzer {
         final XmlAccessType value = getXmlAccessType(clazz);
 
         // TODO analyze & test annotation inheritance
+        ignoredFieldNames.clear();
         final List<Field> relevantFields = Stream.of(clazz.getDeclaredFields()).filter(f -> isRelevant(f, value)).collect(Collectors.toList());
         final List<Method> relevantGetters = Stream.of(clazz.getDeclaredMethods()).filter(m -> isRelevant(m, value)).collect(Collectors.toList());
 
@@ -135,6 +139,11 @@ class JavaTypeAnalyzer {
         if (field.isSynthetic())
             return false;
 
+        if(isAnnotationPresent(field,JsonIgnore.class) || isAnnotationPresent(field.getType(), JsonIgnoreType.class) || isAnnotationPresent(field.getDeclaringClass(), JsonIgnoreType.class)){
+            ignoredFieldNames.add(field.getName().toLowerCase());
+            return false;
+        }
+
         if (isAnnotationPresent(field, XmlElement.class))
             return true;
 
@@ -149,6 +158,12 @@ class JavaTypeAnalyzer {
         return false;
     }
 
+
+    private static String extractFieldName(Method method) {
+        return method.getName().startsWith("get") ? method.getName().substring(3):method.getName();
+
+    }
+
     /**
      * Checks if the method is public and non-static and that the method is a Getter. Does not allow methods with ignored names.
      * Does also not take methods annotated with {@link XmlTransient}
@@ -159,6 +174,10 @@ class JavaTypeAnalyzer {
     private static boolean isRelevant(final Method method, final XmlAccessType accessType) {
         if (method.isSynthetic() || !isGetter(method))
             return false;
+
+        if(isAnnotationPresent(method, JsonIgnore.class) || ignoredFieldNames.contains(extractFieldName(method).toLowerCase()) || isAnnotationPresent(method.getReturnType(), JsonIgnoreType.class) || isAnnotationPresent(method.getDeclaringClass(), JsonIgnoreType.class)){
+            return false;
+        }
 
         if (isAnnotationPresent(method, XmlElement.class))
             return true;
