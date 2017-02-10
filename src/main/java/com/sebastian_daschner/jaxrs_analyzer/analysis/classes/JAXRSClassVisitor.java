@@ -145,7 +145,7 @@ public class JAXRSClassVisitor extends ClassVisitor {
     private void visitJAXRSSuperMethod(Method method, MethodResult methodResult) {
         try {
 
-            final ClassReader classReader = new ClassReader(method.getDeclaringClass().getCanonicalName());
+            final ClassReader classReader = new ContextClassReader(method.getDeclaringClass().getCanonicalName());
             final ClassVisitor visitor = new JAXRSAnnotatedSuperMethodClassVisitor(methodResult, method);
 
             classReader.accept(visitor, ClassReader.EXPAND_FRAMES);

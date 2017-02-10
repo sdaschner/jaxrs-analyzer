@@ -1,12 +1,12 @@
 package com.sebastian_daschner.jaxrs_analyzer.analysis.bytecode;
 
 import com.sebastian_daschner.jaxrs_analyzer.analysis.JobRegistry;
+import com.sebastian_daschner.jaxrs_analyzer.analysis.classes.ContextClassReader;
 import com.sebastian_daschner.jaxrs_analyzer.analysis.classes.ProjectMethodClassVisitor;
 import com.sebastian_daschner.jaxrs_analyzer.model.JavaUtils;
 import com.sebastian_daschner.jaxrs_analyzer.model.methods.MethodIdentifier;
 import com.sebastian_daschner.jaxrs_analyzer.model.results.ClassResult;
 import com.sebastian_daschner.jaxrs_analyzer.model.results.MethodResult;
-import net.jcip.annotations.NotThreadSafe;
 import org.junit.AfterClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -39,7 +39,6 @@ public class SubResourceLocatorMethodContentAnalyzerTest {
     private final Set<String> expectedClassNames;
     private final JobRegistry jobRegistry;
     private String signature;
-
 
 
     public SubResourceLocatorMethodContentAnalyzerTest(final String testClassSimpleName, final String testClassName, final String signature, final Set<String> expectedClassNames)
@@ -77,7 +76,7 @@ public class SubResourceLocatorMethodContentAnalyzerTest {
     @Test
     public void test() throws IOException {
         try {
-            final ClassReader classReader = new ClassReader(testClassName);
+            final ClassReader classReader = new ContextClassReader(testClassName);
 
             final MethodResult methodResult = new MethodResult();
             final ClassResult parentResource = new ClassResult();

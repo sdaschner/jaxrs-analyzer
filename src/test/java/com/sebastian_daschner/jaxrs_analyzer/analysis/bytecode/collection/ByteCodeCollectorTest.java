@@ -16,6 +16,7 @@
 
 package com.sebastian_daschner.jaxrs_analyzer.analysis.bytecode.collection;
 
+import com.sebastian_daschner.jaxrs_analyzer.analysis.classes.ContextClassReader;
 import com.sebastian_daschner.jaxrs_analyzer.analysis.classes.ProjectMethodClassVisitor;
 import com.sebastian_daschner.jaxrs_analyzer.analysis.utils.TestClassUtils;
 import com.sebastian_daschner.jaxrs_analyzer.model.JavaUtils;
@@ -75,7 +76,7 @@ public class ByteCodeCollectorTest {
         // round trip to find the correct test method
         final Method method = Stream.of(JavaUtils.loadClassFromName(testClass).getDeclaredMethods()).filter(m -> m.getName().equals("method")).findAny().orElseThrow(NoSuchElementException::new);
 
-        final ClassReader classReader = new ClassReader(testClass);
+        final ClassReader classReader = new ContextClassReader(testClass);
         final MethodResult methodResult = new MethodResult();
         final ProjectMethodClassVisitor visitor = new ProjectMethodClassVisitor(methodResult, of(testClass, "method", Type.getMethodDescriptor(method), false));
         classReader.accept(visitor, ClassReader.EXPAND_FRAMES);

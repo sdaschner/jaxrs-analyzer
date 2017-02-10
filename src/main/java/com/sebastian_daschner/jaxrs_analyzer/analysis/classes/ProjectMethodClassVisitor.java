@@ -52,7 +52,7 @@ public class ProjectMethodClassVisitor extends ClassVisitor {
         // if method hasn't been found it may be on a super class (invoke_virtual)
         if (!methodFound && !superName.equals(Types.CLASS_OBJECT)) {
             try {
-                final ClassReader classReader = new ClassReader(superName);
+                final ClassReader classReader = new ContextClassReader(superName);
                 final ClassVisitor visitor = new ProjectMethodClassVisitor(methodResult, identifier);
 
                 classReader.accept(visitor, ClassReader.EXPAND_FRAMES);

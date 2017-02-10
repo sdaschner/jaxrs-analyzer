@@ -17,6 +17,7 @@
 package com.sebastian_daschner.jaxrs_analyzer.model;
 
 import com.sebastian_daschner.jaxrs_analyzer.LogProvider;
+import com.sebastian_daschner.jaxrs_analyzer.analysis.classes.ContextClassReader;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.signature.SignatureReader;
 import org.objectweb.asm.util.TraceSignatureVisitor;
@@ -371,7 +372,7 @@ public final class JavaUtils {
 
         // TODO test for variable types
 
-        ClassLoader classLoader = JavaUtils.class.getClassLoader();
+        ClassLoader classLoader = ContextClassReader.getClassLoader();
         try {
             return classLoader.loadClass(className.replace('/', '.'));
         } catch (ClassNotFoundException e) {

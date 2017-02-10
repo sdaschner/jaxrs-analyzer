@@ -18,6 +18,7 @@ package com.sebastian_daschner.jaxrs_analyzer.analysis;
 
 import com.sebastian_daschner.jaxrs_analyzer.LogProvider;
 import com.sebastian_daschner.jaxrs_analyzer.analysis.bytecode.BytecodeAnalyzer;
+import com.sebastian_daschner.jaxrs_analyzer.analysis.classes.ContextClassReader;
 import com.sebastian_daschner.jaxrs_analyzer.analysis.classes.JAXRSClassVisitor;
 import com.sebastian_daschner.jaxrs_analyzer.analysis.javadoc.JavaDocAnalyzer;
 import com.sebastian_daschner.jaxrs_analyzer.analysis.results.ResultInterpreter;
@@ -65,7 +66,6 @@ public class ProjectAnalyzer {
     private final ResultInterpreter resultInterpreter = new ResultInterpreter();
     private final BytecodeAnalyzer bytecodeAnalyzer = new BytecodeAnalyzer();
     private final JavaDocAnalyzer javaDocAnalyzer = new JavaDocAnalyzer();
-    private final URLClassLoader urlClassLoader = (URLClassLoader) ClassLoader.getSystemClassLoader();
 
     /**
      * Creates a project analyzer with given class path locations where to search for classes.
@@ -74,7 +74,9 @@ public class ProjectAnalyzer {
      */
     public ProjectAnalyzer(final Set<Path> classPaths) {
         classPaths.forEach(this::addToClassPool);
-        addToClassPool(Paths.get(System.getProperty("java.home"), "..", "lib", "tools.jar"));
+        final Path lib = Paths.get(System.getProperty("java.home"), "..", "lib", "tools.jar");
+        addToClassPool(lib);
+        addToSystemClassLoader(lib);
     }
 
     /**
@@ -115,7 +117,7 @@ public class ProjectAnalyzer {
 
     private boolean isJAXRSRootResource(String className) {
         try {
-            final Class<?> clazz = urlClassLoader.loadClass(className);
+            final Class<?> clazz = ContextClassReader.getClassLoader().loadClass(className);
             return isAnnotationPresent(clazz, javax.ws.rs.Path.class) || isAnnotationPresent(clazz, ApplicationPath.class);
         } catch (ClassNotFoundException e) {
             LogProvider.error("The class " + className + " could not be loaded!");
@@ -126,7 +128,7 @@ public class ProjectAnalyzer {
 
     private void analyzeClass(final String className, ClassResult classResult) {
         try {
-            final ClassReader classReader = new ClassReader(className);
+            final ClassReader classReader = new ContextClassReader(className);
             final ClassVisitor visitor = new JAXRSClassVisitor(classResult);
 
             classReader.accept(visitor, ClassReader.EXPAND_FRAMES);
@@ -146,9 +148,17 @@ public class ProjectAnalyzer {
             throw new IllegalArgumentException("The location '" + location + "' does not exist!");
         classPool.add(location);
         try {
+            ContextClassReader.addClassPath(location.toUri().toURL());
+        } catch (Exception e) {
+            throw new IllegalArgumentException("The location '" + location + "' could not be loaded to the class path!", e);
+        }
+    }
+
+    private void addToSystemClassLoader(final Path location) {
+        try {
             final Method method = URLClassLoader.class.getDeclaredMethod("addURL", URL.class);
             method.setAccessible(true);
-            method.invoke(urlClassLoader, location.toUri().toURL());
+            method.invoke(ClassLoader.getSystemClassLoader(), location.toUri().toURL());
         } catch (Exception e) {
             throw new IllegalArgumentException("The location '" + location + "' could not be loaded to the class path!", e);
         }

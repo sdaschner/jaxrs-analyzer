@@ -16,6 +16,7 @@
 
 package com.sebastian_daschner.jaxrs_analyzer.analysis.bytecode.reduction;
 
+import com.sebastian_daschner.jaxrs_analyzer.analysis.classes.ContextClassReader;
 import com.sebastian_daschner.jaxrs_analyzer.analysis.classes.ProjectMethodClassVisitor;
 import com.sebastian_daschner.jaxrs_analyzer.analysis.utils.TestClassUtils;
 import com.sebastian_daschner.jaxrs_analyzer.model.JavaUtils;
@@ -97,7 +98,7 @@ public class RelevantInstructionReducerTest {
             final String className = method.getDeclaringClass().getCanonicalName().replace('.', '/');
             final MethodResult methodResult = new MethodResult();
             final ProjectMethodClassVisitor visitor = new ProjectMethodClassVisitor(methodResult, of(className, method.getName(), Type.getMethodDescriptor(method), false));
-            new ClassReader(className).accept(visitor, ClassReader.EXPAND_FRAMES);
+            new ContextClassReader(className).accept(visitor, ClassReader.EXPAND_FRAMES);
 
             return methodResult.getInstructions();
         } catch (IOException e) {

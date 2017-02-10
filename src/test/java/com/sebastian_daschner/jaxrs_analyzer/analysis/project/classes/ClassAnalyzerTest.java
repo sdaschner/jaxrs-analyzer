@@ -18,6 +18,7 @@ package com.sebastian_daschner.jaxrs_analyzer.analysis.project.classes;
 
 
 import com.sebastian_daschner.jaxrs_analyzer.analysis.bytecode.BytecodeAnalyzer;
+import com.sebastian_daschner.jaxrs_analyzer.analysis.classes.ContextClassReader;
 import com.sebastian_daschner.jaxrs_analyzer.analysis.classes.JAXRSClassVisitor;
 import com.sebastian_daschner.jaxrs_analyzer.analysis.utils.TestClassUtils;
 import com.sebastian_daschner.jaxrs_analyzer.model.JavaUtils;
@@ -75,7 +76,7 @@ public class ClassAnalyzerTest {
 
     @Test
     public void test() throws IOException {
-        final ClassReader classReader = new ClassReader(testClass);
+        final ClassReader classReader = new ContextClassReader(testClass);
         final ClassResult actualResult = new ClassResult();
         final ClassVisitor visitor = new JAXRSClassVisitor(actualResult);
         classReader.accept(visitor, ClassReader.EXPAND_FRAMES);

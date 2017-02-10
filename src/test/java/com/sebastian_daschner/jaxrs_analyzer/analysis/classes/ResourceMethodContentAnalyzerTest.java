@@ -86,7 +86,7 @@ public class ResourceMethodContentAnalyzerTest {
     @Test
     public void test() throws IOException {
         try {
-            final ClassReader classReader = new ClassReader(testClassName);
+            final ClassReader classReader = new ContextClassReader(testClassName);
             final ClassResult classResult = new ClassResult();
 
             // only hook up to desired method
