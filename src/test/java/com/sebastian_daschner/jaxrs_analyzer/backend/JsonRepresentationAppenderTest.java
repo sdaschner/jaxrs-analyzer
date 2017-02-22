@@ -199,6 +199,58 @@ public class JsonRepresentationAppenderTest {
         assertThat(builder.toString(), is("{\"abc\":\"string\",\"date\":{\"abc\":\"string\",\"model\":{},\"world\":0},\"hello\":\"string\",\"object\":{\"abc\":\"string\",\"hello\":\"string\",\"model\":{},\"world\":0},\"world\":0}"));
     }
 
+    @Test
+    public void testVisitRecursiveType() {
+        final TypeIdentifier modelIdentifier = TypeIdentifier.ofType("com.sebastian_daschner.test.Model");
+
+        final Map<String, TypeIdentifier> properties = new HashMap<>();
+        properties.put("world", INT_IDENTIFIER);
+        properties.put("hello", STRING_IDENTIFIER);
+        properties.put("abc", STRING_IDENTIFIER);
+        properties.put("model", modelIdentifier);
+        final TypeRepresentation modelRepresentation = TypeRepresentation.ofConcrete(modelIdentifier, properties);
+        representations.put(modelIdentifier, modelRepresentation);
+
+        modelRepresentation.accept(cut);
+        assertThat(builder.toString(), is("{" +
+                "\"abc\":\"string\"," +
+                "\"hello\":\"string\"," +
+                "\"model\":{}," +
+                "\"world\":0" +
+                "}"));
+    }
+
+    @Test
+    public void testVisitCyclicRecursiveType() {
+        final TypeIdentifier firstModelIdentifier = TypeIdentifier.ofType("com.sebastian_daschner.test.first.Model");
+        final TypeIdentifier secondModelIdentifier = TypeIdentifier.ofType("com.sebastian_daschner.test.second.Model");
+
+        Map<String, TypeIdentifier> properties = new HashMap<>();
+        properties.put("world", INT_IDENTIFIER);
+        properties.put("model", secondModelIdentifier);
+        final TypeRepresentation firstModelRepresentation = TypeRepresentation.ofConcrete(firstModelIdentifier, properties);
+        representations.put(firstModelIdentifier, firstModelRepresentation);
+
+        properties = new HashMap<>();
+        properties.put("hello", STRING_IDENTIFIER);
+        properties.put("model", firstModelIdentifier);
+        final TypeRepresentation secondModelRepresentation = TypeRepresentation.ofConcrete(secondModelIdentifier, properties);
+        representations.put(secondModelIdentifier, secondModelRepresentation);
+
+        firstModelRepresentation.accept(cut);
+        assertThat(builder.toString(), is("{" +
+                "\"model\":{\"hello\":\"string\",\"model\":{}}," +
+                "\"world\":0" +
+                "}"));
+
+        clear(builder);
+        secondModelRepresentation.accept(cut);
+        assertThat(builder.toString(), is("{" +
+                "\"hello\":\"string\"," +
+                "\"model\":{\"model\":{},\"world\":0}" +
+                "}"));
+    }
+
     private static void clear(final StringBuilder builder) {
         builder.delete(0, builder.length());
     }
