@@ -4,6 +4,7 @@ Sebastian Daschner
 // new versions are placed on the top
 
 == v0.13
+- Improved class loading functionality while analyzing
 - Support empty domain (https://github.com/sdaschner/jaxrs-analyzer/issues/42[#42^])
 - Output dir is now editable in maven plugin (https://github.com/sdaschner/jaxrs-analyzer-maven-plugin/issues/13[#13^])
 - Ignore properties in representations via Jackson annotations (https://github.com/sdaschner/jaxrs-analyzer/issues/87[#87^])
