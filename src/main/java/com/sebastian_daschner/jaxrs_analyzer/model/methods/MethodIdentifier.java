@@ -100,11 +100,13 @@ public class MethodIdentifier {
         if (parameters.equals(that.parameters))
             return true;
 
-        // fallback if signature matches after type erasure -> everything matches except signature
-        if (parameters.size() == that.parameters.size() && returnType.equals(that.returnType)) {
-            final List<String> types = parameters.stream().map(JavaUtils::toClassName).collect(Collectors.toList());
-            final List<String> thatTypes = that.parameters.stream().map(JavaUtils::toClassName).collect(Collectors.toList());
-            return types.equals(thatTypes);
+        // fallback if signature matches after type erasure
+        if (parameters.size() == that.parameters.size()) {
+            final List<String> erasedTypes = parameters.stream().map(JavaUtils::toClassName).collect(Collectors.toList());
+            final List<String> erasedThatTypes = that.parameters.stream().map(JavaUtils::toClassName).collect(Collectors.toList());
+            final String erasedReturnType = JavaUtils.toClassName(returnType);
+            final String erasedThatReturnType = JavaUtils.toClassName(that.returnType);
+            return erasedTypes.equals(erasedThatTypes) && erasedReturnType.equals(erasedThatReturnType);
         }
 
         return false;
