@@ -110,7 +110,7 @@ final class PathNormalizer {
         char current = 0;
         char last;
 
-        while (index < builder.length()) {
+        while ((index > -1) && (index < builder.length())) {
             last = current;
             current = builder.charAt(index);
 
@@ -130,13 +130,16 @@ final class PathNormalizer {
                     }
                     break;
             }
+
             if ((index == 0 || index == builder.length() - 1) && current == '/') {
                 builder.deleteCharAt(index);
-                if (index == builder.length())
+                if (index == builder.length()) {
                     // check again for path end
                     index--;
-            } else
+                }
+            } else {
                 index++;
+            }
         }
 
         return builder.toString();
