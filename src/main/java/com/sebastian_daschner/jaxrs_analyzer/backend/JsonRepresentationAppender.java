@@ -34,7 +34,6 @@ class JsonRepresentationAppender implements TypeRepresentationVisitor {
     private final StringBuilder builder;
     private final Map<TypeIdentifier, TypeRepresentation> representations;
 
-    private int collectionDepth = 0;
     private Set<TypeIdentifier> visitedTypes = new HashSet<>();
 
     JsonRepresentationAppender(final StringBuilder builder, final Map<TypeIdentifier, TypeRepresentation> representations) {
@@ -64,17 +63,16 @@ class JsonRepresentationAppender implements TypeRepresentationVisitor {
             visitedTypes.remove(representation.getIdentifier());
             builder.deleteCharAt(builder.length() - 1).append('}');
         }
-
-        if (collectionDepth > 0) {
-            builder.append(new String(new char[collectionDepth]).replace('\0', ']'));
-            collectionDepth = 0;
-        }
     }
 
     @Override
-    public void visit(TypeRepresentation.CollectionTypeRepresentation representation) {
+    public void visitStart(TypeRepresentation.CollectionTypeRepresentation representation) {
         builder.append('[');
-        collectionDepth++;
+    }
+
+    @Override
+    public void visitEnd(TypeRepresentation.CollectionTypeRepresentation representation) {
+        builder.append(']');
     }
 
     @Override

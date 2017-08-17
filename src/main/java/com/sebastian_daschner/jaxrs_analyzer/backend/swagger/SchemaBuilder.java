@@ -89,7 +89,13 @@ class SchemaBuilder {
             }
 
             @Override
-            public void visit(final TypeRepresentation.CollectionTypeRepresentation representation) {
+            public void visitStart(final TypeRepresentation.CollectionTypeRepresentation representation) {
+                builder.add("type", "array");
+                inCollection = true;
+            }
+
+            @Override
+            public void visitEnd(final TypeRepresentation.CollectionTypeRepresentation representation) {
                 builder.add("type", "array");
                 inCollection = true;
             }
