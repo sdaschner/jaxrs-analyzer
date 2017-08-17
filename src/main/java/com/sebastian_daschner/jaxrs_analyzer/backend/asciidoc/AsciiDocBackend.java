@@ -43,12 +43,12 @@ public class AsciiDocBackend extends StringBackend {
             builder.append(resourceMethod.getRequestMediaTypes().isEmpty() ? TYPE_WILDCARD : toString(resourceMethod.getRequestMediaTypes()));
             builder.append("` + \n");
 
-            builder.append("*Request Body*: (").append(toTypeOrCollection(resourceMethod.getRequestBody())).append(") + \n");
-            Optional.ofNullable(resources.getTypeRepresentations().get(resourceMethod.getRequestBody())).ifPresent(r -> {
-                builder.append('`');
-                builder.append(doVisit(r));
-                builder.append("` + \n");
-            });
+            builder.append("*Request Body*: (").append(toTypeOrCollection(resourceMethod.getRequestBody())).append(")");
+            Optional.ofNullable(resources.getTypeRepresentations().get(resourceMethod.getRequestBody())).ifPresent(
+                    this::generateSample);
+            if (prettify) {
+                builder.append("\n");
+            }
         } else {
             builder.append("_No body_ + \n");
         }
@@ -93,16 +93,28 @@ public class AsciiDocBackend extends StringBackend {
             response.getHeaders().forEach(h -> builder.append("*Header*: `").append(h).append("` + \n"));
 
             if (response.getResponseBody() != null) {
-                builder.append("*Response Body*: ").append('(').append(toTypeOrCollection(response.getResponseBody())).append(") + \n");
-                Optional.ofNullable(resources.getTypeRepresentations().get(response.getResponseBody())).ifPresent(r -> {
-                    builder.append('`');
-                    builder.append(doVisit(r));
-                    builder.append("` + \n");
-                });
+                builder.append("*Response Body*: ").append('(').append(toTypeOrCollection(response.getResponseBody())).append(")");
+                Optional.ofNullable(resources.getTypeRepresentations().get(response.getResponseBody())).ifPresent(
+                        this::generateSample);
+                builder.append("\n");
             }
 
             builder.append('\n');
         });
+    }
+
+    private void generateSample(TypeRepresentation r) {
+        if (!prettify) {
+            builder.append(" + \n`");
+        } else {
+            builder.append("\n\n[source,javascript]\n----\n");
+        }
+        builder.append(doVisit(r));
+        if (!prettify) {
+            builder.append("` + \n");
+        } else {
+            builder.append("\n----\n\n");
+        }
     }
 
     private String toTypeOrCollection(final TypeIdentifier type) {

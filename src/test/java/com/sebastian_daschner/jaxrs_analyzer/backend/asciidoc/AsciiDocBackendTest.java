@@ -75,7 +75,7 @@ public class AsciiDocBackendTest {
                         "\n" +
                         "==== `200 OK`\n" +
                         "*Header*: `Location` + \n" +
-                        "*Response Body*: (`java.lang.String`) + \n\n", false);
+                        "*Response Body*: (`java.lang.String`)\n\n", false);
 
         add(data, getRestRes1String,
                 "= REST resources of project name\n" +
@@ -91,7 +91,7 @@ public class AsciiDocBackendTest {
                         "\n" +
                         "==== `200 OK`\n" +
                         "*Header*: `Location` + \n" +
-                        "*Response Body*: (`java.lang.String`) + \n\n", true);
+                        "*Response Body*: (`java.lang.String`)\n\n", true);
 
         identifier = TypeIdentifier.ofDynamic();
         properties.put("key", stringIdentifier);
@@ -120,7 +120,7 @@ public class AsciiDocBackendTest {
                         "\n" +
                         "==== `200 OK`\n" +
                         "*Response Body*: (`javax.json.Json`) + \n" +
-                        "`{\"another\":0,\"key\":\"string\"}` + \n\n", false);
+                        "`{\"another\":0,\"key\":\"string\"}` + \n\n\n", false);
         add(data, getRestRes1Json,
                 "= REST resources of project name\n" +
                         "1.0\n" +
@@ -133,9 +133,7 @@ public class AsciiDocBackendTest {
                         "=== Response\n" +
                         "*Content-Type*: `\\*/*`\n" +
                         "\n" +
-                        "==== `200 OK`\n" +
-                        "*Response Body*: (`javax.json.Json`) + \n" +
-                        "`{\n" + "    \"another\":0,\n" + "    \"key\":\"string\"\n" + "}` + \n\n", true);
+                        "==== `200 OK`\n" + "*Response Body*: (`javax.json.Json`)\n\n[source,javascript]\n" + "----\n" + "{\n" + "    \"another\":0,\n" + "    \"key\":\"string\"\n" + "}\n" + "----\n\n\n\n", true);
 
         identifier = TypeIdentifier.ofDynamic();
         properties = new HashMap<>();
@@ -158,7 +156,7 @@ public class AsciiDocBackendTest {
                         "\n" +
                         "==== `200 OK`\n" +
                         "*Response Body*: (`javax.json.Json`) + \n" +
-                        "`[{\"another\":0,\"key\":\"string\"}]` + \n\n", false);
+                        "`[{\"another\":0,\"key\":\"string\"}]` + \n\n\n", false);
 
         identifier = TypeIdentifier.ofDynamic();
         add(data, ResourcesBuilder.withBase("rest")
@@ -178,7 +176,7 @@ public class AsciiDocBackendTest {
                         "\n" +
                         "==== `200 OK`\n" +
                         "*Response Body*: (`javax.json.Json`) + \n" +
-                        "`[\"string\"]` + \n\n", false);
+                        "`[\"string\"]` + \n\n\n", false);
 
         identifier = TypeIdentifier.ofDynamic();
         properties = new HashMap<>();
@@ -200,7 +198,7 @@ public class AsciiDocBackendTest {
                         "\n" +
                         "==== `200 OK`\n" +
                         "*Response Body*: (`javax.json.Json`) + \n" +
-                        "`[{\"key\":\"string\"}]` + \n\n", false);
+                        "`[{\"key\":\"string\"}]` + \n\n\n", false);
 
         properties = new HashMap<>();
         properties.put("name", stringIdentifier);
@@ -222,7 +220,7 @@ public class AsciiDocBackendTest {
                         "\n" +
                         "==== `200 OK`\n" +
                         "*Response Body*: (`com.sebastian_daschner.test.Model`) + \n" +
-                        "`{\"name\":\"string\",\"value\":0}` + \n\n", false);
+                        "`{\"name\":\"string\",\"value\":0}` + \n\n\n", false);
 
         identifier = TypeIdentifier.ofType("Ljava/util/List<Lcom/sebastian_daschner/test/Model;>;");
         properties = new HashMap<>();
@@ -245,7 +243,7 @@ public class AsciiDocBackendTest {
                         "\n" +
                         "==== `200 OK`\n" +
                         "*Response Body*: (Collection of `com.sebastian_daschner.test.Model`) + \n" +
-                        "`[{\"name\":\"string\",\"value\":0}]` + \n\n", false);
+                        "`[{\"name\":\"string\",\"value\":0}]` + \n\n\n", false);
 
         add(data, ResourcesBuilder.withBase("rest")
                         .andTypeRepresentation(identifier, TypeRepresentation.ofCollection(identifier, TypeRepresentation.ofConcrete(MODEL_IDENTIFIER, properties)))
@@ -317,7 +315,7 @@ public class AsciiDocBackendTest {
                     "\n" +
                     "==== `200 OK`\n" +
                     "*Header*: `Location` + \n" +
-                "*Response Body*: (`java.lang.String`) + \n\n", false);
+                "*Response Body*: (`java.lang.String`)\n\n", false);
        return data;
     }
 
