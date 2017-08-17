@@ -79,11 +79,10 @@ class JsonRepresentationAppender implements TypeRepresentationVisitor {
 
     @Override
     public void visit(final TypeRepresentation.EnumTypeRepresentation representation) {
-        final String values = representation.getEnumValues().stream().sorted()
-                .map(s -> '"' + s + '"')
-                .collect(Collectors.joining("|"));
+        final String values = '"' + representation.getEnumValues().stream().sorted()
+                .collect(Collectors.joining("|")) + '"';
 
-        builder.append(values.isEmpty() ? "\"string\"" : values);
+        builder.append(values.length() == 2 ? "\"string\"" : values);
     }
 
     private static String toPrimitiveType(final TypeIdentifier value) {
