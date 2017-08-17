@@ -24,17 +24,19 @@ public class AsciiDocBackendTest {
     private final Backend cut;
     private final Resources resources;
     private final String expectedOutput;
+    private final boolean pretty;
 
-    public AsciiDocBackendTest(final Resources resources, final String expectedOutput) {
+    public AsciiDocBackendTest(final Resources resources, final String expectedOutput, final boolean pretty) {
         cut = new AsciiDocBackend();
         this.resources = resources;
         this.expectedOutput = expectedOutput;
+        this.pretty = pretty;
     }
 
     @Test
     public void test() {
         final Project project = new Project("project name", "1.0", resources);
-        final String actualOutput = new String(cut.render(project));
+        final String actualOutput = new String(cut.render(project, pretty));
 
         assertEquals(expectedOutput, actualOutput);
     }
@@ -48,8 +50,18 @@ public class AsciiDocBackendTest {
         TypeIdentifier identifier;
         Map<String, TypeIdentifier> properties = new HashMap<>();
 
-        add(data, ResourcesBuilder.withBase("rest").andResource("res1", ResourceMethodBuilder.withMethod(HttpMethod.GET)
-                        .andResponse(200, ResponseBuilder.withResponseBody(TypeIdentifier.ofType(Types.STRING)).andHeaders("Location").build()).build()).build(),
+        final Resources getRestRes1String = ResourcesBuilder.withBase("rest")
+                                                .andResource("res1", ResourceMethodBuilder.withMethod(HttpMethod.GET)
+                                                                                          .andResponse(200,
+                                                                                                  ResponseBuilder.withResponseBody(
+                                                                                                          TypeIdentifier.ofType(
+                                                                                                                  Types.STRING))
+                                                                                                                 .andHeaders(
+                                                                                                                         "Location")
+                                                                                                                 .build())
+                                                                                          .build())
+                                                .build();
+        add(data, getRestRes1String,
                 "= REST resources of project name\n" +
                         "1.0\n" +
                         "\n" +
@@ -63,15 +75,38 @@ public class AsciiDocBackendTest {
                         "\n" +
                         "==== `200 OK`\n" +
                         "*Header*: `Location` + \n" +
-                        "*Response Body*: (`java.lang.String`) + \n\n");
+                        "*Response Body*: (`java.lang.String`) + \n\n", false);
+
+        add(data, getRestRes1String,
+                "= REST resources of project name\n" +
+                        "1.0\n" +
+                        "\n" +
+                        "== `GET rest/res1`\n" +
+                        "\n" +
+                        "=== Request\n" +
+                        "_No body_ + \n" +
+                        "\n" +
+                        "=== Response\n" +
+                        "*Content-Type*: `\\*/*`\n" +
+                        "\n" +
+                        "==== `200 OK`\n" +
+                        "*Header*: `Location` + \n" +
+                        "*Response Body*: (`java.lang.String`) + \n\n", true);
 
         identifier = TypeIdentifier.ofDynamic();
         properties.put("key", stringIdentifier);
         properties.put("another", intIdentifier);
-        add(data, ResourcesBuilder.withBase("rest")
-                        .andTypeRepresentation(identifier, TypeRepresentation.ofConcrete(identifier, properties))
-                        .andResource("res1", ResourceMethodBuilder.withMethod(HttpMethod.GET)
-                                .andResponse(200, ResponseBuilder.withResponseBody(identifier).build()).build()).build(),
+        final Resources getRestRes1Json = ResourcesBuilder.withBase("rest")
+                                                .andTypeRepresentation(identifier,
+                                                        TypeRepresentation.ofConcrete(identifier, properties))
+                                                .andResource("res1", ResourceMethodBuilder.withMethod(HttpMethod.GET)
+                                                                                          .andResponse(200,
+                                                                                                  ResponseBuilder.withResponseBody(
+                                                                                                          identifier)
+                                                                                                                 .build())
+                                                                                          .build())
+                                                .build();
+        add(data, getRestRes1Json,
                 "= REST resources of project name\n" +
                         "1.0\n" +
                         "\n" +
@@ -85,7 +120,22 @@ public class AsciiDocBackendTest {
                         "\n" +
                         "==== `200 OK`\n" +
                         "*Response Body*: (`javax.json.Json`) + \n" +
-                        "`{\"another\":0,\"key\":\"string\"}` + \n\n");
+                        "`{\"another\":0,\"key\":\"string\"}` + \n\n", false);
+        add(data, getRestRes1Json,
+                "= REST resources of project name\n" +
+                        "1.0\n" +
+                        "\n" +
+                        "== `GET rest/res1`\n" +
+                        "\n" +
+                        "=== Request\n" +
+                        "_No body_ + \n" +
+                        "\n" +
+                        "=== Response\n" +
+                        "*Content-Type*: `\\*/*`\n" +
+                        "\n" +
+                        "==== `200 OK`\n" +
+                        "*Response Body*: (`javax.json.Json`) + \n" +
+                        "`{\n" + "    \"another\":0,\n" + "    \"key\":\"string\"\n" + "}` + \n\n", true);
 
         identifier = TypeIdentifier.ofDynamic();
         properties = new HashMap<>();
@@ -108,7 +158,7 @@ public class AsciiDocBackendTest {
                         "\n" +
                         "==== `200 OK`\n" +
                         "*Response Body*: (`javax.json.Json`) + \n" +
-                        "`[{\"another\":0,\"key\":\"string\"}]` + \n\n");
+                        "`[{\"another\":0,\"key\":\"string\"}]` + \n\n", false);
 
         identifier = TypeIdentifier.ofDynamic();
         add(data, ResourcesBuilder.withBase("rest")
@@ -128,7 +178,7 @@ public class AsciiDocBackendTest {
                         "\n" +
                         "==== `200 OK`\n" +
                         "*Response Body*: (`javax.json.Json`) + \n" +
-                        "`[\"string\"]` + \n\n");
+                        "`[\"string\"]` + \n\n", false);
 
         identifier = TypeIdentifier.ofDynamic();
         properties = new HashMap<>();
@@ -150,7 +200,7 @@ public class AsciiDocBackendTest {
                         "\n" +
                         "==== `200 OK`\n" +
                         "*Response Body*: (`javax.json.Json`) + \n" +
-                        "`[{\"key\":\"string\"}]` + \n\n");
+                        "`[{\"key\":\"string\"}]` + \n\n", false);
 
         properties = new HashMap<>();
         properties.put("name", stringIdentifier);
@@ -172,7 +222,7 @@ public class AsciiDocBackendTest {
                         "\n" +
                         "==== `200 OK`\n" +
                         "*Response Body*: (`com.sebastian_daschner.test.Model`) + \n" +
-                        "`{\"name\":\"string\",\"value\":0}` + \n\n");
+                        "`{\"name\":\"string\",\"value\":0}` + \n\n", false);
 
         identifier = TypeIdentifier.ofType("Ljava/util/List<Lcom/sebastian_daschner/test/Model;>;");
         properties = new HashMap<>();
@@ -195,7 +245,7 @@ public class AsciiDocBackendTest {
                         "\n" +
                         "==== `200 OK`\n" +
                         "*Response Body*: (Collection of `com.sebastian_daschner.test.Model`) + \n" +
-                        "`[{\"name\":\"string\",\"value\":0}]` + \n\n");
+                        "`[{\"name\":\"string\",\"value\":0}]` + \n\n", false);
 
         add(data, ResourcesBuilder.withBase("rest")
                         .andTypeRepresentation(identifier, TypeRepresentation.ofCollection(identifier, TypeRepresentation.ofConcrete(MODEL_IDENTIFIER, properties)))
@@ -216,7 +266,7 @@ public class AsciiDocBackendTest {
                         "*Content-Type*: `\\*/*`\n" +
                         "\n" +
                         "==== `201 Created`\n" +
-                        "*Header*: `Location` + \n\n");
+                        "*Header*: `Location` + \n\n", false);
 
         add(data, ResourcesBuilder.withBase("rest")
                         .andTypeRepresentation(identifier, TypeRepresentation.ofCollection(identifier, TypeRepresentation.ofConcrete(MODEL_IDENTIFIER, properties)))
@@ -247,7 +297,7 @@ public class AsciiDocBackendTest {
                         "=== Response\n" +
                         "*Content-Type*: `\\*/*`\n" +
                         "\n" +
-                        "==== `200 OK`\n\n");
+                        "==== `200 OK`\n\n", false);
         // deprecated method test
         add(data, ResourcesBuilder.withBase("rest")
             .andResource("res19", ResourceMethodBuilder.withMethod(HttpMethod.GET).andDeprecated(true)
@@ -267,14 +317,16 @@ public class AsciiDocBackendTest {
                     "\n" +
                     "==== `200 OK`\n" +
                     "*Header*: `Location` + \n" +
-                "*Response Body*: (`java.lang.String`) + \n\n");
+                "*Response Body*: (`java.lang.String`) + \n\n", false);
        return data;
     }
 
-    public static void add(final Collection<Object[]> data, final Resources resources, final String output) {
-        final Object[] objects = new Object[2];
+    public static void add(final Collection<Object[]> data, final Resources resources, final String output,
+                           final boolean pretty) {
+        final Object[] objects = new Object[3];
         objects[0] = resources;
         objects[1] = output;
+        objects[2] = pretty;
         data.add(objects);
     }
 

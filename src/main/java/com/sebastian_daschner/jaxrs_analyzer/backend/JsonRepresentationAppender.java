@@ -1,16 +1,28 @@
 package com.sebastian_daschner.jaxrs_analyzer.backend;
 
-import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeIdentifier;
-import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeRepresentation;
-import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeRepresentationVisitor;
+import static com.sebastian_daschner.jaxrs_analyzer.backend.ComparatorUtils.mapKeyComparator;
+import static com.sebastian_daschner.jaxrs_analyzer.model.Types.BOOLEAN;
+import static com.sebastian_daschner.jaxrs_analyzer.model.Types.DOUBLE_TYPES;
+import static com.sebastian_daschner.jaxrs_analyzer.model.Types.INTEGER_TYPES;
+import static com.sebastian_daschner.jaxrs_analyzer.model.Types.PRIMITIVE_BOOLEAN;
+import static com.sebastian_daschner.jaxrs_analyzer.model.Types.STRING;
+import static java.util.Collections.singletonMap;
 
+import java.io.StringReader;
+import java.io.StringWriter;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static com.sebastian_daschner.jaxrs_analyzer.backend.ComparatorUtils.mapKeyComparator;
-import static com.sebastian_daschner.jaxrs_analyzer.model.Types.*;
+import javax.json.JsonReader;
+import javax.json.JsonWriter;
+import javax.json.spi.JsonProvider;
+import javax.json.stream.JsonGenerator;
+
+import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeIdentifier;
+import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeRepresentation;
+import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeRepresentationVisitor;
 
 /**
  * Adds the JSON representation of type identifiers to String builders.
@@ -90,5 +102,4 @@ class JsonRepresentationAppender implements TypeRepresentationVisitor {
 
         return "{}";
     }
-
 }
