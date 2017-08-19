@@ -1,27 +1,18 @@
 package com.sebastian_daschner.jaxrs_analyzer.backend;
 
-import com.sebastian_daschner.jaxrs_analyzer.model.rest.Project;
-import com.sebastian_daschner.jaxrs_analyzer.model.rest.ResourceMethod;
-import com.sebastian_daschner.jaxrs_analyzer.model.rest.Resources;
-import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeRepresentation;
-import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeRepresentationVisitor;
+import com.sebastian_daschner.jaxrs_analyzer.model.rest.*;
 
+import javax.json.*;
+import javax.json.spi.JsonProvider;
+import javax.json.stream.JsonGenerator;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.util.Map;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 import static java.util.Collections.singletonMap;
 import static java.util.Comparator.comparing;
-
-import javax.json.JsonArray;
-import javax.json.JsonObject;
-import javax.json.JsonReader;
-import javax.json.JsonStructure;
-import javax.json.JsonValue;
-import javax.json.JsonWriter;
-import javax.json.spi.JsonProvider;
-import javax.json.stream.JsonGenerator;
 
 /**
  * A backend that is backed by Strings (plain text).
@@ -30,6 +21,9 @@ import javax.json.stream.JsonGenerator;
  */
 public abstract class StringBackend implements Backend {
 
+    public static final String INLINE_PRETTIFY = "inlinePrettify";
+    private static final String INLINE_PRETTIFY_DEFAULT = "true";
+
     protected final Lock lock = new ReentrantLock();
     protected StringBuilder builder;
     protected Resources resources;
@@ -37,20 +31,16 @@ public abstract class StringBackend implements Backend {
     protected String projectVersion;
     protected boolean prettify;
 
-    private void initRender(final Project project, final boolean prettify) {
-        // initialize fields
-        builder = new StringBuilder();
-        resources = project.getResources();
-        projectName = project.getName();
-        projectVersion = project.getVersion();
-        this.prettify = prettify;
+    @Override
+    public void configure(final Map<String, String> config) {
+        prettify = Boolean.parseBoolean(config.getOrDefault(INLINE_PRETTIFY, INLINE_PRETTIFY_DEFAULT));
     }
 
     @Override
-    public byte[] render(final Project project, final boolean prettify) {
+    public byte[] render(final Project project) {
         lock.lock();
         try {
-            initRender(project, prettify);
+            initRender(project);
 
             final String output = renderInternal();
 
@@ -58,6 +48,14 @@ public abstract class StringBackend implements Backend {
         } finally {
             lock.unlock();
         }
+    }
+
+    private void initRender(final Project project) {
+        // initialize fields
+        builder = new StringBuilder();
+        resources = project.getResources();
+        projectName = project.getName();
+        projectVersion = project.getVersion();
     }
 
     private String renderInternal() {
@@ -113,7 +111,7 @@ public abstract class StringBackend implements Backend {
         final StringWriter out = new StringWriter();
         try (final JsonReader reader = provider.createReader(new StringReader(json));
              final JsonWriter jsonWriter = provider.createWriterFactory(singletonMap(JsonGenerator.PRETTY_PRINTING, true))
-                                                   .createWriter(out)) {
+                     .createWriter(out)) {
 
             // jsonWriter.write(reader.readValue()); // bug in RI, can switch to johnzon
             final JsonStructure read = reader.read();

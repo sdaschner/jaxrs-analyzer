@@ -16,6 +16,7 @@
 package com.sebastian_daschner.jaxrs_analyzer;
 
 import com.sebastian_daschner.jaxrs_analyzer.backend.Backend;
+import com.sebastian_daschner.jaxrs_analyzer.backend.StringBackend;
 import com.sebastian_daschner.jaxrs_analyzer.backend.swagger.SwaggerOptions;
 
 import java.io.File;
@@ -43,7 +44,6 @@ public class Main {
     private static String version = DEFAULT_VERSION;
     private static String backendType = "swagger";
     private static Path outputFileLocation;
-    private static boolean prettify;
 
     /**
      * Inspects JAX-RS projects and outputs the gathered information.
@@ -91,7 +91,7 @@ public class Main {
         final Backend backend = JAXRSAnalyzer.constructBackend(backendType);
         backend.configure(attributes);
 
-        final JAXRSAnalyzer jaxrsAnalyzer = new JAXRSAnalyzer(projectClassPaths, projectSourcePaths, classPaths, name, version, backend, outputFileLocation, prettify);
+        final JAXRSAnalyzer jaxrsAnalyzer = new JAXRSAnalyzer(projectClassPaths, projectSourcePaths, classPaths, name, version, backend, outputFileLocation);
         jaxrsAnalyzer.analyze();
     }
 
@@ -100,12 +100,6 @@ public class Main {
             for (int i = 0; i < args.length; i++) {
                 if (args[i].startsWith("-")) {
                     switch (args[i]) {
-                        case "-p":
-                            prettify = true;
-                            break;
-                        case "-np":
-                            prettify = false;
-                            break;
                         case "-b":
                             backendType = extractBackend(args[++i]);
                             break;
@@ -141,6 +135,9 @@ public class Main {
                             break;
                         case "--swaggerTagsPathOffset":
                             attributes.put(SwaggerOptions.SWAGGER_TAGS_PATH_OFFSET, args[++i]);
+                            break;
+                        case "--noInlinePrettify":
+                            attributes.put(StringBackend.INLINE_PRETTIFY, "false");
                             break;
                         case "-a":
                             addAttribute(args[++i]);
@@ -215,6 +212,7 @@ public class Main {
         System.err.println(" --swaggerSchemes <scheme>[,schemes] The Swagger schemes: http (default), https, ws, wss");
         System.err.println(" --renderSwaggerTags Enables rendering of Swagger tags (default tag will be used per default)");
         System.err.println(" --swaggerTagsPathOffset <path offset> The number at which path position the Swagger tags will be extracted (0 will be used per default)");
+        System.err.println(" --noPrettyPrint Don't pretty print inline JSON body representations (will be pretty printed per default)");
         System.err.println("\nExample: java -jar jaxrs-analyzer.jar -b swagger -n \"My Project\" -cp ~/libs/lib1.jar:~/libs/project/bin ~/project/target/classes");
         System.exit(1);
     }

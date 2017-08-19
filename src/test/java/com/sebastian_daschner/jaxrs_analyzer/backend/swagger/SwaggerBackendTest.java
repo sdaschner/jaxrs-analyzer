@@ -35,7 +35,9 @@ import java.util.LinkedList;
 import java.util.Map;
 
 import static com.sebastian_daschner.jaxrs_analyzer.analysis.results.TypeUtils.MODEL_IDENTIFIER;
+import static com.sebastian_daschner.jaxrs_analyzer.backend.StringBackend.INLINE_PRETTIFY;
 import static com.sebastian_daschner.jaxrs_analyzer.backend.swagger.SwaggerOptions.*;
+import static java.util.Collections.singletonMap;
 import static org.junit.Assert.assertEquals;
 
 @RunWith(Parameterized.class)
@@ -55,7 +57,8 @@ public class SwaggerBackendTest {
     @Test
     public void test() {
         final Project project = new Project("project name", "1.0", resources);
-        final String actualOutput = new String(cut.render(project, false));
+        cut.configure(singletonMap(INLINE_PRETTIFY, "false"));
+        final String actualOutput = new String(cut.render(project));
 
         // TODO to fix test w/ different formattings
 //            assertEquals(expectedOutput, actualOutput);
@@ -82,11 +85,11 @@ public class SwaggerBackendTest {
         add(data, ResourcesBuilder.withBase("rest")
                         .andResource("res1", ResourceMethodBuilder.withMethod(HttpMethod.GET)
                                 .andResponse(200, ResponseBuilder.withResponseBody(TypeIdentifier.ofType(Types.STRING)).andHeaders("Location").build()).build()).build(),
-                "{\"swagger\":\"2.0\",\"info\":{\"version\":\"1.0\",\"title\":\"project name\"},\"host\":\"\",\"basePath\":\"/project name/rest\",\"schemes\":[\"http\"],\"paths\":{\"/res1\":{\"get\":{\"consumes\":[],\"produces\":[],\"parameters\":[],\"responses\":{\"200\":{\"description\":\"OK\",\"headers\":{\"Location\":{\"type\":\"string\"}},\"schema\":{\"type\":\"string\"}}}}}},\"definitions\":{}}",new HashMap<>());
+                "{\"swagger\":\"2.0\",\"info\":{\"version\":\"1.0\",\"title\":\"project name\"},\"host\":\"\",\"basePath\":\"/project name/rest\",\"schemes\":[\"http\"],\"paths\":{\"/res1\":{\"get\":{\"consumes\":[],\"produces\":[],\"parameters\":[],\"responses\":{\"200\":{\"description\":\"OK\",\"headers\":{\"Location\":{\"type\":\"string\"}},\"schema\":{\"type\":\"string\"}}}}}},\"definitions\":{}}", new HashMap<>());
 
         Map<String, String> options = new HashMap<>();
         options.put(SWAGGER_SCHEMES, "https,wss");
-        options.put(DOMAIN,"example.com");
+        options.put(DOMAIN, "example.com");
         add(data, ResourcesBuilder.withBase("rest")
                         .andResource("res1", ResourceMethodBuilder.withMethod(HttpMethod.GET)
                                 .andResponse(200, ResponseBuilder.withResponseBody(TypeIdentifier.ofType(Types.STRING)).andHeaders("Location").build()).build()).build(),
@@ -236,16 +239,16 @@ public class SwaggerBackendTest {
 
         // deprecated method test
         add(data, ResourcesBuilder.withBase("rest")
-            .andResource("res19", ResourceMethodBuilder.withMethod(HttpMethod.GET).andDeprecated(true)
-                .andResponse(200, ResponseBuilder.withResponseBody(TypeIdentifier.ofType(Types.STRING)).andHeaders("Location").build()).build()).build(),
-            "{\"swagger\":\"2.0\",\"info\":{\"version\":\"1.0\",\"title\":\"project name\"},\"host\":\"\",\"basePath\":\"/project name/rest\",\"schemes\":[\"http\"],\"paths\":{\"/res19\":{\"get\":{\"consumes\":[],\"produces\":[],\"parameters\":[],\"responses\":{\"200\":{\"description\":\"OK\",\"headers\":{\"Location\":{\"type\":\"string\"}},\"schema\":{\"type\":\"string\"}}},\"deprecated\":true}}},\"definitions\":{}}",new HashMap<>());
+                        .andResource("res19", ResourceMethodBuilder.withMethod(HttpMethod.GET).andDeprecated(true)
+                                .andResponse(200, ResponseBuilder.withResponseBody(TypeIdentifier.ofType(Types.STRING)).andHeaders("Location").build()).build()).build(),
+                "{\"swagger\":\"2.0\",\"info\":{\"version\":\"1.0\",\"title\":\"project name\"},\"host\":\"\",\"basePath\":\"/project name/rest\",\"schemes\":[\"http\"],\"paths\":{\"/res19\":{\"get\":{\"consumes\":[],\"produces\":[],\"parameters\":[],\"responses\":{\"200\":{\"description\":\"OK\",\"headers\":{\"Location\":{\"type\":\"string\"}},\"schema\":{\"type\":\"string\"}}},\"deprecated\":true}}},\"definitions\":{}}", new HashMap<>());
 
         return data;
     }
 
     public static void add(final Collection<Object[]> data, final Resources resources, final String output) {
         Map<String, String> options = new HashMap<>();
-        options.put(DOMAIN,"example.com");
+        options.put(DOMAIN, "example.com");
         add(data, resources, output, options);
     }
 

@@ -46,9 +46,7 @@ public class AsciiDocBackend extends StringBackend {
             builder.append("*Request Body*: (").append(toTypeOrCollection(resourceMethod.getRequestBody())).append(")");
             Optional.ofNullable(resources.getTypeRepresentations().get(resourceMethod.getRequestBody())).ifPresent(
                     this::generateSample);
-            if (prettify) {
-                builder.append("\n");
-            }
+            builder.append("\n");
         } else {
             builder.append("_No body_ + \n");
         }
@@ -104,17 +102,9 @@ public class AsciiDocBackend extends StringBackend {
     }
 
     private void generateSample(TypeRepresentation r) {
-        if (!prettify) {
-            builder.append(" + \n`");
-        } else {
-            builder.append("\n\n[source,javascript]\n----\n");
-        }
+        builder.append("\n\n[source,javascript]\n----\n");
         builder.append(doVisit(r));
-        if (!prettify) {
-            builder.append("` + \n");
-        } else {
-            builder.append("\n----\n\n");
-        }
+        builder.append("\n----\n\n");
     }
 
     private String toTypeOrCollection(final TypeIdentifier type) {

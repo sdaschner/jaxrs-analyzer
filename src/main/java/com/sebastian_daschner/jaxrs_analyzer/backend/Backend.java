@@ -31,10 +31,9 @@ public interface Backend {
      * Renders the REST resources of the given project.
      *
      * @param project The project to render including all information and resources
-     * @param prettify should the response be prettified if possible.
      * @return The data
      */
-    byte[] render(Project project, boolean prettify);
+    byte[] render(Project project);
 
     /**
      * Returns a human readable name of the actual backend.

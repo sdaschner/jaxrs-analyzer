@@ -61,7 +61,8 @@ public class PlainTextBackend extends StringBackend {
 
             builder.append("  Request Body: ").append(toTypeOrCollection(resourceMethod.getRequestBody())).append('\n');
             Optional.ofNullable(resources.getTypeRepresentations().get(resourceMethod.getRequestBody())).ifPresent(r -> {
-                builder.append("   ");
+                if (!prettify)
+                    builder.append("   ");
                 builder.append(doVisit(r));
                 builder.append('\n');
             });
@@ -110,7 +111,8 @@ public class PlainTextBackend extends StringBackend {
             if (response.getResponseBody() != null) {
                 builder.append("   Response Body: ").append(toTypeOrCollection(response.getResponseBody())).append('\n');
                 Optional.ofNullable(resources.getTypeRepresentations().get(response.getResponseBody())).ifPresent(r -> {
-                    builder.append("    ");
+                    if (!prettify)
+                        builder.append("    ");
                     builder.append(doVisit(r));
                     builder.append('\n');
                 });

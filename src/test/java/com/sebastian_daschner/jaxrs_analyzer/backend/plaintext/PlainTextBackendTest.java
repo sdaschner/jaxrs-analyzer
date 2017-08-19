@@ -1,6 +1,7 @@
 package com.sebastian_daschner.jaxrs_analyzer.backend.plaintext;
 
 import com.sebastian_daschner.jaxrs_analyzer.backend.Backend;
+import com.sebastian_daschner.jaxrs_analyzer.backend.StringBackend;
 import com.sebastian_daschner.jaxrs_analyzer.builder.ResourceMethodBuilder;
 import com.sebastian_daschner.jaxrs_analyzer.builder.ResourcesBuilder;
 import com.sebastian_daschner.jaxrs_analyzer.builder.ResponseBuilder;
@@ -10,12 +11,11 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Map;
+import java.util.*;
 
 import static com.sebastian_daschner.jaxrs_analyzer.analysis.results.TypeUtils.MODEL_IDENTIFIER;
+import static com.sebastian_daschner.jaxrs_analyzer.backend.StringBackend.INLINE_PRETTIFY;
+import static java.util.Collections.singletonMap;
 import static org.junit.Assert.assertEquals;
 
 @RunWith(Parameterized.class)
@@ -34,7 +34,8 @@ public class PlainTextBackendTest {
     @Test
     public void test() {
         final Project project = new Project("project name", "1.0", resources);
-        final String actualOutput = new String(cut.render(project, false));
+        cut.configure(singletonMap(INLINE_PRETTIFY, "false"));
+        final String actualOutput = new String(cut.render(project));
         assertEquals(expectedOutput, actualOutput);
     }
 
