@@ -62,7 +62,7 @@ public class SwaggerBackend implements Backend {
     }
 
     @Override
-    public byte[] render(final Project project) {
+    public byte[] render(final Project project, final boolean prettify) {
         lock.lock();
         try {
             // initialize fields

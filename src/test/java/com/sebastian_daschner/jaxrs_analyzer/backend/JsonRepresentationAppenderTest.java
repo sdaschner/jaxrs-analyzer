@@ -45,7 +45,7 @@ public class JsonRepresentationAppenderTest {
     @Test
     public void testEnum() {
         TypeRepresentation.ofEnum(STRING_IDENTIFIER, "Foo", "bar").accept(cut);
-        assertThat(builder.toString(), is("\"Foo\"|\"bar\""));
+        assertThat(builder.toString(), is("\"Foo|bar\""));
     }
 
     @Test
@@ -120,7 +120,7 @@ public class JsonRepresentationAppenderTest {
         representations.put(identifier, representation);
         representations.put(enumIdentifier, enumRepresentation);
         representation.accept(cut);
-        assertThat(builder.toString(), is("{\"abc\":\"string\",\"enumeration\":\"BAR\"|\"BAZ\"|\"FOO\",\"hello\":\"string\",\"world\":0}"));
+        assertThat(builder.toString(), is("{\"abc\":\"string\",\"enumeration\":\"BAR|BAZ|FOO\",\"hello\":\"string\",\"world\":0}"));
     }
 
     @Test

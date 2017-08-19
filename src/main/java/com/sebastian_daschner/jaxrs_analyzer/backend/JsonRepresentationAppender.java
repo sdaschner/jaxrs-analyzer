@@ -1,16 +1,28 @@
 package com.sebastian_daschner.jaxrs_analyzer.backend;
 
-import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeIdentifier;
-import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeRepresentation;
-import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeRepresentationVisitor;
+import static com.sebastian_daschner.jaxrs_analyzer.backend.ComparatorUtils.mapKeyComparator;
+import static com.sebastian_daschner.jaxrs_analyzer.model.Types.BOOLEAN;
+import static com.sebastian_daschner.jaxrs_analyzer.model.Types.DOUBLE_TYPES;
+import static com.sebastian_daschner.jaxrs_analyzer.model.Types.INTEGER_TYPES;
+import static com.sebastian_daschner.jaxrs_analyzer.model.Types.PRIMITIVE_BOOLEAN;
+import static com.sebastian_daschner.jaxrs_analyzer.model.Types.STRING;
+import static java.util.Collections.singletonMap;
 
+import java.io.StringReader;
+import java.io.StringWriter;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static com.sebastian_daschner.jaxrs_analyzer.backend.ComparatorUtils.mapKeyComparator;
-import static com.sebastian_daschner.jaxrs_analyzer.model.Types.*;
+import javax.json.JsonReader;
+import javax.json.JsonWriter;
+import javax.json.spi.JsonProvider;
+import javax.json.stream.JsonGenerator;
+
+import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeIdentifier;
+import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeRepresentation;
+import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeRepresentationVisitor;
 
 /**
  * Adds the JSON representation of type identifiers to String builders.
@@ -22,7 +34,6 @@ class JsonRepresentationAppender implements TypeRepresentationVisitor {
     private final StringBuilder builder;
     private final Map<TypeIdentifier, TypeRepresentation> representations;
 
-    private int collectionDepth = 0;
     private Set<TypeIdentifier> visitedTypes = new HashSet<>();
 
     JsonRepresentationAppender(final StringBuilder builder, final Map<TypeIdentifier, TypeRepresentation> representations) {
@@ -52,26 +63,24 @@ class JsonRepresentationAppender implements TypeRepresentationVisitor {
             visitedTypes.remove(representation.getIdentifier());
             builder.deleteCharAt(builder.length() - 1).append('}');
         }
-
-        if (collectionDepth > 0) {
-            builder.append(new String(new char[collectionDepth]).replace('\0', ']'));
-            collectionDepth = 0;
-        }
     }
 
     @Override
-    public void visit(TypeRepresentation.CollectionTypeRepresentation representation) {
+    public void visitStart(TypeRepresentation.CollectionTypeRepresentation representation) {
         builder.append('[');
-        collectionDepth++;
+    }
+
+    @Override
+    public void visitEnd(TypeRepresentation.CollectionTypeRepresentation representation) {
+        builder.append(']');
     }
 
     @Override
     public void visit(final TypeRepresentation.EnumTypeRepresentation representation) {
-        final String values = representation.getEnumValues().stream().sorted()
-                .map(s -> '"' + s + '"')
-                .collect(Collectors.joining("|"));
+        final String values = '"' + representation.getEnumValues().stream().sorted()
+                .collect(Collectors.joining("|")) + '"';
 
-        builder.append(values.isEmpty() ? "\"string\"" : values);
+        builder.append(values.length() == 2 ? "\"string\"" : values);
     }
 
     private static String toPrimitiveType(final TypeIdentifier value) {
@@ -90,5 +99,4 @@ class JsonRepresentationAppender implements TypeRepresentationVisitor {
 
         return "{}";
     }
-
 }

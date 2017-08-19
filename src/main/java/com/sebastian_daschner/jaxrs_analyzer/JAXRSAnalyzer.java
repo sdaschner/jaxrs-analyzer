@@ -29,6 +29,7 @@ public class JAXRSAnalyzer {
     private final String projectVersion;
     private final Path outputLocation;
     private final Backend backend;
+    private final boolean prettify;
 
     /**
      * Constructs a JAX-RS Analyzer.
@@ -42,7 +43,7 @@ public class JAXRSAnalyzer {
      * @param outputLocation     The location of the output file (output will be printed to standard out if {@code null})
      */
     public JAXRSAnalyzer(final Set<Path> projectClassPaths, final Set<Path> projectSourcePaths, final Set<Path> classPaths, final String projectName, final String projectVersion,
-                         final Backend backend, final Path outputLocation) {
+                         final Backend backend, final Path outputLocation, final Boolean prettify) {
         Objects.requireNonNull(projectClassPaths);
         Objects.requireNonNull(projectSourcePaths);
         Objects.requireNonNull(classPaths);
@@ -60,6 +61,7 @@ public class JAXRSAnalyzer {
         this.projectVersion = projectVersion;
         this.outputLocation = outputLocation;
         this.backend = backend;
+        this.prettify = prettify == null || prettify;
     }
 
     /**
@@ -74,7 +76,7 @@ public class JAXRSAnalyzer {
         }
 
         final Project project = new Project(projectName, projectVersion, resources);
-        final byte[] output = backend.render(project);
+        final byte[] output = backend.render(project, prettify);
 
         if (outputLocation != null) {
             outputToFile(output, outputLocation);

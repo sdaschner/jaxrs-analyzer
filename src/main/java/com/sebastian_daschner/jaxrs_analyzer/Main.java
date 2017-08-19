@@ -43,6 +43,7 @@ public class Main {
     private static String version = DEFAULT_VERSION;
     private static String backendType = "swagger";
     private static Path outputFileLocation;
+    private static boolean prettify;
 
     /**
      * Inspects JAX-RS projects and outputs the gathered information.
@@ -90,7 +91,7 @@ public class Main {
         final Backend backend = JAXRSAnalyzer.constructBackend(backendType);
         backend.configure(attributes);
 
-        final JAXRSAnalyzer jaxrsAnalyzer = new JAXRSAnalyzer(projectClassPaths, projectSourcePaths, classPaths, name, version, backend, outputFileLocation);
+        final JAXRSAnalyzer jaxrsAnalyzer = new JAXRSAnalyzer(projectClassPaths, projectSourcePaths, classPaths, name, version, backend, outputFileLocation, prettify);
         jaxrsAnalyzer.analyze();
     }
 
@@ -99,6 +100,12 @@ public class Main {
             for (int i = 0; i < args.length; i++) {
                 if (args[i].startsWith("-")) {
                     switch (args[i]) {
+                        case "-p":
+                            prettify = true;
+                            break;
+                        case "-np":
+                            prettify = false;
+                            break;
                         case "-b":
                             backendType = extractBackend(args[++i]);
                             break;

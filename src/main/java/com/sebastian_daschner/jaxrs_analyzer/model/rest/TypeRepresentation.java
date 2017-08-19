@@ -169,8 +169,9 @@ public abstract class TypeRepresentation {
 
         @Override
         public void accept(final TypeRepresentationVisitor visitor) {
-            visitor.visit(this);
+            visitor.visitStart(this);
             representation.accept(visitor);
+            visitor.visitEnd(this);
         }
 
         /**
