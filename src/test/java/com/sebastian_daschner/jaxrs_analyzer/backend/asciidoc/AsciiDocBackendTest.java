@@ -134,7 +134,7 @@ public class AsciiDocBackendTest {
                         "=== Response\n" +
                         "*Content-Type*: `\\*/*`\n" +
                         "\n" +
-                        "==== `200 OK`\n" + "*Response Body*: (`javax.json.Json`)\n\n[source,javascript]\n" + "----\n" + "{\n" + "    \"another\":0,\n" + "    \"key\":\"string\"\n" + "}\n" + "----\n\n\n\n", true);
+                        "==== `200 OK`\n" + "*Response Body*: (`javax.json.Json`)\n\n[source,javascript]\n" + "----\n" + "{\n" + "    \"another\": 0,\n" + "    \"key\": \"string\"\n" + "}\n" + "----\n\n\n\n", true);
 
         identifier = TypeIdentifier.ofDynamic();
         properties = new HashMap<>();
