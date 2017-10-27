@@ -10,3 +10,6 @@ dependency-reduced-pom.xml
 .idea/
 
 *.class
+/.classpath
+/.project
+/.settings

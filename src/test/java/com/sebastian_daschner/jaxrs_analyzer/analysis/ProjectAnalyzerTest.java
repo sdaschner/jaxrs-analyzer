@@ -17,6 +17,7 @@
 package com.sebastian_daschner.jaxrs_analyzer.analysis;
 
 import com.sebastian_daschner.jaxrs_analyzer.LogProvider;
+import com.sebastian_daschner.jaxrs_analyzer.analysis.results.JaxbAnalyzerFactory;
 import com.sebastian_daschner.jaxrs_analyzer.builder.ResourceMethodBuilder;
 import com.sebastian_daschner.jaxrs_analyzer.builder.ResponseBuilder;
 import com.sebastian_daschner.jaxrs_analyzer.model.Types;
@@ -72,7 +73,7 @@ public class ProjectAnalyzerTest {
     @Test
     public void test() {
         final long startTime = System.currentTimeMillis();
-        final Resources actualResources = classUnderTest.analyze(singleton(path), singleton(path));
+        final Resources actualResources = classUnderTest.analyze(singleton(path), singleton(path),new JaxbAnalyzerFactory());
         System.out.println("Project analysis took " + (System.currentTimeMillis() - startTime) + " ms");
         final Resources expectedResources = getResources();
 

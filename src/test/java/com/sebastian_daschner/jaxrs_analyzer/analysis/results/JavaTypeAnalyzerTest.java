@@ -48,7 +48,8 @@ public class JavaTypeAnalyzerTest {
         this.testClassName = testClassName;
         this.expectedIdentifier = expectedIdentifier;
         this.expectedRepresentations = expectedRepresentations;
-        this.classUnderTest = new JavaTypeAnalyzer(actualTypeRepresentations);
+        NormalizedTypeAnalyzerFactory analyzerFactory = testClassSimpleName.contains("Jackson")?new JacksonAnalyzerFactory():new JaxbAnalyzerFactory();
+        this.classUnderTest = new JavaTypeAnalyzer(actualTypeRepresentations,analyzerFactory);
     }
 
     @Parameterized.Parameters(name = "{0}")

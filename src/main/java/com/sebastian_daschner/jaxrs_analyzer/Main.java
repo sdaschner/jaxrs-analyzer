@@ -15,6 +15,9 @@
  */
 package com.sebastian_daschner.jaxrs_analyzer;
 
+import com.sebastian_daschner.jaxrs_analyzer.analysis.results.JacksonAnalyzerFactory;
+import com.sebastian_daschner.jaxrs_analyzer.analysis.results.JaxbAnalyzerFactory;
+import com.sebastian_daschner.jaxrs_analyzer.analysis.results.NormalizedTypeAnalyzerFactory;
 import com.sebastian_daschner.jaxrs_analyzer.backend.Backend;
 import com.sebastian_daschner.jaxrs_analyzer.backend.StringBackend;
 import com.sebastian_daschner.jaxrs_analyzer.backend.swagger.SwaggerOptions;
@@ -44,6 +47,7 @@ public class Main {
     private static String version = DEFAULT_VERSION;
     private static String backendType = "swagger";
     private static Path outputFileLocation;
+    private static String typeAnalyzer = "jaxb";
 
     /**
      * Inspects JAX-RS projects and outputs the gathered information.
@@ -90,8 +94,10 @@ public class Main {
 
         final Backend backend = JAXRSAnalyzer.constructBackend(backendType);
         backend.configure(attributes);
-
-        final JAXRSAnalyzer jaxrsAnalyzer = new JAXRSAnalyzer(projectClassPaths, projectSourcePaths, classPaths, name, version, backend, outputFileLocation);
+        
+        NormalizedTypeAnalyzerFactory normalizedTypeAnalyzerFactory = createTypeAnalyzerFactory();
+        final JAXRSAnalyzer jaxrsAnalyzer = new JAXRSAnalyzer(projectClassPaths, projectSourcePaths, classPaths, name, version, backend
+                , outputFileLocation,normalizedTypeAnalyzerFactory);
         jaxrsAnalyzer.analyze();
     }
 
@@ -126,6 +132,9 @@ public class Main {
                             break;
                         case "-e":
                             System.setProperty("project.build.sourceEncoding", args[++i]);
+                            break;
+                        case "-ta":
+                            typeAnalyzer = args[++i];
                             break;
                         case "--swaggerSchemes":
                             attributes.put(SwaggerOptions.SWAGGER_SCHEMES, args[++i]);
@@ -208,6 +217,7 @@ public class Main {
         System.err.println(" -o <output file> The location of the analysis output (will be printed to standard out if omitted)");
         System.err.println(" -a <attribute name>=<attribute value> Set custom attributes for backends.");
         System.err.println(" -e <encoding> The source file encoding");
+        System.err.println(" -ta <type analyzer> Annotations to use for type analyzer: jaxb (default) or jackson");
         System.err.println("\nFollowing available backend specific options (only have effect if the corresponding backend is selected):\n");
         System.err.println(" --swaggerSchemes <scheme>[,schemes] The Swagger schemes: http (default), https, ws, wss");
         System.err.println(" --renderSwaggerTags Enables rendering of Swagger tags (default tag will be used per default)");
@@ -216,5 +226,22 @@ public class Main {
         System.err.println("\nExample: java -jar jaxrs-analyzer.jar -b swagger -n \"My Project\" -cp ~/libs/lib1.jar:~/libs/project/bin ~/project/target/classes");
         System.exit(1);
     }
+
+    private static NormalizedTypeAnalyzerFactory createTypeAnalyzerFactory() {
+        NormalizedTypeAnalyzerFactory normalizedTypeAnalyzerFactory = null;
+        switch (typeAnalyzer) {
+        case "jaxb":
+            normalizedTypeAnalyzerFactory = new JaxbAnalyzerFactory();
+            break;
+        case "jackson":
+            normalizedTypeAnalyzerFactory = new JacksonAnalyzerFactory();
+            break;
+            default:
+                System.err.println("Invalid type analyzer: "+typeAnalyzer);
+                printUsageAndExit();
+        }
+        return normalizedTypeAnalyzerFactory;
+    }
+
 
 }

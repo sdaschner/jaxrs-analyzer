@@ -1,6 +1,7 @@
 package com.sebastian_daschner.jaxrs_analyzer;
 
 import com.sebastian_daschner.jaxrs_analyzer.analysis.ProjectAnalyzer;
+import com.sebastian_daschner.jaxrs_analyzer.analysis.results.NormalizedTypeAnalyzerFactory;
 import com.sebastian_daschner.jaxrs_analyzer.backend.Backend;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.Project;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.Resources;
@@ -29,6 +30,7 @@ public class JAXRSAnalyzer {
     private final String projectVersion;
     private final Path outputLocation;
     private final Backend backend;
+    private final NormalizedTypeAnalyzerFactory normalizedTypeAnalyzerFactory;
 
     /**
      * Constructs a JAX-RS Analyzer.
@@ -42,13 +44,14 @@ public class JAXRSAnalyzer {
      * @param outputLocation     The location of the output file (output will be printed to standard out if {@code null})
      */
     public JAXRSAnalyzer(final Set<Path> projectClassPaths, final Set<Path> projectSourcePaths, final Set<Path> classPaths, final String projectName, final String projectVersion,
-                         final Backend backend, final Path outputLocation) {
+                         final Backend backend, final Path outputLocation, final NormalizedTypeAnalyzerFactory normalizedTypeAnalyzerFactory) {
         Objects.requireNonNull(projectClassPaths);
         Objects.requireNonNull(projectSourcePaths);
         Objects.requireNonNull(classPaths);
         Objects.requireNonNull(projectName);
         Objects.requireNonNull(projectVersion);
         Objects.requireNonNull(backend);
+        Objects.requireNonNull(normalizedTypeAnalyzerFactory);
 
         if (projectClassPaths.isEmpty())
             throw new IllegalArgumentException("At least one project path is mandatory");
@@ -60,13 +63,14 @@ public class JAXRSAnalyzer {
         this.projectVersion = projectVersion;
         this.outputLocation = outputLocation;
         this.backend = backend;
+        this.normalizedTypeAnalyzerFactory = normalizedTypeAnalyzerFactory;
     }
 
     /**
      * Analyzes the JAX-RS project at the class path and produces the output as configured.
      */
     public void analyze() {
-        final Resources resources = new ProjectAnalyzer(classPaths).analyze(projectClassPaths, projectSourcePaths);
+        final Resources resources = new ProjectAnalyzer(classPaths).analyze(projectClassPaths, projectSourcePaths,normalizedTypeAnalyzerFactory);
 
         if (resources.isEmpty()) {
             LogProvider.info("Empty JAX-RS analysis result, omitting output");
