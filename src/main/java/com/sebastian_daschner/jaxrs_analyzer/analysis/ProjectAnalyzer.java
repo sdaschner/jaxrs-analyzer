@@ -76,7 +76,6 @@ public class ProjectAnalyzer {
         classPaths.forEach(this::addToClassPool);
         final Path lib = Paths.get(System.getProperty("java.home"), "..", "lib", "tools.jar");
         addToClassPool(lib);
-        addToSystemClassLoader(lib);
     }
 
     /**
