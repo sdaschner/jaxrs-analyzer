@@ -1,81 +1,82 @@
 package com.sebastian_daschner.jaxrs_analyzer.analysis.javadoc;
 
+import com.github.javaparser.JavaParser;
+import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.body.MethodDeclaration;
 import com.sebastian_daschner.jaxrs_analyzer.LogProvider;
-import com.sebastian_daschner.jaxrs_analyzer.analysis.classes.ContextClassReader;
+import com.sebastian_daschner.jaxrs_analyzer.model.JavaUtils;
+import com.sebastian_daschner.jaxrs_analyzer.model.javadoc.MethodComment;
 import com.sebastian_daschner.jaxrs_analyzer.model.methods.MethodIdentifier;
 import com.sebastian_daschner.jaxrs_analyzer.model.results.ClassResult;
 import com.sebastian_daschner.jaxrs_analyzer.model.results.MethodResult;
-import com.sun.javadoc.ClassDoc;
-import com.sun.javadoc.MethodDoc;
 
-import java.io.File;
-import java.nio.charset.Charset;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.nio.file.FileVisitResult;
+import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.util.*;
 
 /**
  * @author Sebastian Daschner
  */
 public class JavaDocAnalyzer {
 
-    private static final Map<MethodIdentifier, MethodDoc> METHOD_DOCS = new ConcurrentHashMap<>();
-    // TODO use class results for POJO / JAXB enhancement
-    private static final Map<String, ClassDoc> CLASS_DOCS = new ConcurrentHashMap<>();
+    private final Map<MethodIdentifier, MethodComment> methodComments = new HashMap<>();
 
-    public void analyze(final Set<ClassResult> classResults, final Set<String> packages, final Set<Path> projectSourcePaths, final Set<Path> classPaths) {
+    public void analyze(final Set<Path> projectSourcePaths, final Set<ClassResult> classResults) {
+        invokeParser(projectSourcePaths);
+        combineResults(classResults);
+    }
+
+    private void invokeParser(Set<Path> projectSourcePaths) {
         try {
-            invokeDoclet(packages, projectSourcePaths, classPaths);
-            combineResults(classResults);
-        } catch (Exception e) {
+            for (Path projectSourcePath : projectSourcePaths) {
+                invokeParser(projectSourcePath);
+            }
+        } catch (IOException e) {
             LogProvider.error("could not analyze JavaDoc, reason: " + e.getMessage());
             LogProvider.debug(e);
         }
     }
 
-    private void invokeDoclet(final Set<String> packages, final Set<Path> projectSourcePaths, final Set<Path> classPaths) throws Exception {
-        final String docletName = "com.sebastian_daschner.jaxrs_analyzer.analysis.javadoc.JAXRSDoclet";
-        final Class<?> doclet = ContextClassReader.getClassLoader().loadClass(docletName);
-        final String docletPath = Paths.get(doclet.getProtectionDomain().getCodeSource().getLocation().toURI()).toString();
-        final String encoding = System.getProperty("project.build.sourceEncoding", Charset.defaultCharset().name());
+    private void invokeParser(Path sourcePath) throws IOException {
+        Set<Path> files = new HashSet<>();
 
-        // TODO only invoke on sources visited in visitSource
-        final String[] args = Stream.concat(
-                Stream.of("-sourcepath", joinPaths(projectSourcePaths),
-                        "-classpath", joinPaths(classPaths),
-                        "-quiet",
-                        "-docletpath", docletPath,
-                        "-doclet", docletName,
-                        "-encoding", encoding
-                ),
-                packages.stream()
-        ).toArray(String[]::new);
-        final Class<?> javaDocMain = ContextClassReader.getClassLoader().loadClass("com.sun.tools.javadoc.Main");
-        final int result = (int) javaDocMain.getMethod("execute", String[].class).invoke(null, (Object) args);
-        if (result != 0)
-            LogProvider.error("Error in javadoc analysis");
+        Files.walkFileTree(sourcePath, new SimpleFileVisitor<Path>() {
+            @Override
+            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                if (file.toString().endsWith(".java"))
+                    files.add(file);
+                return super.visitFile(file, attrs);
+            }
+        });
+
+        files.forEach(path -> parseJavaDoc(path, new JavaDocParserVisitor(methodComments)));
     }
 
-    private String joinPaths(final Set<Path> projectSourcePaths) {
-        return projectSourcePaths.stream().map(Path::toString).collect(Collectors.joining(File.pathSeparator));
+    private static void parseJavaDoc(Path path, JavaDocParserVisitor visitor) {
+        try {
+            CompilationUnit cu = JavaParser.parse(path.toFile());
+            cu.accept(visitor, null);
+        } catch (FileNotFoundException e) {
+            throw new IllegalStateException(e);
+        }
     }
 
     private void combineResults(final Set<ClassResult> classResults) {
-        METHOD_DOCS.entrySet().forEach(e -> classResults.stream()
-                .map(c -> findMethodResult(e.getKey(), c))
+        methodComments.forEach((key, value) -> classResults.stream()
+                .map(c -> findMethodResult(key, c))
                 .filter(Objects::nonNull)
-                .forEach(m -> m.setMethodDoc(e.getValue())));
+                .forEach(m -> m.setMethodDoc(value)));
     }
 
     private MethodResult findMethodResult(final MethodIdentifier identifier, final ClassResult classResult) {
         if (classResult.getOriginalClass().equals(identifier.getContainingClass()))
             return classResult.getMethods().stream()
-                    .filter(methodResult -> methodResult.getOriginalMethodSignature().equals(identifier))
+                    .filter(methodResult -> equalsSimpleTypeNames(identifier, methodResult))
                     .findAny().orElse(null);
 
         return classResult.getMethods().stream()
@@ -86,20 +87,31 @@ public class JavaDocAnalyzer {
                 .findAny().orElse(null);
     }
 
-    public static void put(final MethodIdentifier identifier, final MethodDoc methodDoc) {
-        METHOD_DOCS.put(identifier, methodDoc);
+    /**
+     * This is a best-effort approach combining only the simple types.
+     *
+     * @see JavaDocParserVisitor#calculateMethodIdentifier(MethodDeclaration)
+     */
+    private boolean equalsSimpleTypeNames(MethodIdentifier identifier, MethodResult methodResult) {
+        MethodIdentifier originalIdentifier = methodResult.getOriginalMethodSignature();
+
+        return originalIdentifier.getMethodName().equals(identifier.getMethodName()) &&
+                matchesTypeBestEffort(originalIdentifier.getReturnType(), identifier.getReturnType()) &&
+                parameterMatch(originalIdentifier.getParameters(), identifier.getParameters());
     }
 
-    public static void put(final String className, final ClassDoc classDoc) {
-        CLASS_DOCS.put(className, classDoc);
+    private boolean parameterMatch(List<String> originalTypes, List<String> types) {
+        if (originalTypes.size() != types.size())
+            return false;
+        for (int i = 0; i < originalTypes.size(); i++) {
+            if (!matchesTypeBestEffort(originalTypes.get(i), types.get(i)))
+                return false;
+        }
+        return true;
     }
 
-    public static MethodDoc get(final MethodIdentifier identifier) {
-        return METHOD_DOCS.get(identifier);
-    }
-
-    public static ClassDoc get(final String className) {
-        return CLASS_DOCS.get(className);
+    private boolean matchesTypeBestEffort(String originalType, String type) {
+        return JavaUtils.toClassName(originalType).contains(type);
     }
 
 }

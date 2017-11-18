@@ -18,10 +18,10 @@ package com.sebastian_daschner.jaxrs_analyzer.model.results;
 
 import com.sebastian_daschner.jaxrs_analyzer.model.elements.HttpResponse;
 import com.sebastian_daschner.jaxrs_analyzer.model.instructions.Instruction;
+import com.sebastian_daschner.jaxrs_analyzer.model.javadoc.MethodComment;
 import com.sebastian_daschner.jaxrs_analyzer.model.methods.MethodIdentifier;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.HttpMethod;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.MethodParameter;
-import com.sun.javadoc.MethodDoc;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -46,7 +46,7 @@ public class MethodResult {
     private HttpMethod httpMethod;
     private ClassResult subResource;
     private ClassResult parentResource;
-    private MethodDoc methodDoc;
+    private MethodComment methodDoc;
     private boolean deprecated;
 
     public Set<String> getRequestMediaTypes() {
@@ -118,11 +118,11 @@ public class MethodResult {
         this.parentResource = parentResource;
     }
 
-    public MethodDoc getMethodDoc() {
+    public MethodComment getMethodDoc() {
         return methodDoc;
     }
 
-    public void setMethodDoc(final MethodDoc methodDoc) {
+    public void setMethodDoc(final MethodComment methodDoc) {
         this.methodDoc = methodDoc;
     }
 

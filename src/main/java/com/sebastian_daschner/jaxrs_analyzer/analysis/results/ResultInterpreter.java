@@ -18,17 +18,15 @@ package com.sebastian_daschner.jaxrs_analyzer.analysis.results;
 
 import com.sebastian_daschner.jaxrs_analyzer.model.JavaUtils;
 import com.sebastian_daschner.jaxrs_analyzer.model.elements.HttpResponse;
+import com.sebastian_daschner.jaxrs_analyzer.model.javadoc.MemberComment;
+import com.sebastian_daschner.jaxrs_analyzer.model.javadoc.MemberParameterTag;
+import com.sebastian_daschner.jaxrs_analyzer.model.javadoc.MethodComment;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.MethodParameter;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.ResourceMethod;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.Resources;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.Response;
 import com.sebastian_daschner.jaxrs_analyzer.model.results.ClassResult;
 import com.sebastian_daschner.jaxrs_analyzer.model.results.MethodResult;
-import com.sebastian_daschner.jaxrs_analyzer.utils.StringUtils;
-import com.sun.javadoc.ClassDoc;
-import com.sun.javadoc.Doc;
-import com.sun.javadoc.MethodDoc;
-import com.sun.javadoc.ParamTag;
 
 import java.util.Optional;
 import java.util.Set;
@@ -42,7 +40,6 @@ import static com.sebastian_daschner.jaxrs_analyzer.analysis.results.JavaDocPara
  */
 public class ResultInterpreter {
 
-    private static final String DEPRECATED_TAG_NAME = "@deprecated";
     private JavaTypeAnalyzer javaTypeAnalyzer;
     private Resources resources;
     private DynamicTypeAnalyzer dynamicTypeAnalyzer;
@@ -103,9 +100,9 @@ public class ResultInterpreter {
      * @return The resource method which this method represents
      */
     private ResourceMethod interpretResourceMethod(final MethodResult methodResult, final ClassResult classResult) {
-        final MethodDoc methodDoc = methodResult.getMethodDoc();
+        final MethodComment methodDoc = methodResult.getMethodDoc();
 
-        final String description = methodDoc == null || StringUtils.isBlank(methodDoc.commentText()) ? null : methodDoc.commentText();
+        final String description = methodDoc != null ? methodDoc.getComment() : null;
         final ResourceMethod resourceMethod = new ResourceMethod(methodResult.getHttpMethod(), description);
         updateMethodParameters(resourceMethod.getMethodParameters(), classResult.getClassFields());
         updateMethodParameters(resourceMethod.getMethodParameters(), methodResult.getMethodParameters());
@@ -131,40 +128,35 @@ public class ResultInterpreter {
         return resourceMethod;
     }
 
-    private boolean hasDeprecationTag(MethodDoc doc) {
+    private boolean hasDeprecationTag(MethodComment doc) {
         if (doc == null)
             return false;
-        return hasMethodDeprecationTag(doc) || hasClassDeprecationTag(doc);
+        return doc.isDeprecated() || hasClassDeprecationTag(doc.getContainingClassComment());
     }
 
-    private boolean hasMethodDeprecationTag(MethodDoc doc) {
-        return doc.tags(DEPRECATED_TAG_NAME).length > 0;
+    private boolean hasClassDeprecationTag(MemberComment doc) {
+        return doc != null && doc.isDeprecated();
     }
 
-    private boolean hasClassDeprecationTag(MethodDoc methodDoc) {
-        final ClassDoc doc = methodDoc.containingClass();
-        return doc != null && doc.tags(DEPRECATED_TAG_NAME).length > 0;
-    }
-
-    private void addParameterDescriptions(final Set<MethodParameter> methodParameters, final MethodDoc methodDoc) {
+    private void addParameterDescriptions(final Set<MethodParameter> methodParameters, final MethodComment methodDoc) {
         if (methodDoc == null)
             return;
 
         methodParameters.forEach(p -> {
-            final Optional<ParamTag> tag = findParameterDoc(p, methodDoc);
+            final Optional<MemberParameterTag> tag = findParameterDoc(p, methodDoc);
 
-            final String description = tag.map(ParamTag::parameterComment)
-                    .orElseGet(() -> findFieldDoc(p, methodDoc.containingClass())
-                            .map(Doc::commentText).orElse(null));
+            final String description = tag.map(MemberParameterTag::getComment)
+                    .orElseGet(() -> findFieldDoc(p, methodDoc.getContainingClassComment())
+                            .map(MemberParameterTag::getComment).orElse(null));
 
             p.setDescription(description);
         });
     }
 
-    private String findRequestBodyDescription(final MethodDoc methodDoc) {
+    private String findRequestBodyDescription(final MethodComment methodDoc) {
         if (methodDoc == null)
             return null;
-        return findRequestBodyDoc(methodDoc).map(ParamTag::parameterComment).orElse(null);
+        return findRequestBodyDoc(methodDoc).map(MemberParameterTag::getComment).orElse(null);
     }
 
     /**
@@ -201,7 +193,7 @@ public class ResultInterpreter {
             if (response == null) {
                 // no inline entities -> potential class type will be considered
                 response = httpResponse.getEntityTypes().isEmpty() ? new Response() :
-                        new Response(javaTypeAnalyzer.analyze(JavaUtils.determineMostSpecificType(httpResponse.getEntityTypes().stream().toArray(String[]::new))));
+                        new Response(javaTypeAnalyzer.analyze(JavaUtils.determineMostSpecificType(httpResponse.getEntityTypes().toArray(new String[0]))));
             }
 
             response.getHeaders().addAll(httpResponse.getHeaders());

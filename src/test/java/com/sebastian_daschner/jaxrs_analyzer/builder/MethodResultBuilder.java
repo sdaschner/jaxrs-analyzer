@@ -17,12 +17,12 @@
 package com.sebastian_daschner.jaxrs_analyzer.builder;
 
 import com.sebastian_daschner.jaxrs_analyzer.model.elements.HttpResponse;
+import com.sebastian_daschner.jaxrs_analyzer.model.javadoc.MethodComment;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.HttpMethod;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.MethodParameter;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.ParameterType;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeIdentifier;
 import com.sebastian_daschner.jaxrs_analyzer.model.results.MethodResult;
-import com.sun.javadoc.MethodDoc;
 
 import java.util.Arrays;
 import java.util.stream.Stream;
@@ -45,7 +45,7 @@ public class MethodResultBuilder {
         return builder;
     }
 
-    public MethodResultBuilder andMethodDoc(final MethodDoc methodDoc) {
+    public MethodResultBuilder andMethodDoc(final MethodComment methodDoc) {
         methodResult.setMethodDoc(methodDoc);
         return this;
     }

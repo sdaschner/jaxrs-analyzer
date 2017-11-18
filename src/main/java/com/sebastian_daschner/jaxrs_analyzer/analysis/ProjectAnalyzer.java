@@ -32,9 +32,6 @@ import org.objectweb.asm.ClassVisitor;
 import javax.ws.rs.ApplicationPath;
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Method;
-import java.net.URL;
-import java.net.URLClassLoader;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Enumeration;
@@ -62,8 +59,6 @@ public class ProjectAnalyzer {
 
     private final Lock lock = new ReentrantLock();
     private final Set<String> classes = new HashSet<>();
-    private final Set<String> packages = new HashSet<>();
-    private final Set<Path> classPool = new HashSet<>();
     private final ResultInterpreter resultInterpreter = new ResultInterpreter();
     private final BytecodeAnalyzer bytecodeAnalyzer = new BytecodeAnalyzer();
     private final JavaDocAnalyzer javaDocAnalyzer = new JavaDocAnalyzer();
@@ -75,9 +70,6 @@ public class ProjectAnalyzer {
      */
     public ProjectAnalyzer(final Set<Path> classPaths) {
         classPaths.forEach(this::addToClassPool);
-        final Path lib = Paths.get(System.getProperty("java.home"), "..", "lib", "tools.jar");
-        addToClassPool(lib);
-        addToSystemClassLoader(lib);
     }
 
     /**
@@ -108,7 +100,7 @@ public class ProjectAnalyzer {
                 bytecodeAnalyzer.analyzeBytecode(classResult);
             }
 
-            javaDocAnalyzer.analyze(classResults, packages, projectSourcePaths, classPool);
+            javaDocAnalyzer.analyze(projectSourcePaths, classResults);
 
             return resultInterpreter.interpret(classResults);
         } finally {
@@ -141,19 +133,8 @@ public class ProjectAnalyzer {
     private void addToClassPool(final Path location) {
         if (!location.toFile().exists())
             throw new IllegalArgumentException("The location '" + location + "' does not exist!");
-        classPool.add(location);
         try {
             ContextClassReader.addClassPath(location.toUri().toURL());
-        } catch (Exception e) {
-            throw new IllegalArgumentException("The location '" + location + "' could not be loaded to the class path!", e);
-        }
-    }
-
-    private void addToSystemClassLoader(final Path location) {
-        try {
-            final Method method = URLClassLoader.class.getDeclaredMethod("addURL", URL.class);
-            method.setAccessible(true);
-            method.invoke(ClassLoader.getSystemClassLoader(), location.toUri().toURL());
         } catch (Exception e) {
             throw new IllegalArgumentException("The location '" + location + "' could not be loaded to the class path!", e);
         }
@@ -189,8 +170,6 @@ public class ProjectAnalyzer {
                 final String entryName = entry.getName();
                 if (entryName.endsWith(".class"))
                     classes.add(toQualifiedClassName(entryName));
-                else if (entry.isDirectory())
-                    packages.add(entryName);
             }
         } catch (IOException e) {
             throw new IllegalArgumentException("Could not read jar-file '" + location + "', reason: " + e.getMessage());
@@ -208,7 +187,6 @@ public class ProjectAnalyzer {
             if (file.isDirectory())
                 addDirectoryClasses(location.resolve(file.getName()), subPath.resolve(file.getName()));
             else if (file.isFile() && file.getName().endsWith(".class")) {
-                packages.add(toQualifiedPackageName(subPath.toString()));
                 final String classFileName = subPath.resolve(file.getName()).toString();
                 classes.add(toQualifiedClassName(classFileName));
             }
@@ -224,16 +202,6 @@ public class ProjectAnalyzer {
     private static String toQualifiedClassName(final String fileName) {
         final String replacedSeparators = fileName.replace(File.separatorChar, '.');
         return replacedSeparators.substring(0, replacedSeparators.length() - ".class".length());
-    }
-
-    /**
-     * Converts the given path name of a directory to the fully-qualified package name.
-     *
-     * @param pathName The directory name (e.g. a/package/)
-     * @return The fully-qualified package name (e.g. a.package)
-     */
-    private static String toQualifiedPackageName(final String pathName) {
-        return pathName.replace(File.separatorChar, '.');
     }
 
 }
