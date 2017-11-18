@@ -17,7 +17,6 @@ public class ContextClassReader extends ClassReader {
 
     public ContextClassReader(final String className) throws IOException {
         super(CLASS_LOADER.getResourceAsStream(className.replace('.', '/') + ".class"));
-        final URL resource = CLASS_LOADER.getResource(className.replace('.', '/') + ".class");
     }
 
     public static ClassLoader getClassLoader() {

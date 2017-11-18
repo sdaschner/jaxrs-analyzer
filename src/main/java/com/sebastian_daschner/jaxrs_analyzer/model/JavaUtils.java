@@ -36,7 +36,7 @@ import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
 
 /**
- * Contains Java and Javassist utility functionality.
+ * Contains Java reflection utility functionality.
  *
  * @author Sebastian Daschner
  */
@@ -372,9 +372,8 @@ public final class JavaUtils {
 
         // TODO test for variable types
 
-        ClassLoader classLoader = ContextClassReader.getClassLoader();
         try {
-            return classLoader.loadClass(className.replace('/', '.'));
+            return ContextClassReader.getClassLoader().loadClass(className.replace('/', '.'));
         } catch (ClassNotFoundException e) {
             LogProvider.error("Could not load class " + className);
             LogProvider.debug(e);

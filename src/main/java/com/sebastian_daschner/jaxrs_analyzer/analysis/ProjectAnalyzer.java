@@ -22,6 +22,7 @@ import com.sebastian_daschner.jaxrs_analyzer.analysis.classes.ContextClassReader
 import com.sebastian_daschner.jaxrs_analyzer.analysis.classes.JAXRSClassVisitor;
 import com.sebastian_daschner.jaxrs_analyzer.analysis.javadoc.JavaDocAnalyzer;
 import com.sebastian_daschner.jaxrs_analyzer.analysis.results.ResultInterpreter;
+import com.sebastian_daschner.jaxrs_analyzer.model.JavaUtils;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.Resources;
 import com.sebastian_daschner.jaxrs_analyzer.model.results.ClassResult;
 import com.sebastian_daschner.jaxrs_analyzer.utils.Pair;
@@ -116,14 +117,8 @@ public class ProjectAnalyzer {
     }
 
     private boolean isJAXRSRootResource(String className) {
-        try {
-            final Class<?> clazz = ContextClassReader.getClassLoader().loadClass(className);
-            return isAnnotationPresent(clazz, javax.ws.rs.Path.class) || isAnnotationPresent(clazz, ApplicationPath.class);
-        } catch (ClassNotFoundException e) {
-            LogProvider.error("The class " + className + " could not be loaded!");
-            LogProvider.debug(e);
-            return false;
-        }
+        final Class<?> clazz = JavaUtils.loadClassFromName(className);
+        return clazz != null && (isAnnotationPresent(clazz, javax.ws.rs.Path.class) || isAnnotationPresent(clazz, ApplicationPath.class));
     }
 
     private void analyzeClass(final String className, ClassResult classResult) {

@@ -1,20 +1,9 @@
 package com.sebastian_daschner.jaxrs_analyzer.analysis.classes;
 
-import java.util.BitSet;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import org.objectweb.asm.AnnotationVisitor;
-import org.objectweb.asm.Opcodes;
-
 import com.sebastian_daschner.jaxrs_analyzer.LogProvider;
 import com.sebastian_daschner.jaxrs_analyzer.analysis.bytecode.collection.InstructionBuilder;
-import com.sebastian_daschner.jaxrs_analyzer.analysis.classes.annotation.ConsumesAnnotationVisitor;
-import com.sebastian_daschner.jaxrs_analyzer.analysis.classes.annotation.DefaultValueAnnotationVisitor;
-import com.sebastian_daschner.jaxrs_analyzer.analysis.classes.annotation.ParamAnnotationVisitor;
-import com.sebastian_daschner.jaxrs_analyzer.analysis.classes.annotation.PathAnnotationVisitor;
-import com.sebastian_daschner.jaxrs_analyzer.analysis.classes.annotation.ProducesAnnotationVisitor;
+import com.sebastian_daschner.jaxrs_analyzer.analysis.classes.annotation.*;
+import com.sebastian_daschner.jaxrs_analyzer.model.JavaUtils;
 import com.sebastian_daschner.jaxrs_analyzer.model.Types;
 import com.sebastian_daschner.jaxrs_analyzer.model.methods.MethodIdentifier;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.HttpMethod;
@@ -23,6 +12,13 @@ import com.sebastian_daschner.jaxrs_analyzer.model.rest.ParameterType;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeIdentifier;
 import com.sebastian_daschner.jaxrs_analyzer.model.results.ClassResult;
 import com.sebastian_daschner.jaxrs_analyzer.model.results.MethodResult;
+import org.objectweb.asm.AnnotationVisitor;
+import org.objectweb.asm.Opcodes;
+
+import java.util.BitSet;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author Sebastian Daschner
@@ -139,18 +135,13 @@ class JAXRSMethodVisitor extends ProjectMethodVisitor {
                 methodResult.setRequestBodyType(requestBodyType);
             }
             methodResult.getMethodParameters().addAll(methodParameters.values());
-            
-			try {
-				final Class<?> containingClass = ContextClassReader.getClassLoader()
-						.loadClass(methodResult.getOriginalMethodSignature().getContainingClass().replace('/', '.'));
 
-				if (containingClass.isInterface()) {
-					methodResult.getInstructions().add(InstructionBuilder.buildInstruction(Opcodes.ICONST_0, null));
-					methodResult.getInstructions().add(InstructionBuilder.buildInstruction(Opcodes.ARETURN, null));
-				}
-			} catch (ClassNotFoundException e) {
-				LogProvider.error("Unable to load class " + methodResult.getOriginalMethodSignature().getContainingClass() + ": " + e.getMessage());
-			}
+            final Class<?> containingClass = JavaUtils.loadClassFromName(methodResult.getOriginalMethodSignature().getContainingClass());
+
+            if (containingClass != null && containingClass.isInterface()) {
+                methodResult.getInstructions().add(InstructionBuilder.buildInstruction(Opcodes.ICONST_0, null));
+                methodResult.getInstructions().add(InstructionBuilder.buildInstruction(Opcodes.ARETURN, null));
+            }
         }
 
         // TODO determine potential super methods which are annotated with JAX-RS annotations.

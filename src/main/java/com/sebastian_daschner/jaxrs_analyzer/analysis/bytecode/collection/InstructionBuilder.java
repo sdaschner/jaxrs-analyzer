@@ -1,6 +1,7 @@
 package com.sebastian_daschner.jaxrs_analyzer.analysis.bytecode.collection;
 
 import com.sebastian_daschner.jaxrs_analyzer.LogProvider;
+import com.sebastian_daschner.jaxrs_analyzer.model.JavaUtils;
 import com.sebastian_daschner.jaxrs_analyzer.model.instructions.*;
 import com.sebastian_daschner.jaxrs_analyzer.model.methods.MethodIdentifier;
 import org.objectweb.asm.Handle;
@@ -290,7 +291,9 @@ public final class InstructionBuilder {
     private static Object getStaticValue(String name, String containingClass) {
         final Field field;
         try {
-            field = Class.forName(containingClass.replace('/', '.')).getDeclaredField(name);
+            // needs to load same class instance in Maven plugin, not from extended classloader
+            final Class<?> clazz = Class.forName(containingClass.replace('/', '.'));
+            field = clazz.getDeclaredField(name);
             field.setAccessible(true);
             return field.get(null);
         } catch (Exception e) {
