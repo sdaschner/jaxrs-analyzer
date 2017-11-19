@@ -134,7 +134,7 @@ public class ResultInterpreter {
     }
 
     /**
-     * Reads @status javadoc annotation and creates Response status codes based on them.
+     * Reads @response javadoc annotation and creates Response status codes based on them.
      *
      * @param methodResult
      * @param resourceMethod
@@ -145,12 +145,12 @@ public class ResultInterpreter {
         methodResult.getMethodDoc().getParamTags();
 
         List<MemberParameterTag> statusTag = methodResult.getMethodDoc().getParamTags().stream()
-                .filter(t -> t.getTagName().equalsIgnoreCase("status"))
+                .filter(t -> t.getTagName().equalsIgnoreCase("response"))
                 .collect(Collectors.toList());
 
         //Class level Javadoc tags NOT working cause below containing class coments are empty
         methodResult.getMethodDoc().getContainingClassComment().getFieldComments().stream()
-                .filter(t -> t.getTagName().equalsIgnoreCase("status"))
+                .filter(t -> t.getTagName().equalsIgnoreCase("response"))
                 .forEach(statusTag::add);
 
         statusTag.stream()

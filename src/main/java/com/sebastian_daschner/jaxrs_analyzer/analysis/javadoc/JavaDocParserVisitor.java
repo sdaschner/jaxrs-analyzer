@@ -109,7 +109,7 @@ public class JavaDocParserVisitor extends VoidVisitorAdapter<Void> {
 
     private List<MemberParameterTag> createMethodParameterTags(Javadoc javadoc, MethodDeclaration method) {
         return javadoc.getBlockTags().stream()
-                .filter(t -> t.getType() == JavadocBlockTag.Type.PARAM || t.getTagName().equalsIgnoreCase("status"))
+                .filter(t -> t.getType() == JavadocBlockTag.Type.PARAM || t.getTagName().equalsIgnoreCase("response"))
                 .map(t -> createMethodParameterTag(t, method))
                 .collect(Collectors.toList());
     }
