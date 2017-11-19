@@ -8,7 +8,7 @@ public class ClassComment extends MemberComment {
     private List<MemberParameterTag> fieldComments = new ArrayList<>();
 
     public ClassComment(String comment, boolean deprecated) {
-        super(comment, deprecated);
+            super(comment, deprecated);
     }
 
     public List<MemberParameterTag> getFieldComments() {

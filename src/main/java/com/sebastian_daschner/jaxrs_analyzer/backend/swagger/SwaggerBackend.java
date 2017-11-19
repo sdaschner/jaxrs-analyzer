@@ -210,7 +210,7 @@ public class SwaggerBackend implements Backend {
             e.getValue().getHeaders().stream().sorted().forEach(h -> headers.add(h, Json.createObjectBuilder().add("type", "string")));
 
             final JsonObjectBuilder response = Json.createObjectBuilder()
-                    .add("description", Optional.ofNullable(Response.Status.fromStatusCode(e.getKey())).map(Response.Status::getReasonPhrase).orElse(""))
+                    .add("description", e.getValue().getDescription() != null ? e.getValue().getDescription() : Optional.ofNullable(Response.Status.fromStatusCode(e.getKey())).map(Response.Status::getReasonPhrase).orElse(""))
                     .add("headers", headers);
 
             if (e.getValue().getResponseBody() != null) {

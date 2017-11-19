@@ -109,7 +109,7 @@ public class JavaDocParserVisitor extends VoidVisitorAdapter<Void> {
 
     private List<MemberParameterTag> createMethodParameterTags(Javadoc javadoc, MethodDeclaration method) {
         return javadoc.getBlockTags().stream()
-                .filter(t -> t.getType() == JavadocBlockTag.Type.PARAM)
+                .filter(t -> t.getType() == JavadocBlockTag.Type.PARAM || t.getTagName().equalsIgnoreCase("status"))
                 .map(t -> createMethodParameterTag(t, method))
                 .collect(Collectors.toList());
     }
@@ -120,12 +120,17 @@ public class JavaDocParserVisitor extends VoidVisitorAdapter<Void> {
                 .map(NodeList::stream)
                 .orElseGet(Stream::empty);
 
-        return createMemberParamTag(tag.getContent(), annotations);
+        return createMemberParamTag(tag, annotations);
     }
 
-    private MemberParameterTag createMemberParamTag(JavadocDescription description, Stream<AnnotationExpr> annotationStream) {
+    private MemberParameterTag createMemberParamTag(JavadocDescription javadocDescription, Stream<AnnotationExpr> annotationStream) {
         Map<String, String> annotations = annotationStream.collect(Collectors.toMap(a -> a.getName().getIdentifier(), a -> a.asSingleMemberAnnotationExpr().getMemberValue().asStringLiteralExpr().asString()));
-        return new MemberParameterTag(description.toText(), annotations);
+        return new MemberParameterTag(javadocDescription.toText(),"", annotations);
+    }
+
+    private MemberParameterTag createMemberParamTag(JavadocBlockTag tag, Stream<AnnotationExpr> annotationStream) {
+        Map<String, String> annotations = annotationStream.collect(Collectors.toMap(a -> a.getName().getIdentifier(), a -> a.asSingleMemberAnnotationExpr().getMemberValue().asStringLiteralExpr().asString()));
+        return new MemberParameterTag(tag.getContent().toText(),tag.getTagName(), annotations);
     }
 
     /**

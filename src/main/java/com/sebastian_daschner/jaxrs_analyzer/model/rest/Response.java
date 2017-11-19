@@ -28,13 +28,20 @@ public class Response {
 
     private final Set<String> headers = new HashSet<>();
     private final TypeIdentifier responseBody;
+    private final String description;
 
     public Response() {
-        this(null);
+        this(null,null);
     }
 
     public Response(final TypeIdentifier responseBody) {
         this.responseBody = responseBody;
+        this.description = null;
+    }
+
+    public Response(TypeIdentifier responseBody, String description) {
+        this.responseBody = responseBody;
+        this.description = description;
     }
 
     public Set<String> getHeaders() {
@@ -43,6 +50,10 @@ public class Response {
 
     public TypeIdentifier getResponseBody() {
         return responseBody;
+    }
+
+    public String getDescription() {
+        return description;
     }
 
     @Override

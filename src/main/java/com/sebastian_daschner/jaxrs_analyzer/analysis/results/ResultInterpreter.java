@@ -28,8 +28,10 @@ import com.sebastian_daschner.jaxrs_analyzer.model.rest.Response;
 import com.sebastian_daschner.jaxrs_analyzer.model.results.ClassResult;
 import com.sebastian_daschner.jaxrs_analyzer.model.results.MethodResult;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static com.sebastian_daschner.jaxrs_analyzer.analysis.results.JavaDocParameterResolver.*;
 
@@ -120,12 +122,56 @@ public class ResultInterpreter {
 
         methodResult.getResponses().forEach(r -> interpretResponse(r, resourceMethod));
 
+        addJavadocResponses(methodResult, resourceMethod);
+
+
         addMediaTypes(methodResult, classResult, resourceMethod);
 
         if (methodResult.isDeprecated() || classResult.isDeprecated() || hasDeprecationTag(methodDoc))
             resourceMethod.setDeprecated(true);
 
         return resourceMethod;
+    }
+
+    /**
+     * Reads @status javadoc annotation and creates Response status codes based on them.
+     *
+     * @param methodResult
+     * @param resourceMethod
+     */
+    private void addJavadocResponses(MethodResult methodResult, ResourceMethod resourceMethod) {
+
+
+        methodResult.getMethodDoc().getParamTags();
+
+        List<MemberParameterTag> statusTag = methodResult.getMethodDoc().getParamTags().stream()
+                .filter(t -> t.getTagName().equalsIgnoreCase("status"))
+                .collect(Collectors.toList());
+
+        //Class level Javadoc tags NOT working cause below containing class coments are empty
+        methodResult.getMethodDoc().getContainingClassComment().getFieldComments().stream()
+                .filter(t -> t.getTagName().equalsIgnoreCase("status"))
+                .forEach(statusTag::add);
+
+        statusTag.stream()
+                .forEach(t -> resourceMethod.getResponses().putIfAbsent(toStatusCode(t),toResponse(t)));
+    }
+
+    private Integer toStatusCode(MemberParameterTag t) {
+        try {
+            return Integer.parseInt(t.getComment().trim().substring(0,3));
+        }catch (NumberFormatException nfe){
+            return null;
+        }
+
+    }
+
+    private Response toResponse(MemberParameterTag memberParameterTag) {
+         if(memberParameterTag.getComment() != null && memberParameterTag.getComment().trim().length() > 3) {
+             return new Response(null,memberParameterTag.getComment().trim().substring(3).trim());
+         } else {
+             return null;
+         }
     }
 
     private boolean hasDeprecationTag(MethodComment doc) {
