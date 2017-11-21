@@ -18,6 +18,7 @@ package com.sebastian_daschner.jaxrs_analyzer.analysis.results;
 
 import com.sebastian_daschner.jaxrs_analyzer.model.JavaUtils;
 import com.sebastian_daschner.jaxrs_analyzer.model.elements.HttpResponse;
+import com.sebastian_daschner.jaxrs_analyzer.model.javadoc.ClassComment;
 import com.sebastian_daschner.jaxrs_analyzer.model.javadoc.MemberComment;
 import com.sebastian_daschner.jaxrs_analyzer.model.javadoc.MemberParameterTag;
 import com.sebastian_daschner.jaxrs_analyzer.model.javadoc.MethodComment;
@@ -120,12 +121,38 @@ public class ResultInterpreter {
 
         methodResult.getResponses().forEach(r -> interpretResponse(r, resourceMethod));
 
+        addResponseComments(methodResult, resourceMethod);
+
         addMediaTypes(methodResult, classResult, resourceMethod);
 
         if (methodResult.isDeprecated() || classResult.isDeprecated() || hasDeprecationTag(methodDoc))
             resourceMethod.setDeprecated(true);
 
         return resourceMethod;
+    }
+
+    /**
+     * Adds the comments for the individual status code to the corresponding Responses.
+     * The information is based on the {@code @response} javadoc tags.
+     */
+    private void addResponseComments(MethodResult methodResult, ResourceMethod resourceMethod) {
+        MethodComment methodDoc = methodResult.getMethodDoc();
+        if (methodDoc == null)
+            return;
+
+        methodDoc.getResponseComments()
+                .forEach((k, v) -> addResponseComment(k, v, resourceMethod));
+
+        ClassComment classDoc = methodDoc.getContainingClassComment();
+
+        // class-level response comments are added last (if absent) to keep hierarchy
+        if (classDoc != null)
+            classDoc.getResponseComments()
+                    .forEach((k, v) -> addResponseComment(k, v, resourceMethod));
+    }
+
+    private void addResponseComment(Integer status, String comment, ResourceMethod resourceMethod) {
+        resourceMethod.getResponses().putIfAbsent(status, new Response(null, comment));
     }
 
     private boolean hasDeprecationTag(MethodComment doc) {
