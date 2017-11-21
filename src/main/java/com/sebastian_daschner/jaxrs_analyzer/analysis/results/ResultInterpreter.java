@@ -18,6 +18,7 @@ package com.sebastian_daschner.jaxrs_analyzer.analysis.results;
 
 import com.sebastian_daschner.jaxrs_analyzer.model.JavaUtils;
 import com.sebastian_daschner.jaxrs_analyzer.model.elements.HttpResponse;
+import com.sebastian_daschner.jaxrs_analyzer.model.javadoc.ClassComment;
 import com.sebastian_daschner.jaxrs_analyzer.model.javadoc.MemberComment;
 import com.sebastian_daschner.jaxrs_analyzer.model.javadoc.MemberParameterTag;
 import com.sebastian_daschner.jaxrs_analyzer.model.javadoc.MethodComment;
@@ -28,10 +29,8 @@ import com.sebastian_daschner.jaxrs_analyzer.model.rest.Response;
 import com.sebastian_daschner.jaxrs_analyzer.model.results.ClassResult;
 import com.sebastian_daschner.jaxrs_analyzer.model.results.MethodResult;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import static com.sebastian_daschner.jaxrs_analyzer.analysis.results.JavaDocParameterResolver.*;
 
@@ -122,8 +121,7 @@ public class ResultInterpreter {
 
         methodResult.getResponses().forEach(r -> interpretResponse(r, resourceMethod));
 
-        addJavadocResponses(methodResult, resourceMethod);
-
+        addResponseComments(methodResult, resourceMethod);
 
         addMediaTypes(methodResult, classResult, resourceMethod);
 
@@ -134,44 +132,27 @@ public class ResultInterpreter {
     }
 
     /**
-     * Reads @response javadoc annotation and creates Response status codes based on them.
-     *
-     * @param methodResult
-     * @param resourceMethod
+     * Adds the comments for the individual status code to the corresponding Responses.
+     * The information is based on the {@code @response} javadoc tags.
      */
-    private void addJavadocResponses(MethodResult methodResult, ResourceMethod resourceMethod) {
+    private void addResponseComments(MethodResult methodResult, ResourceMethod resourceMethod) {
+        MethodComment methodDoc = methodResult.getMethodDoc();
+        if (methodDoc == null)
+            return;
 
+        methodDoc.getResponseComments()
+                .forEach((k, v) -> addResponseComment(k, v, resourceMethod));
 
-        methodResult.getMethodDoc().getParamTags();
+        ClassComment classDoc = methodDoc.getContainingClassComment();
 
-        List<MemberParameterTag> statusTag = methodResult.getMethodDoc().getParamTags().stream()
-                .filter(t -> t.getTagName().equalsIgnoreCase("response"))
-                .collect(Collectors.toList());
-
-        //Class level Javadoc tags NOT working cause below containing class coments are empty
-        methodResult.getMethodDoc().getContainingClassComment().getFieldComments().stream()
-                .filter(t -> t.getTagName().equalsIgnoreCase("response"))
-                .forEach(statusTag::add);
-
-        statusTag.stream()
-                .forEach(t -> resourceMethod.getResponses().putIfAbsent(toStatusCode(t),toResponse(t)));
+        // class-level response comments are added last (if absent) to keep hierarchy
+        if (classDoc != null)
+            classDoc.getResponseComments()
+                    .forEach((k, v) -> addResponseComment(k, v, resourceMethod));
     }
 
-    private Integer toStatusCode(MemberParameterTag t) {
-        try {
-            return Integer.parseInt(t.getComment().trim().substring(0,3));
-        }catch (NumberFormatException nfe){
-            return null;
-        }
-
-    }
-
-    private Response toResponse(MemberParameterTag memberParameterTag) {
-         if(memberParameterTag.getComment() != null && memberParameterTag.getComment().trim().length() > 3) {
-             return new Response(null,memberParameterTag.getComment().trim().substring(3).trim());
-         } else {
-             return null;
-         }
+    private void addResponseComment(Integer status, String comment, ResourceMethod resourceMethod) {
+        resourceMethod.getResponses().putIfAbsent(status, new Response(null, comment));
     }
 
     private boolean hasDeprecationTag(MethodComment doc) {

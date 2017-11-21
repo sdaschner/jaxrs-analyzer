@@ -13,25 +13,19 @@ import java.util.Map;
 public class MemberParameterTag {
 
     private final String comment;
-    private final String tagName;
 
     /**
      * The annotations with their type and {@code values()};
      */
     private final Map<String, String> annotations;
 
-    public MemberParameterTag(String comment, String tagName, Map<String, String> annotations) {
+    public MemberParameterTag(String comment, Map<String, String> annotations) {
         this.comment = comment;
-        this.tagName = tagName;
         this.annotations = Collections.unmodifiableMap(annotations);
     }
 
     public String getComment() {
         return comment;
-    }
-
-    public String getTagName() {
-        return tagName;
     }
 
     public Map<String, String> getAnnotations() {

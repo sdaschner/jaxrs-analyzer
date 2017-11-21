@@ -2,6 +2,7 @@ package com.sebastian_daschner.jaxrs_analyzer.model.javadoc;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 public class MethodComment extends MemberComment {
 
@@ -9,19 +10,11 @@ public class MethodComment extends MemberComment {
     private final ClassComment containingClassComment;
 
     public MethodComment(String comment) {
-        this(comment, Collections.emptyList(), null, false);
+        this(comment, Collections.emptyList(), Collections.emptyMap(), null, false);
     }
 
-    public MethodComment(String comment, List<MemberParameterTag> paramTags) {
-        this(comment, paramTags, null, false);
-    }
-
-    public MethodComment(String comment, List<MemberParameterTag> paramTags, ClassComment containingClassComment) {
-        this(comment, paramTags, containingClassComment, false);
-    }
-
-    public MethodComment(String comment, List<MemberParameterTag> paramTags, ClassComment containingClassComment, boolean deprecated) {
-        super(comment, deprecated);
+    public MethodComment(String comment, List<MemberParameterTag> paramTags, Map<Integer, String> responseComments, ClassComment containingClassComment, boolean deprecated) {
+        super(comment, responseComments, deprecated);
         this.paramTags = Collections.unmodifiableList(paramTags);
         this.containingClassComment = containingClassComment;
     }

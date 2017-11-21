@@ -16,11 +16,13 @@ import com.sebastian_daschner.jaxrs_analyzer.model.javadoc.ClassComment;
 import com.sebastian_daschner.jaxrs_analyzer.model.javadoc.MemberParameterTag;
 import com.sebastian_daschner.jaxrs_analyzer.model.javadoc.MethodComment;
 import com.sebastian_daschner.jaxrs_analyzer.model.methods.MethodIdentifier;
+import com.sebastian_daschner.jaxrs_analyzer.utils.Pair;
 import com.sebastian_daschner.jaxrs_analyzer.utils.StringUtils;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -75,7 +77,8 @@ public class JavaDocParserVisitor extends VoidVisitorAdapter<Void> {
 
     private void recordClassComment(Javadoc javadoc) {
         String comment = javadoc.getDescription().toText();
-        classComments.put(className, new ClassComment(comment, isDeprecated(javadoc)));
+        Map<Integer, String> responseComments = createResponseComments(javadoc);
+        classComments.put(className, new ClassComment(comment, responseComments, isDeprecated(javadoc)));
     }
 
     @Override
@@ -104,12 +107,13 @@ public class JavaDocParserVisitor extends VoidVisitorAdapter<Void> {
         MethodIdentifier identifier = calculateMethodIdentifier(method);
         String comment = javadoc.getDescription().toText();
         List<MemberParameterTag> tags = createMethodParameterTags(javadoc, method);
-        methodComments.put(identifier, new MethodComment(comment, tags, classComments.get(className), isDeprecated(javadoc)));
+        Map<Integer, String> responseComments = createResponseComments(javadoc);
+        methodComments.put(identifier, new MethodComment(comment, tags, responseComments, classComments.get(className), isDeprecated(javadoc)));
     }
 
     private List<MemberParameterTag> createMethodParameterTags(Javadoc javadoc, MethodDeclaration method) {
         return javadoc.getBlockTags().stream()
-                .filter(t -> t.getType() == JavadocBlockTag.Type.PARAM || t.getTagName().equalsIgnoreCase("response"))
+                .filter(t -> t.getType() == JavadocBlockTag.Type.PARAM)
                 .map(t -> createMethodParameterTag(t, method))
                 .collect(Collectors.toList());
     }
@@ -120,17 +124,22 @@ public class JavaDocParserVisitor extends VoidVisitorAdapter<Void> {
                 .map(NodeList::stream)
                 .orElseGet(Stream::empty);
 
-        return createMemberParamTag(tag, annotations);
+        return createMemberParamTag(tag.getContent(), annotations);
     }
 
     private MemberParameterTag createMemberParamTag(JavadocDescription javadocDescription, Stream<AnnotationExpr> annotationStream) {
-        Map<String, String> annotations = annotationStream.collect(Collectors.toMap(a -> a.getName().getIdentifier(), a -> a.asSingleMemberAnnotationExpr().getMemberValue().asStringLiteralExpr().asString()));
-        return new MemberParameterTag(javadocDescription.toText(),"", annotations);
+        Map<String, String> annotations = annotationStream.collect(Collectors.toMap(a -> a.getName().getIdentifier(),
+                a -> a.asSingleMemberAnnotationExpr().getMemberValue().asStringLiteralExpr().asString()));
+        return new MemberParameterTag(javadocDescription.toText(), annotations);
     }
 
-    private MemberParameterTag createMemberParamTag(JavadocBlockTag tag, Stream<AnnotationExpr> annotationStream) {
-        Map<String, String> annotations = annotationStream.collect(Collectors.toMap(a -> a.getName().getIdentifier(), a -> a.asSingleMemberAnnotationExpr().getMemberValue().asStringLiteralExpr().asString()));
-        return new MemberParameterTag(tag.getContent().toText(),tag.getTagName(), annotations);
+    private Map<Integer, String> createResponseComments(Javadoc javadoc) {
+        return javadoc.getBlockTags().stream()
+                .filter(t -> ResponseCommentExtractor.RESPONSE_TAG_NAME.equalsIgnoreCase(t.getTagName()))
+                .map(t -> t.getContent().toText())
+                .map(ResponseCommentExtractor::extract)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toMap(Pair::getLeft, Pair::getRight));
     }
 
     /**
