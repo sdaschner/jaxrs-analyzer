@@ -148,8 +148,11 @@ public class JavaDocParserVisitor extends VoidVisitorAdapter<Void> {
      * This is a best-effort approach.
      */
     private MethodIdentifier calculateMethodIdentifier(MethodDeclaration method) {
-        String[] parameters = method.getParameters().stream().map(p -> p.getType().asString()).toArray(String[]::new);
-        String returnType = method.getType().asString();
+        String[] parameters = method.getParameters().stream()
+                .map(p -> p.getType().asString())
+                .map(p -> p.replace('.', '/'))
+                .toArray(String[]::new);
+        String returnType = method.getType().asString().replace('.', '/');
 
         if (method.isStatic()) {
             return ofStatic(className, method.getNameAsString(), returnType, parameters);

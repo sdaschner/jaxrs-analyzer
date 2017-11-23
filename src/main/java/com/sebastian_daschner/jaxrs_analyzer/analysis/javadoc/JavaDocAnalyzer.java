@@ -18,6 +18,7 @@ import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.*;
+import java.util.stream.Stream;
 
 /**
  * @author Sebastian Daschner
@@ -111,6 +112,10 @@ public class JavaDocAnalyzer {
     }
 
     private boolean matchesTypeBestEffort(String originalType, String type) {
+        // if types are generic types, use full original type signature
+        if (type.contains("<"))
+            return Stream.of(type.replace(">", "").split("<")).allMatch(originalType::contains);
+        // otherwise use class name (for primitives)
         return JavaUtils.toClassName(originalType).contains(type);
     }
 
