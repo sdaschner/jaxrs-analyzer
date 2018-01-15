@@ -86,6 +86,8 @@ class ResourceMethodContentAnalyzer extends MethodContentAnalyzer {
 
                 possibleObjects.stream().filter(o -> o instanceof JsonValue).map(o -> (JsonValue) o).forEach(defaultResponse.getInlineEntities()::add);
 
+                defaultResponse.getContentTypes().addAll(methodResult.getResponseMediaTypes());
+
                 methodResult.getResponses().add(defaultResponse);
             }
 
