@@ -1,13 +1,18 @@
 package com.sebastian_daschner.jaxrs_analyzer.backend.asciidoc;
 
-import com.sebastian_daschner.jaxrs_analyzer.backend.StringBackend;
-import com.sebastian_daschner.jaxrs_analyzer.model.Types;
-import com.sebastian_daschner.jaxrs_analyzer.model.rest.*;
-import com.sebastian_daschner.jaxrs_analyzer.utils.StringUtils;
-
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import com.sebastian_daschner.jaxrs_analyzer.backend.StringBackend;
+import com.sebastian_daschner.jaxrs_analyzer.model.Types;
+import com.sebastian_daschner.jaxrs_analyzer.model.rest.MethodParameter;
+import com.sebastian_daschner.jaxrs_analyzer.model.rest.ParameterType;
+import com.sebastian_daschner.jaxrs_analyzer.model.rest.ResourceMethod;
+import com.sebastian_daschner.jaxrs_analyzer.model.rest.Response;
+import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeIdentifier;
+import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeRepresentation;
+import com.sebastian_daschner.jaxrs_analyzer.utils.StringUtils;
 
 import static com.sebastian_daschner.jaxrs_analyzer.backend.ComparatorUtils.mapKeyComparator;
 import static com.sebastian_daschner.jaxrs_analyzer.backend.ComparatorUtils.parameterComparator;
@@ -30,6 +35,8 @@ public class AsciiDocBackend extends StringBackend {
         if (!StringUtils.isBlank(baseUri))
             builder.append(baseUri).append('/');
         builder.append(resource).append("`\n\n");
+        if( !StringUtils.isBlank( resourceMethod.getDescription() ) )
+            builder.append( "=== Description: " ).append( resourceMethod.getDescription() ).append( "\n\n" );
         if (resourceMethod.isDeprecated())
             builder.append("CAUTION: deprecated\n\n");
     }
