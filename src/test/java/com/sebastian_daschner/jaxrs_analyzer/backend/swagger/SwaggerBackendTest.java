@@ -28,6 +28,7 @@ import org.junit.runners.Parameterized;
 
 import javax.json.Json;
 import javax.json.JsonStructure;
+import javax.ws.rs.core.MediaType;
 import java.io.StringReader;
 import java.util.Collection;
 import java.util.HashMap;
@@ -242,6 +243,22 @@ public class SwaggerBackendTest {
                         .andResource("res19", ResourceMethodBuilder.withMethod(HttpMethod.GET).andDeprecated(true)
                                 .andResponse(200, ResponseBuilder.withResponseBody(TypeIdentifier.ofType(Types.STRING)).andHeaders("Location").build()).build()).build(),
                 "{\"swagger\":\"2.0\",\"info\":{\"version\":\"1.0\",\"title\":\"project name\"},\"host\":\"\",\"basePath\":\"/project name/rest\",\"schemes\":[\"http\"],\"paths\":{\"/res19\":{\"get\":{\"consumes\":[],\"produces\":[],\"parameters\":[],\"responses\":{\"200\":{\"description\":\"OK\",\"headers\":{\"Location\":{\"type\":\"string\"}},\"schema\":{\"type\":\"string\"}}},\"deprecated\":true}}},\"definitions\":{}}", new HashMap<>());
+
+        add(data, ResourcesBuilder.withBase("rest")
+                        .andResource("res19",
+                                ResourceMethodBuilder.withMethod(HttpMethod.GET).andDeprecated(true)
+                                .andResponse(200, ResponseBuilder.withResponseBody(TypeIdentifier.ofType(Types
+                                        .STRING)).andHeaders("Location").build()).andResponseMediaTypes
+                                        (MediaType.APPLICATION_JSON).build(),
+                                ResourceMethodBuilder.withMethod(HttpMethod.GET).andDeprecated(true)
+                                        .andResponse(500, ResponseBuilder.withResponseBody(TypeIdentifier.ofType(Types
+                                                .STRING)).andHeaders("Location").build()).andResponseMediaTypes
+                                        (MediaType.TEXT_PLAIN).build()
+
+                        )
+                        .build()
+                ,
+                "{\"swagger\": \"2.0\",\"info\": {\"version\": \"1.0\",\"title\": \"project name\"},\"host\": \"\",\"basePath\": \"/project name/rest\",\"schemes\": [\"http\"],\"paths\": {\"/res19\": {\"get\": {\"consumes\": [],\"produces\": [\"application/json\", \"text/plain\"],\"parameters\": [],\"responses\": {\"200\": {\"description\": \"OK\",\"headers\": {\"Location\": {\"type\": \"string\"}},\"schema\": {\"type\": \"string\"}},\"500\": {\"description\": \"Internal Server Error\",\"headers\": {\"Location\": {\"type\": \"string\"}},\"schema\": {\"type\": \"string\"}}},\"deprecated\":true}}},\"definitions\": {}}", new HashMap<>());
 
         return data;
     }
