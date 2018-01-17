@@ -1,22 +1,31 @@
 package com.sebastian_daschner.jaxrs_analyzer.backend.plaintext;
 
-import com.sebastian_daschner.jaxrs_analyzer.backend.Backend;
-import com.sebastian_daschner.jaxrs_analyzer.backend.StringBackend;
-import com.sebastian_daschner.jaxrs_analyzer.builder.ResourceMethodBuilder;
-import com.sebastian_daschner.jaxrs_analyzer.builder.ResourcesBuilder;
-import com.sebastian_daschner.jaxrs_analyzer.builder.ResponseBuilder;
-import com.sebastian_daschner.jaxrs_analyzer.model.Types;
-import com.sebastian_daschner.jaxrs_analyzer.model.rest.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.Map;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
-import java.util.*;
+import com.sebastian_daschner.jaxrs_analyzer.backend.Backend;
+import com.sebastian_daschner.jaxrs_analyzer.builder.ResourceMethodBuilder;
+import com.sebastian_daschner.jaxrs_analyzer.builder.ResourcesBuilder;
+import com.sebastian_daschner.jaxrs_analyzer.builder.ResponseBuilder;
+import com.sebastian_daschner.jaxrs_analyzer.model.Types;
+import com.sebastian_daschner.jaxrs_analyzer.model.rest.HttpMethod;
+import com.sebastian_daschner.jaxrs_analyzer.model.rest.Project;
+import com.sebastian_daschner.jaxrs_analyzer.model.rest.Resources;
+import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeIdentifier;
+import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeRepresentation;
+
+import static java.util.Collections.singletonMap;
+
+import static org.junit.Assert.assertEquals;
 
 import static com.sebastian_daschner.jaxrs_analyzer.analysis.results.TypeUtils.MODEL_IDENTIFIER;
 import static com.sebastian_daschner.jaxrs_analyzer.backend.StringBackend.INLINE_PRETTIFY;
-import static java.util.Collections.singletonMap;
-import static org.junit.Assert.assertEquals;
 
 @RunWith(Parameterized.class)
 public class PlainTextBackendTest {
@@ -48,12 +57,13 @@ public class PlainTextBackendTest {
         TypeIdentifier identifier;
         Map<String, TypeIdentifier> properties = new HashMap<>();
 
-        add(data, ResourcesBuilder.withBase("rest").andResource("res1", ResourceMethodBuilder.withMethod(HttpMethod.GET)
+        add(data, ResourcesBuilder.withBase("rest").andResource("res1", ResourceMethodBuilder.withMethod(HttpMethod.GET, "Lorem Ipsum")
                         .andResponse(200, ResponseBuilder.withResponseBody(TypeIdentifier.ofType(Types.STRING)).andHeaders("Location").build()).build()).build(),
                 "REST resources of project name:\n" +
                         "1.0\n" +
                         "\n" +
                         "GET rest/res1:\n" +
+                        "Description: Lorem Ipsum\n" +
                         " Request:\n" +
                         "  No body\n" +
                         "\n" +

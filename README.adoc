@@ -23,7 +23,7 @@ Instead of using the Maven plugin, the tool can also run directly from the jar f
 You can download the latest version https://github.com/sdaschner/jaxrs-analyzer/releases[here].
 
 == Backends
-The Analyzer supports Plaintext, AsciiDoc and Swagger as output format.
+The Analyzer supports Plaintext, AsciiDoc, Markdown and Swagger as output format.
 
 == Documentation / Feature list
 +...+ can be found https://github.com/sdaschner/jaxrs-analyzer/blob/master/Documentation.adoc[here].
