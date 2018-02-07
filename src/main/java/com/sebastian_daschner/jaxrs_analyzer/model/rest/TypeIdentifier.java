@@ -31,6 +31,10 @@ public abstract class TypeIdentifier {
         return new DynamicTypeIdentifier(dynamicCounter.incrementAndGet());
     }
 
+    public static void resetDynamicCounter() {
+        dynamicCounter.set(0);
+    }
+
     private static class JavaTypeIdentifier extends TypeIdentifier {
         private final String type;
 

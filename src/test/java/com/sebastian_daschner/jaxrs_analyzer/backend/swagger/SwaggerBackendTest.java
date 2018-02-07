@@ -96,6 +96,7 @@ public class SwaggerBackendTest {
                 "{\"swagger\":\"2.0\",\"info\":{\"version\":\"1.0\",\"title\":\"project name\"},\"host\":\"example.com\",\"basePath\":\"/rest\",\"schemes\":[\"https\",\"wss\"],\"paths\":{\"/res1\":{\"get\":{\"consumes\":[],\"produces\":[],\"parameters\":[],\"responses\":{\"200\":{\"description\":\"OK\",\"headers\":{\"Location\":{\"type\":\"string\"}},\"schema\":{\"type\":\"string\"}}}}}},\"definitions\":{}}",
                 options);
 
+        TypeIdentifier.resetDynamicCounter();
         identifier = TypeIdentifier.ofDynamic();
         properties.put("key", stringIdentifier);
         properties.put("another", intIdentifier);
@@ -104,6 +105,7 @@ public class SwaggerBackendTest {
                                 .andResponse(200, ResponseBuilder.withResponseBody(identifier).build()).build()).build(),
                 "{\"swagger\":\"2.0\",\"info\":{\"version\":\"1.0\",\"title\":\"project name\"},\"host\":\"example.com\",\"basePath\":\"/rest\",\"schemes\":[\"http\"],\"paths\":{\"/res2\":{\"get\":{\"consumes\":[],\"produces\":[],\"parameters\":[],\"responses\":{\"200\":{\"description\":\"OK\",\"headers\":{},\"schema\":{\"$ref\":\"#/definitions/JsonObject\"}}}}}},\"definitions\":{\"JsonObject\":{\"properties\":{\"another\":{\"type\":\"integer\"},\"key\":{\"type\":\"string\"}}}}}");
 
+        TypeIdentifier.resetDynamicCounter();
         identifier = TypeIdentifier.ofDynamic();
         properties = new HashMap<>();
         properties.put("key", stringIdentifier);
@@ -112,8 +114,9 @@ public class SwaggerBackendTest {
                         .andTypeRepresentation(identifier, TypeRepresentation.ofCollection(identifier, TypeRepresentation.ofConcrete(TypeIdentifier.ofDynamic(), properties)))
                         .andResource("res3", ResourceMethodBuilder.withMethod(HttpMethod.GET)
                                 .andResponse(200, ResponseBuilder.withResponseBody(identifier).build()).build()).build(),
-                "{\"swagger\":\"2.0\",\"info\":{\"version\":\"1.0\",\"title\":\"project name\"},\"host\":\"example.com\",\"basePath\":\"/rest\",\"schemes\":[\"http\"],\"paths\":{\"/res3\":{\"get\":{\"consumes\":[],\"produces\":[],\"parameters\":[],\"responses\":{\"200\":{\"description\":\"OK\",\"headers\":{},\"schema\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/definitions/JsonObject\"}}}}}}},\"definitions\":{\"JsonObject\":{\"properties\":{\"another\":{\"type\":\"integer\"},\"key\":{\"type\":\"string\"}}}}}");
+                "{\"swagger\":\"2.0\",\"info\":{\"version\":\"1.0\",\"title\":\"project name\"},\"host\":\"example.com\",\"basePath\":\"/rest\",\"schemes\":[\"http\"],\"paths\":{\"/res3\":{\"get\":{\"consumes\":[],\"produces\":[],\"parameters\":[],\"responses\":{\"200\":{\"description\":\"OK\",\"headers\":{},\"schema\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/definitions/JsonObject_2\"}}}}}}},\"definitions\":{\"JsonObject_2\":{\"properties\":{\"another\":{\"type\":\"integer\"},\"key\":{\"type\":\"string\"}}}}}");
 
+        TypeIdentifier.resetDynamicCounter();
         identifier = TypeIdentifier.ofDynamic();
         add(data, ResourcesBuilder.withBase("rest")
                         .andTypeRepresentation(identifier, TypeRepresentation.ofCollection(identifier, TypeRepresentation.ofConcrete(stringIdentifier)))
@@ -121,6 +124,7 @@ public class SwaggerBackendTest {
                                 .andResponse(200, ResponseBuilder.withResponseBody(identifier).build()).build()).build(),
                 "{\"swagger\":\"2.0\",\"info\":{\"version\":\"1.0\",\"title\":\"project name\"},\"host\":\"example.com\",\"basePath\":\"/rest\",\"schemes\":[\"http\"],\"paths\":{\"/res4\":{\"get\":{\"consumes\":[],\"produces\":[],\"parameters\":[],\"responses\":{\"200\":{\"description\":\"OK\",\"headers\":{},\"schema\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}}}}}}},\"definitions\":{}}");
 
+        TypeIdentifier.resetDynamicCounter();
         identifier = TypeIdentifier.ofDynamic();
         properties = new HashMap<>();
         properties.put("key", stringIdentifier);

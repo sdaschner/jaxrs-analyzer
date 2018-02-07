@@ -49,7 +49,7 @@ public class TestClass2 {
 
     public static ClassResult getResult() {
 
-        final MethodResult firstMethod = MethodResultBuilder.withResponses(HttpResponseBuilder.newBuilder().andEntityTypes(Types.PRIMITIVE_INT).build())
+        final MethodResult firstMethod = MethodResultBuilder.withResponses(HttpResponseBuilder.newBuilder().andEntityTypes(Types.PRIMITIVE_INT).andContentTypes("text/html").build())
                 .andResponseMediaTypes("text/html").andMethod(HttpMethod.GET).build();
         final MethodResult secondMethod = MethodResultBuilder.withResponses(HttpResponseBuilder.withStatues(202).build())
                 .andMethod(HttpMethod.POST).andRequestBodyType(Types.STRING).build();
