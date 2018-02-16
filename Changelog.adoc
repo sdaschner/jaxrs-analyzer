@@ -4,6 +4,7 @@ Sebastian Daschner
 // new versions are placed on the top
 == v0.16+inx-1-SNAPSHOT
 - Generating description also in Plaintext, Asciidoc and Markdown
+- Added Markdown support
 
 == v0.14
 - Fixed test related execution phase
