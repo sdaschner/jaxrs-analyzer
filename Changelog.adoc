@@ -5,6 +5,7 @@ Sebastian Daschner
 == v0.16+inx-1-SNAPSHOT
 - Generating description also in Plaintext, Asciidoc and Markdown
 - Added Markdown support
+- Added possibility to ignore JAX-RS boundary classes
 
 == v0.14
 - Fixed test related execution phase

@@ -43,6 +43,7 @@ public class Main {
     private static String name = DEFAULT_NAME;
     private static String version = DEFAULT_VERSION;
     private static String backendType = "swagger";
+    private static Set<String> ignoredBoundaryClasses = new HashSet<>();
     private static Path outputFileLocation;
 
     /**
@@ -70,6 +71,7 @@ public class Main {
      * <li>{@code --swaggerSchemes scheme[,schemes]} The Swagger schemes: {@code http} (default), {@code https}, {@code ws}, {@code wss}")</li>
      * <li>{@code --renderSwaggerTags} Enables rendering of Swagger tags (will not be rendered per default)</li>
      * <li>{@code --swaggerTagsPathOffset path offset} The number at which path position the Swagger tags should be extracted ({@code 0} per default)</li>
+     * <li>{@code --ignoredBoundaryClasses class[,classes]} Boundary classes which should be ignored by analyze (empty per default)</li>
      * </ul>
      *
      * @param args The arguments
@@ -92,6 +94,7 @@ public class Main {
         backend.configure(attributes);
 
         final JAXRSAnalyzer jaxrsAnalyzer = new JAXRSAnalyzer(projectClassPaths, projectSourcePaths, classPaths, name, version, backend, outputFileLocation);
+        jaxrsAnalyzer.setIgnoredBoundaryClasses( ignoredBoundaryClasses );
         jaxrsAnalyzer.analyze();
     }
 
@@ -138,6 +141,9 @@ public class Main {
                             break;
                         case "--noInlinePrettify":
                             attributes.put(StringBackend.INLINE_PRETTIFY, "false");
+                            break;
+                        case "--ignoredBoundaryClasses":
+                            ignoredBoundaryClasses = buildSetOfCommaList( args[++i] );
                             break;
                         case "-a":
                             addAttribute(args[++i]);
@@ -187,6 +193,15 @@ public class Main {
         return paths;
     }
 
+    private static Set<String> buildSetOfCommaList( String commaList ) {
+        Set<String> set = new HashSet<>();
+        if( commaList==null || commaList.trim().isEmpty() )
+            return set;
+
+        set.addAll( Arrays.asList( commaList.split( "," ) ) );
+        return set;
+    }
+
     private static void validateArgs() {
         if (projectClassPaths.isEmpty()) {
             System.err.println("Please provide at least one project path\n");
@@ -212,6 +227,7 @@ public class Main {
         System.err.println(" --swaggerSchemes <scheme>[,schemes] The Swagger schemes: http (default), https, ws, wss");
         System.err.println(" --renderSwaggerTags Enables rendering of Swagger tags (default tag will be used per default)");
         System.err.println(" --swaggerTagsPathOffset <path offset> The number at which path position the Swagger tags will be extracted (0 will be used per default)");
+        System.err.println(" --ignoredBoundaryClasses <fully qualified classname [class,...]> Boundary classes which should be ignored by analyze (empty per default)");
         System.err.println(" --noPrettyPrint Don't pretty print inline JSON body representations (will be pretty printed per default)");
         System.err.println("\nExample: java -jar jaxrs-analyzer.jar -b swagger -n \"My Project\" -cp ~/libs/lib1.jar:~/libs/project/bin ~/project/target/classes");
         System.exit(1);

@@ -29,6 +29,8 @@ public class JAXRSAnalyzer {
     private final String projectVersion;
     private final Path outputLocation;
     private final Backend backend;
+    private Set<String> ignoredBoundaryClasses = new HashSet<>();
+
 
     /**
      * Constructs a JAX-RS Analyzer.
@@ -62,11 +64,15 @@ public class JAXRSAnalyzer {
         this.backend = backend;
     }
 
+    public void setIgnoredBoundaryClasses( Set<String> ignoredBoundaryClasses ) {
+        this.ignoredBoundaryClasses = ignoredBoundaryClasses;
+    }
+
     /**
      * Analyzes the JAX-RS project at the class path and produces the output as configured.
      */
     public void analyze() {
-        final Resources resources = new ProjectAnalyzer(classPaths).analyze(projectClassPaths, projectSourcePaths);
+        final Resources resources = new ProjectAnalyzer( classPaths, ignoredBoundaryClasses ).analyze(projectClassPaths, projectSourcePaths);
 
         if (resources.isEmpty()) {
             LogProvider.info("Empty JAX-RS analysis result, omitting output");
