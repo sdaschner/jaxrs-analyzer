@@ -128,7 +128,9 @@ public class JavaDocParserVisitor extends VoidVisitorAdapter<Void> {
     }
 
     private MemberParameterTag createMemberParamTag(JavadocDescription javadocDescription, Stream<AnnotationExpr> annotationStream) {
-        Map<String, String> annotations = annotationStream.collect(Collectors.toMap(a -> a.getName().getIdentifier(),
+        Map<String, String> annotations = annotationStream
+                .filter(a -> a.isSingleMemberAnnotationExpr())
+                .collect(Collectors.toMap(a -> a.getName().getIdentifier(),
                 a -> a.asSingleMemberAnnotationExpr().getMemberValue().asStringLiteralExpr().asString()));
         return new MemberParameterTag(javadocDescription.toText(), annotations);
     }

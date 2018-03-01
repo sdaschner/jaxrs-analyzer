@@ -26,6 +26,7 @@ import java.net.URI;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
+import javax.validation.constraints.Pattern;
 
 /**
  * These sources are solely used for test purposes and not meant for deployment.
@@ -83,7 +84,7 @@ public class TestResources {
      */
     @DELETE
     @Path("{foobar}")
-    public void deleteTest(@PathParam("foobar") final String foobar) {
+    public void deleteTest(@PathParam("foobar") @Pattern(regexp = "^\\S.*") final String foobar) {
         Logger.getLogger("").info("deleted " + foobar);
     }
 
