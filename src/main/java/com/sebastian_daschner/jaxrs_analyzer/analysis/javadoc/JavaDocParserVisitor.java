@@ -8,6 +8,7 @@ import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.comments.Comment;
 import com.github.javaparser.ast.expr.AnnotationExpr;
+import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
 import com.github.javaparser.javadoc.Javadoc;
 import com.github.javaparser.javadoc.JavadocBlockTag;
@@ -128,7 +129,9 @@ public class JavaDocParserVisitor extends VoidVisitorAdapter<Void> {
     }
 
     private MemberParameterTag createMemberParamTag(JavadocDescription javadocDescription, Stream<AnnotationExpr> annotationStream) {
-        Map<String, String> annotations = annotationStream.collect(Collectors.toMap(a -> a.getName().getIdentifier(),
+        Map<String, String> annotations = annotationStream
+                .filter(Expression::isSingleMemberAnnotationExpr)
+                .collect(Collectors.toMap(a -> a.getName().getIdentifier(),
                 a -> a.asSingleMemberAnnotationExpr().getMemberValue().asStringLiteralExpr().asString()));
         return new MemberParameterTag(javadocDescription.toText(), annotations);
     }
