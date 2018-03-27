@@ -51,7 +51,7 @@ public class ClassAnalyzerTest {
     }
 
     @Parameterized.Parameters(name = "{0}")
-    public static Collection<Object[]> data() throws NotFoundException, IOException, ReflectiveOperationException {
+    public static Collection<Object[]> data() throws NotFoundException, ReflectiveOperationException {
         Collection<Object[]> data = new LinkedList<>();
 
         final Set<String> testClasses = TestClassUtils.getClasses("com/sebastian_daschner/jaxrs_analyzer/analysis/project/classes/testclasses");
