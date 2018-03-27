@@ -17,6 +17,7 @@
 package com.sebastian_daschner.jaxrs_analyzer.model.rest;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Represents a set of resources and their possible methods.
@@ -25,7 +26,7 @@ import java.util.*;
  */
 public class Resources {
 
-    private final Map<String, Set<ResourceMethod>> resources = new HashMap<>();
+    private Map<String, Set<ResourceMethod>> resources = new HashMap<>();
     private final Map<TypeIdentifier, TypeRepresentation> typeRepresentations = new HashMap<>();
     private String basePath;
 
@@ -64,6 +65,24 @@ public class Resources {
      */
     public boolean isEmpty() {
         return resources.isEmpty() || resources.values().stream().allMatch(Set::isEmpty);
+    }
+
+    /**
+     * Consolidates the information contained in multiple responses for the same path.
+     * Internally creates new resources.
+     */
+    public void consolidateMultiplePaths() {
+        Map<String, Set<ResourceMethod>> oldResources = resources;
+        resources = new HashMap<>();
+
+        oldResources.keySet().forEach(s -> consolidateMultipleMethodsForSamePath(s, oldResources.get(s)));
+    }
+
+    private void consolidateMultipleMethodsForSamePath(String path, Set<ResourceMethod> resourceMethods) {
+        resourceMethods.stream()
+                .collect(Collectors.groupingBy(m -> m.getMethod().toString().toLowerCase(),
+                        Collectors.reducing(new ResourceMethod(), ResourceMethod::combine))
+                ).forEach((k, v) -> addMethod(path, v));
     }
 
     public Map<TypeIdentifier, TypeRepresentation> getTypeRepresentations() {

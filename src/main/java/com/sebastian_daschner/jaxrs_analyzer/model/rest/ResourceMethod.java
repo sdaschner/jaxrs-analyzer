@@ -16,7 +16,11 @@
 
 package com.sebastian_daschner.jaxrs_analyzer.model.rest;
 
+import com.sebastian_daschner.jaxrs_analyzer.utils.StringUtils;
+
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Represents a REST resource method.
@@ -29,12 +33,15 @@ public class ResourceMethod {
     private final Set<String> responseMediaTypes = new HashSet<>();
     private final Map<Integer, Response> responses = new HashMap<>();
     private final Set<MethodParameter> methodParameters = new HashSet<>();
-    private final String description;
+    private String description;
 
-    private final HttpMethod method;
+    private HttpMethod method;
     private TypeIdentifier requestBody;
     private String requestBodyDescription;
     private boolean deprecated;
+
+    public ResourceMethod() {
+    }
 
     public ResourceMethod(final HttpMethod method, final String description) {
         Objects.requireNonNull(method);
@@ -88,6 +95,46 @@ public class ResourceMethod {
 
     public void setRequestBodyDescription(final String requestBodyDescription) {
         this.requestBodyDescription = requestBodyDescription;
+    }
+
+    public ResourceMethod combine(ResourceMethod with) {
+        ResourceMethod rm = new ResourceMethod();
+        rm.method = with.method;
+        rm.requestBody = with.requestBody;
+
+        rm.requestMediaTypes.addAll(this.requestMediaTypes);
+        rm.requestMediaTypes.addAll(with.requestMediaTypes);
+
+        rm.responseMediaTypes.addAll(this.responseMediaTypes);
+        rm.responseMediaTypes.addAll(with.responseMediaTypes);
+
+        rm.responses.putAll(this.responses);
+        rm.responses.putAll(with.responses);
+
+        rm.methodParameters.addAll(this.methodParameters);
+        rm.methodParameters.addAll(with.methodParameters);
+
+        String combinedDescription = Stream.of(this.description, with.description)
+                .filter(s -> !StringUtils.isBlank(s))
+                .collect(Collectors.joining("\n"));
+        rm.description = StringUtils.isBlank(combinedDescription) ? null : combinedDescription;
+
+        rm.requestBodyDescription = mergeRequestBodyDescription(with);
+
+        rm.deprecated = Stream.of(this.deprecated, with.deprecated).anyMatch(Boolean.TRUE::equals);
+        return rm;
+    }
+
+    private String mergeRequestBodyDescription(ResourceMethod other) {
+        final boolean thisNull = requestBodyDescription == null;
+        final boolean otherNull = other.requestBodyDescription == null;
+        if (thisNull && otherNull)
+            return null;
+
+        if (thisNull ^ otherNull)
+            return thisNull ? other.requestBodyDescription : requestBodyDescription;
+
+        return requestBodyDescription + "\n" + other.requestBodyDescription;
     }
 
     @Override

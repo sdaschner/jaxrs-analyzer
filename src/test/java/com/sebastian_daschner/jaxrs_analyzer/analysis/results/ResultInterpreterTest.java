@@ -212,6 +212,7 @@ public class ResultInterpreterTest {
 
         final ClassResult appPathResult = ClassResultBuilder.withApplicationPath("path").build();
         final MethodResult getMethod = MethodResultBuilder.withResponses(HttpResponseBuilder.newBuilder().andEntityTypes(Types.STRING).build())
+                .andResponseMediaTypes("application/json")
                 .andMethod(HttpMethod.GET).andResponseMediaTypes("application/json").build();
         final MethodResult postMethod = MethodResultBuilder.newBuilder().andMethod(HttpMethod.POST).andRequestBodyType(Types.STRING).build();
         final ClassResult resClassResult = ClassResultBuilder.withResourcePath("test").andMethods(getMethod, postMethod).build();

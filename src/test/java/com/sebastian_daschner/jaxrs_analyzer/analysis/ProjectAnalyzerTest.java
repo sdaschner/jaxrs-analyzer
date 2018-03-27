@@ -206,7 +206,7 @@ public class ProjectAnalyzerTest {
 
         // test/test
         ResourceMethod fourthGet = ResourceMethodBuilder.withMethod(HttpMethod.GET, "Returns a test string with plain text.").andAcceptMediaTypes("application/json")
-                .andResponseMediaTypes("text/plain").andResponse(200, ResponseBuilder.withResponseBody(stringIdentifier).build()).build();
+                .andResponseMediaTypes("text/plain", "application/json").andResponse(200, ResponseBuilder.withResponseBody(stringIdentifier).build()).build();
         addMethods(resources, "test/test", fourthGet);
 
         // complex

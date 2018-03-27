@@ -31,6 +31,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.stream.Collectors;
 
 import static com.sebastian_daschner.jaxrs_analyzer.backend.ComparatorUtils.mapKeyComparator;
 import static com.sebastian_daschner.jaxrs_analyzer.backend.ComparatorUtils.parameterComparator;
@@ -95,11 +96,19 @@ public class SwaggerBackend implements Backend {
     }
 
     private void appendHeader() {
+        renderHeader();
+        renderTags();
+    }
+
+    private void renderHeader() {
         builder.add("swagger", SWAGGER_VERSION).add("info", Json.createObjectBuilder()
                 .add("version", projectVersion).add("title", projectName))
                 .add("host", options.getDomain() == null ? "" : options.getDomain()).add("basePath", (options.getDomain() != null && !"".equals(options.getDomain().trim()) ? '/' : '/' + projectName + '/') + resources.getBasePath())
                 .add("schemes", options.getSchemes().stream().map(Enum::name).map(String::toLowerCase).sorted()
                         .collect(Json::createArrayBuilder, JsonArrayBuilder::add, JsonArrayBuilder::add).build());
+    }
+
+    private void renderTags() {
         if (options.isRenderTags()) {
             final JsonArrayBuilder tags = Json.createArrayBuilder();
             resources.getResources().stream()
@@ -129,10 +138,19 @@ public class SwaggerBackend implements Backend {
 
     private JsonObjectBuilder buildPathDefinition(final String s) {
         final JsonObjectBuilder methods = Json.createObjectBuilder();
-        resources.getMethods(s).stream()
+        consolidateMultipleMethodsForSamePath(s)
+                .values().stream()
                 .sorted(comparing(ResourceMethod::getMethod))
-                .forEach(m -> methods.add(m.getMethod().toString().toLowerCase(), buildForMethod(m, s)));
+                .forEach(m ->
+                        methods.add(m.getMethod().toString().toLowerCase(), buildForMethod(m, s)));
         return methods;
+    }
+
+    private Map<String, ResourceMethod> consolidateMultipleMethodsForSamePath(String s) {
+        return resources.getMethods(s).stream().collect(
+                Collectors.groupingBy(m->m.getMethod().toString().toLowerCase(),
+                        Collectors.reducing(new ResourceMethod(), ResourceMethod::combine))
+        );
     }
 
     private JsonObjectBuilder buildForMethod(final ResourceMethod method, final String s) {
