@@ -42,6 +42,7 @@ class SchemaBuilder {
      * The fully-qualified class name together with the JSON definitions identified by the definition names.
      */
     private final Map<String, Pair<String, JsonObject>> jsonDefinitions = new HashMap<>();
+    private final DefinitionNameBuilder definitionNameBuilder = new DefinitionNameBuilder();
 
     /**
      * All known representation defined in the REST resources
@@ -145,7 +146,7 @@ class SchemaBuilder {
     }
 
     private void addObject(final JsonObjectBuilder builder, final TypeIdentifier identifier, final Map<String, TypeIdentifier> properties) {
-        final String definition = buildDefinition(identifier.getName());
+        final String definition = definitionNameBuilder.buildDefinitionName(identifier.getName(), jsonDefinitions);
 
         if (jsonDefinitions.containsKey(definition)) {
             builder.add("$ref", "#/definitions/" + definition);
@@ -165,28 +166,6 @@ class SchemaBuilder {
 
     private void addPrimitive(final JsonObjectBuilder builder, final SwaggerType type) {
         builder.add("type", type.toString());
-    }
-
-    private String buildDefinition(final String typeName) {
-
-        String definition;
-        if (typeName.startsWith(TypeIdentifier.DYNAMIC_TYPE_PREFIX)) {
-            String id = typeName.substring(TypeIdentifier.DYNAMIC_TYPE_PREFIX.length());
-            definition = "JsonObject" + ("1".equals(id) ? "" : "_" + id);
-        } else {
-            definition = typeName.substring(typeName.lastIndexOf('/') + 1, typeName.length() - 1);
-        }
-
-        final Pair<String, JsonObject> containedEntry = jsonDefinitions.get(definition);
-        if (containedEntry == null || containedEntry.getLeft() != null && containedEntry.getLeft().equals(typeName))
-            return definition;
-
-        if (!definition.matches("_\\d+$"))
-            return definition + "_2";
-
-        final int separatorIndex = definition.lastIndexOf('_');
-        final int index = Integer.parseInt(definition.substring(separatorIndex + 1));
-        return definition.substring(0, separatorIndex + 1) + (index + 1);
     }
 
     /**

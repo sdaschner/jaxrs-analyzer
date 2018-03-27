@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static com.sebastian_daschner.jaxrs_analyzer.analysis.results.TypeUtils.*;
+import static com.sebastian_daschner.jaxrs_analyzer.backend.swagger.TypeIdentifierTestSupport.resetTypeIdentifierCounter;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 
@@ -26,7 +27,7 @@ public class SchemaBuilderTest {
     @Before
     public void resetRepresentations() {
         representations.clear();
-        TypeIdentifier.resetDynamicCounter();
+        resetTypeIdentifierCounter();
     }
 
     @Test
