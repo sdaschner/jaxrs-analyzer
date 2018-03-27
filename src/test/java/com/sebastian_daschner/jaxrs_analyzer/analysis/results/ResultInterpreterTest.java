@@ -38,10 +38,12 @@ import static org.junit.Assert.assertEquals;
 public class ResultInterpreterTest {
 
     private ResultInterpreter classUnderTest;
+    private NormalizedTypeAnalyzerFactory normalizedTypeAnalyzerFactory;
 
     @Before
     public void setUp() {
         classUnderTest = new ResultInterpreter();
+        normalizedTypeAnalyzerFactory = new JaxbAnalyzerFactory();
     }
 
     @Test
@@ -60,7 +62,7 @@ public class ResultInterpreterTest {
 
         final Set<ClassResult> results = new HashSet<>(Arrays.asList(appPathResult, resClassResult));
 
-        final Resources actualResult = classUnderTest.interpret(results);
+        final Resources actualResult = classUnderTest.interpret(results,normalizedTypeAnalyzerFactory);
 
         assertEquals(expectedResult, actualResult);
     }
@@ -87,7 +89,7 @@ public class ResultInterpreterTest {
 
         final Set<ClassResult> results = new HashSet<>(Arrays.asList(appPathResult, resClassResult));
 
-        final Resources actualResult = classUnderTest.interpret(results);
+        final Resources actualResult = classUnderTest.interpret(results,normalizedTypeAnalyzerFactory);
 
         assertEquals(expectedResult, actualResult);
     }
@@ -106,7 +108,7 @@ public class ResultInterpreterTest {
 
         final Set<ClassResult> results = new HashSet<>(Arrays.asList(appPathResult, resClassResult));
 
-        final Resources actualResult = classUnderTest.interpret(results);
+        final Resources actualResult = classUnderTest.interpret(results,normalizedTypeAnalyzerFactory);
 
         assertEquals(expectedResult, actualResult);
     }
@@ -129,7 +131,7 @@ public class ResultInterpreterTest {
 
         final Set<ClassResult> results = new HashSet<>(Arrays.asList(appPathResult, resClassResult));
 
-        final Resources actualResult = classUnderTest.interpret(results);
+        final Resources actualResult = classUnderTest.interpret(results,normalizedTypeAnalyzerFactory);
 
         assertEquals(expectedResult, actualResult);
     }
@@ -150,7 +152,7 @@ public class ResultInterpreterTest {
 
         final Set<ClassResult> results = new HashSet<>(Arrays.asList(appPathResult, resClassResult));
 
-        final Resources actualResult = classUnderTest.interpret(results);
+        final Resources actualResult = classUnderTest.interpret(results,normalizedTypeAnalyzerFactory);
 
         assertEquals(expectedResult, actualResult);
     }
@@ -172,7 +174,7 @@ public class ResultInterpreterTest {
 
         final Set<ClassResult> results = new HashSet<>(Arrays.asList(appPathResult, resClassResult));
 
-        final Resources actualResult = classUnderTest.interpret(results);
+        final Resources actualResult = classUnderTest.interpret(results,normalizedTypeAnalyzerFactory);
 
         assertEquals(expectedResult, actualResult);
     }
@@ -193,7 +195,7 @@ public class ResultInterpreterTest {
 
         final Set<ClassResult> results = new HashSet<>(Arrays.asList(appPathResult, resClassResult));
 
-        final Resources actualResult = classUnderTest.interpret(results);
+        final Resources actualResult = classUnderTest.interpret(results,normalizedTypeAnalyzerFactory);
 
         assertEquals(expectedResult, actualResult);
     }
@@ -219,7 +221,7 @@ public class ResultInterpreterTest {
 
         final Set<ClassResult> results = new HashSet<>(Arrays.asList(appPathResult, resClassResult));
 
-        final Resources actualResult = classUnderTest.interpret(results);
+        final Resources actualResult = classUnderTest.interpret(results,normalizedTypeAnalyzerFactory);
 
         assertEquals(expectedResult, actualResult);
     }
@@ -246,7 +248,7 @@ public class ResultInterpreterTest {
 
         final Set<ClassResult> results = new HashSet<>(Arrays.asList(appPathResult, resClassResult));
 
-        final Resources actualResult = classUnderTest.interpret(results);
+        final Resources actualResult = classUnderTest.interpret(results,normalizedTypeAnalyzerFactory);
 
         assertEquals(expectedResult, actualResult);
     }
@@ -276,7 +278,7 @@ public class ResultInterpreterTest {
 
         final Set<ClassResult> results = new HashSet<>(Arrays.asList(appPathResult, resClassResult));
 
-        final Resources actualResult = classUnderTest.interpret(results);
+        final Resources actualResult = classUnderTest.interpret(results,normalizedTypeAnalyzerFactory);
 
         assertEquals(expectedResult, actualResult);
     }
@@ -302,7 +304,7 @@ public class ResultInterpreterTest {
 
         final Set<ClassResult> results = new HashSet<>(Arrays.asList(appPathResult, resClassResult));
 
-        final Resources actualResult = classUnderTest.interpret(results);
+        final Resources actualResult = classUnderTest.interpret(results,normalizedTypeAnalyzerFactory);
 
         assertEquals(expectedResult, actualResult);
     }

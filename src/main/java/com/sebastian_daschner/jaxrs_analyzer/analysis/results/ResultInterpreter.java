@@ -51,11 +51,11 @@ public class ResultInterpreter {
      *
      * @return All REST resources
      */
-    public Resources interpret(final Set<ClassResult> classResults) {
+    public Resources interpret(final Set<ClassResult> classResults, NormalizedTypeAnalyzerFactory normalizedTypeAnalyzerFactory) {
         resources = new Resources();
         resources.setBasePath(PathNormalizer.getApplicationPath(classResults));
 
-        javaTypeAnalyzer = new JavaTypeAnalyzer(resources.getTypeRepresentations());
+        javaTypeAnalyzer = new JavaTypeAnalyzer(resources.getTypeRepresentations(),normalizedTypeAnalyzerFactory);
         dynamicTypeAnalyzer = new DynamicTypeAnalyzer(resources.getTypeRepresentations());
         stringParameterResolver = new StringParameterResolver(resources.getTypeRepresentations(), javaTypeAnalyzer);
 

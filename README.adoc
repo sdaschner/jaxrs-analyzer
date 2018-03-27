@@ -25,6 +25,11 @@ You can download the latest version https://github.com/sdaschner/jaxrs-analyzer/
 == Backends
 The Analyzer supports Plaintext, AsciiDoc and Swagger as output format.
 
+== Annotations for Type Analyzer
+By default JAXB annotations and visibility rules will determine which fields will be serialized to JSON.
+Alternatively Jackson annotations can be used which will then determine visibility as well as adhere to property names
+as specified by the @JsonProperty("my_property_name") annotation.   
+
 == Documentation / Feature list
 +...+ can be found https://github.com/sdaschner/jaxrs-analyzer/blob/master/Documentation.adoc[here].
 

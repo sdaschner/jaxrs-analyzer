@@ -51,6 +51,7 @@ Following available options:
 * `-v <project version>` The version of the project
 * `-d <project domain>` The domain of the project
 * `-o <output file>` The location of the analysis output (will be printed to standard out if omitted)
+* `-ta <type analyzer>` Annotations to use for type analyzer: jaxb (default) or jackson
 
 Following available backend specific options (only have effect if the corresponding backend is selected):
 

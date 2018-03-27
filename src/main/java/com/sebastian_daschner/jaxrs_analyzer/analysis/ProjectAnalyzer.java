@@ -21,6 +21,7 @@ import com.sebastian_daschner.jaxrs_analyzer.analysis.bytecode.BytecodeAnalyzer;
 import com.sebastian_daschner.jaxrs_analyzer.analysis.classes.ContextClassReader;
 import com.sebastian_daschner.jaxrs_analyzer.analysis.classes.JAXRSClassVisitor;
 import com.sebastian_daschner.jaxrs_analyzer.analysis.javadoc.JavaDocAnalyzer;
+import com.sebastian_daschner.jaxrs_analyzer.analysis.results.NormalizedTypeAnalyzerFactory;
 import com.sebastian_daschner.jaxrs_analyzer.analysis.results.ResultInterpreter;
 import com.sebastian_daschner.jaxrs_analyzer.model.JavaUtils;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.Resources;
@@ -79,7 +80,7 @@ public class ProjectAnalyzer {
      * @param projectSourcePaths The project source file paths
      * @return The REST resource representations
      */
-    public Resources analyze(final Set<Path> projectClassPaths, final Set<Path> projectSourcePaths) {
+    public Resources analyze(final Set<Path> projectClassPaths, final Set<Path> projectSourcePaths, NormalizedTypeAnalyzerFactory normalizedTypeAnalyzerFactory) {
         lock.lock();
         try {
             projectClassPaths.forEach(this::addProjectPath);
@@ -102,7 +103,7 @@ public class ProjectAnalyzer {
 
             javaDocAnalyzer.analyze(projectSourcePaths, classResults);
 
-            return resultInterpreter.interpret(classResults);
+            return resultInterpreter.interpret(classResults,normalizedTypeAnalyzerFactory);
         } finally {
             lock.unlock();
         }

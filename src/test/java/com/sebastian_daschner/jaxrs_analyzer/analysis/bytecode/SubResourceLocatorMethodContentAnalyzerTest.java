@@ -8,6 +8,7 @@ import com.sebastian_daschner.jaxrs_analyzer.model.methods.MethodIdentifier;
 import com.sebastian_daschner.jaxrs_analyzer.model.results.ClassResult;
 import com.sebastian_daschner.jaxrs_analyzer.model.results.MethodResult;
 import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -97,6 +98,11 @@ public class SubResourceLocatorMethodContentAnalyzerTest {
         assertEquals("failed for " + testClassName, expectedClassNames, captor.getAllValues().stream().collect(Collectors.toSet()));
         verify(jobRegistry, times(expectedClassNames.size())).analyzeResourceClass(any(), any());
     }
+    
+    @BeforeClass
+    public static void saveJobRegistryBeforeAllTests() {
+        originalJobRegistry = JobRegistry.getInstance();
+    }
 
     @AfterClass
     public static void tearDown() throws NoSuchFieldException, IllegalAccessException {
@@ -106,7 +112,6 @@ public class SubResourceLocatorMethodContentAnalyzerTest {
     private static void injectJobRegistry(final JobRegistry jobRegistry) throws NoSuchFieldException, IllegalAccessException {
         final Field field = JobRegistry.class.getDeclaredField("INSTANCE");
         field.setAccessible(true);
-        originalJobRegistry = JobRegistry.getInstance();
         Field modifiersField = Field.class.getDeclaredField("modifiers");
         modifiersField.setAccessible(true);
         modifiersField.setInt(field, field.getModifiers() & ~Modifier.FINAL);
