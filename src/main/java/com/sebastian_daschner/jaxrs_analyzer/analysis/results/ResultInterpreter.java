@@ -60,6 +60,7 @@ public class ResultInterpreter {
         stringParameterResolver = new StringParameterResolver(resources.getTypeRepresentations(), javaTypeAnalyzer);
 
         classResults.stream().filter(c -> c.getResourcePath() != null).forEach(this::interpretClassResult);
+        resources.consolidateMultiplePaths();
 
         return resources;
     }

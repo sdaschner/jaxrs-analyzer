@@ -40,7 +40,9 @@ public class ResourceMethod {
     private String requestBodyDescription;
     private boolean deprecated;
 
-    public ResourceMethod(){}
+    public ResourceMethod() {
+    }
+
     public ResourceMethod(final HttpMethod method, final String description) {
         Objects.requireNonNull(method);
         this.method = method;
@@ -95,7 +97,7 @@ public class ResourceMethod {
         this.requestBodyDescription = requestBodyDescription;
     }
 
-    public ResourceMethod combine(ResourceMethod with){
+    public ResourceMethod combine(ResourceMethod with) {
         ResourceMethod rm = new ResourceMethod();
         rm.method = with.method;
         rm.requestBody = with.requestBody;
@@ -112,17 +114,27 @@ public class ResourceMethod {
         rm.methodParameters.addAll(this.methodParameters);
         rm.methodParameters.addAll(with.methodParameters);
 
-        String combinedDescription = Stream.of(this.description, with.description).filter(s -> !StringUtils.isBlank(s)).collect
-                (Collectors
-                        .joining("\n"));
+        String combinedDescription = Stream.of(this.description, with.description)
+                .filter(s -> !StringUtils.isBlank(s))
+                .collect(Collectors.joining("\n"));
         rm.description = StringUtils.isBlank(combinedDescription) ? null : combinedDescription;
 
-        rm.requestBodyDescription = Optional.ofNullable(this.requestBodyDescription).orElse("") + "\n" + Optional.ofNullable(with
-                .requestBodyDescription).orElse("");
+        rm.requestBodyDescription = mergeRequestBodyDescription(with);
 
-        rm.deprecated = Stream.of(this.deprecated, with.deprecated).anyMatch(b->Boolean.TRUE.equals(b));
-
+        rm.deprecated = Stream.of(this.deprecated, with.deprecated).anyMatch(Boolean.TRUE::equals);
         return rm;
+    }
+
+    private String mergeRequestBodyDescription(ResourceMethod other) {
+        final boolean thisNull = requestBodyDescription == null;
+        final boolean otherNull = other.requestBodyDescription == null;
+        if (thisNull && otherNull)
+            return null;
+
+        if (thisNull ^ otherNull)
+            return thisNull ? other.requestBodyDescription : requestBodyDescription;
+
+        return requestBodyDescription + "\n" + other.requestBodyDescription;
     }
 
     @Override

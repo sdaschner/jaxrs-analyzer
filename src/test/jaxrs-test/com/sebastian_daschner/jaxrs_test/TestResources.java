@@ -52,6 +52,13 @@ public class TestResources {
     }
 
     @GET
+    @Path("test")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response testJson() {
+        return Response.ok("{\"hi\":\"hello\"}", MediaType.APPLICATION_JSON).build();
+    }
+
+    @GET
     public List<? extends Model> getModels() {
         return this.testStore.getModels();
     }
