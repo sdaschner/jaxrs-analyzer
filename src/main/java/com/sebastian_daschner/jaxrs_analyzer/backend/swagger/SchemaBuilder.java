@@ -168,8 +168,14 @@ class SchemaBuilder {
     }
 
     private String buildDefinition(final String typeName) {
-        final String definition = typeName.startsWith(TypeIdentifier.DYNAMIC_TYPE_PREFIX) ? "JsonObject" :
-                typeName.substring(typeName.lastIndexOf('/') + 1, typeName.length() - 1);
+
+        String definition;
+        if (typeName.startsWith(TypeIdentifier.DYNAMIC_TYPE_PREFIX)) {
+            String id = typeName.substring(TypeIdentifier.DYNAMIC_TYPE_PREFIX.length());
+            definition = "JsonObject" + ("1".equals(id) ? "" : "_" + id);
+        } else {
+            definition = typeName.substring(typeName.lastIndexOf('/') + 1, typeName.length() - 1);
+        }
 
         final Pair<String, JsonObject> containedEntry = jsonDefinitions.get(definition);
         if (containedEntry == null || containedEntry.getLeft() != null && containedEntry.getLeft().equals(typeName))

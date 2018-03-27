@@ -26,6 +26,7 @@ public class SchemaBuilderTest {
     @Before
     public void resetRepresentations() {
         representations.clear();
+        TypeIdentifier.resetDynamicCounter();
     }
 
     @Test
@@ -197,6 +198,42 @@ public class SchemaBuilderTest {
                         .add("test1", type("integer"))))
                 .add("JsonObject_2", Json.createObjectBuilder().add("properties", Json.createObjectBuilder()
                         .add("nested", Json.createObjectBuilder().add("$ref", "#/definitions/JsonObject"))))
+                .build()));
+    }
+
+    @Test
+    public void testDifferentDynamicDefinitions() {
+        final TypeIdentifier firstIdentifier = TypeIdentifier.ofDynamic();
+        final TypeIdentifier secondIdentifier = TypeIdentifier.ofDynamic();
+        final TypeIdentifier thirdIdentifier = TypeIdentifier.ofDynamic();
+
+        final Map<String, TypeIdentifier> firstProperties = new HashMap<>();
+        firstProperties.put("_links", secondIdentifier);
+
+        final Map<String, TypeIdentifier> secondProperties = new HashMap<>();
+        secondProperties.put("self", thirdIdentifier);
+
+        final Map<String, TypeIdentifier> thirdProperties = new HashMap<>();
+        thirdProperties.put("href", STRING_IDENTIFIER);
+
+        representations.put(firstIdentifier, TypeRepresentation.ofConcrete(firstIdentifier, firstProperties));
+        representations.put(secondIdentifier, TypeRepresentation.ofConcrete(secondIdentifier, secondProperties));
+        representations.put(thirdIdentifier, TypeRepresentation.ofConcrete(thirdIdentifier, thirdProperties));
+
+        cut = new SchemaBuilder(representations);
+
+        assertThat(cut.build(firstIdentifier).build(), is(Json.createObjectBuilder().add("$ref", "#/definitions/JsonObject").build()));
+        assertThat(cut.build(secondIdentifier).build(), is(Json.createObjectBuilder().add("$ref", "#/definitions/JsonObject_2").build()));
+        assertThat(cut.build(thirdIdentifier).build(), is(Json.createObjectBuilder().add("$ref", "#/definitions/JsonObject_3").build()));
+
+        final JsonObject definitions = cut.getDefinitions();
+        assertThat(definitions, is(Json.createObjectBuilder()
+                .add("JsonObject", Json.createObjectBuilder().add("properties", Json.createObjectBuilder()
+                        .add("_links", Json.createObjectBuilder().add("$ref", "#/definitions/JsonObject_2"))))
+                .add("JsonObject_2", Json.createObjectBuilder().add("properties", Json.createObjectBuilder()
+                        .add("self", Json.createObjectBuilder().add("$ref", "#/definitions/JsonObject_3"))))
+                .add("JsonObject_3", Json.createObjectBuilder().add("properties", Json.createObjectBuilder()
+                        .add("href", type("string"))))
                 .build()));
     }
 
