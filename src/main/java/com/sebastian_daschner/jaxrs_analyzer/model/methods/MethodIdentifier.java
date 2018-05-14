@@ -20,8 +20,6 @@ import com.sebastian_daschner.jaxrs_analyzer.model.JavaUtils;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static java.util.Arrays.asList;
 
@@ -87,39 +85,22 @@ public class MethodIdentifier {
     }
 
     @Override
-    public boolean equals(Object o) {
+    @SuppressWarnings({"squid:S00122", "squid:S1067"})
+    // generated code so it's fine to have more than one statement in one line and more than 3 conditional operators
+    public boolean equals(final Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-
-        MethodIdentifier that = (MethodIdentifier) o;
-
-        if (staticMethod != that.staticMethod) return false;
-        if (!containingClass.equals(that.containingClass)) return false;
-        if (!methodName.equals(that.methodName)) return false;
-
-        if (parameters.equals(that.parameters))
-            return true;
-
-        // fallback if signature matches after type erasure
-        if (parameters.size() == that.parameters.size()) {
-            final List<String> erasedTypes = parameters.stream().map(JavaUtils::toClassName).collect(Collectors.toList());
-            final List<String> erasedThatTypes = that.parameters.stream().map(JavaUtils::toClassName).collect(Collectors.toList());
-            final String erasedReturnType = JavaUtils.toClassName(returnType);
-            final String erasedThatReturnType = JavaUtils.toClassName(that.returnType);
-            return erasedTypes.equals(erasedThatTypes) && erasedReturnType.equals(erasedThatReturnType);
-        }
-
-        return false;
+        final MethodIdentifier that = (MethodIdentifier) o;
+        return staticMethod == that.staticMethod &&
+                Objects.equals(containingClass, that.containingClass) &&
+                Objects.equals(methodName, that.methodName) &&
+                Objects.equals(returnType, that.returnType) &&
+                Objects.equals(parameters, that.parameters);
     }
 
     @Override
     public int hashCode() {
-        int result = containingClass.hashCode();
-        result = 31 * result + methodName.hashCode();
-        result = 31 * result + returnType.hashCode();
-        result = 31 * result + (staticMethod ? 1 : 0);
-        result = 31 * result + parameters.hashCode();
-        return result;
+        return Objects.hash(containingClass, methodName, returnType, staticMethod, parameters);
     }
 
     @Override
