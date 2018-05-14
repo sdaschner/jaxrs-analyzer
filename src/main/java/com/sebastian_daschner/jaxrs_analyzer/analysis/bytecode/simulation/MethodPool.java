@@ -53,6 +53,7 @@ public class MethodPool {
     private final ReadWriteLock readWriteLock;
 
     private MethodPool() {
+        // could also be a ConcurrentHashMap, could probably make readWriteLock obsolete, but might influence performance negatively
         availableMethods = new HashMap<>();
 
         Stream.of(KnownResponseResultMethod.values()).forEach(knownResponseResultMethod -> availableMethods.put(knownResponseResultMethod.getIdentifier(), knownResponseResultMethod));
