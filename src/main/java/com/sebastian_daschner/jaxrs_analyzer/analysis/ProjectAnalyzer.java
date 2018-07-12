@@ -42,6 +42,8 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
+import com.sebastian_daschner.jaxrs_analyzer.utils.RestrictedStringHashSet;
+
 import static com.sebastian_daschner.jaxrs_analyzer.model.JavaUtils.isAnnotationPresent;
 
 /**
@@ -58,7 +60,7 @@ public class ProjectAnalyzer {
     // b should have result
 
     private final Lock lock = new ReentrantLock();
-    private final Set<String> classes = new HashSet<>();
+    private final RestrictedStringHashSet classes = new RestrictedStringHashSet();
     private final ResultInterpreter resultInterpreter = new ResultInterpreter();
     private final BytecodeAnalyzer bytecodeAnalyzer = new BytecodeAnalyzer();
     private final JavaDocAnalyzer javaDocAnalyzer = new JavaDocAnalyzer();
@@ -69,6 +71,18 @@ public class ProjectAnalyzer {
      * @param classPaths The locations of additional class paths (can be directories or jar-files)
      */
     public ProjectAnalyzer(final Set<Path> classPaths) {
+        this( classPaths, new HashSet<>() );
+    }
+
+    /**
+     * Creates a project analyzer with given class path locations where to search for classes.
+     * Additionally a blacklist of skipped classes is provided.
+     *
+     * @param classPaths The locations of additional class paths (can be directories or jar-files)
+     * @param ignoredBoundaryClassnames Set of full qualified classnames to be skipped on analyze
+     */
+    public ProjectAnalyzer(final Set<Path> classPaths, final Set<String> ignoredBoundaryClassnames ) {
+        classes.getIgnored().addAll( ignoredBoundaryClassnames );
         classPaths.forEach(this::addToClassPool);
     }
 

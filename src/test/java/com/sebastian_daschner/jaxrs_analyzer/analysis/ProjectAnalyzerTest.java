@@ -66,7 +66,8 @@ public class ProjectAnalyzerTest {
                 .collect(Collectors.toSet());
 
         classPaths.add(path);
-        classUnderTest = new ProjectAnalyzer(classPaths);
+        classUnderTest = new ProjectAnalyzer(classPaths,
+                new HashSet<>( Collections.singletonList( "com.sebastian_daschner.jaxrs_test.IgnoredTestResources" ) ) );
     }
 
     @Test
@@ -78,6 +79,7 @@ public class ProjectAnalyzerTest {
 
         assertEquals(expectedResources.getBasePath(), actualResources.getBasePath());
 
+        assertFalse( actualResources.getResources().contains( "ignored" ) );
         assertEquals(expectedResources.getResources(), actualResources.getResources());
         assertResourceEquals(expectedResources, actualResources);
         assertEquals(expectedResources.getTypeRepresentations().size(), actualResources.getTypeRepresentations().size());
