@@ -2,10 +2,19 @@
 Sebastian Daschner
 
 // new versions are placed on the top
-== v0.17-SNAPSHOT
-- Generating description also in Plaintext, Asciidoc and Markdown
-- Added Markdown support
-- Added possibility to ignore JAX-RS boundary classes
+
+== v0.17 SNAPSHOT
+- Markdown support
+- Added resource description in remaining backends
+- Support to ignore JAX-RS boundary classes
+
+== v0.16
+- Added AsciiDoc prettification
+- Fixed error on empty application path
+- Minor fixes
+
+== v0.15
+- Fixed JavaDoc erased types
 
 == v0.14
 - Fixed test related execution phase

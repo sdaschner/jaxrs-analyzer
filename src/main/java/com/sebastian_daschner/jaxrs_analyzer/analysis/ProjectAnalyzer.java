@@ -42,8 +42,6 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
-import com.sebastian_daschner.jaxrs_analyzer.utils.RestrictedStringHashSet;
-
 import static com.sebastian_daschner.jaxrs_analyzer.model.JavaUtils.isAnnotationPresent;
 
 /**
@@ -60,7 +58,7 @@ public class ProjectAnalyzer {
     // b should have result
 
     private final Lock lock = new ReentrantLock();
-    private final RestrictedStringHashSet classes = new RestrictedStringHashSet();
+    private final Set<String> classes = new HashSet<>();
     private final ResultInterpreter resultInterpreter = new ResultInterpreter();
     private final BytecodeAnalyzer bytecodeAnalyzer = new BytecodeAnalyzer();
     private final JavaDocAnalyzer javaDocAnalyzer = new JavaDocAnalyzer();
@@ -71,18 +69,6 @@ public class ProjectAnalyzer {
      * @param classPaths The locations of additional class paths (can be directories or jar-files)
      */
     public ProjectAnalyzer(final Set<Path> classPaths) {
-        this( classPaths, new HashSet<>() );
-    }
-
-    /**
-     * Creates a project analyzer with given class path locations where to search for classes.
-     * Additionally a blacklist of skipped classes is provided.
-     *
-     * @param classPaths The locations of additional class paths (can be directories or jar-files)
-     * @param ignoredBoundaryClassnames Set of full qualified classnames to be skipped on analyze
-     */
-    public ProjectAnalyzer(final Set<Path> classPaths, final Set<String> ignoredBoundaryClassnames ) {
-        classes.getIgnored().addAll( ignoredBoundaryClassnames );
         classPaths.forEach(this::addToClassPool);
     }
 
@@ -91,9 +77,10 @@ public class ProjectAnalyzer {
      *
      * @param projectClassPaths  The project class paths
      * @param projectSourcePaths The project source file paths
+     * @param ignoredResources   The fully-qualified root resource class names to be ignored
      * @return The REST resource representations
      */
-    public Resources analyze(final Set<Path> projectClassPaths, final Set<Path> projectSourcePaths) {
+    public Resources analyze(Set<Path> projectClassPaths, Set<Path> projectSourcePaths, Set<String> ignoredResources) {
         lock.lock();
         try {
             projectClassPaths.forEach(this::addProjectPath);
@@ -102,7 +89,10 @@ public class ProjectAnalyzer {
             final JobRegistry jobRegistry = JobRegistry.getInstance();
             final Set<ClassResult> classResults = new HashSet<>();
 
-            classes.stream().filter(this::isJAXRSRootResource).forEach(c -> jobRegistry.analyzeResourceClass(c, new ClassResult()));
+            classes.stream()
+                    .filter(this::isJAXRSRootResource)
+                    .filter(r -> !ignoredResources.contains(r))
+                    .forEach(c -> jobRegistry.analyzeResourceClass(c, new ClassResult()));
 
             Pair<String, ClassResult> classResultPair;
             while ((classResultPair = jobRegistry.nextUnhandledClass()) != null) {

@@ -1,4 +1,4 @@
-package com.sebastian_daschner.jaxrs_analyzer.backend.mardown;
+package com.sebastian_daschner.jaxrs_analyzer.backend.markdown;
 
 import java.util.Optional;
 import java.util.Set;

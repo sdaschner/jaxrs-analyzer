@@ -44,6 +44,7 @@ public class ProjectAnalyzerTest {
 
     private ProjectAnalyzer classUnderTest;
     private Path path;
+    private String ignoredRootResource = "com.sebastian_daschner.jaxrs_test.IgnoredTestResources";
 
     @Before
     public void setUp() throws MalformedURLException {
@@ -66,20 +67,19 @@ public class ProjectAnalyzerTest {
                 .collect(Collectors.toSet());
 
         classPaths.add(path);
-        classUnderTest = new ProjectAnalyzer(classPaths,
-                new HashSet<>( Collections.singletonList( "com.sebastian_daschner.jaxrs_test.IgnoredTestResources" ) ) );
+        classUnderTest = new ProjectAnalyzer(classPaths);
     }
 
     @Test
     public void test() {
         final long startTime = System.currentTimeMillis();
-        final Resources actualResources = classUnderTest.analyze(singleton(path), singleton(path));
+        final Resources actualResources = classUnderTest.analyze(singleton(path), singleton(path), singleton(ignoredRootResource));
         System.out.println("Project analysis took " + (System.currentTimeMillis() - startTime) + " ms");
         final Resources expectedResources = getResources();
 
         assertEquals(expectedResources.getBasePath(), actualResources.getBasePath());
 
-        assertFalse( actualResources.getResources().contains( "ignored" ) );
+        assertFalse(actualResources.getResources().contains("ignored"));
         assertEquals(expectedResources.getResources(), actualResources.getResources());
         assertResourceEquals(expectedResources, actualResources);
         assertEquals(expectedResources.getTypeRepresentations().size(), actualResources.getTypeRepresentations().size());

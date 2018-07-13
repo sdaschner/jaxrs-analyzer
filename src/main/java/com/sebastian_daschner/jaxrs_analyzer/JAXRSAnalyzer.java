@@ -22,68 +22,43 @@ import java.util.stream.StreamSupport;
  */
 public class JAXRSAnalyzer {
 
-    private final Set<Path> projectClassPaths = new HashSet<>();
-    private final Set<Path> projectSourcePaths = new HashSet<>();
-    private final Set<Path> classPaths = new HashSet<>();
-    private final String projectName;
-    private final String projectVersion;
-    private final Path outputLocation;
-    private final Backend backend;
-    private Set<String> ignoredBoundaryClasses = new HashSet<>();
-
+    private final Analysis analysis;
 
     /**
      * Constructs a JAX-RS Analyzer.
-     *
-     * @param projectClassPaths  The paths of the projects classes to be analyzed (can either be directories or jar-files, at least one is mandatory)
-     * @param projectSourcePaths The paths of the projects sources to be analyzed (can either be directories or jar-files, optional)
-     * @param classPaths         The additional class paths (can either be directories or jar-files)
-     * @param projectName        The project name
-     * @param projectVersion     The project version
-     * @param backend            The backend to render the output
-     * @param outputLocation     The location of the output file (output will be printed to standard out if {@code null})
      */
-    public JAXRSAnalyzer(final Set<Path> projectClassPaths, final Set<Path> projectSourcePaths, final Set<Path> classPaths, final String projectName, final String projectVersion,
-                         final Backend backend, final Path outputLocation) {
-        Objects.requireNonNull(projectClassPaths);
-        Objects.requireNonNull(projectSourcePaths);
-        Objects.requireNonNull(classPaths);
-        Objects.requireNonNull(projectName);
-        Objects.requireNonNull(projectVersion);
-        Objects.requireNonNull(backend);
+    public JAXRSAnalyzer(Analysis analysis) {
+        Objects.requireNonNull(analysis);
+        Objects.requireNonNull(analysis.projectClassPaths);
+        Objects.requireNonNull(analysis.projectSourcePaths);
+        Objects.requireNonNull(analysis.classPaths);
+        Objects.requireNonNull(analysis.projectName);
+        Objects.requireNonNull(analysis.projectVersion);
+        Objects.requireNonNull(analysis.backend);
 
-        if (projectClassPaths.isEmpty())
+        if (analysis.projectClassPaths.isEmpty())
             throw new IllegalArgumentException("At least one project path is mandatory");
 
-        this.projectClassPaths.addAll(projectClassPaths);
-        this.projectSourcePaths.addAll(projectSourcePaths);
-        this.classPaths.addAll(classPaths);
-        this.projectName = projectName;
-        this.projectVersion = projectVersion;
-        this.outputLocation = outputLocation;
-        this.backend = backend;
-    }
-
-    public void setIgnoredBoundaryClasses( Set<String> ignoredBoundaryClasses ) {
-        this.ignoredBoundaryClasses = ignoredBoundaryClasses;
+        this.analysis = analysis;
     }
 
     /**
      * Analyzes the JAX-RS project at the class path and produces the output as configured.
      */
     public void analyze() {
-        final Resources resources = new ProjectAnalyzer( classPaths, ignoredBoundaryClasses ).analyze(projectClassPaths, projectSourcePaths);
+        final Resources resources = new ProjectAnalyzer(analysis.classPaths)
+                .analyze(analysis.projectClassPaths, analysis.projectSourcePaths, analysis.ignoredResources);
 
         if (resources.isEmpty()) {
             LogProvider.info("Empty JAX-RS analysis result, omitting output");
             return;
         }
 
-        final Project project = new Project(projectName, projectVersion, resources);
-        final byte[] output = backend.render(project);
+        final Project project = new Project(analysis.projectName, analysis.projectVersion, resources);
+        final byte[] output = analysis.backend.render(project);
 
-        if (outputLocation != null) {
-            outputToFile(output, outputLocation);
+        if (analysis.outputLocation != null) {
+            outputToFile(output, analysis.outputLocation);
         } else {
             outputToConsole(output);
         }
@@ -115,6 +90,54 @@ public class JAXRSAnalyzer {
                 .filter(b -> backendType.equalsIgnoreCase(b.getName()))
                 .findAny()
                 .orElseThrow(() -> new IllegalArgumentException("Unknown backend type " + backendType));
+    }
+
+    public static class Analysis {
+
+        private final Set<Path> projectClassPaths = new HashSet<>();
+        private final Set<Path> projectSourcePaths = new HashSet<>();
+        private final Set<Path> classPaths = new HashSet<>();
+        private final Set<String> ignoredResources = new HashSet<>();
+        private String projectName;
+        private String projectVersion;
+        private Path outputLocation;
+        private Backend backend;
+
+        public Set<Path> getProjectClassPaths() {
+            return projectClassPaths;
+        }
+
+        public void addProjectClassPath(Path classPath) {
+            projectClassPaths.add(classPath);
+        }
+
+        public void addProjectSourcePath(Path sourcePath) {
+            projectSourcePaths.add(sourcePath);
+        }
+
+        public void addClassPath(Path classPath) {
+            classPaths.add(classPath);
+        }
+
+        public void addIgnoredResource(String ignored) {
+            ignoredResources.add(ignored);
+        }
+
+        public void setProjectName(String projectName) {
+            this.projectName = projectName;
+        }
+
+        public void setProjectVersion(String projectVersion) {
+            this.projectVersion = projectVersion;
+        }
+
+        public void setOutputLocation(Path outputLocation) {
+            this.outputLocation = outputLocation;
+        }
+
+        public void setBackend(Backend backend) {
+            this.backend = backend;
+        }
     }
 
 }
