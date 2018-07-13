@@ -13,7 +13,7 @@ Just add the latest release version of the JAX-RS Analyzer to your Maven pom.xml
 <plugin>
     <groupId>com.sebastian-daschner</groupId>
     <artifactId>jaxrs-analyzer-maven-plugin</artifactId>
-    <version>0.14</version>
+    <version>0.16</version>
     <executions>
         <execution>
             <goals>
@@ -44,7 +44,7 @@ The `projectPath` entries may be directories or jar files containing the classes
 
 Following available options:
 
-* `-b <backend>` The backend to choose: `swagger` (default), `plaintext`, `asciidoc`
+* `-b <backend>` The backend to choose: `swagger` (default), `plaintext`, `asciidoc`, `markdown`
 * `-cp <class path>[:class paths...]` The additional class paths containing classes which are used in the project (separated by colon); this may be directories or jar-files
 * `-X` Debug enabled (prints error debugging information on Standard error out)
 * `-n <project name>` The name of the project
@@ -57,12 +57,14 @@ Following available backend specific options (only have effect if the correspond
 * `--swaggerSchemes <scheme>[,schemes]` The Swagger schemes: `http` (default), `https`, `ws`, `wss`
 * `--renderSwaggerTags` Enables rendering of Swagger tags (default tag will be used per default)
 * `--swaggerTagsPathOffset <path offset>` The number at which path position the Swagger tags will be extracted (0 will be used per default)
+* `--ignoredRootResources <fully qualified classname [class,...]>` JAX-RS root resource classes which should be ignored by analyze (empty per default). Note that these ignores only cause the classes to be ignored as root resources; they might still be taken into account as JAX-RS sub-resources.
 
 == Backends
-The Analyzer supports Plaintext, AsciiDoc and Swagger as output format.
-The latter two can be processed further.
+The Analyzer supports Plaintext, AsciiDoc, Markdown and Swagger as output format.
+The latter three can be processed further.
 
-AsciiDoc is a human-readable, lightweight markup language and can be converted to PDF, HTML (and many more) using tools like https://github.com/asciidoctor/asciidoctor[Asciidoctor].
+AsciiDoc and Markdown are human-readable, lightweight markup languages.
+They can easily converted to PDF, HTML, and many more.
 
 The Swagger JSON file can be used with Swagger UI or the http://editor.swagger.io[Swagger Editor].
 

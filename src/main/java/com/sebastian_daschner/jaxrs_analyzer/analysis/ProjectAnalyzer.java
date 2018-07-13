@@ -77,9 +77,10 @@ public class ProjectAnalyzer {
      *
      * @param projectClassPaths  The project class paths
      * @param projectSourcePaths The project source file paths
+     * @param ignoredResources   The fully-qualified root resource class names to be ignored
      * @return The REST resource representations
      */
-    public Resources analyze(final Set<Path> projectClassPaths, final Set<Path> projectSourcePaths) {
+    public Resources analyze(Set<Path> projectClassPaths, Set<Path> projectSourcePaths, Set<String> ignoredResources) {
         lock.lock();
         try {
             projectClassPaths.forEach(this::addProjectPath);
@@ -88,7 +89,10 @@ public class ProjectAnalyzer {
             final JobRegistry jobRegistry = JobRegistry.getInstance();
             final Set<ClassResult> classResults = new HashSet<>();
 
-            classes.stream().filter(this::isJAXRSRootResource).forEach(c -> jobRegistry.analyzeResourceClass(c, new ClassResult()));
+            classes.stream()
+                    .filter(this::isJAXRSRootResource)
+                    .filter(r -> !ignoredResources.contains(r))
+                    .forEach(c -> jobRegistry.analyzeResourceClass(c, new ClassResult()));
 
             Pair<String, ClassResult> classResultPair;
             while ((classResultPair = jobRegistry.nextUnhandledClass()) != null) {

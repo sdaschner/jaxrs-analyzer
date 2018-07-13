@@ -1,4 +1,4 @@
-package com.sebastian_daschner.jaxrs_analyzer.backend.asciidoc;
+package com.sebastian_daschner.jaxrs_analyzer.backend.markdown;
 
 import java.util.Optional;
 import java.util.Set;
@@ -18,32 +18,33 @@ import static com.sebastian_daschner.jaxrs_analyzer.backend.ComparatorUtils.mapK
 import static com.sebastian_daschner.jaxrs_analyzer.backend.ComparatorUtils.parameterComparator;
 import static com.sebastian_daschner.jaxrs_analyzer.model.JavaUtils.toReadableType;
 
-/**
- * A backend implementation which produces an AsciiDoc representation of the JAX-RS project.
- *
- * @author Sebastian Daschner
- */
-public class AsciiDocBackend extends StringBackend {
 
-    private static final String NAME = "AsciiDoc";
-    private static final String DOCUMENT_TITLE = "= REST resources of ";
+/**
+ * A backend implementation which produces an Markdown representation of the JAX-RS project.
+ *
+ * @author Sven Ehnert
+ */
+public class MarkdownBackend extends StringBackend {
+
+    private static final String NAME = "Markdown";
+    private static final String DOCUMENT_TITLE = "# REST resources of ";
     private static final String TYPE_WILDCARD = "\\*/*";
 
     @Override
     protected void appendMethod(final String baseUri, final String resource, final ResourceMethod resourceMethod) {
-        builder.append("== `").append(resourceMethod.getMethod()).append(' ');
+        builder.append("## `").append(resourceMethod.getMethod()).append(' ');
         if (!StringUtils.isBlank(baseUri))
             builder.append(baseUri).append('/');
         builder.append(resource).append("`\n\n");
         if( !StringUtils.isBlank( resourceMethod.getDescription() ) )
-            builder.append( "=== Description: " ).append( resourceMethod.getDescription() ).append( "\n\n" );
+            builder.append( "### Description: " ).append( resourceMethod.getDescription() ).append( "\n\n" );
         if (resourceMethod.isDeprecated())
             builder.append("CAUTION: deprecated\n\n");
     }
 
     @Override
     protected void appendRequest(final ResourceMethod resourceMethod) {
-        builder.append("=== Request\n");
+        builder.append("### Request\n");
 
         if (resourceMethod.getRequestBody() != null) {
             builder.append("*Content-Type*: `");
@@ -85,14 +86,14 @@ public class AsciiDocBackend extends StringBackend {
 
     @Override
     protected void appendResponse(final ResourceMethod resourceMethod) {
-        builder.append("=== Response\n");
+        builder.append("### Response\n");
 
         builder.append("*Content-Type*: `");
         builder.append(resourceMethod.getResponseMediaTypes().isEmpty() ? TYPE_WILDCARD : toString(resourceMethod.getResponseMediaTypes()));
         builder.append("`\n\n");
 
         resourceMethod.getResponses().entrySet().stream().sorted(mapKeyComparator()).forEach(e -> {
-            builder.append("==== `").append(e.getKey()).append(' ')
+            builder.append("#### `").append(e.getKey()).append(' ')
                     .append(javax.ws.rs.core.Response.Status.fromStatusCode(e.getKey()).getReasonPhrase()).append("`\n");
             final Response response = e.getValue();
             response.getHeaders().forEach(h -> builder.append("*Header*: `").append(h).append("` + \n"));
@@ -109,9 +110,9 @@ public class AsciiDocBackend extends StringBackend {
     }
 
     private void generateSample(TypeRepresentation r) {
-        builder.append("\n\n[source,javascript]\n----\n");
+        builder.append("\n\n```javascript\n");
         builder.append(doVisit(r));
-        builder.append("\n----\n\n");
+        builder.append("\n```\n\n");
     }
 
     private String toTypeOrCollection(final TypeIdentifier type) {
@@ -133,7 +134,7 @@ public class AsciiDocBackend extends StringBackend {
 
     @Override
     protected void appendFirstLine() {
-        builder.append(DOCUMENT_TITLE).append(projectName).append("\n");
+        builder.append(DOCUMENT_TITLE).append(projectName).append("\n\n");
     }
 
 }
