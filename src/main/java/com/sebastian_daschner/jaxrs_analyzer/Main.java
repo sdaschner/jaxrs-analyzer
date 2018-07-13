@@ -42,7 +42,6 @@ public class Main {
 
     private static final JAXRSAnalyzer.Analysis analysis = new JAXRSAnalyzer.Analysis();
     private static final Map<String, String> attributes = new HashMap<>();
-    private static Backend backend;
 
     /**
      * Inspects JAX-RS projects and outputs the gathered information.
@@ -208,9 +207,9 @@ public class Main {
     }
 
     private static void configureBackend() {
-        if (backend == null)
-            backend = JAXRSAnalyzer.constructBackend(DEFAULT_BACKEND);
-        backend.configure(attributes);
+        if (analysis.getBackend() == null)
+            analysis.setBackend(JAXRSAnalyzer.constructBackend(DEFAULT_BACKEND));
+        analysis.configureBackend(attributes);
     }
 
     private static void printUsageAndExit() {

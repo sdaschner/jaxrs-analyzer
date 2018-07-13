@@ -1,31 +1,25 @@
 package com.sebastian_daschner.jaxrs_analyzer.backend.asciidoc;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Map;
-
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-
 import com.sebastian_daschner.jaxrs_analyzer.backend.Backend;
 import com.sebastian_daschner.jaxrs_analyzer.builder.ResourceMethodBuilder;
 import com.sebastian_daschner.jaxrs_analyzer.builder.ResourcesBuilder;
 import com.sebastian_daschner.jaxrs_analyzer.builder.ResponseBuilder;
 import com.sebastian_daschner.jaxrs_analyzer.model.Types;
-import com.sebastian_daschner.jaxrs_analyzer.model.rest.HttpMethod;
-import com.sebastian_daschner.jaxrs_analyzer.model.rest.Project;
-import com.sebastian_daschner.jaxrs_analyzer.model.rest.Resources;
-import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeIdentifier;
-import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeRepresentation;
+import com.sebastian_daschner.jaxrs_analyzer.model.rest.*;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
-import static java.util.Collections.singletonMap;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
-
+import static com.sebastian_daschner.jaxrs_analyzer.analysis.results.TypeUtils.ENUM_IDENTIFIER;
 import static com.sebastian_daschner.jaxrs_analyzer.analysis.results.TypeUtils.MODEL_IDENTIFIER;
 import static com.sebastian_daschner.jaxrs_analyzer.backend.StringBackend.INLINE_PRETTIFY;
+import static java.util.Collections.singletonMap;
+import static org.junit.Assert.assertEquals;
 
 @RunWith(Parameterized.class)
 public class AsciiDocBackendTest {
@@ -255,6 +249,30 @@ public class AsciiDocBackendTest {
                         "*Response Body*: (Collection of `com.sebastian_daschner.test.Model`)\n\n" +
                         "[source,javascript]\n" + "----\n" + "[{\"name\":\"string\",\"value\":0}]\n" + "----\n\n\n\n", false);
 
+        identifier = TypeIdentifier.ofType("Ljava/util/List<Lcom/sebastian_daschner/test/Enumeration;>;");
+        add(data, ResourcesBuilder.withBase("rest")
+                        .andTypeRepresentation(identifier, TypeRepresentation.ofCollection(identifier, TypeRepresentation.ofEnum(ENUM_IDENTIFIER, "VALUE", "ANOTHER_VALUE", "OTHER")))
+                        .andResource("res1", ResourceMethodBuilder.withMethod(HttpMethod.GET)
+                                .andResponse(200, ResponseBuilder.withResponseBody(identifier).build()).build()).build(),
+                "= REST resources of project name\n" +
+                        "1.0\n" +
+                        "\n" +
+                        "== `GET rest/res1`\n" +
+                        "\n" +
+                        "=== Request\n" +
+                        "_No body_ + \n" +
+                        "\n" +
+                        "=== Response\n" +
+                        "*Content-Type*: `\\*/*`\n" +
+                        "\n" +
+                        "==== `200 OK`\n" +
+                        "*Response Body*: (Collection of `com.sebastian_daschner.test.Enumeration`)\n\n" +
+                        "[source,javascript]\n" + "----\n" + "[\"ANOTHER_VALUE|OTHER|VALUE\"]\n" + "----\n\n\n\n", false);
+
+        identifier = TypeIdentifier.ofType("Ljava/util/List<Lcom/sebastian_daschner/test/Model;>;");
+        properties = new HashMap<>();
+        properties.put("name", stringIdentifier);
+        properties.put("value", intIdentifier);
         add(data, ResourcesBuilder.withBase("rest")
                         .andTypeRepresentation(identifier, TypeRepresentation.ofCollection(identifier, TypeRepresentation.ofConcrete(MODEL_IDENTIFIER, properties)))
                         .andResource("res1", ResourceMethodBuilder.withMethod(HttpMethod.POST).andRequestBodyType(identifier).andFormParam("form", MODEL_IDENTIFIER.getType())

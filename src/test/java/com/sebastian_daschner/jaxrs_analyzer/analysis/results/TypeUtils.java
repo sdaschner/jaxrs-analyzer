@@ -11,6 +11,7 @@ public final class TypeUtils {
     public static final TypeIdentifier INT_IDENTIFIER = TypeIdentifier.ofType(Types.PRIMITIVE_INT);
     public static final TypeIdentifier STRING_LIST_IDENTIFIER = TypeIdentifier.ofType("Ljava/util/List<Ljava/lang/String;>;");
     public static final TypeIdentifier MODEL_IDENTIFIER = TypeIdentifier.ofType("Lcom/sebastian_daschner/test/Model;");
+    public static final TypeIdentifier ENUM_IDENTIFIER = TypeIdentifier.ofType("Lcom/sebastian_daschner/test/Enumeration;");
 
     private TypeUtils() {
         throw new UnsupportedOperationException();

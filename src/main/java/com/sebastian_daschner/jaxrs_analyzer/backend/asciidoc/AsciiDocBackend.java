@@ -117,7 +117,7 @@ public class AsciiDocBackend extends StringBackend {
     private String toTypeOrCollection(final TypeIdentifier type) {
         final TypeRepresentation representation = resources.getTypeRepresentations().get(type);
         if (representation != null && !representation.getComponentType().equals(type) && !type.getType().equals(Types.JSON)) {
-            return "Collection of `" + toReadableType(representation.getComponentType().getType()) + '`';
+            return "Collection of `" + toReadableComponentType(representation.getComponentType()) + '`';
         }
         return '`' + toReadableType(type.getType()) + '`';
     }

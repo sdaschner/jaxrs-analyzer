@@ -216,4 +216,13 @@ public class JavaUtilsTest {
         assertEquals(stampedLockLinkedList, actualType);
     }
 
+    @Test
+    public void testToReadableTypes() {
+        assertEquals("com.sebastian_daschner.model.Model", toReadableType("Lcom/sebastian_daschner/model/Model;"));
+        assertEquals("com.sebastian_daschner.model.Enumeration", toReadableType("Lcom/sebastian_daschner/model/Enumeration;"));
+        assertEquals("java.util.List<com.sebastian_daschner.model.Enumeration>", toReadableType("Ljava/util/List<Lcom/sebastian_daschner/model/Enumeration;>;"));
+        assertEquals("java.util.List<com.sebastian_daschner.model.Model>", toReadableType("Ljava/util/List<Lcom/sebastian_daschner/model/Model;>;"));
+        assertEquals("java.util.List<? extends com.sebastian_daschner.model.Model>", toReadableType("Ljava/util/List<+Lcom/sebastian_daschner/model/Model;>;"));
+    }
+
 }

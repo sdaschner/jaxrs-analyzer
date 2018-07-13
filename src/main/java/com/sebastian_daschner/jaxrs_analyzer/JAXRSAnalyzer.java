@@ -9,10 +9,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.file.Path;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.ServiceLoader;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.StreamSupport;
 
 /**
@@ -123,6 +120,11 @@ public class JAXRSAnalyzer {
             ignoredResources.add(ignored);
         }
 
+        public void configureBackend(Map<String, String> attributes) {
+            if (backend != null)
+                backend.configure(attributes);
+        }
+
         public void setProjectName(String projectName) {
             this.projectName = projectName;
         }
@@ -137,6 +139,10 @@ public class JAXRSAnalyzer {
 
         public void setBackend(Backend backend) {
             this.backend = backend;
+        }
+
+        public Backend getBackend() {
+            return backend;
         }
     }
 

@@ -10,7 +10,9 @@ import java.io.StringWriter;
 import java.util.Map;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.regex.Pattern;
 
+import static com.sebastian_daschner.jaxrs_analyzer.model.JavaUtils.toReadableType;
 import static java.util.Collections.singletonMap;
 import static java.util.Comparator.comparing;
 
@@ -23,6 +25,7 @@ public abstract class StringBackend implements Backend {
 
     public static final String INLINE_PRETTIFY = "inlinePrettify";
     private static final String INLINE_PRETTIFY_DEFAULT = "true";
+    private static final Pattern CLEAR_COMPONENT_TYPE = Pattern.compile("[+\\-]");
 
     protected final Lock lock = new ReentrantLock();
     protected StringBuilder builder;
@@ -100,6 +103,11 @@ public abstract class StringBackend implements Backend {
         typeRepresentation.accept(appender);
         final String json = builder.toString();
         return prettify ? format(json) : json;
+    }
+
+    protected String toReadableComponentType(TypeIdentifier componentType) {
+        final String type = componentType.getType();
+        return toReadableType(CLEAR_COMPONENT_TYPE.matcher(type).replaceAll(""));
     }
 
     private static byte[] serialize(final String output) {
