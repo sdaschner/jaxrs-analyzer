@@ -106,9 +106,15 @@ class SchemaBuilder {
                 builder.add("type", "string");
                 if (!representation.getEnumValues().isEmpty()) {
                     final JsonArrayBuilder array = representation.getEnumValues().stream().sorted().collect(Json::createArrayBuilder, JsonArrayBuilder::add, JsonArrayBuilder::add);
-                    builder.add("enum", array);
+                    if (inCollection) {
+                        builder.add("items", Json.createObjectBuilder().add("type", "string").add("enum", array).build());
+                    } else {
+                        builder.add("enum", array);
+                    }
+
                 }
             }
+
         };
 
         final TypeRepresentation representation = typeRepresentations.get(identifier);
