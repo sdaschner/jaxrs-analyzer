@@ -107,9 +107,13 @@ abstract class MethodContentAnalyzer {
                 continue;
             }
 
-            final List<Instruction> nestedMethodInstructions = interpretRelevantInstructions(methodResult.getInstructions());
-            projectMethods.add(new ProjectMethod(identifier, nestedMethodInstructions));
-            addProjectMethods(nestedMethodInstructions, projectMethods);
+            try {
+                final List<Instruction> nestedMethodInstructions = interpretRelevantInstructions(methodResult.getInstructions());
+                projectMethods.add(new ProjectMethod(identifier, nestedMethodInstructions));
+                addProjectMethods(nestedMethodInstructions, projectMethods);
+            } catch(IndexOutOfBoundsException e){
+                LogProvider.error("Could not analyze project method " + identifier.getContainingClass() + "#" + identifier.getMethodName());
+            }
         }
     }
 
