@@ -195,7 +195,7 @@ public class Main {
     private static List<String> extractList(String list) {
         return Stream.of(list.split(COMMA_LIST_SEPARATOR))
                 .map(String::trim)
-                .filter(String::isEmpty)
+                .filter(item -> item!=null && !item.isEmpty())
                 .collect(Collectors.toList());
     }
 
