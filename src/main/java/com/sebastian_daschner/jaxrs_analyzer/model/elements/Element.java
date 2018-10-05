@@ -61,8 +61,12 @@ public class Element {
      * @return This element (needed as BinaryOperator)
      */
     public Element merge(final Element element) {
-        types.addAll(element.types);
-        possibleValues.addAll(element.possibleValues);
+        if(types != element.types) {
+            types.addAll(element.types);
+        }
+        if(possibleValues != element.possibleValues) {
+            possibleValues.addAll(element.possibleValues);
+        }
         return this;
     }
 
