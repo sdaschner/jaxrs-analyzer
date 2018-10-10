@@ -210,6 +210,11 @@ public class ProjectAnalyzerTest {
         ResourceMethod fourthGet = ResourceMethodBuilder.withMethod(HttpMethod.GET, "Returns a test string with plain text.").andAcceptMediaTypes("application/json")
                 .andResponseMediaTypes("text/plain", "application/json").andResponse(200, ResponseBuilder.withResponseBody(stringIdentifier).build()).build();
         addMethods(resources, "test/test", fourthGet);
+        
+        // resourceWithoutClassLevelJavadoc/test
+        ResourceMethod getResourceWithoutJavadoc = ResourceMethodBuilder.withMethod(HttpMethod.GET, "Returns a test string in json.").andAcceptMediaTypes("application/json")
+                .andResponseMediaTypes("application/json").andResponse(200, ResponseBuilder.withResponseBody(stringIdentifier).build()).build();
+        addMethods(resources, "resourceWithoutJavadoc/test", getResourceWithoutJavadoc);
 
         // complex
         ResourceMethod eighthGet = ResourceMethodBuilder.withMethod(HttpMethod.GET).andResponseMediaTypes("application/json")
