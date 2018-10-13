@@ -3,7 +3,7 @@
 
     <groupId>com.sebastian-daschner</groupId>
     <artifactId>jaxrs-analyzer</artifactId>
-    <version>0.17</version>
+    <version>0.18-SNAPSHOT</version>
     <name>JAX-RS Analyzer</name>
     <packaging>jar</packaging>
 
@@ -124,7 +124,7 @@
         <connection>scm:git:git@github.com:sdaschner/jaxrs-analyzer.git</connection>
         <developerConnection>scm:git:git@github.com:sdaschner/jaxrs-analyzer.git</developerConnection>
         <url>scm:git:git@github.com:sdaschner/jaxrs-analyzer.git</url>
-        <tag>v0.17</tag>
+        <tag>HEAD</tag>
     </scm>
 
     <distributionManagement>
@@ -152,7 +152,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-source-plugin</artifactId>
-                        <version>2.4</version>
+                        <version>3.0.1</version>
                         <executions>
                             <execution>
                                 <id>attach-sources</id>
@@ -179,7 +179,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-release-plugin</artifactId>
-                        <version>2.5.1</version>
+                        <version>2.5.3</version>
                         <configuration>
                             <tagNameFormat>v@{project.version}</tagNameFormat>
                         </configuration>
