@@ -3,10 +3,13 @@ Sebastian Daschner
 
 // new versions are placed on the top
 
-== v0.17 SNAPSHOT
+== v0.18 SNAPSHOT
+
+== v0.17
 - Markdown support
 - Added resource description in remaining backends
 - Support to ignore JAX-RS boundary classes
+- fixed minor JavaDoc issues
 
 == v0.16
 - Added AsciiDoc prettification
