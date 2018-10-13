@@ -1,10 +1,9 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.sebastian-daschner</groupId>
     <artifactId>jaxrs-analyzer</artifactId>
-    <version>0.17-SNAPSHOT</version>
+    <version>0.17</version>
     <name>JAX-RS Analyzer</name>
     <packaging>jar</packaging>
 
@@ -95,8 +94,7 @@
                         </goals>
                         <configuration>
                             <transformers>
-                                <transformer
-                                        implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                                     <mainClass>com.sebastian_daschner.jaxrs_analyzer.Main</mainClass>
                                 </transformer>
                             </transformers>
@@ -126,7 +124,7 @@
         <connection>scm:git:git@github.com:sdaschner/jaxrs-analyzer.git</connection>
         <developerConnection>scm:git:git@github.com:sdaschner/jaxrs-analyzer.git</developerConnection>
         <url>scm:git:git@github.com:sdaschner/jaxrs-analyzer.git</url>
-        <tag>HEAD</tag>
+        <tag>v0.17</tag>
     </scm>
 
     <distributionManagement>
