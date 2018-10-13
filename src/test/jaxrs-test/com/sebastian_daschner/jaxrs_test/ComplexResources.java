@@ -25,7 +25,10 @@ import javax.ws.rs.container.ResourceContext;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.HeaderParam;
 import java.util.ArrayList;
+import static javax.ws.rs.core.HttpHeaders.AUTHORIZATION;
+
 
 /**
  * These sources are solely used for test purposes and not meant for deployment.
@@ -82,6 +85,17 @@ public class ComplexResources extends AbstractResources implements Resources {
     public SomeSubResource anotherSubresResource() {
         // just for testing, this would fail due to missing default constructor
         return rc.getResource(SubResources.class);
+    }
+
+    /**
+     * Creates an authorization endpoint.
+     *
+     * @param token auth token
+     */
+    @GET
+    @Path("auth")
+    public Response get(@HeaderParam(AUTHORIZATION) String token) {
+        return Response.ok("Authorized").build();
     }
 
 }

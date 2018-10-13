@@ -9,6 +9,8 @@ import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.comments.Comment;
 import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.ast.expr.Expression;
+import com.github.javaparser.ast.expr.NameExpr;
+import com.github.javaparser.ast.expr.StringLiteralExpr;
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
 import com.github.javaparser.javadoc.Javadoc;
 import com.github.javaparser.javadoc.JavadocBlockTag;
@@ -132,8 +134,19 @@ public class JavaDocParserVisitor extends VoidVisitorAdapter<Void> {
         Map<String, String> annotations = annotationStream
                 .filter(Expression::isSingleMemberAnnotationExpr)
                 .collect(Collectors.toMap(a -> a.getName().getIdentifier(),
-                a -> a.asSingleMemberAnnotationExpr().getMemberValue().asStringLiteralExpr().asString()));
+                        this::createMemberParamValue));
         return new MemberParameterTag(javadocDescription.toText(), annotations);
+    }
+
+    private String createMemberParamValue(AnnotationExpr a) {
+        Expression memberValue = a.asSingleMemberAnnotationExpr().getMemberValue();
+        if (memberValue.getClass().isAssignableFrom(StringLiteralExpr.class))
+            return memberValue.asStringLiteralExpr().asString();
+
+        if (memberValue.getClass().isAssignableFrom(NameExpr.class))
+            return memberValue.asNameExpr().getNameAsString();
+
+        throw new IllegalArgumentException(String.format("Javadoc param type (%s) not supported.", memberValue.toString()));
     }
 
     private Map<Integer, String> createResponseComments(Javadoc javadoc) {

@@ -275,6 +275,12 @@ public class ProjectAnalyzerTest {
                 .andResponse(200, ResponseBuilder.withResponseBody(stringIdentifier).build()).build();
         addMethods(resources, "complex/anotherSubres/{name}", eleventhGet);
 
+        // complex/auth
+        ResourceMethod authGet = ResourceMethodBuilder.withMethod(HttpMethod.GET, "Creates an authorization endpoint.")
+                .andHeaderParam("Authorization", Types.STRING)
+                .andResponse(200, ResponseBuilder.withResponseBody(stringIdentifier).build()).build();
+        addMethods(resources, "complex/auth", authGet);
+
         // json_tests
         final TypeIdentifier firstIdentifier = TypeIdentifier.ofDynamic();
         properties = new HashMap<>();
