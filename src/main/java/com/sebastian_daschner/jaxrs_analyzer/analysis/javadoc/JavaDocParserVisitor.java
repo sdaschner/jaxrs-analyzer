@@ -89,12 +89,17 @@ public class JavaDocParserVisitor extends VoidVisitorAdapter<Void> {
         field.getComment()
                 .filter(Comment::isJavadocComment)
                 .map(this::toJavaDoc)
-                .ifPresent(c -> classComments.get(className).getFieldComments().add(createFieldComment(c, field)));
+                .ifPresent(c ->createFieldComment(c, field));
         super.visit(field, arg);
     }
 
-    private MemberParameterTag createFieldComment(Javadoc javadoc, FieldDeclaration field) {
-        return createMemberParamTag(javadoc.getDescription(), field.getAnnotations().stream());
+    private void createFieldComment(Javadoc javadoc, FieldDeclaration field) {
+      ClassComment classComment = classComments.get(className);
+      if(classComment == null) {
+        classComment = new ClassComment("", new HashMap<>(), false);
+        classComments.put(className, classComment);
+      }
+      classComment.getFieldComments().add(createMemberParamTag(javadoc.getDescription(), field.getAnnotations().stream()));
     }
 
     @Override
