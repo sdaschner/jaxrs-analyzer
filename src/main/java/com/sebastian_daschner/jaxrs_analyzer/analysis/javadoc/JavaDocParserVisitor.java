@@ -134,19 +134,19 @@ public class JavaDocParserVisitor extends VoidVisitorAdapter<Void> {
         Map<String, String> annotations = annotationStream
                 .filter(Expression::isSingleMemberAnnotationExpr)
                 .collect(Collectors.toMap(a -> a.getName().getIdentifier(),
-                a -> createMemberParamValue(a)));
+                        this::createMemberParamValue));
         return new MemberParameterTag(javadocDescription.toText(), annotations);
     }
 
     private String createMemberParamValue(AnnotationExpr a) {
         Expression memberValue = a.asSingleMemberAnnotationExpr().getMemberValue();
-        if(memberValue.getClass().isAssignableFrom(StringLiteralExpr.class)) {
+        if (memberValue.getClass().isAssignableFrom(StringLiteralExpr.class))
             return memberValue.asStringLiteralExpr().asString();
-        } else if(memberValue.getClass().isAssignableFrom(NameExpr.class)) {
-            return memberValue.asNameExpr().getNameAsString();
-        }
-        throw new IllegalArgumentException(String.format("Javadoc param type (%s) not supported.",memberValue.toString()));
 
+        if (memberValue.getClass().isAssignableFrom(NameExpr.class))
+            return memberValue.asNameExpr().getNameAsString();
+
+        throw new IllegalArgumentException(String.format("Javadoc param type (%s) not supported.", memberValue.toString()));
     }
 
     private Map<Integer, String> createResponseComments(Javadoc javadoc) {
