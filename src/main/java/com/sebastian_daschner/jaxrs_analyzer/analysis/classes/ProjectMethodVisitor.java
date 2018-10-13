@@ -119,7 +119,7 @@ class ProjectMethodVisitor extends MethodVisitor {
     @Override
     public void visitInvokeDynamicInsn(String name, String desc, Handle bsm, Object... bsmArgs) {
         final Handle handle = Stream.of(bsmArgs).filter(a -> a instanceof Handle).map(a -> (Handle) a)
-                .findAny().orElseThrow(() -> new IllegalStateException("No invoke dynamic handle found."));
+                .findAny().orElse(bsm);
 
         methodResult.getInstructions().add(buildInvokeDynamic(className, name, desc, handle, getLastLabel()));
     }
