@@ -427,6 +427,11 @@ enum KnownResponseResultMethod implements IdentifiableMethod {
         return this.identifier.equals(identifier);
     }
 
+    @Override
+    public MethodIdentifier getIdentifier() {
+        return identifier;
+    }
+
     private static Element addHeader(final Element object, final String header) {
         object.getPossibleValues().stream().filter(r -> r instanceof HttpResponse).map(r -> (HttpResponse) r).forEach(r -> r.getHeaders().add(header));
         return object;

@@ -31,4 +31,5 @@ public interface IdentifiableMethod extends Method {
      */
     boolean matches(final MethodIdentifier identifier);
 
+    MethodIdentifier getIdentifier();
 }

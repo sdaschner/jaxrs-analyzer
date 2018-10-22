@@ -157,6 +157,11 @@ enum KnownJsonResultMethod implements IdentifiableMethod {
         return this.identifier.equals(identifier);
     }
 
+    @Override
+    public MethodIdentifier getIdentifier() {
+        return identifier;
+    }
+
     private static Element addToArray(final Element object, final List<Element> arguments) {
         return addToArray(object, arguments.get(0));
     }

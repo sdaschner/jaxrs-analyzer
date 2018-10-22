@@ -43,6 +43,11 @@ public class ProjectMethod implements IdentifiableMethod {
     }
 
     @Override
+    public MethodIdentifier getIdentifier() {
+        return identifier;
+    }
+
+    @Override
     public Element invoke(final Element object, final List<Element> arguments) {
         return new InjectableArgumentMethodSimulator().simulate(arguments, instructions, identifier);
     }

@@ -16,15 +16,15 @@
 
 package com.sebastian_daschner.jaxrs_analyzer.analysis.bytecode.simulation;
 
+import com.sebastian_daschner.jaxrs_analyzer.LogProvider;
 import com.sebastian_daschner.jaxrs_analyzer.model.elements.Element;
 import com.sebastian_daschner.jaxrs_analyzer.model.methods.IdentifiableMethod;
 import com.sebastian_daschner.jaxrs_analyzer.model.methods.Method;
 import com.sebastian_daschner.jaxrs_analyzer.model.methods.MethodIdentifier;
 import com.sebastian_daschner.jaxrs_analyzer.model.methods.ProjectMethod;
 
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Optional;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.Function;
@@ -49,16 +49,17 @@ public class MethodPool {
         return null;
     };
 
-    private final List<IdentifiableMethod> availableMethods;
+    private final Map<MethodIdentifier, IdentifiableMethod> availableMethods;
     private final ReadWriteLock readWriteLock;
 
     private MethodPool() {
-        availableMethods = new LinkedList<>();
+        // could also be a ConcurrentHashMap, could probably make readWriteLock obsolete, but might influence performance negatively
+        availableMethods = new HashMap<>();
 
-        // order matters, known methods are taken first
-        Stream.of(KnownResponseResultMethod.values()).forEach(availableMethods::add);
-        Stream.of(KnownJsonResultMethod.values()).forEach(availableMethods::add);
+        Stream.of(KnownResponseResultMethod.values()).forEach(knownResponseResultMethod -> availableMethods.put(knownResponseResultMethod.getIdentifier(), knownResponseResultMethod));
+        Stream.of(KnownJsonResultMethod.values()).forEach(knownJsonResultMethod -> availableMethods.put(knownJsonResultMethod.getIdentifier(), knownJsonResultMethod));
 
+        // could be made obsolete by using ConcurrentHashMap instead a HashMap for availableMethods
         readWriteLock = new ReentrantReadWriteLock();
     }
 
@@ -70,7 +71,15 @@ public class MethodPool {
     public void addProjectMethod(final ProjectMethod method) {
         readWriteLock.writeLock().lock();
         try {
-            availableMethods.add(method);
+            availableMethods.put(method.getIdentifier(), method);
+
+            // FIXME: just for debugging/testing
+            if (availableMethods.containsKey(method.getIdentifier())) {
+                final IdentifiableMethod method2 = availableMethods.get(method.getIdentifier());
+                if(!method2.getIdentifier().equals(method.getIdentifier())) {
+                    LogProvider.debug("replacing existing method in pool");
+                }
+            }
         } finally {
             readWriteLock.writeLock().unlock();
         }
@@ -86,9 +95,9 @@ public class MethodPool {
         // search for available methods
         readWriteLock.readLock().lock();
         try {
-            final Optional<? extends IdentifiableMethod> method = availableMethods.stream().filter(m -> m.matches(identifier)).findAny();
-            if (method.isPresent())
-                return method.get();
+            if (availableMethods.containsKey(identifier)) {
+                return availableMethods.get(identifier);
+            }
         } finally {
             readWriteLock.readLock().unlock();
         }
