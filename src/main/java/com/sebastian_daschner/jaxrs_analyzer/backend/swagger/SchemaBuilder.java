@@ -16,6 +16,7 @@
 
 package com.sebastian_daschner.jaxrs_analyzer.backend.swagger;
 
+import com.sebastian_daschner.jaxrs_analyzer.model.Types;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeIdentifier;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeRepresentation;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeRepresentationVisitor;
@@ -62,6 +63,7 @@ class SchemaBuilder {
      */
     JsonObjectBuilder build(final TypeIdentifier identifier) {
         final SwaggerType type = toSwaggerType(identifier.getType());
+        final String format = toSwaggerFormat(identifier.getType());
         switch (type) {
             case BOOLEAN:
             case INTEGER:
@@ -69,7 +71,7 @@ class SchemaBuilder {
             case NULL:
             case STRING:
                 final JsonObjectBuilder builder = Json.createObjectBuilder();
-                addPrimitive(builder, type);
+                addPrimitive(builder, type, format);
                 return builder;
         }
 
@@ -138,13 +140,14 @@ class SchemaBuilder {
 
     private void add(final JsonObjectBuilder builder, final TypeRepresentation.ConcreteTypeRepresentation representation) {
         final SwaggerType type = toSwaggerType(representation.getIdentifier().getType());
+        final String format = toSwaggerFormat(representation.getIdentifier().getType());
         switch (type) {
             case BOOLEAN:
             case INTEGER:
             case NUMBER:
             case NULL:
             case STRING:
-                addPrimitive(builder, type);
+                addPrimitive(builder, type, format);
                 return;
         }
 
@@ -170,8 +173,10 @@ class SchemaBuilder {
         builder.add("$ref", "#/definitions/" + definition);
     }
 
-    private void addPrimitive(final JsonObjectBuilder builder, final SwaggerType type) {
+    private void addPrimitive(final JsonObjectBuilder builder, final SwaggerType type, String format) {
         builder.add("type", type.toString());
+        if (format!=null)
+            builder.add("format", format);
     }
 
     /**
@@ -193,7 +198,36 @@ class SchemaBuilder {
         if (STRING.equals(type))
             return SwaggerType.STRING;
 
+        if (DATE.equals(type) || LOCALDATE.equals(type) || INSTANT.equals(type) || LOCALDATETIME.equals(type) || OFFSETDATETIME.equals(type))
+            return SwaggerType.STRING;
+
         return SwaggerType.OBJECT;
+    }
+
+    /**
+     * Converts the given Java type to the Swagger JSON format.
+     *
+     * @param type The Java type definition
+     * @return The Swagger format
+     */
+    private static String toSwaggerFormat(final String type) {
+        if (type.equals(Types.BIG_INTEGER) || type.equals(Types.LONG) || type.equals(Types.PRIMITIVE_LONG))
+            return SwaggerFormat.INT64.toString();
+        if (type.equals(Types.DOUBLE) || type.equals(Types.PRIMITIVE_DOUBLE) || type.equals(Types.BIG_DECIMAL))
+            return SwaggerFormat.DOUBLE.toString();
+        if (type.equals(Types.FLOAT) || type.equals(Types.PRIMITIVE_FLOAT))
+            return SwaggerFormat.FLOAT.toString();
+        if (type.equals(Types.DATE))
+            return SwaggerFormat.DATETIME.toString();
+        if (type.equals(Types.LOCALDATE))
+            return SwaggerFormat.DATE.toString();
+        if (type.equals(Types.LOCALDATETIME))
+            return SwaggerFormat.DATETIME.toString();
+        if (type.equals(Types.INSTANT))
+            return SwaggerFormat.DATETIME.toString();
+        if (type.equals(Types.OFFSETDATETIME))
+            return SwaggerFormat.DATETIME.toString();
+        return null;
     }
 
     /**
@@ -203,7 +237,7 @@ class SchemaBuilder {
      */
     private enum SwaggerType {
 
-        ARRAY, BOOLEAN, INTEGER, NULL, NUMBER, OBJECT, STRING;
+        ARRAY, BOOLEAN, INTEGER, NULL, NUMBER, OBJECT, STRING, DATE;
 
         @Override
         public String toString() {
@@ -211,4 +245,17 @@ class SchemaBuilder {
         }
     }
 
+    private enum SwaggerFormat {
+        FLOAT("float"), DOUBLE("double"), INT32("int32"), INT64("int64"), BYTE("byte"), BINARY("binary"), DATE("date"),
+        DATETIME("date-time"), PASSWORD("password");
+
+        SwaggerFormat(String realName) {
+            this.realName = realName;
+        }
+        public String toString() {
+            return realName.toLowerCase();
+        }
+        private final String realName;
+
+    }
 }
