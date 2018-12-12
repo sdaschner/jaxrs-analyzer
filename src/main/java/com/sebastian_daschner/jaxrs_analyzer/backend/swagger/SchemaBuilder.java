@@ -28,6 +28,7 @@ import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import static com.sebastian_daschner.jaxrs_analyzer.backend.ComparatorUtils.mapKeyComparator;
 import static com.sebastian_daschner.jaxrs_analyzer.model.Types.*;
@@ -63,7 +64,7 @@ class SchemaBuilder {
      */
     JsonObjectBuilder build(final TypeIdentifier identifier) {
         final SwaggerType type = toSwaggerType(identifier.getType());
-        final String format = toSwaggerFormat(identifier.getType());
+        final Optional<SwaggerFormat> format = toSwaggerFormat(identifier.getType());
         switch (type) {
             case BOOLEAN:
             case INTEGER:
@@ -140,7 +141,7 @@ class SchemaBuilder {
 
     private void add(final JsonObjectBuilder builder, final TypeRepresentation.ConcreteTypeRepresentation representation) {
         final SwaggerType type = toSwaggerType(representation.getIdentifier().getType());
-        final String format = toSwaggerFormat(representation.getIdentifier().getType());
+        final Optional<SwaggerFormat> format = toSwaggerFormat(representation.getIdentifier().getType());
         switch (type) {
             case BOOLEAN:
             case INTEGER:
@@ -173,10 +174,10 @@ class SchemaBuilder {
         builder.add("$ref", "#/definitions/" + definition);
     }
 
-    private void addPrimitive(final JsonObjectBuilder builder, final SwaggerType type, String format) {
+    private void addPrimitive(final JsonObjectBuilder builder, final SwaggerType type, Optional<SwaggerFormat> format) {
         builder.add("type", type.toString());
-        if (format!=null)
-            builder.add("format", format);
+        if (format.isPresent())
+            builder.add("format", format.toString());
     }
 
     /**
@@ -188,19 +189,13 @@ class SchemaBuilder {
     private static SwaggerType toSwaggerType(final String type) {
         if (INTEGER_TYPES.contains(type))
             return SwaggerType.INTEGER;
-
         if (DOUBLE_TYPES.contains(type))
             return SwaggerType.NUMBER;
-
         if (BOOLEAN.equals(type) || PRIMITIVE_BOOLEAN.equals(type))
             return SwaggerType.BOOLEAN;
-
-        if (STRING.equals(type))
+        if (STRING.equals(type) || DATE.equals(type) || LOCALDATE.equals(type) ||
+            INSTANT.equals(type) || LOCALDATETIME.equals(type) || OFFSETDATETIME.equals(type))
             return SwaggerType.STRING;
-
-        if (DATE.equals(type) || LOCALDATE.equals(type) || INSTANT.equals(type) || LOCALDATETIME.equals(type) || OFFSETDATETIME.equals(type))
-            return SwaggerType.STRING;
-
         return SwaggerType.OBJECT;
     }
 
@@ -210,24 +205,18 @@ class SchemaBuilder {
      * @param type The Java type definition
      * @return The Swagger format
      */
-    private static String toSwaggerFormat(final String type) {
+    private static Optional<SwaggerFormat> toSwaggerFormat(final String type) {
+        SwaggerFormat format = null;
         if (type.equals(Types.BIG_INTEGER) || type.equals(Types.LONG) || type.equals(Types.PRIMITIVE_LONG))
-            return SwaggerFormat.INT64.toString();
+            format = SwaggerFormat.INT64;
         if (type.equals(Types.DOUBLE) || type.equals(Types.PRIMITIVE_DOUBLE) || type.equals(Types.BIG_DECIMAL))
-            return SwaggerFormat.DOUBLE.toString();
+            format = SwaggerFormat.DOUBLE;
         if (type.equals(Types.FLOAT) || type.equals(Types.PRIMITIVE_FLOAT))
-            return SwaggerFormat.FLOAT.toString();
-        if (type.equals(Types.DATE))
-            return SwaggerFormat.DATETIME.toString();
-        if (type.equals(Types.LOCALDATE))
-            return SwaggerFormat.DATE.toString();
-        if (type.equals(Types.LOCALDATETIME))
-            return SwaggerFormat.DATETIME.toString();
-        if (type.equals(Types.INSTANT))
-            return SwaggerFormat.DATETIME.toString();
-        if (type.equals(Types.OFFSETDATETIME))
-            return SwaggerFormat.DATETIME.toString();
-        return null;
+            format = SwaggerFormat.FLOAT;
+        if (type.equals(Types.DATE) || type.equals(Types.LOCALDATE) || type.equals(Types.LOCALDATETIME) || type.equals(Types.INSTANT)
+            || type.equals(Types.OFFSETDATETIME))
+            format = SwaggerFormat.DATETIME;
+        return Optional.ofNullable(format);
     }
 
     /**
