@@ -14,6 +14,10 @@ public final class Types {
     }
 
     public static final String OBJECT = "Ljava/lang/Object;";
+    public static final String LOCALDATE = "Ljava/time/LocalDate;";
+    public static final String INSTANT = "Ljava/time/Instant;";
+    public static final String OFFSETDATETIME = "Ljava/time/OffsetDateTime;";
+    public static final String LOCALDATETIME = "Ljava/time/LocalDateTime;";
     public static final String CLASS = "Ljava/lang/Class;";
 
     public static final String PATH = "Ljavax/ws/rs/Path;";
