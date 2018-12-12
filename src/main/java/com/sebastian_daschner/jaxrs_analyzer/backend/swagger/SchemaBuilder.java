@@ -177,7 +177,7 @@ class SchemaBuilder {
     private void addPrimitive(final JsonObjectBuilder builder, final SwaggerType type, Optional<SwaggerFormat> format) {
         builder.add("type", type.toString());
         if (format.isPresent())
-            builder.add("format", format.toString());
+            builder.add("format", format.get().toString());
     }
 
     /**
