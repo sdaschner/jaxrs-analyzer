@@ -1,5 +1,6 @@
 package com.sebastian_daschner.jaxrs_analyzer.analysis.classes;
 
+import com.sebastian_daschner.jaxrs_analyzer.analysis.classes.annotation.BeanParamAnnotationVisitor;
 import com.sebastian_daschner.jaxrs_analyzer.analysis.classes.annotation.DefaultValueAnnotationVisitor;
 import com.sebastian_daschner.jaxrs_analyzer.analysis.classes.annotation.ParamAnnotationVisitor;
 import com.sebastian_daschner.jaxrs_analyzer.model.Types;
@@ -41,6 +42,8 @@ class JAXRSFieldVisitor extends FieldVisitor {
                 return paramAnnotationVisitor(ParameterType.COOKIE);
             case Types.MATRIX_PARAM:
                 return paramAnnotationVisitor(ParameterType.MATRIX);
+            case Types.BEAN_PARAM:
+                return beanParamAnnotationVisitor();
             case Types.DEFAULT_VALUE:
                 return defaultAnnotationVisitor();
             default:
@@ -49,23 +52,30 @@ class JAXRSFieldVisitor extends FieldVisitor {
     }
 
     private AnnotationVisitor paramAnnotationVisitor(final ParameterType parameterType) {
-        if (parameter == null)
+        if (parameter == null) {
             parameter = new MethodParameter(TypeIdentifier.ofType(signature), parameterType);
-        else
+        } else {
             parameter.setParameterType(parameterType);
+        }
         return new ParamAnnotationVisitor(parameter);
     }
 
+    private AnnotationVisitor beanParamAnnotationVisitor() {
+        return new BeanParamAnnotationVisitor(classResult, signature);
+    }
+
     private AnnotationVisitor defaultAnnotationVisitor() {
-        if (parameter == null)
+        if (parameter == null) {
             parameter = new MethodParameter(TypeIdentifier.ofType(signature));
+        }
         return new DefaultValueAnnotationVisitor(parameter);
     }
 
     @Override
     public void visitEnd() {
-        if (parameter != null)
+        if (parameter != null) {
             classResult.getClassFields().add(parameter);
+        }
     }
 
 }
