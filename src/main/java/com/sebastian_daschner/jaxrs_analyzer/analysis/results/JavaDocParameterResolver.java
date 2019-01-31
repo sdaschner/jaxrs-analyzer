@@ -74,6 +74,8 @@ final class JavaDocParameterResolver {
                 return toReadableType(PATH_PARAM);
             case QUERY:
                 return toReadableType(QUERY_PARAM);
+            case BEAN:
+                return toReadableType(BEAN_PARAM);
             case HEADER:
                 return toReadableType(HEADER_PARAM);
             case FORM:

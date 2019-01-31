@@ -38,6 +38,7 @@ public final class Types {
     public static final String FORM_PARAM = "Ljavax/ws/rs/FormParam;";
     public static final String COOKIE_PARAM = "Ljavax/ws/rs/CookieParam;";
     public static final String MATRIX_PARAM = "Ljavax/ws/rs/MatrixParam;";
+    public static final String BEAN_PARAM = "Ljavax/ws/rs/BeanParam;";
 
     public static final String DEPRECATED = "Ljava/lang/Deprecated;";
 

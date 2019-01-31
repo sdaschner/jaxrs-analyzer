@@ -91,6 +91,8 @@ class JAXRSMethodVisitor extends ProjectMethodVisitor {
                 return paramAnnotationVisitor(index, ParameterType.COOKIE);
             case Types.MATRIX_PARAM:
                 return paramAnnotationVisitor(index, ParameterType.MATRIX);
+            case Types.BEAN_PARAM:
+                return beanParamAnnotationVisitor(index);
             case Types.DEFAULT_VALUE:
                 return defaultAnnotationVisitor(index);
             case Types.SUSPENDED:
@@ -115,6 +117,13 @@ class JAXRSMethodVisitor extends ProjectMethodVisitor {
         }
 
         return new ParamAnnotationVisitor(methodParameter);
+    }
+    
+    private AnnotationVisitor beanParamAnnotationVisitor(final int index) {
+        annotatedParameters.set(index);
+        final String type = parameterTypes.get(index);
+
+        return new BeanParamAnnotationVisitor(methodResult, type);
     }
 
     private AnnotationVisitor defaultAnnotationVisitor(final int index) {
