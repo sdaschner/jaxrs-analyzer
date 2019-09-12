@@ -26,11 +26,8 @@ public class TestClass33 {
 
 	public static Set<TypeRepresentation> expectedTypeRepresentations() {
 		final Map<String, TypeIdentifier> properties = new HashMap<>();
-
 		properties.put("swappedWithString", TypeUtils.STRING_IDENTIFIER);
-		return new HashSet<>(Arrays.asList(
-				TypeRepresentation.ofConcrete(TypeIdentifier.ofType(String.class)),
-				TypeRepresentation.ofConcrete(expectedIdentifier(), properties)));
+		return Collections.singleton(TypeRepresentation.ofConcrete(expectedIdentifier(), properties));
 	}
 
 	public static TypeIdentifier expectedIdentifier() {

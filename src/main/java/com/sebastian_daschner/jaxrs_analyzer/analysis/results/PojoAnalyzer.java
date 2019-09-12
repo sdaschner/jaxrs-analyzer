@@ -25,7 +25,9 @@ import java.util.stream.Stream;
 import static com.sebastian_daschner.jaxrs_analyzer.model.JavaUtils.*;
 
 /**
- * Basic java pojo analyzer.
+ * Basic java pojo analyzer.  If you want to modify the behavior of the basic pojo
+ * analysis, inherit from this type and override {@link #isRelevant(Field, XmlAccessType)}
+ * or {@link #isRelevant(Field, XmlAccessType)}
  */
 public class PojoAnalyzer implements JavaClassAnalyzer {
 	private static final String[] NAMES_TO_IGNORE = {"getClass"};
@@ -97,7 +99,7 @@ public class PojoAnalyzer implements JavaClassAnalyzer {
 	 *
 	 * @param type The type descriptor
 	 * @param clazz The class
-	 * @return
+	 * @return the analysis result
 	 */
 	@Override
 	public JavaClassAnalysis analyze(String type, Class<?> clazz) {

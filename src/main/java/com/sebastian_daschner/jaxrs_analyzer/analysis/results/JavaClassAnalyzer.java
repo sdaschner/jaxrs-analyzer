@@ -10,6 +10,11 @@ import java.util.Map;
  * class.  IF your thing is responsible for a given type, return
  * a result.  IF your thing is not responsible for a type, return
  * null.
+ *
+ * To add an analyzer, create a service entry in your META-INF/services
+ * per {@link java.util.ServiceLoader} rules.
+ *
+ * @see PojoAnalyzer
  */
 public interface JavaClassAnalyzer {
 

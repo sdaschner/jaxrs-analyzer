@@ -30,7 +30,7 @@ public class TestClass32 {
 	}
 
 	public static Set<TypeRepresentation> expectedTypeRepresentations() {
-		return Collections.singleton(TypeRepresentation.ofConcrete(expectedIdentifier()));
+		return Collections.emptySet(); // this type is swapped with a String
 	}
 
 	public static TypeIdentifier expectedIdentifier() {

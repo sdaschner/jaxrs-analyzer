@@ -19,15 +19,18 @@ package com.sebastian_daschner.jaxrs_test;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.ws.rs.GET;
+import javax.ws.rs.HeaderParam;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.container.ResourceContext;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.HeaderParam;
 import java.util.ArrayList;
-import static javax.ws.rs.core.HttpHeaders.AUTHORIZATION;
+
+import static javax.ws.rs.core.HttpHeaders.*;
 
 
 /**
@@ -98,4 +101,17 @@ public class ComplexResources extends AbstractResources implements Resources {
         return Response.ok("Authorized").build();
     }
 
+	@POST
+	@Path("generatedThing/{id}")
+    public GeneratedThing generatedThing(@PathParam("id") StringableValue id, GeneratedThing g) {
+    	return new GeneratedThing()
+			    .setId(new StringableValue())
+			    .setName("asdf");
+    }
+
+	@GET
+	@Path("stringableValue/{id}")
+	public StringableValue stringableValue(@PathParam("id") StringableValue id) {
+		return id;
+	}
 }

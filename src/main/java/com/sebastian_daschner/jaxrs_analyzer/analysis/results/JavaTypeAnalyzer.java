@@ -68,21 +68,30 @@ class JavaTypeAnalyzer {
 		TypeIdentifier identifier = TypeIdentifier.ofType(type);
 
 		if (analyzedTypes.contains(type)) {
-			while (true) {
-				TypeIdentifier typeIdentifier = typeSwaps.get(identifier);
-				if (typeIdentifier == null || typeIdentifier == identifier) {
-					break;
-				}
+			// cool we've already analyzed this type...but was it swapped?
+			TypeIdentifier typeIdentifier = typeSwaps.get(identifier);
+			if (typeIdentifier != null) {
 				identifier = typeIdentifier;
 			}
 		} else if (isAssignableTo(type, COLLECTION) || !isJDKType(type)) {
 			analyzedTypes.add(type);
 			TypeRepresentation typeRepresentation = analyzeInternal(identifier, type);
-			if (!typeRepresentation.getIdentifier().equals(identifier)) {
-				typeSwaps.put(identifier, typeRepresentation.getIdentifier());
+
+			// The type may have been swapped.  make sure to keep track of the swaps!
+			TypeIdentifier typeIdentifier = typeRepresentation.getIdentifier();
+			if (!typeIdentifier.equals(identifier)) {
+				// we want the OG identifier to map to the swapped identifier
+				typeSwaps.put(identifier, typeIdentifier);
+				identifier = typeIdentifier;
+
+				if (!isJDKType(identifier.getType())) {
+					// now track the swapped identifier with the swapped type rep
+					typeRepresentations.put(identifier, typeRepresentation);
+				}
+			} else {
+				// No swapping
+				typeRepresentations.put(identifier, typeRepresentation);
 			}
-			identifier = typeRepresentation.getIdentifier();
-			typeRepresentations.put(identifier, typeRepresentation);
 		}
 
 		return identifier;
@@ -111,7 +120,7 @@ class JavaTypeAnalyzer {
 			return TypeRepresentation.ofConcrete(identifier);
 
 		JavaClassAnalysis result = null;
-		for (JavaClassAnalyzer analyzer : JavaClassAnalyzerRegistry.getAnalyzers()) {
+		for (JavaClassAnalyzer analyzer : PluginRegistry.getInstance().getJavaClassAnalyzers()) {
 			result = analyzer.analyze(type, clazz);
 			if (result != null) {
 				break;

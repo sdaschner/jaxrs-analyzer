@@ -26,6 +26,7 @@ import com.sebastian_daschner.jaxrs_analyzer.model.rest.Resources;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.Response;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeIdentifier;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeRepresentation;
+import com.sebastian_daschner.jaxrs_test.GeneratedThing;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -170,6 +171,13 @@ public class ProjectAnalyzerTest {
         final TypeRepresentation modelRepresentation = TypeRepresentation.ofConcrete(modelIdentifier, properties);
         resources.getTypeRepresentations().put(modelIdentifier, modelRepresentation);
 
+	    properties = new HashMap<>();
+	    properties.put("id", TypeIdentifier.ofType(String.class));
+	    properties.put("name", TypeIdentifier.ofType(String.class));
+	    final TypeIdentifier generatedIdentifier = TypeIdentifier.ofType(GeneratedThing.class);
+	    final TypeRepresentation generatedRepresentation = TypeRepresentation.ofConcrete(generatedIdentifier, properties);
+	    resources.getTypeRepresentations().put(generatedIdentifier, generatedRepresentation);
+
         final TypeIdentifier modelListIdentifier = TypeIdentifier.ofType("Ljava/util/List<+Lcom/sebastian_daschner/jaxrs_test/Model;>;");
         resources.getTypeRepresentations().put(modelListIdentifier, TypeRepresentation.ofCollection(modelListIdentifier, modelRepresentation));
         final TypeIdentifier stringArrayListIdentifier = TypeIdentifier.ofType("Ljava/util/ArrayList<Ljava/lang/String;>;");
@@ -295,7 +303,20 @@ public class ProjectAnalyzerTest {
                 .andResponse(200, ResponseBuilder.withResponseBody(stringIdentifier).build()).build();
         addMethods(resources, "complex/auth", authGet);
 
-        // json_tests
+	    // complex/generatedThing/{id}
+	    ResourceMethod postGeneratedThing = ResourceMethodBuilder.withMethod(HttpMethod.POST)
+			    .andPathParam("id", Types.STRING, null, null)
+			    .andRequestBodyType(generatedIdentifier)
+			    .andResponse(200, ResponseBuilder.withResponseBody(generatedIdentifier).build()).build();
+	    addMethods(resources, "complex/generatedThing/{id}", postGeneratedThing);
+
+	    // complex/stringableValue/{id}
+	    ResourceMethod getStringableThing = ResourceMethodBuilder.withMethod(HttpMethod.GET)
+			    .andPathParam("id", Types.STRING, null, null)
+			    .andResponse(200, ResponseBuilder.withResponseBody(stringIdentifier).build()).build();
+	    addMethods(resources, "complex/stringableValue/{id}", getStringableThing);
+
+	    // json_tests
         final TypeIdentifier firstIdentifier = TypeIdentifier.ofDynamic();
         properties = new HashMap<>();
         properties.put("key", stringIdentifier);
@@ -329,6 +350,7 @@ public class ProjectAnalyzerTest {
         ResourceMethod thirteenthGet = ResourceMethodBuilder.withMethod(HttpMethod.GET).andResponse(200, ResponseBuilder.withResponseBody(fourthIdentifier).build())
                 .build();
         addMethods(resources, "json_tests/info", thirteenthGet);
+
 
         return resources;
     }
