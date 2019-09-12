@@ -31,7 +31,7 @@ import java.util.Set;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-import static java.util.Collections.singleton;
+import static java.util.Collections.*;
 
 /**
  * Analyzes sub-resource-locator methods. This class is thread-safe.
@@ -40,10 +40,15 @@ import static java.util.Collections.singleton;
  */
 class SubResourceLocatorMethodContentAnalyzer extends MethodContentAnalyzer {
 
+	private final JobRegistry jobRegistry;
     private final Lock lock = new ReentrantLock();
     private final MethodSimulator simulator = new MethodSimulator();
 
-    /**
+	SubResourceLocatorMethodContentAnalyzer(JobRegistry jobRegistry) {
+		this.jobRegistry = jobRegistry;
+	}
+
+	/**
      * Analyzes the sub-resource locator method as a class result (which will be the content of a method result).
      *
      * @param methodResult The method result of the sub-resource locator (containing the instructions, and a sub-resource class result)
@@ -86,7 +91,7 @@ class SubResourceLocatorMethodContentAnalyzer extends MethodContentAnalyzer {
 
     private void registerSubResourceJob(final String type, final ClassResult classResult) {
         final String className = JavaUtils.toClassName(type);
-        JobRegistry.getInstance().analyzeResourceClass(className, classResult);
+        jobRegistry.analyzeResourceClass(className, classResult);
     }
 
 }

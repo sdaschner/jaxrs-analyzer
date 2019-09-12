@@ -19,8 +19,9 @@ package com.sebastian_daschner.jaxrs_analyzer.analysis.utils;
 import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.HashSet;
+import java.util.Comparator;
 import java.util.Set;
+import java.util.TreeSet;
 
 public class TestClassUtils {
 
@@ -36,7 +37,11 @@ public class TestClassUtils {
      * @throws ClassNotFoundException If a class could not be found
      */
     public static Set<String> getClasses(final String packageName) throws ClassNotFoundException {
-        final Set<String> classes = new HashSet<>();
+        final Set<String> classes = new TreeSet<>((o1, o2) -> {
+	        int n1 = getTestNumber(o1);
+	        int n2 = getTestNumber(o2);
+	        return n1 == n2 ? o1.compareTo(o2) : n1 > n2 ? 1 : -1;
+        });
 
         final String postfixPackageName = packageName + '/';
 
@@ -53,5 +58,18 @@ public class TestClassUtils {
 
         return classes;
     }
+
+	private static int getTestNumber(String o1) {
+		StringBuilder numberBuilder = new StringBuilder();
+		for (int i = o1.length() - 1; i >= 0; i--) {
+			char c = o1.charAt(i);
+			if (Character.isDigit(c)) {
+				numberBuilder.insert(0, c);
+			} else {
+				break;
+			}
+		}
+		return numberBuilder.length() == 0 ? 0 : Integer.parseInt(numberBuilder.toString());
+	}
 
 }

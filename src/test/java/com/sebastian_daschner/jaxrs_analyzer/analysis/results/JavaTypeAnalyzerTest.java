@@ -20,16 +20,20 @@ import com.sebastian_daschner.jaxrs_analyzer.analysis.utils.TestClassUtils;
 import com.sebastian_daschner.jaxrs_analyzer.model.JavaUtils;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeIdentifier;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeRepresentation;
+import org.hamcrest.CoreMatchers;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
 import javax.ws.rs.NotFoundException;
 import java.io.IOException;
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.Map;
+import java.util.Set;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 @RunWith(Parameterized.class)
 public class JavaTypeAnalyzerTest {
@@ -90,7 +94,7 @@ public class JavaTypeAnalyzerTest {
                 .collect(HashMap::new, (m, r) -> m.put(r.getIdentifier(), r), Map::putAll);
         assertEquals("failed for " + testClassSimpleName, expectedTypeRepresentations, actualTypeRepresentations);
 
-        expectedRepresentations.stream().forEach(ex -> {
+        expectedRepresentations.forEach(ex -> {
             final TypeRepresentation ac = actualTypeRepresentations.get(ex.getIdentifier());
             if (!TypeUtils.equals(ex, ac))
                 fail("failed for " + testClassSimpleName + "\nNo type representation match \nexpected: " + ex + "\nactual:   " + ac);

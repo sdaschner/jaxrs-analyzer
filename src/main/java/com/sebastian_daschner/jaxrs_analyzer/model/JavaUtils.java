@@ -48,6 +48,20 @@ public final class JavaUtils {
         throw new UnsupportedOperationException();
     }
 
+
+	/**
+	 * Converts a getter name to the property name (without the "get" or "is" and lowercase).
+	 *
+	 * @param name The name of the method (MUST match "get[A-Z][A-Za-z]*|is[A-Z][A-Za-z]*")
+	 * @return The name of the property
+	 */
+	public static String extractPropertyName(final String name) {
+		final int size = name.startsWith("is") ? 2 : 3;
+		final char chars[] = name.substring(size).toCharArray();
+		chars[0] = Character.toLowerCase(chars[0]);
+		return new String(chars);
+	}
+
     /**
      * Checks if the given method name is a Java initializer.
      *

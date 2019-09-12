@@ -35,7 +35,7 @@ import java.util.Set;
 import static com.sebastian_daschner.jaxrs_analyzer.analysis.results.TypeUtils.STRING_IDENTIFIER;
 import static org.junit.Assert.assertEquals;
 
-public class ResultInterpreterTest {
+public class JavaClassAnalysisInterpreterTest {
 
     private ResultInterpreter classUnderTest;
 
