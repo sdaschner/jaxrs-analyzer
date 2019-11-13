@@ -18,6 +18,7 @@ import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.*;
+import java.util.Map.Entry;
 import java.util.stream.Stream;
 
 /**
@@ -68,28 +69,22 @@ public class JavaDocAnalyzer {
     }
 
     private void combineResults(final Set<ClassResult> classResults) {
-        methodComments.forEach((key, value) -> classResults.stream()
-                .map(c -> findMethodResult(key, c))
-                .filter(Objects::nonNull)
-                .forEach(m -> m.setMethodDoc(value)));
-    }
-
-    private MethodResult findMethodResult(final MethodIdentifier identifier, final ClassResult classResult) {
-        if (classResult.getOriginalClass().equals(identifier.getContainingClass()))
-            return classResult.getMethods().stream()
-                    .filter(methodResult -> equalsSimpleTypeNames(identifier, methodResult))
-                    .findAny().orElse(null);
-
-        return classResult.getMethods().stream()
-                .map(MethodResult::getSubResource)
-                .filter(Objects::nonNull)
-                .map(c -> findMethodResult(identifier, c))
-                .filter(Objects::nonNull)
-                .findAny().orElse(null);
+        classResults.stream()
+            .flatMap(classResult -> classResult.getMethods().stream()) // flatten our set of sets (multiple methods within multiple class results) into one set
+            .forEach(methodResult -> {
+                // For our single methodResult, see if we have a matching entry in the methodComments map (if we do, set the 'methodDoc' property)
+                this.methodComments.entrySet().stream()
+                    .filter(entry -> equalsSimpleTypeNames(entry.getKey(), methodResult))
+                    .map(Entry::getValue)
+                    .findAny()
+                    .ifPresent(methodResult::setMethodDoc);
+            });
     }
 
     /**
      * This is a best-effort approach combining only the simple types.
+     * @param identifier the MethodIdentifier from methodComments.
+     * @param methodResult the MethodResult (containing a MethodIdentifier in originalMethodSignature) from classResults.
      *
      * @see JavaDocParserVisitor#calculateMethodIdentifier(MethodDeclaration)
      */
