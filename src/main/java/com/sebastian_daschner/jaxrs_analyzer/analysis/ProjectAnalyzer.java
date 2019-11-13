@@ -123,6 +123,11 @@ public class ProjectAnalyzer {
             final ClassVisitor visitor = new JAXRSClassVisitor(classResult);
 
             classReader.accept(visitor, ClassReader.EXPAND_FRAMES);
+
+            // recursively visit any super classes
+            if (!classReader.getSuperName().equals("java/lang/Object")) {
+                analyzeClass(classReader.getSuperName(), classResult);
+            }
         } catch (IOException e) {
             LogProvider.error("The class " + className + " could not be loaded!");
             LogProvider.debug(e);
