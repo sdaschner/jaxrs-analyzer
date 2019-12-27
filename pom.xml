@@ -1,14 +1,14 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.sebastian-daschner</groupId>
+    <groupId>com.github.markrileybot</groupId>
     <artifactId>jaxrs-analyzer</artifactId>
-    <version>0.18-SNAPSHOT</version>
+    <version>0.18</version>
     <name>JAX-RS Analyzer</name>
     <packaging>jar</packaging>
 
     <description>Generates REST documentation by analysing JAX-RS projects.</description>
-    <url>https://github.com/sdaschner/jaxrs-analyzer</url>
+    <url>https://github.com/markrileybot/jaxrs-analyzer</url>
 
     <licenses>
         <license>
@@ -22,6 +22,11 @@
             <name>Sebastian Daschner</name>
             <organization>sebastian-daschner.com</organization>
             <organizationUrl>https://www.sebastian-daschner.com</organizationUrl>
+		</developer>
+        <developer>
+            <name>Mark Riley</name>
+            <organization>eucleo</organization>
+            <organizationUrl>https://eucleo.com</organizationUrl>
         </developer>
     </developers>
 
@@ -106,6 +111,16 @@
                                     </excludes>
                                 </filter>
                             </filters>
+                            <relocations>
+                                <relocation>
+                                    <pattern>org.ow2.asm</pattern>
+                                    <shadedPattern>jaxrsa.shaded.org.ow2.asm</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>com.fasterxml.jackson</pattern>
+                                    <shadedPattern>jaxrsa.shaded.com.fasterxml.jackson</shadedPattern>
+                                </relocation>
+                            </relocations>
                         </configuration>
                     </execution>
                 </executions>
@@ -121,20 +136,16 @@
     </properties>
 
     <scm>
-        <connection>scm:git:git@github.com:sdaschner/jaxrs-analyzer.git</connection>
-        <developerConnection>scm:git:git@github.com:sdaschner/jaxrs-analyzer.git</developerConnection>
-        <url>scm:git:git@github.com:sdaschner/jaxrs-analyzer.git</url>
+        <connection>scm:git:git@github.com:markrileybot/jaxrs-analyzer.git</connection>
+        <developerConnection>scm:git:git@github.com:markrileybot/jaxrs-analyzer.git</developerConnection>
+        <url>scm:git:git@github.com:markrileybot/jaxrs-analyzer.git</url>
         <tag>HEAD</tag>
     </scm>
 
     <distributionManagement>
-        <snapshotRepository>
-            <id>ossrh-snapshots</id>
-            <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
-        </snapshotRepository>
         <repository>
-            <id>ossrh</id>
-            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+			<id>bintray-markrileybot-markrileybot</id>
+			<url>https://api.bintray.com/maven/mrileybot/markrileybot/jaxrs-analyzer/;publish=1</url>
         </repository>
     </distributionManagement>
 
