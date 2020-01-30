@@ -41,7 +41,7 @@ final class ResponseTypeNormalizer {
      * @return The normalized type
      */
     static String normalizeCollection(final String type) {
-        if (isAssignableTo(type, Types.COLLECTION)) {
+        if (isAssignableTo(type, Types.COLLECTION) || isAssignableTo(type, Types.ITERABLE)) {
             if (!getTypeParameters(type).isEmpty()) {
                 return getTypeParameters(type).get(0);
             }

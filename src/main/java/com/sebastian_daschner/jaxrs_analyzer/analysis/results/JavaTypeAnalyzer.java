@@ -73,7 +73,7 @@ class JavaTypeAnalyzer {
 			if (typeIdentifier != null) {
 				identifier = typeIdentifier;
 			}
-		} else if (isAssignableTo(type, COLLECTION) || !isJDKType(type)) {
+		} else if (isAssignableTo(type, COLLECTION) || isIterableWithTypeParameters(type) || !isJDKType(type)) {
 			analyzedTypes.add(type);
 			TypeRepresentation typeRepresentation = analyzeInternal(identifier, type);
 
@@ -103,7 +103,7 @@ class JavaTypeAnalyzer {
 	}
 
 	private TypeRepresentation analyzeInternal(final TypeIdentifier identifier, final String type) {
-		if (isAssignableTo(type, COLLECTION)) {
+		if (isAssignableTo(type, COLLECTION) || isIterableWithTypeParameters(type)) {
 			final String containedType = ResponseTypeNormalizer.normalizeCollection(type);
 			return TypeRepresentation.ofCollection(identifier, analyzeInternal(TypeIdentifier.ofType(containedType), containedType));
 		}

@@ -64,6 +64,7 @@ public final class Types {
     public static final String LIST = "Ljava/util/List;";
     public static final String SET = "Ljava/util/Set;";
     public static final String COLLECTION = "Ljava/util/Collection;";
+	public static final String ITERABLE = "Ljava/lang/Iterable;";
     public static final String BIG_DECIMAL = "Ljava/math/BigDecimal;";
     public static final String BIG_INTEGER = "Ljava/math/BigInteger;";
     public static final String URI = "Ljava/net/URI;";

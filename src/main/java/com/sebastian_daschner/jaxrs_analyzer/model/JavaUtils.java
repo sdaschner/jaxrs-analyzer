@@ -234,6 +234,10 @@ public final class JavaUtils {
         return type.indexOf('<') >= 0;
     }
 
+    public static boolean isIterableWithTypeParameters(String type) {
+    	return hasTypeParameters(type) && isAssignableTo(type, ITERABLE);
+    }
+
     /**
      * Converts the given JVM object type signature to a class name. Erasures parametrized types.
      * <p>
