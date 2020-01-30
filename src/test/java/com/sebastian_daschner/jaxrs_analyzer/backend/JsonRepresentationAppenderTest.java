@@ -32,13 +32,13 @@ public class JsonRepresentationAppenderTest {
 
     @Test
     public void testVisitPrimitive() {
-        TypeRepresentation.ofConcrete(TypeIdentifier.ofType(Types.STRING)).accept(cut);
+        TypeRepresentation.ofConcreteBuilder().identifier(TypeIdentifier.ofType(Types.STRING)).build().accept(cut);
         assertThat(builder.toString(), is("\"string\""));
     }
 
     @Test
     public void testMissingRepresentation() {
-        TypeRepresentation.ofCollection(STRING_LIST_IDENTIFIER, TypeRepresentation.ofConcrete(STRING_IDENTIFIER)).accept(cut);
+        TypeRepresentation.ofCollection(STRING_LIST_IDENTIFIER, TypeRepresentation.ofConcreteBuilder().identifier(STRING_IDENTIFIER).build()).accept(cut);
         assertThat(builder.toString(), is("[\"string\"]"));
     }
 
@@ -56,7 +56,7 @@ public class JsonRepresentationAppenderTest {
 
     @Test
     public void testVisitSimpleList() {
-        final TypeRepresentation stringRepresentation = TypeRepresentation.ofConcrete(STRING_IDENTIFIER);
+        final TypeRepresentation stringRepresentation = TypeRepresentation.ofConcreteBuilder().identifier(STRING_IDENTIFIER).build();
         final TypeRepresentation listRepresentation = TypeRepresentation.ofCollection(STRING_LIST_IDENTIFIER, stringRepresentation);
         representations.put(STRING_LIST_IDENTIFIER, listRepresentation);
 
@@ -80,7 +80,7 @@ public class JsonRepresentationAppenderTest {
     public void testVisitMultipleList() {
         final TypeIdentifier identifier = TypeIdentifier.ofType("java.util.List<java.util.List<java.lang.String>>");
         final TypeRepresentation representation = TypeRepresentation.ofCollection(identifier, TypeRepresentation.ofCollection(STRING_LIST_IDENTIFIER,
-                TypeRepresentation.ofConcrete(STRING_IDENTIFIER)));
+                TypeRepresentation.ofConcreteBuilder().identifier(STRING_IDENTIFIER).build()));
         representations.put(identifier, representation);
 
         representation.accept(cut);
@@ -97,11 +97,11 @@ public class JsonRepresentationAppenderTest {
 
     @Test
     public void testVisitDynamic() {
-        TypeRepresentation.ofConcrete(TypeIdentifier.ofDynamic()).accept(cut);
+        TypeRepresentation.ofConcreteBuilder().identifier(TypeIdentifier.ofDynamic()).build().accept(cut);
         assertThat(builder.toString(), is("{}"));
 
         clear(builder);
-        TypeRepresentation.ofCollection(TypeIdentifier.ofDynamic(), TypeRepresentation.ofConcrete(TypeIdentifier.ofDynamic())).accept(cut);
+        TypeRepresentation.ofCollection(TypeIdentifier.ofDynamic(), TypeRepresentation.ofConcreteBuilder().identifier(TypeIdentifier.ofDynamic()).build()).accept(cut);
         assertThat(builder.toString(), is("[{}]"));
     }
 
@@ -114,7 +114,7 @@ public class JsonRepresentationAppenderTest {
         properties.put("hello", STRING_IDENTIFIER);
         properties.put("abc", STRING_IDENTIFIER);
         properties.put("enumeration", enumIdentifier);
-        final TypeRepresentation representation = TypeRepresentation.ofConcrete(identifier, properties);
+        final TypeRepresentation representation = TypeRepresentation.ofConcreteBuilder().identifier(identifier).properties(properties).build();
         final TypeRepresentation enumRepresentation = TypeRepresentation.ofEnum(identifier, "FOO", "BAR", "BAZ");
 
         representations.put(identifier, representation);
@@ -131,7 +131,7 @@ public class JsonRepresentationAppenderTest {
         properties.put("hello", STRING_IDENTIFIER);
         properties.put("abc", STRING_IDENTIFIER);
         properties.put("model", identifier);
-        final TypeRepresentation representation = TypeRepresentation.ofConcrete(identifier, properties);
+        final TypeRepresentation representation = TypeRepresentation.ofConcreteBuilder().identifier(identifier).properties(properties).build();
 
         representations.put(identifier, representation);
         representation.accept(cut);
@@ -148,7 +148,7 @@ public class JsonRepresentationAppenderTest {
         properties.put("world", INT_IDENTIFIER);
         properties.put("abc", STRING_IDENTIFIER);
         properties.put("model", modelIdentifier);
-        final TypeRepresentation dateRepresentation = TypeRepresentation.ofConcrete(dateIdentifier, properties);
+        final TypeRepresentation dateRepresentation = TypeRepresentation.ofConcreteBuilder().identifier(dateIdentifier).properties(properties).build();
         representations.put(dateIdentifier, dateRepresentation);
 
         properties = new HashMap<>();
@@ -156,7 +156,7 @@ public class JsonRepresentationAppenderTest {
         properties.put("hello", STRING_IDENTIFIER);
         properties.put("abc", STRING_IDENTIFIER);
         properties.put("model", modelIdentifier);
-        final TypeRepresentation objectRepresentation = TypeRepresentation.ofConcrete(objectIdentifier, properties);
+        final TypeRepresentation objectRepresentation = TypeRepresentation.ofConcreteBuilder().identifier(objectIdentifier).properties(properties).build();
         representations.put(objectIdentifier, objectRepresentation);
 
         properties = new HashMap<>();
@@ -165,7 +165,7 @@ public class JsonRepresentationAppenderTest {
         properties.put("abc", STRING_IDENTIFIER);
         properties.put("date", dateIdentifier);
         properties.put("object", objectIdentifier);
-        final TypeRepresentation modelRepresentation = TypeRepresentation.ofConcrete(modelIdentifier, properties);
+        final TypeRepresentation modelRepresentation = TypeRepresentation.ofConcreteBuilder().identifier(modelIdentifier).properties(properties).build();
         representations.put(modelIdentifier, modelRepresentation);
 
         // date
@@ -208,7 +208,7 @@ public class JsonRepresentationAppenderTest {
         properties.put("hello", STRING_IDENTIFIER);
         properties.put("abc", STRING_IDENTIFIER);
         properties.put("model", modelIdentifier);
-        final TypeRepresentation modelRepresentation = TypeRepresentation.ofConcrete(modelIdentifier, properties);
+        final TypeRepresentation modelRepresentation = TypeRepresentation.ofConcreteBuilder().identifier(modelIdentifier).properties(properties).build();
         representations.put(modelIdentifier, modelRepresentation);
 
         modelRepresentation.accept(cut);
@@ -228,13 +228,13 @@ public class JsonRepresentationAppenderTest {
         Map<String, TypeIdentifier> properties = new HashMap<>();
         properties.put("world", INT_IDENTIFIER);
         properties.put("model", secondModelIdentifier);
-        final TypeRepresentation firstModelRepresentation = TypeRepresentation.ofConcrete(firstModelIdentifier, properties);
+        final TypeRepresentation firstModelRepresentation = TypeRepresentation.ofConcreteBuilder().identifier(firstModelIdentifier).properties(properties).build();
         representations.put(firstModelIdentifier, firstModelRepresentation);
 
         properties = new HashMap<>();
         properties.put("hello", STRING_IDENTIFIER);
         properties.put("model", firstModelIdentifier);
-        final TypeRepresentation secondModelRepresentation = TypeRepresentation.ofConcrete(secondModelIdentifier, properties);
+        final TypeRepresentation secondModelRepresentation = TypeRepresentation.ofConcreteBuilder().identifier(secondModelIdentifier).properties(properties).build();
         representations.put(secondModelIdentifier, secondModelRepresentation);
 
         firstModelRepresentation.accept(cut);

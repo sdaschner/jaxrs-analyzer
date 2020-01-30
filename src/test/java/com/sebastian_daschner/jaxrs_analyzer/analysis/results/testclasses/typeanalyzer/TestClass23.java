@@ -47,7 +47,7 @@ public class TestClass23 {
         properties.put("second", TypeIdentifier.ofType(Types.PRIMITIVE_INT));
         //properties.put("child", identifier); @JsonIgnore
 
-        return Collections.singleton(TypeRepresentation.ofConcrete(identifier, properties));
+        return Collections.singleton(TypeRepresentation.ofConcreteBuilder().identifier(identifier).properties(properties).build());
     }
 
     public static TypeIdentifier expectedIdentifier() {

@@ -16,29 +16,44 @@
 
 package com.sebastian_daschner.jaxrs_analyzer.analysis;
 
+import static java.util.Collections.singleton;
+import static java.util.Collections.singletonList;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+
 import com.sebastian_daschner.jaxrs_analyzer.LogProvider;
 import com.sebastian_daschner.jaxrs_analyzer.builder.ResourceMethodBuilder;
 import com.sebastian_daschner.jaxrs_analyzer.builder.ResponseBuilder;
 import com.sebastian_daschner.jaxrs_analyzer.model.Types;
-import com.sebastian_daschner.jaxrs_analyzer.model.rest.*;
+import com.sebastian_daschner.jaxrs_analyzer.model.rest.HttpMethod;
+import com.sebastian_daschner.jaxrs_analyzer.model.rest.ResourceMethod;
+import com.sebastian_daschner.jaxrs_analyzer.model.rest.Resources;
+import com.sebastian_daschner.jaxrs_analyzer.model.rest.Response;
+import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeIdentifier;
+import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeRepresentation;
+
 import org.junit.Before;
 import org.junit.Test;
+
+import java.io.File;
+import java.net.MalformedURLException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.tools.JavaCompiler;
 import javax.tools.JavaFileObject;
 import javax.tools.StandardJavaFileManager;
 import javax.tools.ToolProvider;
-import java.io.File;
-import java.net.MalformedURLException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import static java.util.Collections.singleton;
-import static java.util.Collections.singletonList;
-import static org.junit.Assert.*;
 
 public class ProjectAnalyzerTest {
 
@@ -158,13 +173,14 @@ public class ProjectAnalyzerTest {
         properties.put("id", TypeIdentifier.ofType(Types.PRIMITIVE_LONG));
         properties.put("name", stringIdentifier);
         final TypeIdentifier modelIdentifier = TypeIdentifier.ofType("Lcom/sebastian_daschner/jaxrs_test/Model;");
-        final TypeRepresentation modelRepresentation = TypeRepresentation.ofConcrete(modelIdentifier, properties);
+        final TypeRepresentation modelRepresentation = TypeRepresentation.ofConcreteBuilder().identifier(modelIdentifier).properties(properties).build();
         resources.getTypeRepresentations().put(modelIdentifier, modelRepresentation);
 
         final TypeIdentifier modelListIdentifier = TypeIdentifier.ofType("Ljava/util/List<+Lcom/sebastian_daschner/jaxrs_test/Model;>;");
         resources.getTypeRepresentations().put(modelListIdentifier, TypeRepresentation.ofCollection(modelListIdentifier, modelRepresentation));
         final TypeIdentifier stringArrayListIdentifier = TypeIdentifier.ofType("Ljava/util/ArrayList<Ljava/lang/String;>;");
-        resources.getTypeRepresentations().put(stringArrayListIdentifier, TypeRepresentation.ofCollection(stringArrayListIdentifier, TypeRepresentation.ofConcrete(stringIdentifier)));
+        resources.getTypeRepresentations().put(stringArrayListIdentifier,
+            TypeRepresentation.ofCollection(stringArrayListIdentifier, TypeRepresentation.ofConcreteBuilder().identifier(stringIdentifier).build()));
 
         resources.setBasePath("rest");
 
@@ -292,17 +308,17 @@ public class ProjectAnalyzerTest {
         properties.put("key", stringIdentifier);
         // All numbers are treat as double (JSON type number)
         properties.put("duke", TypeIdentifier.ofType(Types.DOUBLE));
-        resources.getTypeRepresentations().put(firstIdentifier, TypeRepresentation.ofConcrete(firstIdentifier, properties));
+        resources.getTypeRepresentations().put(firstIdentifier, TypeRepresentation.ofConcreteBuilder().identifier(firstIdentifier).properties(properties).build());
         ResourceMethod twelfthGet = ResourceMethodBuilder.withMethod(HttpMethod.GET).andResponse(200, ResponseBuilder.withResponseBody(firstIdentifier).build()).build();
 
         final TypeIdentifier secondIdentifier = TypeIdentifier.ofDynamic();
         properties = new HashMap<>();
         properties.put("key", stringIdentifier);
-        resources.getTypeRepresentations().put(secondIdentifier, TypeRepresentation.ofConcrete(secondIdentifier, properties));
+        resources.getTypeRepresentations().put(secondIdentifier, TypeRepresentation.ofConcreteBuilder().identifier(secondIdentifier).properties(properties).build());
 
         // TODO type should be Object because JsonArray is interpreted as collection type
         final TypeIdentifier thirdIdentifier = TypeIdentifier.ofDynamic();
-        resources.getTypeRepresentations().put(thirdIdentifier, TypeRepresentation.ofCollection(thirdIdentifier, TypeRepresentation.ofConcrete(stringIdentifier)));
+        resources.getTypeRepresentations().put(thirdIdentifier, TypeRepresentation.ofCollection(thirdIdentifier, TypeRepresentation.ofConcreteBuilder().identifier(stringIdentifier).build()));
         ResourceMethod fifthPost = ResourceMethodBuilder.withMethod(HttpMethod.POST)
                 .andResponse(202, ResponseBuilder.withResponseBody(secondIdentifier).build())
                 .andResponse(500, ResponseBuilder.newBuilder().build())
@@ -316,7 +332,7 @@ public class ProjectAnalyzerTest {
         properties.put("key", stringIdentifier);
         properties.put("duke", stringIdentifier);
         properties.put("hello", stringIdentifier);
-        resources.getTypeRepresentations().put(fourthIdentifier, TypeRepresentation.ofConcrete(fourthIdentifier, properties));
+        resources.getTypeRepresentations().put(fourthIdentifier, TypeRepresentation.ofConcreteBuilder().identifier(fourthIdentifier).properties(properties).build());
         ResourceMethod thirteenthGet = ResourceMethodBuilder.withMethod(HttpMethod.GET).andResponse(200, ResponseBuilder.withResponseBody(fourthIdentifier).build())
                 .build();
         addMethods(resources, "json_tests/info", thirteenthGet);

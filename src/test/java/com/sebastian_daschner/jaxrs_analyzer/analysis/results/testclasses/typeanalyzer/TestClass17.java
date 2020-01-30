@@ -36,8 +36,8 @@ public class TestClass17 extends SuperTestClass3 {
         properties.put("world", stringIdentifier);
         properties.put("partner", superTestClass3);
 
-        return new HashSet<>(Arrays.asList(TypeRepresentation.ofConcrete(expectedIdentifier(), properties),
-                TypeRepresentation.ofConcrete(superTestClass3, Collections.singletonMap("hello", stringIdentifier))));
+        return new HashSet<>(Arrays.asList(TypeRepresentation.ofConcreteBuilder().identifier(expectedIdentifier()).properties(properties).build(),
+                TypeRepresentation.ofConcreteBuilder().identifier(superTestClass3).properties(Collections.singletonMap("hello", stringIdentifier)).build()));
     }
 
     public static TypeIdentifier expectedIdentifier() {

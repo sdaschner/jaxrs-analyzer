@@ -27,7 +27,7 @@ public class TestClass15 extends SuperTestClass1 {
         properties.put("foobar", TypeUtils.STRING_IDENTIFIER);
         properties.put("test", TypeUtils.STRING_IDENTIFIER);
 
-        return Collections.singleton(TypeRepresentation.ofConcrete(expectedIdentifier(), properties));
+        return Collections.singleton(TypeRepresentation.ofConcreteBuilder().identifier(expectedIdentifier()).properties(properties).build());
     }
 
     public static TypeIdentifier expectedIdentifier() {

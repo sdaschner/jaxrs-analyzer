@@ -44,13 +44,13 @@ public class TestClass12 {
         properties.put("child", innerTestIdentifier);
 
         final TypeIdentifier testClass12Identifier = expectedIdentifier();
-        final TypeRepresentation testClass12 = TypeRepresentation.ofConcrete(testClass12Identifier, properties);
+        final TypeRepresentation testClass12 = TypeRepresentation.ofConcreteBuilder().identifier(testClass12Identifier).properties(properties).build();
 
         final Map<String, TypeIdentifier> innerProperties = new HashMap<>();
         innerProperties.put("second", TypeIdentifier.ofType(Types.PRIMITIVE_INT));
         innerProperties.put("child", testClass12Identifier);
 
-        final TypeRepresentation innerTestClass = TypeRepresentation.ofConcrete(innerTestIdentifier, innerProperties);
+        final TypeRepresentation innerTestClass = TypeRepresentation.ofConcreteBuilder().identifier(innerTestIdentifier).properties(innerProperties).build();
 
         return new HashSet<>(Arrays.asList(testClass12, innerTestClass));
     }

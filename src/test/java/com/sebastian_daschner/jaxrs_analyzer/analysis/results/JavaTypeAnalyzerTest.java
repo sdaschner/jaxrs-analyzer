@@ -48,7 +48,7 @@ public class JavaTypeAnalyzerTest {
         this.testClassName = testClassName;
         this.expectedIdentifier = expectedIdentifier;
         this.expectedRepresentations = expectedRepresentations;
-        this.classUnderTest = new JavaTypeAnalyzer(actualTypeRepresentations);
+        this.classUnderTest = new JavaTypeAnalyzer(actualTypeRepresentations, new HashMap<>());
     }
 
     @Parameterized.Parameters(name = "{0}")

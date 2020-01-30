@@ -43,7 +43,7 @@ public class TestClass4 {
         properties.put("first", TypeIdentifier.ofType("Ljava/time/LocalDate;"));
         properties.put("second", TypeIdentifier.ofType(Types.DATE));
 
-        return Collections.singleton(TypeRepresentation.ofConcrete(expectedIdentifier(), properties));
+        return Collections.singleton(TypeRepresentation.ofConcreteBuilder().identifier(expectedIdentifier()).properties(properties).build());
     }
 
     public static TypeIdentifier expectedIdentifier() {

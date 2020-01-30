@@ -20,9 +20,10 @@ import com.sebastian_daschner.jaxrs_analyzer.analysis.results.TypeUtils;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeIdentifier;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeRepresentation;
 
-import javax.xml.bind.annotation.XmlTransient;
 import java.util.Collections;
 import java.util.Set;
+
+import javax.xml.bind.annotation.XmlTransient;
 
 public class TestClass2 {
 
@@ -44,7 +45,9 @@ public class TestClass2 {
     }
 
     public static Set<TypeRepresentation> expectedTypeRepresentations() {
-        return Collections.singleton(TypeRepresentation.ofConcrete(expectedIdentifier(), Collections.singletonMap("second", TypeUtils.STRING_IDENTIFIER)));
+        return Collections.singleton(
+            TypeRepresentation.ofConcreteBuilder().identifier(expectedIdentifier()).properties(Collections.singletonMap("second", TypeUtils.STRING_IDENTIFIER))
+                .build());
     }
 
     public static TypeIdentifier expectedIdentifier() {

@@ -30,7 +30,7 @@ public class TestClass20 implements Interface1, Interface2 {
         properties.put("test3", TypeUtils.STRING_IDENTIFIER);
         properties.put("test4", TypeUtils.STRING_IDENTIFIER);
 
-        return Collections.singleton(TypeRepresentation.ofConcrete(expectedIdentifier(), properties));
+        return Collections.singleton(TypeRepresentation.ofConcreteBuilder().identifier(expectedIdentifier()).properties(properties).build());
     }
 
     public static TypeIdentifier expectedIdentifier() {

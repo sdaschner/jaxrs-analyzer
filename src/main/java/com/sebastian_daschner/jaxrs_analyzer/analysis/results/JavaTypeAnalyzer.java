@@ -16,25 +16,47 @@
 
 package com.sebastian_daschner.jaxrs_analyzer.analysis.results;
 
+import static com.sebastian_daschner.jaxrs_analyzer.model.JavaUtils.getAnnotation;
+import static com.sebastian_daschner.jaxrs_analyzer.model.JavaUtils.getFieldDescriptor;
+import static com.sebastian_daschner.jaxrs_analyzer.model.JavaUtils.getMethodSignature;
+import static com.sebastian_daschner.jaxrs_analyzer.model.JavaUtils.getReturnType;
+import static com.sebastian_daschner.jaxrs_analyzer.model.JavaUtils.isAnnotationPresent;
+import static com.sebastian_daschner.jaxrs_analyzer.model.JavaUtils.isAssignableTo;
+import static com.sebastian_daschner.jaxrs_analyzer.model.JavaUtils.loadClassFromType;
+import static com.sebastian_daschner.jaxrs_analyzer.model.JavaUtils.toClassName;
+import static com.sebastian_daschner.jaxrs_analyzer.model.Types.COLLECTION;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreType;
 import com.sebastian_daschner.jaxrs_analyzer.model.Types;
+import com.sebastian_daschner.jaxrs_analyzer.model.javadoc.ClassComment;
+import com.sebastian_daschner.jaxrs_analyzer.model.javadoc.MemberParameterTag;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeIdentifier;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeRepresentation;
+import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeRepresentation.ConcreteTypeRepresentationBuilder;
 import com.sebastian_daschner.jaxrs_analyzer.utils.Pair;
+
 import org.objectweb.asm.Type;
+
+import java.lang.reflect.AccessibleObject;
+import java.lang.reflect.Field;
+import java.lang.reflect.Member;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlTransient;
-import java.lang.reflect.*;
-import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import static com.sebastian_daschner.jaxrs_analyzer.model.JavaUtils.*;
-import static com.sebastian_daschner.jaxrs_analyzer.model.Types.COLLECTION;
 
 /**
  * Analyzes a class (usually a POJO) for it's properties and methods.
@@ -51,10 +73,12 @@ class JavaTypeAnalyzer {
      * The type representation storage where all analyzed types have to be added. This will be created by the caller.
      */
     private final Map<TypeIdentifier, TypeRepresentation> typeRepresentations;
+    private final Map<String, ClassComment> classComments;
     private final Set<String> analyzedTypes;
 
-    JavaTypeAnalyzer(final Map<TypeIdentifier, TypeRepresentation> typeRepresentations) {
+    JavaTypeAnalyzer(final Map<TypeIdentifier, TypeRepresentation> typeRepresentations, final Map<String, ClassComment> classComments) {
         this.typeRepresentations = typeRepresentations;
+        this.classComments = classComments;
         analyzedTypes = new HashSet<>();
     }
 
@@ -93,10 +117,28 @@ class JavaTypeAnalyzer {
         if (loadedClass != null && loadedClass.isEnum())
             return TypeRepresentation.ofEnum(identifier, Stream.of(loadedClass.getEnumConstants()).map(o -> (Enum<?>) o).map(Enum::name).toArray(String[]::new));
 
-        return TypeRepresentation.ofConcrete(identifier, analyzeClass(type, loadedClass));
+        final Map<String, Pair<String, TypeIdentifier>> classResults = analyzeClass(type, loadedClass);
+
+        final Map<String, TypeIdentifier> properties = classResults.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e-> e.getValue().getRight()));
+        final Map<String, String> propertyDescriptions = classResults.entrySet().stream().filter(e -> e.getValue().getLeft() != null)
+            .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().getLeft()));
+
+        // build up the concrete type response
+        final ConcreteTypeRepresentationBuilder builder = TypeRepresentation.ofConcreteBuilder().identifier(identifier).properties(properties);
+
+        if (!propertyDescriptions.isEmpty()) {
+            builder.propertyDescriptions(propertyDescriptions);
+        }
+
+        if (classComments.containsKey(toClassName(type))) {
+            final ClassComment comment = classComments.get(toClassName(type));
+            builder.description(comment.getComment());
+        }
+
+        return builder.build();
     }
 
-    private Map<String, TypeIdentifier> analyzeClass(final String type, final Class<?> clazz) {
+    private Map<String, Pair<String, TypeIdentifier>> analyzeClass(final String type, final Class<?> clazz) {
         if (clazz == null || isJDKType(type))
             return Collections.emptyMap();
 
@@ -107,18 +149,33 @@ class JavaTypeAnalyzer {
         final List<Field> relevantFields = Stream.of(clazz.getDeclaredFields()).filter(f -> isRelevant(f, value)).collect(Collectors.toList());
         final List<Method> relevantGetters = Stream.of(clazz.getDeclaredMethods()).filter(m -> isRelevant(m, value)).collect(Collectors.toList());
 
-        final Map<String, TypeIdentifier> properties = new HashMap<>();
+        final Map<String, Pair<String, TypeIdentifier>> properties = new HashMap<>();
 
         final Stream<Class<?>> allSuperTypes = Stream.concat(Stream.of(clazz.getInterfaces()), Stream.of(clazz.getSuperclass()));
         allSuperTypes.filter(Objects::nonNull).map(Type::getDescriptor).map(t -> analyzeClass(t, loadClassFromType(t))).forEach(properties::putAll);
 
         Stream.concat(relevantFields.stream().map(f -> mapField(f, type)), relevantGetters.stream().map(g -> mapGetter(g, type)))
                 .filter(Objects::nonNull).forEach(p -> {
-            properties.put(p.getLeft(), TypeIdentifier.ofType(p.getRight()));
+            properties.put(p.getLeft(), Pair.of(getDescription(type, p.getLeft()), TypeIdentifier.ofType(p.getRight())));
             analyze(p.getRight());
         });
 
         return properties;
+    }
+
+    private String getDescription(String parentClass, String subFieldName) {
+        final String className = toClassName(parentClass);
+        if (classComments.containsKey(className)) {
+            // look through classComments (obtained from JavaDocAnalyzer, using JavaParser) and see if we have a matching field for this class/type
+            return classComments.get(className).getFieldComments()
+                .stream()
+                .filter(memberParameterTag -> memberParameterTag.getName().equals(subFieldName))
+                .map(MemberParameterTag::getComment)
+                .findAny()
+                .orElse(null);
+        }
+
+        return null;
     }
 
     private XmlAccessType getXmlAccessType(final Class<?> clazz) {

@@ -1,20 +1,25 @@
 package com.sebastian_daschner.jaxrs_analyzer.backend.swagger;
 
-import com.sebastian_daschner.jaxrs_analyzer.model.Types;
-import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeIdentifier;
-import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeRepresentation;
-import org.junit.Before;
-import org.junit.Test;
-
-import javax.json.Json;
-import javax.json.JsonObject;
-import java.util.HashMap;
-import java.util.Map;
-
-import static com.sebastian_daschner.jaxrs_analyzer.analysis.results.TypeUtils.*;
+import static com.sebastian_daschner.jaxrs_analyzer.analysis.results.TypeUtils.INT_IDENTIFIER;
+import static com.sebastian_daschner.jaxrs_analyzer.analysis.results.TypeUtils.MODEL_IDENTIFIER;
+import static com.sebastian_daschner.jaxrs_analyzer.analysis.results.TypeUtils.OBJECT_IDENTIFIER;
+import static com.sebastian_daschner.jaxrs_analyzer.analysis.results.TypeUtils.STRING_IDENTIFIER;
 import static com.sebastian_daschner.jaxrs_analyzer.backend.swagger.TypeIdentifierTestSupport.resetTypeIdentifierCounter;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
+
+import com.sebastian_daschner.jaxrs_analyzer.model.Types;
+import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeIdentifier;
+import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeRepresentation;
+
+import org.junit.Before;
+import org.junit.Test;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.json.Json;
+import javax.json.JsonObject;
 
 public class SchemaBuilderTest {
 
@@ -32,7 +37,7 @@ public class SchemaBuilderTest {
 
     @Test
     public void testSimpleDefinitions() {
-        representations.put(INT_LIST_IDENTIFIER, TypeRepresentation.ofCollection(INTEGER_IDENTIFIER, TypeRepresentation.ofConcrete(INTEGER_IDENTIFIER)));
+        representations.put(INT_LIST_IDENTIFIER, TypeRepresentation.ofCollection(INTEGER_IDENTIFIER, TypeRepresentation.ofConcreteBuilder().identifier(INTEGER_IDENTIFIER).build()));
 
         final TypeIdentifier modelIdentifier = MODEL_IDENTIFIER;
         final Map<String, TypeIdentifier> modelProperties = new HashMap<>();
@@ -41,7 +46,15 @@ public class SchemaBuilderTest {
         modelProperties.put("hello1", STRING_IDENTIFIER);
         modelProperties.put("array1", INT_LIST_IDENTIFIER);
 
-        representations.put(modelIdentifier, TypeRepresentation.ofConcrete(modelIdentifier, modelProperties));
+        final Map<String, String> modelPropertyComments = new HashMap<>();
+
+        modelPropertyComments.put("test1", "This is a description for test1");
+        modelPropertyComments.put("hello1", "Some other description");
+        modelPropertyComments.put("array1", "This is an array");
+
+        representations.put(modelIdentifier,
+            TypeRepresentation.ofConcreteBuilder().identifier(modelIdentifier).description("Our overall model").properties(modelProperties)
+                .propertyDescriptions(modelPropertyComments).build());
 
         final Map<String, TypeIdentifier> dynamicProperties = new HashMap<>();
 
@@ -55,8 +68,8 @@ public class SchemaBuilderTest {
 
         dynamicProperties.put("object2", nestedDynamicIdentifier);
 
-        representations.put(nestedDynamicIdentifier, TypeRepresentation.ofConcrete(nestedDynamicIdentifier, nestedDynamicProperties));
-        representations.put(OBJECT_IDENTIFIER, TypeRepresentation.ofConcrete(OBJECT_IDENTIFIER, dynamicProperties));
+        representations.put(nestedDynamicIdentifier, TypeRepresentation.ofConcreteBuilder().identifier(nestedDynamicIdentifier).properties(nestedDynamicProperties).build());
+        representations.put(OBJECT_IDENTIFIER, TypeRepresentation.ofConcreteBuilder().identifier(OBJECT_IDENTIFIER).properties(dynamicProperties).build());
 
         cut = new SchemaBuilder(representations);
         assertThat(cut.build(modelIdentifier).build(), is(Json.createObjectBuilder().add("$ref", "#/definitions/Model").build()));
@@ -64,10 +77,10 @@ public class SchemaBuilderTest {
 
         final JsonObject definitions = cut.getDefinitions();
         assertThat(definitions, is(Json.createObjectBuilder()
-                .add("Model", Json.createObjectBuilder().add("properties", Json.createObjectBuilder()
-                        .add("array1", Json.createObjectBuilder().add("type", "array").add("items", type("integer")))
-                        .add("hello1", type("string"))
-                        .add("test1", type("integer"))))
+                .add("Model", Json.createObjectBuilder().add("description", "Our overall model").add("properties", Json.createObjectBuilder()
+                        .add("array1", Json.createObjectBuilder().add("type", "array").add("items", type("integer")).add("description", "This is an array"))
+                        .add("hello1", typeWithDesc("string", "Some other description"))
+                        .add("test1", typeWithDesc("integer", "This is a description for test1"))))
                 .add("JsonObject", Json.createObjectBuilder().add("properties", Json.createObjectBuilder().add("test", type("integer"))))
                 .add("Object", Json.createObjectBuilder().add("properties", Json.createObjectBuilder()
                         .add("array2", Json.createObjectBuilder().add("type", "array").add("items", type("integer")))
@@ -92,9 +105,9 @@ public class SchemaBuilderTest {
         anotherLockProperties.put("hello1", STRING_IDENTIFIER);
         anotherLockProperties.put("array1", INT_LIST_IDENTIFIER);
 
-        representations.put(INT_LIST_IDENTIFIER, TypeRepresentation.ofCollection(INTEGER_IDENTIFIER, TypeRepresentation.ofConcrete(INTEGER_IDENTIFIER)));
-        representations.put(lockIdentifier, TypeRepresentation.ofConcrete(lockIdentifier, lockProperties));
-        representations.put(anotherLockIdentifier, TypeRepresentation.ofConcrete(anotherLockIdentifier, anotherLockProperties));
+        representations.put(INT_LIST_IDENTIFIER, TypeRepresentation.ofCollection(INTEGER_IDENTIFIER, TypeRepresentation.ofConcreteBuilder().identifier(INTEGER_IDENTIFIER).build()));
+        representations.put(lockIdentifier, TypeRepresentation.ofConcreteBuilder().identifier(lockIdentifier).properties(lockProperties).build());
+        representations.put(anotherLockIdentifier, TypeRepresentation.ofConcreteBuilder().identifier(anotherLockIdentifier).properties(anotherLockProperties).build());
 
         cut = new SchemaBuilder(representations);
 
@@ -124,7 +137,7 @@ public class SchemaBuilderTest {
         // unknown type identifier
         properties.put("array1", INT_LIST_IDENTIFIER);
 
-        representations.put(identifier, TypeRepresentation.ofConcrete(identifier, properties));
+        representations.put(identifier, TypeRepresentation.ofConcreteBuilder().identifier(identifier).properties(properties).build());
 
         cut = new SchemaBuilder(representations);
 
@@ -140,6 +153,40 @@ public class SchemaBuilderTest {
     }
 
     @Test
+    public void testSimpleDefinitionSomeMissingComments() {
+        representations.put(INT_LIST_IDENTIFIER, TypeRepresentation.ofCollection(INTEGER_IDENTIFIER, TypeRepresentation.ofConcreteBuilder().identifier(INTEGER_IDENTIFIER).build()));
+
+        final TypeIdentifier modelIdentifier = MODEL_IDENTIFIER;
+        final Map<String, TypeIdentifier> modelProperties = new HashMap<>();
+
+        modelProperties.put("test1", INT_IDENTIFIER);
+        modelProperties.put("hello1", STRING_IDENTIFIER);
+        modelProperties.put("hello2", STRING_IDENTIFIER);
+        modelProperties.put("array1", INT_LIST_IDENTIFIER);
+
+        final Map<String, String> modelPropertyComments = new HashMap<>();
+
+        modelPropertyComments.put("test1", "This is a description for test1");
+        modelPropertyComments.put("hello2", "This is a description for hello2");
+
+        representations.put(modelIdentifier,
+            TypeRepresentation.ofConcreteBuilder().identifier(modelIdentifier).description("Our overall model").properties(modelProperties)
+                .propertyDescriptions(modelPropertyComments).build());
+
+        cut = new SchemaBuilder(representations);
+        assertThat(cut.build(modelIdentifier).build(), is(Json.createObjectBuilder().add("$ref", "#/definitions/Model").build()));
+
+        final JsonObject definitions = cut.getDefinitions();
+        assertThat(definitions, is(Json.createObjectBuilder()
+            .add("Model", Json.createObjectBuilder().add("description", "Our overall model").add("properties", Json.createObjectBuilder()
+                .add("array1", Json.createObjectBuilder().add("type", "array").add("items", type("integer")))
+                .add("hello1", type("string"))
+                .add("hello2", typeWithDesc("string", "This is a description for hello2"))
+                .add("test1", typeWithDesc("integer", "This is a description for test1"))))
+            .build()));
+    }
+
+    @Test
     public void testMultipleDifferentDefinitions() {
         final Map<String, TypeIdentifier> properties = new HashMap<>();
 
@@ -147,8 +194,8 @@ public class SchemaBuilderTest {
         properties.put("hello1", STRING_IDENTIFIER);
         properties.put("array1", INT_LIST_IDENTIFIER);
 
-        representations.put(MODEL_IDENTIFIER, TypeRepresentation.ofConcrete(MODEL_IDENTIFIER, properties));
-        representations.put(INT_LIST_IDENTIFIER, TypeRepresentation.ofCollection(INTEGER_IDENTIFIER, TypeRepresentation.ofConcrete(INTEGER_IDENTIFIER)));
+        representations.put(MODEL_IDENTIFIER, TypeRepresentation.ofConcreteBuilder().identifier(MODEL_IDENTIFIER).properties(properties).build());
+        representations.put(INT_LIST_IDENTIFIER, TypeRepresentation.ofCollection(INTEGER_IDENTIFIER, TypeRepresentation.ofConcreteBuilder().identifier(INTEGER_IDENTIFIER).build()));
 
         cut = new SchemaBuilder(representations);
 
@@ -180,9 +227,9 @@ public class SchemaBuilderTest {
         final Map<String, TypeIdentifier> secondProperties = new HashMap<>();
         secondProperties.put("nested", firstIdentifier);
 
-        representations.put(INT_LIST_IDENTIFIER, TypeRepresentation.ofCollection(INTEGER_IDENTIFIER, TypeRepresentation.ofConcrete(INTEGER_IDENTIFIER)));
-        representations.put(firstIdentifier, TypeRepresentation.ofConcrete(firstIdentifier, firstProperties));
-        representations.put(secondIdentifier, TypeRepresentation.ofConcrete(secondIdentifier, secondProperties));
+        representations.put(INT_LIST_IDENTIFIER, TypeRepresentation.ofCollection(INTEGER_IDENTIFIER, TypeRepresentation.ofConcreteBuilder().identifier(INTEGER_IDENTIFIER).build()));
+        representations.put(firstIdentifier, TypeRepresentation.ofConcreteBuilder().identifier(firstIdentifier).properties(firstProperties).build());
+        representations.put(secondIdentifier, TypeRepresentation.ofConcreteBuilder().identifier(secondIdentifier).properties(secondProperties).build());
 
         cut = new SchemaBuilder(representations);
 
@@ -217,9 +264,9 @@ public class SchemaBuilderTest {
         final Map<String, TypeIdentifier> thirdProperties = new HashMap<>();
         thirdProperties.put("href", STRING_IDENTIFIER);
 
-        representations.put(firstIdentifier, TypeRepresentation.ofConcrete(firstIdentifier, firstProperties));
-        representations.put(secondIdentifier, TypeRepresentation.ofConcrete(secondIdentifier, secondProperties));
-        representations.put(thirdIdentifier, TypeRepresentation.ofConcrete(thirdIdentifier, thirdProperties));
+        representations.put(firstIdentifier, TypeRepresentation.ofConcreteBuilder().identifier(firstIdentifier).properties(firstProperties).build());
+        representations.put(secondIdentifier, TypeRepresentation.ofConcreteBuilder().identifier(secondIdentifier).properties(secondProperties).build());
+        representations.put(thirdIdentifier, TypeRepresentation.ofConcreteBuilder().identifier(thirdIdentifier).properties(thirdProperties).build());
 
         cut = new SchemaBuilder(representations);
 
@@ -241,12 +288,17 @@ public class SchemaBuilderTest {
     @Test
     public void testEnumDefinitions() {
         final TypeIdentifier enumIdentifier = TypeIdentifier.ofType("Lcom/sebastian_daschner/test/Enumeration;");
-        final Map<String, TypeIdentifier> modelProperties = new HashMap<>();
 
+        final Map<String, TypeIdentifier> modelProperties = new HashMap<>();
         modelProperties.put("foobar", enumIdentifier);
         modelProperties.put("hello1", STRING_IDENTIFIER);
 
-        representations.put(MODEL_IDENTIFIER, TypeRepresentation.ofConcrete(MODEL_IDENTIFIER, modelProperties));
+        final Map<String, String> propertyDescriptions = new HashMap<>();
+        propertyDescriptions.put("foobar", "foobar is important, so here is its JavaDoc-type comment.");
+        propertyDescriptions.put("hello1", "Another comment here.");
+
+        representations.put(MODEL_IDENTIFIER,
+            TypeRepresentation.ofConcreteBuilder().identifier(MODEL_IDENTIFIER).properties(modelProperties).propertyDescriptions(propertyDescriptions).build());
         representations.put(enumIdentifier, TypeRepresentation.ofEnum(enumIdentifier, "THIRD", "FIRST", "SECOND"));
 
         cut = new SchemaBuilder(representations);
@@ -257,14 +309,19 @@ public class SchemaBuilderTest {
 
         final JsonObject definitions = cut.getDefinitions();
         assertThat(definitions, is(Json.createObjectBuilder()
-                .add("Model", Json.createObjectBuilder().add("properties", Json.createObjectBuilder()
-                        .add("foobar", Json.createObjectBuilder().add("type", "string").add("enum", Json.createArrayBuilder().add("FIRST").add("SECOND").add("THIRD")))
-                        .add("hello1", type("string"))))
+                .add("Model", Json.createObjectBuilder().add("properties", Json.createObjectBuilder().add("foobar",
+                    Json.createObjectBuilder().add("type", "string").add("enum", Json.createArrayBuilder().add("FIRST").add("SECOND").add("THIRD"))
+                        .add("description", "foobar is important, so here is its JavaDoc-type comment."))
+                        .add("hello1", typeWithDesc("string", "Another comment here."))))
                 .build()));
     }
 
     private static JsonObject type(final String type) {
         return Json.createObjectBuilder().add("type", type).build();
+    }
+
+    private static JsonObject typeWithDesc(final String type, final String description) {
+        return Json.createObjectBuilder().add("type", type).add("description", description).build();
     }
 
 }

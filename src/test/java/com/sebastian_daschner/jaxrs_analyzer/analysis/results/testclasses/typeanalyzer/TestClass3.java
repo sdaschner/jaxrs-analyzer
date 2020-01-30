@@ -20,10 +20,16 @@ import com.sebastian_daschner.jaxrs_analyzer.analysis.results.TypeUtils;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeIdentifier;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeRepresentation;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
-import java.util.*;
 
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.FIELD)
@@ -54,9 +60,10 @@ public class TestClass3 {
         properties.put("second", typeIdentifier);
         properties.put("third", anotherInnerIdentifier);
 
-        final TypeRepresentation testClass3 = TypeRepresentation.ofConcrete(expectedIdentifier(), properties);
-        final TypeRepresentation innerClass = TypeRepresentation.ofConcrete(innerClassIdentifier, Collections.singletonMap("name", TypeUtils.STRING_IDENTIFIER));
-        final TypeRepresentation anotherInner = TypeRepresentation.ofConcrete(anotherInnerIdentifier);
+        final TypeRepresentation testClass3 = TypeRepresentation.ofConcreteBuilder().identifier(expectedIdentifier()).properties(properties).build();
+        final TypeRepresentation innerClass = TypeRepresentation.ofConcreteBuilder().identifier(innerClassIdentifier)
+            .properties(Collections.singletonMap("name", TypeUtils.STRING_IDENTIFIER)).build();
+        final TypeRepresentation anotherInner = TypeRepresentation.ofConcreteBuilder().identifier(anotherInnerIdentifier).build();
         final TypeRepresentation type = TypeRepresentation.ofEnum(typeIdentifier, "ONE", "TWO", "THREE");
 
         return new HashSet<>(Arrays.asList(testClass3, innerClass, anotherInner, type));

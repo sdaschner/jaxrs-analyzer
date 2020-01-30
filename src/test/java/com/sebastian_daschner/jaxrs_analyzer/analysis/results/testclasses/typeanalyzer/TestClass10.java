@@ -49,7 +49,7 @@ public class TestClass10 {
         properties.put("second", TypeIdentifier.ofType("Ljava/util/Map;"));
         properties.put("third", TypeIdentifier.ofType("Ljava/util/Map<Ljava/lang/String;Ljava/lang/String;>;"));
 
-        return Collections.singleton(TypeRepresentation.ofConcrete(expectedIdentifier(), properties));
+        return Collections.singleton(TypeRepresentation.ofConcreteBuilder().identifier(expectedIdentifier()).properties(properties).build());
     }
 
     public static TypeIdentifier expectedIdentifier() {

@@ -63,7 +63,7 @@ public class TestClass25 {
         properties.put("publicField", TypeUtils.STRING_IDENTIFIER);
         properties.put("int", TypeIdentifier.ofType(Types.PRIMITIVE_INT));
 
-        return Collections.singleton(TypeRepresentation.ofConcrete(expectedIdentifier(), properties));
+        return Collections.singleton(TypeRepresentation.ofConcreteBuilder().identifier(expectedIdentifier()).properties(properties).build());
     }
 
     public static TypeIdentifier expectedIdentifier() {

@@ -50,8 +50,8 @@ public class TestClass5 {
         properties.put("first", listIdentifier);
         properties.put("second", setIdentifier);
 
-        final TypeRepresentation testClass5 = TypeRepresentation.ofConcrete(expectedIdentifier(), properties);
-        final TypeRepresentation string = TypeRepresentation.ofConcrete(TypeUtils.STRING_IDENTIFIER);
+        final TypeRepresentation testClass5 = TypeRepresentation.ofConcreteBuilder().identifier(expectedIdentifier()).properties(properties).build();
+        final TypeRepresentation string = TypeRepresentation.ofConcreteBuilder().identifier(TypeUtils.STRING_IDENTIFIER).build();
         final TypeRepresentation listString = TypeRepresentation.ofCollection(listIdentifier, string);
         final TypeRepresentation setString = TypeRepresentation.ofCollection(setIdentifier, string);
 

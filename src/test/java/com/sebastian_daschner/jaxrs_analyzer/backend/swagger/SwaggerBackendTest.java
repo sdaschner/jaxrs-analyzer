@@ -101,7 +101,7 @@ public class SwaggerBackendTest {
         identifier = TypeIdentifier.ofDynamic();
         properties.put("key", stringIdentifier);
         properties.put("another", intIdentifier);
-        add(data, ResourcesBuilder.withBase("rest").andTypeRepresentation(identifier, TypeRepresentation.ofConcrete(identifier, properties))
+        add(data, ResourcesBuilder.withBase("rest").andTypeRepresentation(identifier, TypeRepresentation.ofConcreteBuilder().identifier(identifier).properties(properties).build())
                         .andResource("res2", ResourceMethodBuilder.withMethod(HttpMethod.GET)
                                 .andResponse(200, ResponseBuilder.withResponseBody(identifier).build()).build()).build(),
                 "{\"swagger\":\"2.0\",\"info\":{\"version\":\"1.0\",\"title\":\"project name\"},\"host\":\"example.com\",\"basePath\":\"/rest\",\"schemes\":[\"http\"],\"paths\":{\"/res2\":{\"get\":{\"consumes\":[],\"produces\":[],\"parameters\":[],\"responses\":{\"200\":{\"description\":\"OK\",\"headers\":{},\"schema\":{\"$ref\":\"#/definitions/JsonObject\"}}}}}},\"definitions\":{\"JsonObject\":{\"properties\":{\"another\":{\"type\":\"integer\"},\"key\":{\"type\":\"string\"}}}}}");
@@ -112,7 +112,7 @@ public class SwaggerBackendTest {
         properties.put("key", stringIdentifier);
         properties.put("another", intIdentifier);
         add(data, ResourcesBuilder.withBase("rest")
-                        .andTypeRepresentation(identifier, TypeRepresentation.ofCollection(identifier, TypeRepresentation.ofConcrete(TypeIdentifier.ofDynamic(), properties)))
+                        .andTypeRepresentation(identifier, TypeRepresentation.ofCollection(identifier, TypeRepresentation.ofConcreteBuilder().identifier(TypeIdentifier.ofDynamic()).properties(properties).build()))
                         .andResource("res3", ResourceMethodBuilder.withMethod(HttpMethod.GET)
                                 .andResponse(200, ResponseBuilder.withResponseBody(identifier).build()).build()).build(),
                 "{\"swagger\":\"2.0\",\"info\":{\"version\":\"1.0\",\"title\":\"project name\"},\"host\":\"example.com\",\"basePath\":\"/rest\",\"schemes\":[\"http\"],\"paths\":{\"/res3\":{\"get\":{\"consumes\":[],\"produces\":[],\"parameters\":[],\"responses\":{\"200\":{\"description\":\"OK\",\"headers\":{},\"schema\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/definitions/JsonObject_2\"}}}}}}},\"definitions\":{\"JsonObject_2\":{\"properties\":{\"another\":{\"type\":\"integer\"},\"key\":{\"type\":\"string\"}}}}}");
@@ -120,7 +120,7 @@ public class SwaggerBackendTest {
         resetTypeIdentifierCounter();
         identifier = TypeIdentifier.ofDynamic();
         add(data, ResourcesBuilder.withBase("rest")
-                        .andTypeRepresentation(identifier, TypeRepresentation.ofCollection(identifier, TypeRepresentation.ofConcrete(stringIdentifier)))
+                        .andTypeRepresentation(identifier, TypeRepresentation.ofCollection(identifier, TypeRepresentation.ofConcreteBuilder().identifier(stringIdentifier).build()))
                         .andResource("res4", ResourceMethodBuilder.withMethod(HttpMethod.GET)
                                 .andResponse(200, ResponseBuilder.withResponseBody(identifier).build()).build()).build(),
                 "{\"swagger\":\"2.0\",\"info\":{\"version\":\"1.0\",\"title\":\"project name\"},\"host\":\"example.com\",\"basePath\":\"/rest\",\"schemes\":[\"http\"],\"paths\":{\"/res4\":{\"get\":{\"consumes\":[],\"produces\":[],\"parameters\":[],\"responses\":{\"200\":{\"description\":\"OK\",\"headers\":{},\"schema\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}}}}}}},\"definitions\":{}}");
@@ -130,7 +130,7 @@ public class SwaggerBackendTest {
         properties = new HashMap<>();
         properties.put("key", stringIdentifier);
         add(data, ResourcesBuilder.withBase("rest")
-                        .andTypeRepresentation(identifier, TypeRepresentation.ofCollection(identifier, TypeRepresentation.ofConcrete(identifier, properties)))
+                        .andTypeRepresentation(identifier, TypeRepresentation.ofCollection(identifier, TypeRepresentation.ofConcreteBuilder().identifier(identifier).properties(properties).build()))
                         .andResource("res5", ResourceMethodBuilder.withMethod(HttpMethod.GET)
                                 .andResponse(200, ResponseBuilder.withResponseBody(identifier).build()).build()).build(),
                 "{\"swagger\":\"2.0\",\"info\":{\"version\":\"1.0\",\"title\":\"project name\"},\"host\":\"example.com\",\"basePath\":\"/rest\",\"schemes\":[\"http\"],\"paths\":{\"/res5\":{\"get\":{\"consumes\":[],\"produces\":[],\"parameters\":[],\"responses\":{\"200\":{\"description\":\"OK\",\"headers\":{},\"schema\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/definitions/JsonObject\"}}}}}}},\"definitions\":{\"JsonObject\":{\"properties\":{\"key\":{\"type\":\"string\"}}}}}");
@@ -139,14 +139,14 @@ public class SwaggerBackendTest {
         properties.put("name", stringIdentifier);
         properties.put("value", intIdentifier);
         add(data, ResourcesBuilder.withBase("rest")
-                        .andTypeRepresentation(MODEL_IDENTIFIER, TypeRepresentation.ofConcrete(MODEL_IDENTIFIER, properties))
+                        .andTypeRepresentation(MODEL_IDENTIFIER, TypeRepresentation.ofConcreteBuilder().identifier(MODEL_IDENTIFIER).properties(properties).build())
                         .andResource("res6", ResourceMethodBuilder.withMethod(HttpMethod.GET)
                                 .andResponse(200, ResponseBuilder.withResponseBody(MODEL_IDENTIFIER).build()).build()).build(),
                 "{\"swagger\":\"2.0\",\"info\":{\"version\":\"1.0\",\"title\":\"project name\"},\"host\":\"example.com\",\"basePath\":\"/rest\",\"schemes\":[\"http\"],\"paths\":{\"/res6\":{\"get\":{\"consumes\":[],\"produces\":[],\"parameters\":[],\"responses\":{\"200\":{\"description\":\"OK\",\"headers\":{},\"schema\":{\"$ref\":\"#/definitions/Model\"}}}}}},\"definitions\":{\"Model\":{\"properties\":{\"name\":{\"type\":\"string\"},\"value\":{\"type\":\"integer\"}}}}}");
 
         identifier = TypeIdentifier.ofType("Ljavax/ws/rs/core/StreamingOutput;");
         add(data, ResourcesBuilder.withBase("rest")
-                        .andTypeRepresentation(identifier, TypeRepresentation.ofConcrete(identifier))
+                        .andTypeRepresentation(identifier, TypeRepresentation.ofConcreteBuilder().identifier(identifier).build())
                         .andResource("res7", ResourceMethodBuilder.withMethod(HttpMethod.GET)
                                 .andResponse(200, ResponseBuilder.withResponseBody(identifier).build()).build()).build(),
                 "{\"swagger\":\"2.0\",\"info\":{\"version\":\"1.0\",\"title\":\"project name\"},\"host\":\"example.com\",\"basePath\":\"/rest\",\"schemes\":[\"http\"],\"paths\":{\"/res7\":{\"get\":{\"consumes\":[],\"produces\":[],\"parameters\":[],\"responses\":{\"200\":{\"description\":\"OK\",\"headers\":{},\"schema\":{\"$ref\":\"#/definitions/StreamingOutput\"}}}}}},\"definitions\":{\"StreamingOutput\":{\"properties\":{}}}}");
@@ -156,7 +156,7 @@ public class SwaggerBackendTest {
         properties.put("name", stringIdentifier);
         properties.put("value", intIdentifier);
         add(data, ResourcesBuilder.withBase("rest")
-                        .andTypeRepresentation(dynamicIdentifier, TypeRepresentation.ofCollection(MODEL_IDENTIFIER, TypeRepresentation.ofConcrete(MODEL_IDENTIFIER, properties)))
+                        .andTypeRepresentation(dynamicIdentifier, TypeRepresentation.ofCollection(MODEL_IDENTIFIER, TypeRepresentation.ofConcreteBuilder().identifier(MODEL_IDENTIFIER).properties(properties).build()))
                         .andResource("res8", ResourceMethodBuilder.withMethod(HttpMethod.POST).andRequestBodyType(dynamicIdentifier).andAcceptMediaTypes("application/json")
                                 .andResponse(201, ResponseBuilder.newBuilder().andHeaders("Location").build()).build()).build(),
                 "{\"swagger\":\"2.0\",\"info\":{\"version\":\"1.0\",\"title\":\"project name\"},\"host\":\"example.com\",\"basePath\":\"/rest\",\"schemes\":[\"http\"],\"paths\":{\"/res8\":{\"post\":{\"consumes\":[\"application/json\"],\"produces\":[],\"parameters\":[{\"name\":\"body\",\"in\":\"body\",\"required\":true,\"schema\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/definitions/Model\"}}}],\"responses\":{\"201\":{\"description\":\"Created\",\"headers\":{\"Location\":{\"type\":\"string\"}}}}}}},\"definitions\":{\"Model\":{\"properties\":{\"name\":{\"type\":\"string\"},\"value\":{\"type\":\"integer\"}}}}}");
@@ -210,19 +210,19 @@ public class SwaggerBackendTest {
 
         // query parameter tests
         add(data, ResourcesBuilder.withBase("rest")
-                        .andTypeRepresentation(dynamicIdentifier, TypeRepresentation.ofCollection(identifier, TypeRepresentation.ofConcrete(identifier, properties)))
+                        .andTypeRepresentation(dynamicIdentifier, TypeRepresentation.ofCollection(identifier, TypeRepresentation.ofConcreteBuilder().identifier(identifier).properties(properties).build()))
                         .andResource("res15", ResourceMethodBuilder.withMethod(HttpMethod.GET).andQueryParam("value", "Ljava/lang/Integer;").andAcceptMediaTypes("application/json")
                                 .andResponse(200, ResponseBuilder.withResponseBody(TypeIdentifier.ofType(Types.STRING)).andHeaders("Location").build()).build()).build(),
                 "{\"swagger\":\"2.0\",\"info\":{\"version\":\"1.0\",\"title\":\"project name\"},\"host\":\"example.com\",\"basePath\":\"/rest\",\"schemes\":[\"http\"],\"paths\":{\"/res15\":{\"get\":{\"consumes\":[\"application/json\"],\"produces\":[],\"parameters\":[{\"type\":\"integer\",\"name\":\"value\",\"in\":\"query\",\"required\":true}],\"responses\":{\"200\":{\"description\":\"OK\",\"headers\":{\"Location\":{\"type\":\"string\"}},\"schema\":{\"type\":\"string\"}}}}}},\"definitions\":{}}");
 
         add(data, ResourcesBuilder.withBase("rest")
-                        .andTypeRepresentation(dynamicIdentifier, TypeRepresentation.ofCollection(identifier, TypeRepresentation.ofConcrete(identifier, properties)))
+                        .andTypeRepresentation(dynamicIdentifier, TypeRepresentation.ofCollection(identifier, TypeRepresentation.ofConcreteBuilder().identifier(identifier).properties(properties).build()))
                         .andResource("res16", ResourceMethodBuilder.withMethod(HttpMethod.GET).andQueryParam("value", "Ljava/lang/Integer;", "test").andAcceptMediaTypes("application/json")
                                 .andResponse(200, ResponseBuilder.withResponseBody(TypeIdentifier.ofType(Types.STRING)).andHeaders("Location").build()).build()).build(),
                 "{\"swagger\":\"2.0\",\"info\":{\"version\":\"1.0\",\"title\":\"project name\"},\"host\":\"example.com\",\"basePath\":\"/rest\",\"schemes\":[\"http\"],\"paths\":{\"/res16\":{\"get\":{\"consumes\":[\"application/json\"],\"produces\":[],\"parameters\":[{\"type\":\"integer\",\"name\":\"value\",\"in\":\"query\",\"required\":false,\"default\":\"test\"}],\"responses\":{\"200\":{\"description\":\"OK\",\"headers\":{\"Location\":{\"type\":\"string\"}},\"schema\":{\"type\":\"string\"}}}}}},\"definitions\":{}}");
 
         add(data, ResourcesBuilder.withBase("rest")
-                        .andTypeRepresentation(dynamicIdentifier, TypeRepresentation.ofCollection(identifier, TypeRepresentation.ofConcrete(identifier, properties)))
+                        .andTypeRepresentation(dynamicIdentifier, TypeRepresentation.ofCollection(identifier, TypeRepresentation.ofConcreteBuilder().identifier(identifier).properties(properties).build()))
                         .andResource("res17", ResourceMethodBuilder.withMethod(HttpMethod.GET).andQueryParam("value", "Ljava/lang/Integer;").andQueryParam("name", "Ljava/lang/String;", "foobar").andAcceptMediaTypes("application/json")
                                 .andResponse(200, ResponseBuilder.withResponseBody(TypeIdentifier.ofType(Types.STRING)).andHeaders("Location").build()).build()).build(),
                 "{\"swagger\":\"2.0\",\"info\":{\"version\":\"1.0\",\"title\":\"project name\"},\"host\":\"example.com\",\"basePath\":\"/rest\",\"schemes\":[\"http\"],\"paths\":{\"/res17\":{\"get\":{\"consumes\":[\"application/json\"],\"produces\":[],\"parameters\":[{\"type\":\"string\",\"name\":\"name\",\"in\":\"query\",\"required\":false,\"default\":\"foobar\"},{\"type\":\"integer\",\"name\":\"value\",\"in\":\"query\",\"required\":true}],\"responses\":{\"200\":{\"description\":\"OK\",\"headers\":{\"Location\":{\"type\":\"string\"}},\"schema\":{\"type\":\"string\"}}}}}},\"definitions\":{}}");
