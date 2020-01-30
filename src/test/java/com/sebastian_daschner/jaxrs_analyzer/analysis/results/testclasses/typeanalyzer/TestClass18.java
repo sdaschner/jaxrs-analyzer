@@ -26,7 +26,7 @@ public class TestClass18 extends SuperTestClass4 {
         properties.put("test", TypeUtils.STRING_IDENTIFIER);
         properties.put("partner", identifier);
 
-        return Collections.singleton(TypeRepresentation.ofConcrete(identifier, properties));
+        return Collections.singleton(TypeRepresentation.ofConcreteBuilder().identifier(identifier).properties(properties).build());
     }
 
     public static TypeIdentifier expectedIdentifier() {

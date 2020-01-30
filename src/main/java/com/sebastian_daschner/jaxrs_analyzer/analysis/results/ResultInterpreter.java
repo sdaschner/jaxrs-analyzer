@@ -16,6 +16,7 @@
 
 package com.sebastian_daschner.jaxrs_analyzer.analysis.results;
 
+import com.sebastian_daschner.jaxrs_analyzer.analysis.javadoc.JavaDocAnalyzerResults;
 import com.sebastian_daschner.jaxrs_analyzer.model.JavaUtils;
 import com.sebastian_daschner.jaxrs_analyzer.model.elements.HttpResponse;
 import com.sebastian_daschner.jaxrs_analyzer.model.javadoc.ClassComment;
@@ -51,15 +52,15 @@ public class ResultInterpreter {
      *
      * @return All REST resources
      */
-    public Resources interpret(final Set<ClassResult> classResults) {
+    public Resources interpret(final JavaDocAnalyzerResults javaDocAnalyzerResults) {
         resources = new Resources();
-        resources.setBasePath(PathNormalizer.getApplicationPath(classResults));
+        resources.setBasePath(PathNormalizer.getApplicationPath(javaDocAnalyzerResults.getClassResults()));
 
-        javaTypeAnalyzer = new JavaTypeAnalyzer(resources.getTypeRepresentations());
+        javaTypeAnalyzer = new JavaTypeAnalyzer(resources.getTypeRepresentations(), javaDocAnalyzerResults.getClassComments());
         dynamicTypeAnalyzer = new DynamicTypeAnalyzer(resources.getTypeRepresentations());
         stringParameterResolver = new StringParameterResolver(resources.getTypeRepresentations(), javaTypeAnalyzer);
 
-        classResults.stream().filter(c -> c.getResourcePath() != null).forEach(this::interpretClassResult);
+        javaDocAnalyzerResults.getClassResults().stream().filter(c -> c.getResourcePath() != null).forEach(this::interpretClassResult);
         resources.consolidateMultiplePaths();
 
         return resources;

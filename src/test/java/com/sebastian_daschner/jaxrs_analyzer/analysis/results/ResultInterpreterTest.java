@@ -16,24 +16,36 @@
 
 package com.sebastian_daschner.jaxrs_analyzer.analysis.results;
 
-import com.sebastian_daschner.jaxrs_analyzer.builder.*;
+import static com.sebastian_daschner.jaxrs_analyzer.analysis.results.TypeUtils.STRING_IDENTIFIER;
+import static org.junit.Assert.assertEquals;
+
+import com.sebastian_daschner.jaxrs_analyzer.analysis.javadoc.JavaDocAnalyzerResults;
+import com.sebastian_daschner.jaxrs_analyzer.builder.ClassResultBuilder;
+import com.sebastian_daschner.jaxrs_analyzer.builder.HttpResponseBuilder;
+import com.sebastian_daschner.jaxrs_analyzer.builder.MethodResultBuilder;
+import com.sebastian_daschner.jaxrs_analyzer.builder.ResourceMethodBuilder;
+import com.sebastian_daschner.jaxrs_analyzer.builder.ResponseBuilder;
 import com.sebastian_daschner.jaxrs_analyzer.model.Types;
 import com.sebastian_daschner.jaxrs_analyzer.model.javadoc.MethodComment;
-import com.sebastian_daschner.jaxrs_analyzer.model.rest.*;
+import com.sebastian_daschner.jaxrs_analyzer.model.rest.HttpMethod;
+import com.sebastian_daschner.jaxrs_analyzer.model.rest.ResourceMethod;
+import com.sebastian_daschner.jaxrs_analyzer.model.rest.Resources;
+import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeIdentifier;
+import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeRepresentation;
 import com.sebastian_daschner.jaxrs_analyzer.model.results.ClassResult;
 import com.sebastian_daschner.jaxrs_analyzer.model.results.MethodResult;
+
 import org.junit.Before;
 import org.junit.Test;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
-import static com.sebastian_daschner.jaxrs_analyzer.analysis.results.TypeUtils.STRING_IDENTIFIER;
-import static org.junit.Assert.assertEquals;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
 
 public class ResultInterpreterTest {
 
@@ -60,7 +72,7 @@ public class ResultInterpreterTest {
 
         final Set<ClassResult> results = new HashSet<>(Arrays.asList(appPathResult, resClassResult));
 
-        final Resources actualResult = classUnderTest.interpret(results);
+        final Resources actualResult = classUnderTest.interpret(new JavaDocAnalyzerResults(results, new HashMap<>())); // TODO
 
         assertEquals(expectedResult, actualResult);
     }
@@ -87,7 +99,7 @@ public class ResultInterpreterTest {
 
         final Set<ClassResult> results = new HashSet<>(Arrays.asList(appPathResult, resClassResult));
 
-        final Resources actualResult = classUnderTest.interpret(results);
+        final Resources actualResult = classUnderTest.interpret(new JavaDocAnalyzerResults(results, new HashMap<>())); // TODO
 
         assertEquals(expectedResult, actualResult);
     }
@@ -106,7 +118,7 @@ public class ResultInterpreterTest {
 
         final Set<ClassResult> results = new HashSet<>(Arrays.asList(appPathResult, resClassResult));
 
-        final Resources actualResult = classUnderTest.interpret(results);
+        final Resources actualResult = classUnderTest.interpret(new JavaDocAnalyzerResults(results, new HashMap<>())); // TODO
 
         assertEquals(expectedResult, actualResult);
     }
@@ -129,7 +141,7 @@ public class ResultInterpreterTest {
 
         final Set<ClassResult> results = new HashSet<>(Arrays.asList(appPathResult, resClassResult));
 
-        final Resources actualResult = classUnderTest.interpret(results);
+        final Resources actualResult = classUnderTest.interpret(new JavaDocAnalyzerResults(results, new HashMap<>())); // TODO
 
         assertEquals(expectedResult, actualResult);
     }
@@ -150,7 +162,7 @@ public class ResultInterpreterTest {
 
         final Set<ClassResult> results = new HashSet<>(Arrays.asList(appPathResult, resClassResult));
 
-        final Resources actualResult = classUnderTest.interpret(results);
+        final Resources actualResult = classUnderTest.interpret(new JavaDocAnalyzerResults(results, new HashMap<>())); // TODO
 
         assertEquals(expectedResult, actualResult);
     }
@@ -172,7 +184,7 @@ public class ResultInterpreterTest {
 
         final Set<ClassResult> results = new HashSet<>(Arrays.asList(appPathResult, resClassResult));
 
-        final Resources actualResult = classUnderTest.interpret(results);
+        final Resources actualResult = classUnderTest.interpret(new JavaDocAnalyzerResults(results, new HashMap<>())); // TODO
 
         assertEquals(expectedResult, actualResult);
     }
@@ -193,7 +205,7 @@ public class ResultInterpreterTest {
 
         final Set<ClassResult> results = new HashSet<>(Arrays.asList(appPathResult, resClassResult));
 
-        final Resources actualResult = classUnderTest.interpret(results);
+        final Resources actualResult = classUnderTest.interpret(new JavaDocAnalyzerResults(results, new HashMap<>())); // TODO
 
         assertEquals(expectedResult, actualResult);
     }
@@ -219,7 +231,7 @@ public class ResultInterpreterTest {
 
         final Set<ClassResult> results = new HashSet<>(Arrays.asList(appPathResult, resClassResult));
 
-        final Resources actualResult = classUnderTest.interpret(results);
+        final Resources actualResult = classUnderTest.interpret(new JavaDocAnalyzerResults(results, new HashMap<>())); // TODO
 
         assertEquals(expectedResult, actualResult);
     }
@@ -230,7 +242,7 @@ public class ResultInterpreterTest {
         expectedResult.setBasePath("path");
 
         final TypeIdentifier stringListIdentifier = TypeIdentifier.ofType("Ljava/util/List<Ljava/lang/String;>;");
-        final TypeRepresentation stringList = TypeRepresentation.ofCollection(stringListIdentifier, TypeRepresentation.ofConcrete(STRING_IDENTIFIER));
+        final TypeRepresentation stringList = TypeRepresentation.ofCollection(stringListIdentifier, TypeRepresentation.ofConcreteBuilder().identifier(STRING_IDENTIFIER).build());
         expectedResult.getTypeRepresentations().put(stringListIdentifier, stringList);
 
         final ResourceMethod resourceGetMethod = ResourceMethodBuilder.withMethod(HttpMethod.GET)
@@ -246,7 +258,7 @@ public class ResultInterpreterTest {
 
         final Set<ClassResult> results = new HashSet<>(Arrays.asList(appPathResult, resClassResult));
 
-        final Resources actualResult = classUnderTest.interpret(results);
+        final Resources actualResult = classUnderTest.interpret(new JavaDocAnalyzerResults(results, new HashMap<>())); // TODO
 
         assertEquals(expectedResult, actualResult);
     }
@@ -258,8 +270,8 @@ public class ResultInterpreterTest {
         final Resources expectedResult = new Resources();
         expectedResult.setBasePath("path");
         final TypeIdentifier identifier = TypeIdentifier.ofType(configurationType);
-        expectedResult.getTypeRepresentations().put(identifier, TypeRepresentation.ofConcrete(identifier,
-                Collections.singletonMap("name", STRING_IDENTIFIER)));
+        expectedResult.getTypeRepresentations().put(identifier,
+            TypeRepresentation.ofConcreteBuilder().identifier(identifier).properties(Collections.singletonMap("name", STRING_IDENTIFIER)).build());
 
         final ResourceMethod resourceGetMethod = ResourceMethodBuilder.withMethod(HttpMethod.GET)
                 .andResponse(200, ResponseBuilder.withResponseBody(identifier).build())
@@ -276,7 +288,7 @@ public class ResultInterpreterTest {
 
         final Set<ClassResult> results = new HashSet<>(Arrays.asList(appPathResult, resClassResult));
 
-        final Resources actualResult = classUnderTest.interpret(results);
+        final Resources actualResult = classUnderTest.interpret(new JavaDocAnalyzerResults(results, new HashMap<>())); // TODO
 
         assertEquals(expectedResult, actualResult);
     }
@@ -302,7 +314,7 @@ public class ResultInterpreterTest {
 
         final Set<ClassResult> results = new HashSet<>(Arrays.asList(appPathResult, resClassResult));
 
-        final Resources actualResult = classUnderTest.interpret(results);
+        final Resources actualResult = classUnderTest.interpret(new JavaDocAnalyzerResults(results, new HashMap<>())); // TODO
 
         assertEquals(expectedResult, actualResult);
     }

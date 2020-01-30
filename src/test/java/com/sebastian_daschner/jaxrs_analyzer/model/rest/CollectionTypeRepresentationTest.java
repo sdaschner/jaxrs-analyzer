@@ -15,15 +15,15 @@ public class CollectionTypeRepresentationTest {
 
     @Test
     public void testContentEqualsConcrete() {
-        final TypeRepresentation.ConcreteTypeRepresentation stringRepresentation = (TypeRepresentation.ConcreteTypeRepresentation) TypeRepresentation.ofConcrete(TypeIdentifier.ofType(Types.STRING));
-        final TypeRepresentation.ConcreteTypeRepresentation objectRepresentation = (TypeRepresentation.ConcreteTypeRepresentation) TypeRepresentation.ofConcrete(TypeIdentifier.ofType(Types.OBJECT));
+        final TypeRepresentation.ConcreteTypeRepresentation stringRepresentation = (TypeRepresentation.ConcreteTypeRepresentation) TypeRepresentation.ofConcreteBuilder().identifier(TypeIdentifier.ofType(Types.STRING)).build();
+        final TypeRepresentation.ConcreteTypeRepresentation objectRepresentation = (TypeRepresentation.ConcreteTypeRepresentation) TypeRepresentation.ofConcreteBuilder().identifier(TypeIdentifier.ofType(Types.OBJECT)).build();
 
         assertTrue(stringRepresentation.contentEquals(objectRepresentation.getProperties()));
 
         final Map<String, TypeIdentifier> firstProperties = new HashMap<>();
         firstProperties.put("hello", STRING_IDENTIFIER);
         firstProperties.put("world", INT_IDENTIFIER);
-        final TypeRepresentation.ConcreteTypeRepresentation firstRepresentation = (TypeRepresentation.ConcreteTypeRepresentation) TypeRepresentation.ofConcrete(OBJECT_IDENTIFIER, firstProperties);
+        final TypeRepresentation.ConcreteTypeRepresentation firstRepresentation = (TypeRepresentation.ConcreteTypeRepresentation) TypeRepresentation.ofConcreteBuilder().identifier(OBJECT_IDENTIFIER).properties(firstProperties).build();
 
         final Map<String, TypeIdentifier> secondProperties = new HashMap<>();
         secondProperties.put("hello", STRING_IDENTIFIER);
@@ -38,10 +38,10 @@ public class CollectionTypeRepresentationTest {
         firstProperties.put("hello", STRING_IDENTIFIER);
         firstProperties.put("world", INT_IDENTIFIER);
 
-        final TypeRepresentation firstRepresentation = TypeRepresentation.ofConcrete(OBJECT_IDENTIFIER, firstProperties);
-        final TypeRepresentation secondRepresentation = TypeRepresentation.ofConcrete(OBJECT_IDENTIFIER, Collections.emptyMap());
-        final TypeRepresentation thirdRepresentation = TypeRepresentation.ofConcrete(TypeIdentifier.ofDynamic(), new HashMap<>(firstProperties));
-        final TypeRepresentation fourthRepresentation = TypeRepresentation.ofConcrete(TypeIdentifier.ofDynamic(), new HashMap<>(firstProperties));
+        final TypeRepresentation firstRepresentation = TypeRepresentation.ofConcreteBuilder().identifier(OBJECT_IDENTIFIER).properties(firstProperties).build();
+        final TypeRepresentation secondRepresentation = TypeRepresentation.ofConcreteBuilder().identifier(OBJECT_IDENTIFIER).properties(Collections.emptyMap()).build();
+        final TypeRepresentation thirdRepresentation = TypeRepresentation.ofConcreteBuilder().identifier(TypeIdentifier.ofDynamic()).properties(new HashMap<>(firstProperties)).build();
+        final TypeRepresentation fourthRepresentation = TypeRepresentation.ofConcreteBuilder().identifier(TypeIdentifier.ofDynamic()).properties(new HashMap<>(firstProperties)).build();
 
         final TypeRepresentation.CollectionTypeRepresentation firstCollection = (TypeRepresentation.CollectionTypeRepresentation) TypeRepresentation.ofCollection(TypeIdentifier.ofDynamic(), firstRepresentation);
         final TypeRepresentation.CollectionTypeRepresentation secondCollection = (TypeRepresentation.CollectionTypeRepresentation) TypeRepresentation.ofCollection(TypeIdentifier.ofDynamic(), secondRepresentation);

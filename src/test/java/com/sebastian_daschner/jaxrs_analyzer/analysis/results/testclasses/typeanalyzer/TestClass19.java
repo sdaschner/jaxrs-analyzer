@@ -29,7 +29,7 @@ public class TestClass19 extends SuperTestClass5 {
         properties.put("hello", TypeUtils.STRING_IDENTIFIER);
         properties.put("overidden", TypeUtils.STRING_IDENTIFIER);
 
-        return Collections.singleton(TypeRepresentation.ofConcrete(expectedIdentifier(), properties));
+        return Collections.singleton(TypeRepresentation.ofConcreteBuilder().identifier(expectedIdentifier()).properties(properties).build());
     }
 
     public static TypeIdentifier expectedIdentifier() {

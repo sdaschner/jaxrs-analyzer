@@ -117,10 +117,10 @@ public class DynamicTypeAnalyzerTest {
     @Test
     public void testEqualTypes() {
         // should be ignored
-        typeRepresentations.put(STRING_LIST_IDENTIFIER, TypeRepresentation.ofCollection(STRING_LIST_IDENTIFIER, TypeRepresentation.ofConcrete(STRING_IDENTIFIER)));
+        typeRepresentations.put(STRING_LIST_IDENTIFIER, TypeRepresentation.ofCollection(STRING_LIST_IDENTIFIER, TypeRepresentation.ofConcreteBuilder().identifier(STRING_IDENTIFIER).build()));
         final TypeIdentifier modelIdentifier = TypeIdentifier.ofType("com.sebastian_daschner.test.Model");
         final Map<String, TypeIdentifier> modelProperties = Collections.singletonMap("string", TypeUtils.STRING_IDENTIFIER);
-        typeRepresentations.put(modelIdentifier, TypeRepresentation.ofConcrete(modelIdentifier, modelProperties));
+        typeRepresentations.put(modelIdentifier, TypeRepresentation.ofConcreteBuilder().identifier(modelIdentifier).properties(modelProperties).build());
 
         TypeIdentifier identifier = cut.analyze(Json.createArrayBuilder().add("foobar").build());
         final String firstName = identifier.getName();

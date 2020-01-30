@@ -46,6 +46,10 @@ public class JavaDocParserVisitor extends VoidVisitorAdapter<Void> {
         this.methodComments = methodComments;
     }
 
+    public Map<String, ClassComment> getClassComments() {
+        return classComments;
+    }
+
     @Override
     public void visit(PackageDeclaration packageDeclaration, Void arg) {
         packageName = packageDeclaration.getNameAsString();
@@ -99,7 +103,21 @@ public class JavaDocParserVisitor extends VoidVisitorAdapter<Void> {
             classComment = new ClassComment();
             classComments.put(className, classComment);
         }
-        classComment.getFieldComments().add(createMemberParamTag(javadoc.getDescription(), field.getAnnotations().stream()));
+        classComment.getFieldComments().add(createMemberParamTag(getFieldName(field), javadoc.getDescription(), field.getAnnotations().stream()));
+    }
+
+    /**
+     * Extracts the field name from FieldDeclaration, using the included variables. I have not seen variables have more than one entry,
+     * so this best effort approach seems to work fine for the required purpose.
+     * @param field JavaParser field declaration.
+     * @return the field name, if extracted.
+     */
+    private String getFieldName(FieldDeclaration field) {
+        if (field.getVariables().isNonEmpty()) {
+            return field.getVariables().get(0).getName().getIdentifier();
+        }
+
+        return null;
     }
 
     @Override
@@ -132,15 +150,15 @@ public class JavaDocParserVisitor extends VoidVisitorAdapter<Void> {
                 .map(NodeList::stream)
                 .orElseGet(Stream::empty);
 
-        return createMemberParamTag(tag.getContent(), annotations);
+        return createMemberParamTag(tag.getName().orElse(null), tag.getContent(), annotations);
     }
 
-    private MemberParameterTag createMemberParamTag(JavadocDescription javadocDescription, Stream<AnnotationExpr> annotationStream) {
+    private MemberParameterTag createMemberParamTag(String name, JavadocDescription javadocDescription, Stream<AnnotationExpr> annotationStream) {
         Map<String, String> annotations = annotationStream
                 .filter(Expression::isSingleMemberAnnotationExpr)
                 .collect(Collectors.toMap(a -> a.getName().getIdentifier(),
                         this::createMemberParamValue));
-        return new MemberParameterTag(javadocDescription.toText(), annotations);
+        return new MemberParameterTag(name, javadocDescription.toText(), annotations);
     }
 
     private String createMemberParamValue(AnnotationExpr a) {

@@ -21,6 +21,7 @@ import com.sebastian_daschner.jaxrs_analyzer.analysis.bytecode.BytecodeAnalyzer;
 import com.sebastian_daschner.jaxrs_analyzer.analysis.classes.ContextClassReader;
 import com.sebastian_daschner.jaxrs_analyzer.analysis.classes.JAXRSClassVisitor;
 import com.sebastian_daschner.jaxrs_analyzer.analysis.javadoc.JavaDocAnalyzer;
+import com.sebastian_daschner.jaxrs_analyzer.analysis.javadoc.JavaDocAnalyzerResults;
 import com.sebastian_daschner.jaxrs_analyzer.analysis.results.ResultInterpreter;
 import com.sebastian_daschner.jaxrs_analyzer.model.JavaUtils;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.Resources;
@@ -104,9 +105,9 @@ public class ProjectAnalyzer {
                 bytecodeAnalyzer.analyzeBytecode(classResult);
             }
 
-            javaDocAnalyzer.analyze(projectSourcePaths, classResults);
+            final JavaDocAnalyzerResults javaDocAnalyzerResults = javaDocAnalyzer.analyze(projectSourcePaths, classResults);
 
-            return resultInterpreter.interpret(classResults);
+            return resultInterpreter.interpret(javaDocAnalyzerResults);
         } finally {
             lock.unlock();
         }

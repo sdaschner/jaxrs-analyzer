@@ -16,20 +16,25 @@
 
 package com.sebastian_daschner.jaxrs_analyzer.backend.swagger;
 
+import static com.sebastian_daschner.jaxrs_analyzer.backend.ComparatorUtils.mapKeyComparator;
+import static com.sebastian_daschner.jaxrs_analyzer.model.Types.BOOLEAN;
+import static com.sebastian_daschner.jaxrs_analyzer.model.Types.DOUBLE_TYPES;
+import static com.sebastian_daschner.jaxrs_analyzer.model.Types.INTEGER_TYPES;
+import static com.sebastian_daschner.jaxrs_analyzer.model.Types.PRIMITIVE_BOOLEAN;
+import static com.sebastian_daschner.jaxrs_analyzer.model.Types.STRING;
+
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeIdentifier;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeRepresentation;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeRepresentationVisitor;
 import com.sebastian_daschner.jaxrs_analyzer.utils.Pair;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.json.Json;
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
-import java.util.HashMap;
-import java.util.Map;
-
-import static com.sebastian_daschner.jaxrs_analyzer.backend.ComparatorUtils.mapKeyComparator;
-import static com.sebastian_daschner.jaxrs_analyzer.model.Types.*;
 
 /**
  * Creates Swagger schema type definitions.
@@ -61,6 +66,18 @@ class SchemaBuilder {
      * @return The schema JSON object builder with the needed properties
      */
     JsonObjectBuilder build(final TypeIdentifier identifier) {
+        return this.build(identifier, null);
+    }
+
+    /**
+     * Creates the schema object builder for the identifier.
+     * The actual definitions are retrieved via {@link SchemaBuilder#getDefinitions} after all types have been declared.
+     *
+     * @param identifier The identifier
+     * @param description A description for this field, for example a JavaDoc.
+     * @return The schema JSON object builder with the needed properties
+     */
+    JsonObjectBuilder build(final TypeIdentifier identifier, final String description) {
         final SwaggerType type = toSwaggerType(identifier.getType());
         switch (type) {
             case BOOLEAN:
@@ -70,6 +87,7 @@ class SchemaBuilder {
             case STRING:
                 final JsonObjectBuilder builder = Json.createObjectBuilder();
                 addPrimitive(builder, type);
+                addDescriptionIfAvailable(builder, description);
                 return builder;
         }
 
@@ -118,10 +136,13 @@ class SchemaBuilder {
         };
 
         final TypeRepresentation representation = typeRepresentations.get(identifier);
-        if (representation == null)
+        if (representation == null) {
             builder.add("type", "object");
-        else
+        }
+        else {
             representation.accept(visitor);
+        }
+        addDescriptionIfAvailable(builder, description);
         return builder;
     }
 
@@ -148,10 +169,13 @@ class SchemaBuilder {
                 return;
         }
 
-        addObject(builder, representation.getIdentifier(), representation.getProperties());
+        addObject(builder, representation, representation.getProperties(), representation.getPropertyDescriptions());
     }
 
-    private void addObject(final JsonObjectBuilder builder, final TypeIdentifier identifier, final Map<String, TypeIdentifier> properties) {
+    private void addObject(final JsonObjectBuilder builder, final TypeRepresentation representation, final Map<String, TypeIdentifier> properties,
+        final Map<String, String> propertyDescriptions) {
+
+        final TypeIdentifier identifier = representation.getIdentifier();
         final String definition = definitionNameBuilder.buildDefinitionName(identifier.getName(), jsonDefinitions);
 
         if (jsonDefinitions.containsKey(definition)) {
@@ -160,18 +184,36 @@ class SchemaBuilder {
         }
 
         // reserve definition
-        jsonDefinitions.put(definition, Pair.of(identifier.getName(), Json.createObjectBuilder().build()));
+        final JsonObjectBuilder objectBuilder = Json.createObjectBuilder();
+        jsonDefinitions.put(definition, Pair.of(identifier.getName(), objectBuilder.build()));
 
+        // if we have a comment/description, include this
+        representation.getDescription().ifPresent(desc -> objectBuilder.add("description", desc));
+
+        // build - and include - the inner properties (e.g. the class' fields)
         final JsonObjectBuilder nestedBuilder = Json.createObjectBuilder();
+        properties.entrySet().stream().sorted(mapKeyComparator()).forEach(e -> {
+            if (propertyDescriptions.containsKey(e.getKey())) {
+                nestedBuilder.add(e.getKey(), build(e.getValue(), propertyDescriptions.get(e.getKey())));
+            } else {
+                nestedBuilder.add(e.getKey(), build(e.getValue()));
+            }
+        });
+        objectBuilder.add("properties", nestedBuilder);
 
-        properties.entrySet().stream().sorted(mapKeyComparator()).forEach(e -> nestedBuilder.add(e.getKey(), build(e.getValue())));
-        jsonDefinitions.put(definition, Pair.of(identifier.getName(), Json.createObjectBuilder().add("properties", nestedBuilder).build()));
+        jsonDefinitions.put(definition, Pair.of(identifier.getName(), objectBuilder.build()));
 
         builder.add("$ref", "#/definitions/" + definition);
     }
 
     private void addPrimitive(final JsonObjectBuilder builder, final SwaggerType type) {
         builder.add("type", type.toString());
+    }
+
+    private void addDescriptionIfAvailable(JsonObjectBuilder builder, String description) {
+        if (description != null && !description.isEmpty()) {
+            builder.add("description", description);
+        }
     }
 
     /**

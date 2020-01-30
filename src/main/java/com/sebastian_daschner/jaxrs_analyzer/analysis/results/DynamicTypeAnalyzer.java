@@ -75,7 +75,7 @@ class DynamicTypeAnalyzer {
 
     private TypeIdentifier analyzeInternal(final JsonArray jsonArray) {
         final TypeIdentifier containedIdentifier = jsonArray.isEmpty() ? TypeIdentifier.ofType(Types.OBJECT) : analyzeInternal(jsonArray.get(0));
-        final TypeRepresentation containedRepresentation = typeRepresentations.getOrDefault(containedIdentifier, TypeRepresentation.ofConcrete(containedIdentifier));
+        final TypeRepresentation containedRepresentation = typeRepresentations.getOrDefault(containedIdentifier, TypeRepresentation.ofConcreteBuilder().identifier(containedIdentifier).build());
 
         final TypeIdentifier existingCollection = findExistingCollection(containedRepresentation);
         if (existingCollection != null) {
@@ -96,7 +96,7 @@ class DynamicTypeAnalyzer {
             return existing;
 
         final TypeIdentifier identifier = TypeIdentifier.ofDynamic();
-        typeRepresentations.put(identifier, TypeRepresentation.ofConcrete(identifier, properties));
+        typeRepresentations.put(identifier, TypeRepresentation.ofConcreteBuilder().identifier(identifier).properties(properties).build());
         return identifier;
     }
 

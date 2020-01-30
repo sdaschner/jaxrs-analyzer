@@ -54,7 +54,7 @@ public class TestClass7 {
         properties.put("second", TypeUtils.STRING_IDENTIFIER);
         properties.put("third", TypeUtils.STRING_IDENTIFIER);
 
-        return Collections.singleton(TypeRepresentation.ofConcrete(expectedIdentifier(), properties));
+        return Collections.singleton(TypeRepresentation.ofConcreteBuilder().identifier(expectedIdentifier()).properties(properties).build());
     }
 
     public static TypeIdentifier expectedIdentifier() {

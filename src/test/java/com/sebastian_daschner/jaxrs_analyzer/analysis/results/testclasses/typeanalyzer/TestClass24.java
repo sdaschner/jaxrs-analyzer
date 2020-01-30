@@ -46,7 +46,7 @@ public class TestClass24 {
         properties.put("first", TypeIdentifier.ofType(Types.PRIMITIVE_INT));
 
         final TypeIdentifier testClass24Identifier = expectedIdentifier();
-        final TypeRepresentation testClass24 = TypeRepresentation.ofConcrete(testClass24Identifier, properties);
+        final TypeRepresentation testClass24 = TypeRepresentation.ofConcreteBuilder().identifier(testClass24Identifier).properties(properties).build();
 
 
         return new HashSet<>(Arrays.asList(testClass24));

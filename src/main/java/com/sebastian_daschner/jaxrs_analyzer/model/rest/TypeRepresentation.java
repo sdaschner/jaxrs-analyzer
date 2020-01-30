@@ -18,7 +18,12 @@ package com.sebastian_daschner.jaxrs_analyzer.model.rest;
 
 import com.sebastian_daschner.jaxrs_analyzer.model.Types;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 
 /**
  * Represents a request/response body type including the properties which actually will be serialized (e.g. depending on the JAXB mapping).
@@ -47,6 +52,14 @@ public abstract class TypeRepresentation {
      */
     public abstract TypeIdentifier getComponentType();
 
+    /**
+     * The comment/description (e.g. from a JavaDoc), if available.
+     * @return (optional) the description.
+     */
+    public Optional<String> getDescription() {
+        return Optional.empty();
+    }
+
     @Override
     public boolean equals(final Object o) {
         if (this == o) return true;
@@ -62,25 +75,13 @@ public abstract class TypeRepresentation {
     }
 
     /**
-     * Creates a type representation of a concrete type (i.e. a Java type, not a programmatically created type) without actual properties.
-     * This is used for JDK internal types (like {@link String}, {@link Object}) where no property analysis is desired.
-     *
-     * @param identifier The type identifier
-     * @return The type representation
+     * Returns a builder so that a a type representation of a concrete type (i.e. a Java type, not a programmatically created type) can be created.
+     * Might just include identifier (no properties), used for JKD internal types (like {@link String}, {@link Object}) where no property analysis is desired.
+     * Might have identifier and other fields (such as properties), used for extended/custom types.
+     * @return ConcreteTypeRepresentation builder.
      */
-    public static TypeRepresentation ofConcrete(final TypeIdentifier identifier) {
-        return new ConcreteTypeRepresentation(identifier, Collections.emptyMap());
-    }
-
-    /**
-     * Creates a type representation of a concrete type (i.e. a Java type, not a programmatically created type) plus the actual properties.
-     *
-     * @param identifier The type identifier
-     * @param properties The type (POJO) description
-     * @return The type representation
-     */
-    public static TypeRepresentation ofConcrete(final TypeIdentifier identifier, final Map<String, TypeIdentifier> properties) {
-        return new ConcreteTypeRepresentation(identifier, properties);
+    public static ConcreteTypeRepresentationBuilder ofConcreteBuilder() {
+        return new ConcreteTypeRepresentationBuilder();
     }
 
     /**
@@ -107,17 +108,65 @@ public abstract class TypeRepresentation {
         return new EnumTypeRepresentation(identifier, new HashSet<>(Arrays.asList(enumValues)));
     }
 
+    public static class ConcreteTypeRepresentationBuilder {
+        private TypeIdentifier identifier;
+        private Map<String, TypeIdentifier> properties = Collections.emptyMap(); // property types
+        private Map<String, String> propertyDescriptions = Collections.emptyMap(); // property descriptions, e.g. from JavaDocs
+        private String description; // parent description, e.g. the JavaDoc of the overall class.
+
+        public ConcreteTypeRepresentationBuilder() {
+        }
+
+        public ConcreteTypeRepresentationBuilder identifier(TypeIdentifier identifier) {
+            this.identifier = identifier;
+            return this;
+        }
+
+        public ConcreteTypeRepresentationBuilder properties(Map<String, TypeIdentifier> properties) {
+            this.properties = properties;
+            return this;
+        }
+
+        public ConcreteTypeRepresentationBuilder propertyDescriptions(Map<String, String> propertyDescriptions) {
+            this.propertyDescriptions = propertyDescriptions;
+            return this;
+        }
+
+        public ConcreteTypeRepresentationBuilder description(String description) {
+            this.description = description;
+            return this;
+        }
+
+        public ConcreteTypeRepresentation build() {
+            return new ConcreteTypeRepresentation(identifier, properties, propertyDescriptions, description);
+        }
+    }
+
     public static class ConcreteTypeRepresentation extends TypeRepresentation {
 
-        private final Map<String, TypeIdentifier> properties;
+        private final Map<String, TypeIdentifier> properties; // property types
+        private final Map<String, String> propertyDescriptions; // property descriptions, e.g. from JavaDocs
+        private final String description; // parent description, e.g. the JavaDoc of the overall class.
 
-        private ConcreteTypeRepresentation(final TypeIdentifier identifier, final Map<String, TypeIdentifier> properties) {
+        private ConcreteTypeRepresentation(final TypeIdentifier identifier, final Map<String, TypeIdentifier> properties,
+            final Map<String, String> propertyDescriptions, final String description) {
             super(identifier);
             this.properties = properties;
+            this.propertyDescriptions = propertyDescriptions;
+            this.description = description;
         }
 
         public Map<String, TypeIdentifier> getProperties() {
             return properties;
+        }
+
+        public Map<String, String> getPropertyDescriptions() {
+            return propertyDescriptions;
+        }
+
+        @Override
+        public Optional<String> getDescription() {
+            return Optional.ofNullable(description);
         }
 
         @Override

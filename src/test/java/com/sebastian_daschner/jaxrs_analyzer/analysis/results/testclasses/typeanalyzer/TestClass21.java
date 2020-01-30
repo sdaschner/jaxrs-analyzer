@@ -44,7 +44,7 @@ public class TestClass21 {
         final TypeIdentifier inner = TypeIdentifier.ofType("Lcom/sebastian_daschner/jaxrs_analyzer/analysis/results/testclasses/typeanalyzer/TestClass21$InnerTestClass21;");
         properties.put("inner", inner);
 
-        return new HashSet<>(asList(TypeRepresentation.ofConcrete(expectedIdentifier(), properties), TypeRepresentation.ofEnum(inner, "FIRST", "SECOND")));
+        return new HashSet<>(asList(TypeRepresentation.ofConcreteBuilder().identifier(expectedIdentifier()).properties(properties).build(), TypeRepresentation.ofEnum(inner, "FIRST", "SECOND")));
     }
 
     public static TypeIdentifier expectedIdentifier() {

@@ -17,7 +17,12 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Stream;
 
 /**
@@ -26,10 +31,12 @@ import java.util.stream.Stream;
 public class JavaDocAnalyzer {
 
     private final Map<MethodIdentifier, MethodComment> methodComments = new HashMap<>();
+    private final JavaDocParserVisitor javaDocParserVisitor = new JavaDocParserVisitor(methodComments);
 
-    public void analyze(final Set<Path> projectSourcePaths, final Set<ClassResult> classResults) {
+    public JavaDocAnalyzerResults analyze(final Set<Path> projectSourcePaths, final Set<ClassResult> classResults) {
         invokeParser(projectSourcePaths);
         combineResults(classResults);
+        return new JavaDocAnalyzerResults(classResults, javaDocParserVisitor.getClassComments());
     }
 
     private void invokeParser(Set<Path> projectSourcePaths) {
@@ -55,7 +62,7 @@ public class JavaDocAnalyzer {
             }
         });
 
-        files.forEach(path -> parseJavaDoc(path, new JavaDocParserVisitor(methodComments)));
+        files.forEach(path -> parseJavaDoc(path, javaDocParserVisitor));
     }
 
     private static void parseJavaDoc(Path path, JavaDocParserVisitor visitor) {

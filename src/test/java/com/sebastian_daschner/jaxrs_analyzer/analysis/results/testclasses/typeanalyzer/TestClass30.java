@@ -70,7 +70,7 @@ public class TestClass30 {
         properties.put("int", TypeIdentifier.ofType(Types.PRIMITIVE_INT));
         properties.put("testname", TypeIdentifier.ofType(Types.PRIMITIVE_BOOLEAN));
 
-        return Collections.singleton(TypeRepresentation.ofConcrete(expectedIdentifier(), properties));
+        return Collections.singleton(TypeRepresentation.ofConcreteBuilder().identifier(expectedIdentifier()).properties(properties).build());
     }
 
     public static TypeIdentifier expectedIdentifier() {

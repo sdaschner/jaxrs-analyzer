@@ -42,7 +42,7 @@ public class TestClass11 {
         properties.put("second", TypeIdentifier.ofType(Types.PRIMITIVE_INT));
         properties.put("child", identifier);
 
-        return Collections.singleton(TypeRepresentation.ofConcrete(identifier, properties));
+        return Collections.singleton(TypeRepresentation.ofConcreteBuilder().identifier(identifier).properties(properties).build());
     }
 
     public static TypeIdentifier expectedIdentifier() {
