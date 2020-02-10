@@ -52,7 +52,7 @@ public class Main {
      * <p>
      * Following available options:
      * <ul>
-     * <li>{@code -b backend} The backend to choose: {@code swagger} (default), {@code plaintext}, {@code asciidoc}, {@code markdown}</li>
+     * <li>{@code -b backend} The backend to choose: {@code swagger} (default), {@code plaintext}, {@code asciidoc}, {@code markdown}, {@code html}</li>
      * <li>{@code -cp class path[:class paths...]} The additional class paths which contain classes which are used in the project</li>
      * <li>{@code -sp source path[:source paths...]} The optional source paths  needed for JavaDoc analysis</li>
      * <li>{@code -X} Debug enabled (prints error debugging information on Standard error out)</li>
@@ -216,7 +216,7 @@ public class Main {
         System.err.println("Usage: java -jar jaxrs-analyzer.jar [options] classPath [classPaths...]");
         System.err.println("The classPath entries may be directories or jar-files containing the classes to be analyzed\n");
         System.err.println("Following available options:\n");
-        System.err.println(" -b <backend> The backend to choose: swagger (default), plaintext, asciidoc, markdown");
+        System.err.println(" -b <backend> The backend to choose: swagger (default), plaintext, asciidoc, markdown, html");
         System.err.println(" -cp <class path>[:class paths] Additional class paths (separated with colon) which contain classes used in the project (may be directories or jar-files)");
         System.err.println(" -sp <source path>[:source paths] Optional source paths (separated with colon) needed for JavaDoc analysis (may be directories or jar-files)");
         System.err.println(" -X Debug enabled (enabled error debugging information)");

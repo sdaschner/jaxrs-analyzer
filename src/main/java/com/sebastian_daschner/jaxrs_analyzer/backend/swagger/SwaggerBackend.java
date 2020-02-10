@@ -17,14 +17,24 @@
 package com.sebastian_daschner.jaxrs_analyzer.backend.swagger;
 
 import com.sebastian_daschner.jaxrs_analyzer.backend.Backend;
-import com.sebastian_daschner.jaxrs_analyzer.model.rest.*;
+import com.sebastian_daschner.jaxrs_analyzer.model.rest.MethodParameter;
+import com.sebastian_daschner.jaxrs_analyzer.model.rest.ParameterType;
+import com.sebastian_daschner.jaxrs_analyzer.model.rest.Project;
+import com.sebastian_daschner.jaxrs_analyzer.model.rest.ResourceMethod;
+import com.sebastian_daschner.jaxrs_analyzer.model.rest.Resources;
 import com.sebastian_daschner.jaxrs_analyzer.utils.StringUtils;
 
-import javax.json.*;
+import javax.json.Json;
+import javax.json.JsonArrayBuilder;
+import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
+import javax.json.JsonWriter;
 import javax.json.stream.JsonGenerator;
 import javax.ws.rs.core.Response;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -33,10 +43,9 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
 
-import static com.sebastian_daschner.jaxrs_analyzer.backend.ComparatorUtils.mapKeyComparator;
-import static com.sebastian_daschner.jaxrs_analyzer.backend.ComparatorUtils.parameterComparator;
-import static java.util.Collections.singletonMap;
-import static java.util.Comparator.comparing;
+import static com.sebastian_daschner.jaxrs_analyzer.backend.ComparatorUtils.*;
+import static java.util.Collections.*;
+import static java.util.Comparator.*;
 
 /**
  * A backend which produces a Swagger JSON representation of the resources.
@@ -66,22 +75,31 @@ public class SwaggerBackend implements Backend {
     public byte[] render(final Project project) {
         lock.lock();
         try {
-            // initialize fields
-            builder = Json.createObjectBuilder();
-            resources = project.getResources();
-            projectName = project.getName();
-            projectVersion = project.getVersion();
-            schemaBuilder = new SchemaBuilder(resources.getTypeRepresentations());
-
-            final JsonObject output = modifyJson(renderInternal());
-
-            return serialize(output);
+	        final JsonObject output = renderJson(project);
+	        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+	        try (OutputStreamWriter writer = new OutputStreamWriter(baos)) {
+		        serialize(output, writer, true);
+	        } catch (IOException e) {
+		        throw new RuntimeException(e);
+	        }
+	        return baos.toByteArray();
         } finally {
             lock.unlock();
         }
     }
 
-    private JsonObject modifyJson(final JsonObject json) {
+	protected JsonObject renderJson(Project project) {
+		// initialize fields
+		builder = Json.createObjectBuilder();
+		resources = project.getResources();
+		projectName = project.getName();
+		projectVersion = project.getVersion();
+		schemaBuilder = new SchemaBuilder(resources.getTypeRepresentations());
+
+		return modifyJson(renderInternal());
+	}
+
+	private JsonObject modifyJson(final JsonObject json) {
         if (options.getJsonPatch() == null)
             return json;
         return options.getJsonPatch().apply(json);
@@ -269,17 +287,12 @@ public class SwaggerBackend implements Backend {
         }
     }
 
-    private static byte[] serialize(final JsonObject jsonObject) {
-        try (final ByteArrayOutputStream output = new ByteArrayOutputStream()) {
-            final Map<String, ?> config = singletonMap(JsonGenerator.PRETTY_PRINTING, true);
-            final JsonWriter jsonWriter = Json.createWriterFactory(config).createWriter(output);
+    protected static void serialize(final JsonObject jsonObject, Writer writer, boolean pretty) {
+	    final Map<String, ?> config = singletonMap(JsonGenerator.PRETTY_PRINTING, pretty);
+        try (final JsonWriter jsonWriter = Json.createWriterFactory(config).createWriter(writer)) {
             jsonWriter.write(jsonObject);
-            jsonWriter.close();
-
-            return output.toByteArray();
-        } catch (IOException e) {
+        } catch (Exception e) {
             throw new RuntimeException("Could not write Swagger output", e);
         }
     }
-
 }

@@ -2,15 +2,15 @@ package com.sebastian_daschner.jaxrs_analyzer;
 
 import com.sebastian_daschner.jaxrs_analyzer.backend.Backend;
 import com.sebastian_daschner.jaxrs_analyzer.backend.asciidoc.AsciiDocBackend;
+import com.sebastian_daschner.jaxrs_analyzer.backend.html.SwaggerHtmlBackend;
 import com.sebastian_daschner.jaxrs_analyzer.backend.plaintext.PlainTextBackend;
 import com.sebastian_daschner.jaxrs_analyzer.backend.swagger.SwaggerBackend;
 import org.junit.Test;
 
 import java.util.Map;
 
-import static org.hamcrest.CoreMatchers.instanceOf;
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.CoreMatchers.*;
+import static org.junit.Assert.*;
 
 public class MainTest {
 
@@ -53,4 +53,9 @@ public class MainTest {
         assertThat(backend, is(instanceOf(AsciiDocBackend.class)));
     }
 
+	@Test
+	public void shouldLoadHtmlFromJavaService() {
+		final Backend backend = JAXRSAnalyzer.constructBackend("html");
+		assertThat(backend, is(instanceOf(SwaggerHtmlBackend.class)));
+	}
 }

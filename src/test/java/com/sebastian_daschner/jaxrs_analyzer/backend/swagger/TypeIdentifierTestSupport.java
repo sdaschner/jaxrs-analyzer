@@ -5,12 +5,12 @@ import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeIdentifier;
 import java.lang.reflect.Field;
 import java.util.concurrent.atomic.AtomicInteger;
 
-final class TypeIdentifierTestSupport {
+public final class TypeIdentifierTestSupport {
 
     private TypeIdentifierTestSupport() {
     }
 
-    static void resetTypeIdentifierCounter() {
+    public static void resetTypeIdentifierCounter() {
         try {
             Field dynamicCounterField = TypeIdentifier.class.getDeclaredField("dynamicCounter");
             dynamicCounterField.setAccessible(true);
