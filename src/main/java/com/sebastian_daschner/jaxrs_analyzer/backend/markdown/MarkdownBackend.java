@@ -40,6 +40,8 @@ public class MarkdownBackend extends StringBackend {
             builder.append( "### Description: " ).append( resourceMethod.getDescription() ).append( "\n\n" );
         if (resourceMethod.isDeprecated())
             builder.append("CAUTION: deprecated\n\n");
+	    if (resourceMethod.isAuthRequired())
+		    builder.append("Authorization: required\n\n");
     }
 
     @Override

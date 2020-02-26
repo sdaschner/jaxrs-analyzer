@@ -66,6 +66,7 @@ public class Main {
      * Following available backend specific options (only have effect if the corresponding backend is selected):
      * <ul>
      * <li>{@code --swaggerSchemes scheme[,schemes]} The Swagger schemes: {@code http} (default), {@code https}, {@code ws}, {@code wss}")</li>
+     * <li>{@code --swaggerSecurityScheme scheme} The Swagger security scheme: basic, jwt, apikey</li>
      * <li>{@code --renderSwaggerTags} Enables rendering of Swagger tags (will not be rendered per default)</li>
      * <li>{@code --swaggerTagsPathOffset path offset} The number at which path position the Swagger tags should be extracted ({@code 0} per default)</li>
      * <li>{@code --ignoredRootResources class[,classes]} JAX-RS root resource classes which should be ignored by analyze (empty per default)</li>
@@ -138,6 +139,9 @@ public class Main {
                         case "--swaggerTagsPathOffset":
                             attributes.put(SwaggerOptions.SWAGGER_TAGS_PATH_OFFSET, args[++i]);
                             break;
+	                    case "--swaggerSecurityScheme":
+		                    attributes.put(SwaggerOptions.SWAGGER_SECURITY_SCHEME, args[++i]);
+		                    break;
                         case "--noInlinePrettify":
                             attributes.put(StringBackend.INLINE_PRETTIFY, "false");
                             break;

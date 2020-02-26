@@ -90,6 +90,7 @@ class JAXRSAnnotatedSuperMethodVisitor extends MethodVisitor {
             case Types.SUSPENDED:
                 LogProvider.debug("Handling of " + annotationDesc + " not yet implemented");
             case Types.CONTEXT:
+	        case Types.AUTH_PARAM:
                 annotatedParameters.set(index);
             default:
                 return null;

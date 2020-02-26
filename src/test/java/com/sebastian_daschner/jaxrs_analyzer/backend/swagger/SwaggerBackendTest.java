@@ -21,25 +21,31 @@ import com.sebastian_daschner.jaxrs_analyzer.builder.ResourceMethodBuilder;
 import com.sebastian_daschner.jaxrs_analyzer.builder.ResourcesBuilder;
 import com.sebastian_daschner.jaxrs_analyzer.builder.ResponseBuilder;
 import com.sebastian_daschner.jaxrs_analyzer.model.Types;
-import com.sebastian_daschner.jaxrs_analyzer.model.rest.*;
+import com.sebastian_daschner.jaxrs_analyzer.model.rest.HttpMethod;
+import com.sebastian_daschner.jaxrs_analyzer.model.rest.Project;
+import com.sebastian_daschner.jaxrs_analyzer.model.rest.Resources;
+import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeIdentifier;
+import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeRepresentation;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
 import javax.json.Json;
 import javax.json.JsonStructure;
+import java.io.IOException;
 import java.io.StringReader;
+import java.io.StringWriter;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 
-import static com.sebastian_daschner.jaxrs_analyzer.analysis.results.TypeUtils.MODEL_IDENTIFIER;
-import static com.sebastian_daschner.jaxrs_analyzer.backend.StringBackend.INLINE_PRETTIFY;
+import static com.sebastian_daschner.jaxrs_analyzer.analysis.results.TypeUtils.*;
+import static com.sebastian_daschner.jaxrs_analyzer.backend.StringBackend.*;
 import static com.sebastian_daschner.jaxrs_analyzer.backend.swagger.SwaggerOptions.*;
 import static com.sebastian_daschner.jaxrs_analyzer.backend.swagger.TypeIdentifierTestSupport.*;
-import static java.util.Collections.singletonMap;
-import static org.junit.Assert.assertEquals;
+import static java.util.Collections.*;
+import static org.junit.Assert.*;
 
 @RunWith(Parameterized.class)
 public class SwaggerBackendTest {
@@ -56,10 +62,12 @@ public class SwaggerBackendTest {
     }
 
     @Test
-    public void test() {
+    public void test() throws IOException {
         final Project project = new Project("project name", "1.0", resources);
         cut.configure(singletonMap(INLINE_PRETTIFY, "false"));
-        final String actualOutput = new String(cut.render(project));
+	    StringWriter stringWriter = new StringWriter();
+	    cut.render(project, stringWriter);
+        final String actualOutput = stringWriter.toString();
 
         // TODO to fix test w/ different formattings
 //            assertEquals(expectedOutput, actualOutput);
@@ -247,6 +255,14 @@ public class SwaggerBackendTest {
                         .andResource("res19", ResourceMethodBuilder.withMethod(HttpMethod.GET).andDeprecated(true)
                                 .andResponse(200, ResponseBuilder.withResponseBody(TypeIdentifier.ofType(Types.STRING)).andHeaders("Location").build()).build()).build(),
                 "{\"swagger\":\"2.0\",\"info\":{\"version\":\"1.0\",\"title\":\"project name\"},\"host\":\"\",\"basePath\":\"/project name/rest\",\"schemes\":[\"http\"],\"paths\":{\"/res19\":{\"get\":{\"consumes\":[],\"produces\":[],\"parameters\":[],\"responses\":{\"200\":{\"description\":\"OK\",\"headers\":{\"Location\":{\"type\":\"string\"}},\"schema\":{\"type\":\"string\"}}},\"deprecated\":true}}},\"definitions\":{}}", new HashMap<>());
+
+	    // secure method test
+	    options = new HashMap<>();
+	    options.put(SWAGGER_SECURITY_SCHEME, "jwt");
+	    add(data, ResourcesBuilder.withBase("rest")
+					    .andResource("res19", ResourceMethodBuilder.withMethod(HttpMethod.GET).andAuthRequired(true)
+							    .andResponse(200, ResponseBuilder.withResponseBody(TypeIdentifier.ofType(Types.STRING)).andHeaders("Location").build()).build()).build(),
+			    "{\"swagger\":\"2.0\",\"info\":{\"version\":\"1.0\",\"title\":\"project name\"},\"host\":\"\",\"basePath\":\"/project name/rest\",\"schemes\":[\"http\"],\"securityDefinitions\":{\"JwtAuth\":{\"type\":\"apiKey\",\"in\":\"header\",\"name\":\"Authorization\"}},\"paths\":{\"/res19\":{\"get\":{\"consumes\":[],\"produces\":[],\"parameters\":[],\"responses\":{\"200\":{\"description\":\"OK\",\"headers\":{\"Location\":{\"type\":\"string\"}},\"schema\":{\"type\":\"string\"}}},\"security\":[{\"JwtAuth\":[]}]}}},\"definitions\":{}}", options);
 
         return data;
     }

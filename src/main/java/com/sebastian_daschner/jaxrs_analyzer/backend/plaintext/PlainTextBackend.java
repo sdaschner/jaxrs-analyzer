@@ -50,6 +50,8 @@ public class PlainTextBackend extends StringBackend {
             builder.append("Description: ").append(resourceMethod.getDescription()).append("\n");
         if (resourceMethod.isDeprecated())
             builder.append(" Deprecated\n");
+	    if (resourceMethod.isAuthRequired())
+		    builder.append(" Authorization required\n");
     }
 
     @Override

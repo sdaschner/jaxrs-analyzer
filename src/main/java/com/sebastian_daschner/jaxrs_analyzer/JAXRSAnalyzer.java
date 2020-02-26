@@ -5,11 +5,15 @@ import com.sebastian_daschner.jaxrs_analyzer.backend.Backend;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.Project;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.Resources;
 
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
+import java.io.FileWriter;
+import java.io.PrintWriter;
+import java.io.Writer;
 import java.nio.file.Path;
-import java.util.*;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Objects;
+import java.util.ServiceLoader;
+import java.util.Set;
 import java.util.stream.StreamSupport;
 
 /**
@@ -52,32 +56,20 @@ public class JAXRSAnalyzer {
         }
 
         final Project project = new Project(analysis.projectName, analysis.projectVersion, resources);
-        final byte[] output = analysis.backend.render(project);
 
-        if (analysis.outputLocation != null) {
-            outputToFile(output, analysis.outputLocation);
-        } else {
-            outputToConsole(output);
-        }
-    }
-
-    private void outputToConsole(final byte[] output) {
         try {
-            System.out.write(output);
-            System.out.flush();
-        } catch (IOException e) {
-            LogProvider.error("Could not write the output, reason: " + e.getMessage());
-            LogProvider.debug(e);
-        }
-    }
-
-    private static void outputToFile(final byte[] output, final Path outputLocation) {
-        try (final OutputStream stream = new FileOutputStream(outputLocation.toFile())) {
-            stream.write(output);
-            stream.flush();
-        } catch (IOException e) {
-            LogProvider.error("Could not write to the specified output location, reason: " + e.getMessage());
-            LogProvider.debug(e);
+	        Writer output = null;
+	        if (analysis.outputLocation == null) {
+		        output = new PrintWriter(System.out);
+	        } else {
+		        output = new FileWriter(analysis.outputLocation.toFile());
+	        }
+	        try (Writer out = output) {
+		        analysis.backend.render(project, out);
+	        }
+        } catch (Exception e) {
+	        LogProvider.error("Could not write to the specified output location, reason: " + e.getMessage());
+	        LogProvider.debug(e);
         }
     }
 

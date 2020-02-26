@@ -24,6 +24,7 @@ public class SwaggerOptions {
     public static final String RENDER_SWAGGER_TAGS = "renderSwaggerTags";
     public static final String SWAGGER_TAGS_PATH_OFFSET = "swaggerTagsPathOffset";
     public static final String JSON_PATCH = "jsonPatch";
+	public static final String SWAGGER_SECURITY_SCHEME = "swaggerSecurityScheme";
 
     private static final String DEFAULT_DOMAIN = "";
     private static final Set<SwaggerScheme> DEFAULT_SCHEMES = EnumSet.of(SwaggerScheme.HTTP);
@@ -56,6 +57,11 @@ public class SwaggerOptions {
      */
     private JsonPatch jsonPatch;
 
+	/**
+	 * A security scheme
+	 */
+	private SwaggerSecurityScheme securityScheme;
+
     String getDomain() {
         return domain;
     }
@@ -76,7 +82,11 @@ public class SwaggerOptions {
         return jsonPatch;
     }
 
-    void configure(final Map<String, String> config) {
+	SwaggerSecurityScheme getSecurityScheme() {
+		return securityScheme;
+	}
+
+	void configure(final Map<String, String> config) {
         if (config.containsKey(SWAGGER_TAGS_PATH_OFFSET)) {
             int swaggerTagsPathOffset = Integer.parseInt(config.get(SWAGGER_TAGS_PATH_OFFSET));
 
@@ -103,15 +113,33 @@ public class SwaggerOptions {
         if (config.containsKey(JSON_PATCH)) {
             jsonPatch = readPatch(config.get(JSON_PATCH));
         }
+
+        if (config.containsKey(SWAGGER_SECURITY_SCHEME)) {
+        	securityScheme = extractSwaggerSecurityScheme(config.get(SWAGGER_SECURITY_SCHEME));
+        }
     }
 
-    private Set<SwaggerScheme> extractSwaggerSchemes(final String schemes) {
+	private static SwaggerSecurityScheme extractSwaggerSecurityScheme(final String schemes) {
+		switch (schemes.toLowerCase()) {
+			case "basic":
+				return SwaggerSecurityScheme.BASIC;
+			case "token":
+			case "jwt":
+				return SwaggerSecurityScheme.JWT;
+			case "apikey":
+			case "api_key":
+				return SwaggerSecurityScheme.API_KEY;
+		}
+		return null;
+	}
+
+    private static Set<SwaggerScheme> extractSwaggerSchemes(final String schemes) {
         return Stream.of(schemes.split(","))
-                .map(this::extractSwaggerScheme)
+                .map(SwaggerOptions::extractSwaggerScheme)
                 .collect(() -> EnumSet.noneOf(SwaggerScheme.class), Set::add, Set::addAll);
     }
 
-    private SwaggerScheme extractSwaggerScheme(final String scheme) {
+    private static SwaggerScheme extractSwaggerScheme(final String scheme) {
         switch (scheme.toLowerCase()) {
             case "http":
                 return SwaggerScheme.HTTP;

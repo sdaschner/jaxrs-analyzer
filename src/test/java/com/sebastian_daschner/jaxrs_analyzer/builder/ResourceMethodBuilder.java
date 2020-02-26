@@ -155,6 +155,11 @@ public class ResourceMethodBuilder {
         return this;
     }
 
+	public ResourceMethodBuilder andAuthRequired(final boolean authRequired) {
+		method.setAuthRequired(authRequired);
+		return this;
+	}
+
     public ResourceMethod build() {
         return method;
     }

@@ -8,7 +8,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StringWriter;
-import java.nio.charset.StandardCharsets;
+import java.io.Writer;
 
 public class SwaggerHtmlBackend extends SwaggerBackend {
 
@@ -24,12 +24,11 @@ public class SwaggerHtmlBackend extends SwaggerBackend {
 	}
 
 	@Override
-	public byte[] render(Project project) {
-		String html = getHtml()
+	public void render(Project project, Writer writer) throws IOException {
+		writer.write(getHtml()
 				.replace("{{css}}", getAllCss())
 				.replace("{{js}}", getAllJs())
-				.replace("{{spec}}", getSwaggerJson(project));
-		return html.getBytes(StandardCharsets.UTF_8);
+				.replace("{{spec}}", getSwaggerJson(project)));
 	}
 
 	private String getSwaggerJson(Project project) {
