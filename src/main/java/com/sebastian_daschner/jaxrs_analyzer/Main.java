@@ -142,6 +142,9 @@ public class Main {
 	                    case "--swaggerSecurityScheme":
 		                    attributes.put(SwaggerOptions.SWAGGER_SECURITY_SCHEME, args[++i]);
 		                    break;
+	                    case "--swaggerJsonPatch":
+		                    attributes.put(SwaggerOptions.JSON_PATCH, args[++i]);
+		                    break;
                         case "--noInlinePrettify":
                             attributes.put(StringBackend.INLINE_PRETTIFY, "false");
                             break;
@@ -233,7 +236,8 @@ public class Main {
         System.err.println("\nFollowing available backend specific options (only have effect if the corresponding backend is selected):\n");
         System.err.println(" --swaggerSchemes <scheme>[,schemes] The Swagger schemes: http (default), https, ws, wss");
         System.err.println(" --renderSwaggerTags Enables rendering of Swagger tags (default tag will be used per default)");
-        System.err.println(" --swaggerTagsPathOffset <path offset> The number at which path position the Swagger tags will be extracted (0 will be used per default)");
+        System.err.println(" --swaggerJsonPatch <path> A json patch for the generated swagger");
+	    System.err.println(" --swaggerTagsPathOffset <path offset> The number at which path position the Swagger tags will be extracted (0 will be used per default)");
         System.err.println(" --ignoredRootResources <fully qualified classname [class,...]> JAX-RS root resource classes which should be ignored by analyze (empty per default)");
         System.err.println(" --noPrettyPrint Don't pretty print inline JSON body representations (will be pretty printed per default)");
         System.err.println("\nExample: java -jar jaxrs-analyzer.jar -b swagger -n \"My Project\" -cp ~/libs/lib1.jar:~/libs/project/bin ~/project/target/classes");

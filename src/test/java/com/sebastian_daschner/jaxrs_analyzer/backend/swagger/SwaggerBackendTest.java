@@ -26,12 +26,16 @@ import com.sebastian_daschner.jaxrs_analyzer.model.rest.Project;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.Resources;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeIdentifier;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeRepresentation;
+import org.junit.ClassRule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
 import javax.json.Json;
 import javax.json.JsonStructure;
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
@@ -49,6 +53,9 @@ import static org.junit.Assert.*;
 
 @RunWith(Parameterized.class)
 public class SwaggerBackendTest {
+
+	@ClassRule
+	public static TemporaryFolder temporaryFolder = new TemporaryFolder();
 
     private final Backend cut;
     private final Resources resources;
@@ -83,7 +90,7 @@ public class SwaggerBackendTest {
 
 
     @Parameterized.Parameters
-    public static Collection<Object[]> data() {
+    public static Collection<Object[]> data() throws IOException {
         final Collection<Object[]> data = new LinkedList<>();
         final TypeIdentifier stringIdentifier = TypeIdentifier.ofType(Types.STRING);
         final TypeIdentifier intIdentifier = TypeIdentifier.ofType(Types.PRIMITIVE_INT);
@@ -200,17 +207,24 @@ public class SwaggerBackendTest {
                         + "},\"definitions\":{}}",
                 options);
 
-        options = new HashMap<>();
+
+	    temporaryFolder.create();
+	    File file = temporaryFolder.newFile("patch.json");
+	    try (FileWriter writer = new FileWriter(file)) {
+	    	writer.write("[{ \"op\": \"replace\", \"path\": \"/info/version\", \"value\": \"2.0\" }]");
+	    }
+	    options = new HashMap<>();
         options.put(DOMAIN, "domain.tld");
         options.put(SWAGGER_SCHEMES, "http,https");
         options.put(RENDER_SWAGGER_TAGS, "true");
         options.put(SWAGGER_TAGS_PATH_OFFSET, "42");
+	    options.put(JSON_PATCH, file.getAbsolutePath());
         add(data, ResourcesBuilder.withBase("rest")
                         .andResource("v2/res13", ResourceMethodBuilder.withMethod(HttpMethod.GET)
                                 .andResponse(200, ResponseBuilder.withResponseBody(TypeIdentifier.ofType(Types.STRING)).andHeaders("Location").build()).build())
                         .andResource("v2/res14", ResourceMethodBuilder.withMethod(HttpMethod.GET)
                                 .andResponse(200, ResponseBuilder.withResponseBody(TypeIdentifier.ofType(Types.STRING)).andHeaders("Location").build()).build()).build(),
-                "{\"swagger\":\"2.0\",\"info\":{\"version\":\"1.0\",\"title\":\"project name\"},\"host\":\"domain.tld\",\"basePath\":\"/rest\",\"schemes\":[\"http\",\"https\"],\"tags\":[],\"paths\":{"
+                "{\"swagger\":\"2.0\",\"info\":{\"version\":\"2.0\",\"title\":\"project name\"},\"host\":\"domain.tld\",\"basePath\":\"/rest\",\"schemes\":[\"http\",\"https\"],\"tags\":[],\"paths\":{"
                         + "\"/v2/res13\":{\"get\":{\"consumes\":[],\"produces\":[],\"parameters\":[],\"responses\":{\"200\":{\"description\":\"OK\",\"headers\":{\"Location\":{\"type\":\"string\"}},\"schema\":{\"type\":\"string\"}}}}},"
                         + "\"/v2/res14\":{\"get\":{\"consumes\":[],\"produces\":[],\"parameters\":[],\"responses\":{\"200\":{\"description\":\"OK\",\"headers\":{\"Location\":{\"type\":\"string\"}},\"schema\":{\"type\":\"string\"}}}}}"
                         + "},\"definitions\":{}}",

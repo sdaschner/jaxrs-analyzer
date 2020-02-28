@@ -5,6 +5,7 @@ import com.sebastian_daschner.jaxrs_analyzer.LogProvider;
 import javax.json.Json;
 import javax.json.JsonArray;
 import javax.json.JsonPatch;
+import java.io.BufferedReader;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.EnumSet;
@@ -155,8 +156,8 @@ public class SwaggerOptions {
     }
 
     private static JsonPatch readPatch(final String patchFile) {
-        try {
-            final JsonArray patchArray = Json.createReader(Files.newBufferedReader(Paths.get(patchFile))).readArray();
+        try (BufferedReader reader = Files.newBufferedReader(Paths.get(patchFile))) {
+            final JsonArray patchArray = Json.createReader(reader).readArray();
             return Json.createPatchBuilder(patchArray).build();
         } catch (Exception e) {
             LogProvider.error("Could not read JSON patch from the specified location, reason: " + e.getMessage());
@@ -165,5 +166,4 @@ public class SwaggerOptions {
             return null;
         }
     }
-
 }

@@ -47,7 +47,7 @@ public class SwaggerHtmlBackendTest {
 
 
     @Parameterized.Parameters
-    public static Collection<Object[]> data() {
+    public static Collection<Object[]> data() throws IOException {
         return SwaggerBackendTest.data();
     }
 
