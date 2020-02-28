@@ -28,7 +28,8 @@ import static org.objectweb.asm.Opcodes.*;
  */
 public class JAXRSClassVisitor extends ClassVisitor {
 
-    private static final Class<? extends Annotation>[] RELEVANT_METHOD_ANNOTATIONS = new Class[]{Path.class, GET.class, PUT.class, POST.class, DELETE.class, OPTIONS.class, HEAD.class};
+    private static final Class<? extends Annotation>[] RELEVANT_METHOD_ANNOTATIONS = new Class[]{
+    		Path.class, GET.class, PUT.class, POST.class, DELETE.class, OPTIONS.class, HEAD.class, PATCH.class};
 
     private final ClassResult classResult;
 

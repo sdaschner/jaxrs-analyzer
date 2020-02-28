@@ -67,6 +67,9 @@ class JAXRSMethodVisitor extends ProjectMethodVisitor {
             case Types.OPTIONS:
                 methodResult.setHttpMethod(HttpMethod.OPTIONS);
                 break;
+	        case Types.PATCH:
+		        methodResult.setHttpMethod(HttpMethod.PATCH);
+		        break;
             case Types.DEPRECATED:
                 methodResult.setDeprecated(true);
                 break;

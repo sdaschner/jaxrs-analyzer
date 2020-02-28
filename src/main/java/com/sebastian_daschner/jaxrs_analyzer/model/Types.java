@@ -29,6 +29,7 @@ public final class Types {
     public static final String DELETE = "Ljavax/ws/rs/DELETE;";
     public static final String HEAD = "Ljavax/ws/rs/HEAD;";
     public static final String OPTIONS = "Ljavax/ws/rs/OPTIONS;";
+	public static final String PATCH = "Ljavax/ws/rs/PATCH;";
     public static final String SUSPENDED = "Ljavax/ws/rs/container/Suspended;";
 
     public static final String DEFAULT_VALUE = "Ljavax/ws/rs/DefaultValue;";
