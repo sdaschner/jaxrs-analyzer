@@ -17,6 +17,7 @@
 package com.sebastian_daschner.jaxrs_analyzer.backend.swagger;
 
 import com.sebastian_daschner.jaxrs_analyzer.backend.Backend;
+import com.sebastian_daschner.jaxrs_analyzer.backend.BackendUtils;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.MethodParameter;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.ParameterType;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.Project;
@@ -31,7 +32,6 @@ import javax.json.JsonObjectBuilder;
 import javax.json.JsonValue;
 import javax.json.JsonWriter;
 import javax.json.stream.JsonGenerator;
-import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.Map;
@@ -210,8 +210,8 @@ public class SwaggerBackend implements Backend {
 
 		if (method.isAuthRequired() && authType != null) {
 			builder.add("security", Json.createArrayBuilder()
-				.add(Json.createObjectBuilder()
-					.add(authType, JsonValue.EMPTY_JSON_ARRAY)));
+					.add(Json.createObjectBuilder()
+							.add(authType, JsonValue.EMPTY_JSON_ARRAY)));
 		}
 
 		if (options.isRenderTags())
@@ -271,7 +271,7 @@ public class SwaggerBackend implements Backend {
 			e.getValue().getHeaders().stream().sorted().forEach(h -> headers.add(h, Json.createObjectBuilder().add("type", "string")));
 
 			final JsonObjectBuilder response = Json.createObjectBuilder()
-					.add("description", e.getValue().getDescription() != null ? e.getValue().getDescription() : Optional.ofNullable(Response.Status.fromStatusCode(e.getKey())).map(Response.Status::getReasonPhrase).orElse(""))
+					.add("description", e.getValue().getDescription() != null ? e.getValue().getDescription() : BackendUtils.getReason(e.getKey()))
 					.add("headers", headers);
 
 			if (e.getValue().getResponseBody() != null) {

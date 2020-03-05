@@ -1,9 +1,6 @@
 package com.sebastian_daschner.jaxrs_analyzer.backend.markdown;
 
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-
+import com.sebastian_daschner.jaxrs_analyzer.backend.BackendUtils;
 import com.sebastian_daschner.jaxrs_analyzer.backend.StringBackend;
 import com.sebastian_daschner.jaxrs_analyzer.model.Types;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.MethodParameter;
@@ -14,9 +11,12 @@ import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeIdentifier;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeRepresentation;
 import com.sebastian_daschner.jaxrs_analyzer.utils.StringUtils;
 
-import static com.sebastian_daschner.jaxrs_analyzer.backend.ComparatorUtils.mapKeyComparator;
-import static com.sebastian_daschner.jaxrs_analyzer.backend.ComparatorUtils.parameterComparator;
-import static com.sebastian_daschner.jaxrs_analyzer.model.JavaUtils.toReadableType;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import static com.sebastian_daschner.jaxrs_analyzer.backend.ComparatorUtils.*;
+import static com.sebastian_daschner.jaxrs_analyzer.model.JavaUtils.*;
 
 
 /**
@@ -96,7 +96,7 @@ public class MarkdownBackend extends StringBackend {
 
         resourceMethod.getResponses().entrySet().stream().sorted(mapKeyComparator()).forEach(e -> {
             builder.append("#### `").append(e.getKey()).append(' ')
-                    .append(javax.ws.rs.core.Response.Status.fromStatusCode(e.getKey()).getReasonPhrase()).append("`\n");
+                    .append(BackendUtils.getReason(e.getKey())).append("`\n");
             final Response response = e.getValue();
             response.getHeaders().forEach(h -> builder.append("*Header*: `").append(h).append("` + \n"));
 
