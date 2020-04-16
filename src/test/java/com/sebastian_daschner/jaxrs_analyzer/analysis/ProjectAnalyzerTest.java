@@ -19,6 +19,7 @@ package com.sebastian_daschner.jaxrs_analyzer.analysis;
 import com.sebastian_daschner.jaxrs_analyzer.LogProvider;
 import com.sebastian_daschner.jaxrs_analyzer.builder.ResourceMethodBuilder;
 import com.sebastian_daschner.jaxrs_analyzer.builder.ResponseBuilder;
+import com.sebastian_daschner.jaxrs_analyzer.model.JavaUtils;
 import com.sebastian_daschner.jaxrs_analyzer.model.Types;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.HttpMethod;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.ResourceMethod;
@@ -315,6 +316,15 @@ public class ProjectAnalyzerTest {
 			    .andPathParam("id", Types.STRING, null, null)
 			    .andResponse(200, ResponseBuilder.withResponseBody(stringIdentifier).build()).build();
 	    addMethods(resources, "complex/stringableValue/{id}", getStringableThing);
+
+	    // complex/specialWrappingResult/{id}
+	    ResourceMethod getSpecialWrappingResult = ResourceMethodBuilder.withMethod(HttpMethod.GET)
+			    .andPathParam("id", Types.STRING, null, null)
+			    .andResponse(200, ResponseBuilder.withResponseBody(
+					    TypeIdentifier.ofType(JavaUtils.toTypeWithParameters(JavaUtils.toClassName(Types.COLLECTION),
+							    JavaUtils.toClassName(stringIdentifier.getType())))
+			    ).build()).build();
+	    addMethods(resources, "complex/specialWrappingResult/{id}", getSpecialWrappingResult);
 
 	    // json_tests
         final TypeIdentifier firstIdentifier = TypeIdentifier.ofDynamic();

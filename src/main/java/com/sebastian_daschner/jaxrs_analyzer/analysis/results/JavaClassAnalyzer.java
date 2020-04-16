@@ -25,6 +25,7 @@ public interface JavaClassAnalyzer {
 	 */
 	final class JavaClassAnalysis {
 		public final Class<?> replacement;
+		public final String replacementType;
 		public final Map<String, TypeIdentifier> properties = new HashMap<>();
 
 		/**
@@ -33,6 +34,16 @@ public interface JavaClassAnalyzer {
 		 */
 		public JavaClassAnalysis(Class<?> replacement) {
 			this.replacement = replacement;
+			this.replacementType = null;
+		}
+
+		/**
+		 * Swap the type with a replacement type
+		 * @param replacement The replacement type
+		 */
+		public JavaClassAnalysis(String replacement) {
+			this.replacementType = replacement;
+			this.replacement = null;
 		}
 
 		/**
@@ -42,6 +53,7 @@ public interface JavaClassAnalyzer {
 		public JavaClassAnalysis(Map<String, TypeIdentifier> properties) {
 			this.properties.putAll(properties);
 			this.replacement = null;
+			this.replacementType = null;
 		}
 	}
 

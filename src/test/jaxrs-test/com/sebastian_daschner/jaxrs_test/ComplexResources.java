@@ -114,4 +114,10 @@ public class ComplexResources extends AbstractResources implements Resources {
 	public StringableValue stringableValue(@PathParam("id") StringableValue id) {
 		return id;
 	}
+
+	@GET
+	@Path("specialWrappingResult/{id}")
+	public SpecialWrappingResult<String> specialWrappingResult(@PathParam("id") StringableValue id) {
+		return null;
+	}
 }

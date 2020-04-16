@@ -27,13 +27,18 @@ import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.TypeVariable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.sebastian_daschner.jaxrs_analyzer.model.Types.*;
-import static java.util.Collections.emptyList;
-import static java.util.Collections.emptyMap;
+import static java.util.Collections.*;
 
 /**
  * Contains Java reflection utility functionality.
@@ -289,6 +294,23 @@ public final class JavaUtils {
     public static String toType(final String className) {
         return 'L' + className + ';';
     }
+
+	/**
+	 * Converts the given JVM class name to a type signature.
+	 * <p>
+	 * Example: {@code java/util/List -> Ljava/util/List<a, b, c>;}
+	 */
+	public static String toTypeWithParameters(final String className, final String ... types) {
+		StringBuilder params = new StringBuilder()
+				.append('L')
+				.append(className)
+				.append('<');
+		for (int i = 0; i < types.length; i++) {
+			if (i > 0) params.append(';');
+			params.append(types[i]);
+		}
+		return params.append(">;").toString();
+	}
 
     /**
      * Converts the given type signature to a human readable type string.

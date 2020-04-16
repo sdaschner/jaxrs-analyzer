@@ -132,6 +132,10 @@ class JavaTypeAnalyzer {
 				final TypeIdentifier replacementId = TypeIdentifier.ofType(result.replacement);
 				return analyzeClass(replacementId, replacementId.getType(), result.replacement);
 
+			} else if (result.replacementType != null && !result.replacementType.equals(type)) {
+				final TypeIdentifier replacementId = TypeIdentifier.ofType(result.replacementType);
+				return analyzeInternal(replacementId, result.replacementType);
+
 			} else {
 				final Map<String, TypeIdentifier> properties = new HashMap<>();
 

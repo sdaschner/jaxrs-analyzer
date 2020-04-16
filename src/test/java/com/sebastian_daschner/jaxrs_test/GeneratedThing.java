@@ -3,7 +3,6 @@ package com.sebastian_daschner.jaxrs_test;
 public class GeneratedThing {
 
 	private StringableValue id;
-
 	private Object name;
 
 	public Object getName() {
