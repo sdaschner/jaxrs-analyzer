@@ -243,6 +243,14 @@ public final class JavaUtils {
     	return hasTypeParameters(type) && isAssignableTo(type, ITERABLE);
     }
 
+	/**
+	 * @param type the type
+	 * @return true if the is a container type with type parameters
+	 */
+	public static boolean isContainer(String type) {
+		return isAssignableTo(type, COLLECTION) || isIterableWithTypeParameters(type);
+	}
+
     /**
      * Converts the given JVM object type signature to a class name. Erasures parametrized types.
      * <p>

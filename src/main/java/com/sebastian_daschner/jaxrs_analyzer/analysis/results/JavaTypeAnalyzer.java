@@ -32,7 +32,6 @@ import java.util.Set;
 import java.util.stream.Stream;
 
 import static com.sebastian_daschner.jaxrs_analyzer.model.JavaUtils.*;
-import static com.sebastian_daschner.jaxrs_analyzer.model.Types.*;
 
 /**
  * Analyzes a class (usually a POJO) for it's properties and methods.
@@ -73,7 +72,7 @@ class JavaTypeAnalyzer {
 			if (typeIdentifier != null) {
 				identifier = typeIdentifier;
 			}
-		} else if (isAssignableTo(type, COLLECTION) || isIterableWithTypeParameters(type) || !isJDKType(type)) {
+		} else if (isContainer(type) || !isJDKType(type)) {
 			analyzedTypes.add(type);
 			TypeRepresentation typeRepresentation = analyzeInternal(identifier, type);
 
@@ -82,12 +81,14 @@ class JavaTypeAnalyzer {
 			if (!typeIdentifier.equals(identifier)) {
 				// we want the OG identifier to map to the swapped identifier
 				typeSwaps.put(identifier, typeIdentifier);
-				identifier = typeIdentifier;
 
-				if (!isJDKType(identifier.getType())) {
+				// If the new type is NOT a simple jdk type then we need to track the type representation
+				if (!isJDKType(typeIdentifier.getType()) || isContainer(typeIdentifier.getType())) {
 					// now track the swapped identifier with the swapped type rep
-					typeRepresentations.put(identifier, typeRepresentation);
+					typeRepresentations.put(typeIdentifier, typeRepresentation);
 				}
+
+				identifier = typeIdentifier;
 			} else {
 				// No swapping
 				typeRepresentations.put(identifier, typeRepresentation);
@@ -103,7 +104,7 @@ class JavaTypeAnalyzer {
 	}
 
 	private TypeRepresentation analyzeInternal(final TypeIdentifier identifier, final String type) {
-		if (isAssignableTo(type, COLLECTION) || isIterableWithTypeParameters(type)) {
+		if (isContainer(type)) {
 			final String containedType = ResponseTypeNormalizer.normalizeCollection(type);
 			return TypeRepresentation.ofCollection(identifier, analyzeInternal(TypeIdentifier.ofType(containedType), containedType));
 		}
