@@ -322,7 +322,7 @@ public class ProjectAnalyzerTest {
 			    .andPathParam("id", Types.STRING, null, null)
 			    .andResponse(200, ResponseBuilder.withResponseBody(
 					    TypeIdentifier.ofType(JavaUtils.toTypeWithParameters(JavaUtils.toClassName(Types.COLLECTION),
-							    JavaUtils.toClassName(stringIdentifier.getType())))
+							    JavaUtils.toClassName(generatedIdentifier.getType())))
 			    ).build()).build();
 	    addMethods(resources, "complex/specialWrappingResult/{id}", getSpecialWrappingResult);
 

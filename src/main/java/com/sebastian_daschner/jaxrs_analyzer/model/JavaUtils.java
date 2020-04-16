@@ -298,7 +298,7 @@ public final class JavaUtils {
 	/**
 	 * Converts the given JVM class name to a type signature.
 	 * <p>
-	 * Example: {@code java/util/List -> Ljava/util/List<a, b, c>;}
+	 * Example: {@code java/util/List -> Ljava/util/List<La;Lb;Lc;>;}
 	 */
 	public static String toTypeWithParameters(final String className, final String ... types) {
 		StringBuilder params = new StringBuilder()
@@ -306,8 +306,7 @@ public final class JavaUtils {
 				.append(className)
 				.append('<');
 		for (int i = 0; i < types.length; i++) {
-			if (i > 0) params.append(';');
-			params.append(types[i]);
+			params.append('L').append(types[i]).append(';');
 		}
 		return params.append(">;").toString();
 	}
