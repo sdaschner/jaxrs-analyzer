@@ -18,6 +18,7 @@ package com.sebastian_daschner.jaxrs_analyzer.backend.swagger;
 
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeIdentifier;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeRepresentation;
+import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeRepresentation.OptionalTypeRepresentation;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeRepresentationVisitor;
 import com.sebastian_daschner.jaxrs_analyzer.utils.Pair;
 
@@ -111,10 +112,8 @@ class SchemaBuilder {
                     } else {
                         builder.add("enum", array);
                     }
-
                 }
             }
-
         };
 
         final TypeRepresentation representation = typeRepresentations.get(identifier);

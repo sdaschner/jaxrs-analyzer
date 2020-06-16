@@ -100,6 +100,8 @@ class JAXRSMethodVisitor extends ProjectMethodVisitor {
                 return paramAnnotationVisitor(index, ParameterType.MATRIX);
             case Types.DEFAULT_VALUE:
                 return defaultAnnotationVisitor(index);
+	        case Types.REQUIRED_VALUE:
+	        	return requiredAnnotationVisitor(index);
             case Types.SUSPENDED:
                 LogProvider.debug("Handling of " + annotationDesc + " not yet implemented");
 	            return null;
@@ -135,6 +137,19 @@ class JAXRSMethodVisitor extends ProjectMethodVisitor {
 
         return new DefaultValueAnnotationVisitor(methodParameter);
     }
+
+
+	private AnnotationVisitor requiredAnnotationVisitor(final int index) {
+		final String type = parameterTypes.get(index);
+
+		MethodParameter methodParameter = methodParameters.get(index);
+		if (methodParameter == null) {
+			methodParameter = new MethodParameter(TypeIdentifier.ofType(type));
+			methodParameters.put(index, methodParameter);
+		}
+		methodParameter.setRequired(true);
+		return null;
+	}
 
     @Override
     public void visitEnd() {

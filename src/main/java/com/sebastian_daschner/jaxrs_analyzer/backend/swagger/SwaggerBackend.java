@@ -251,7 +251,7 @@ public class SwaggerBackend implements Backend {
 						final JsonObjectBuilder paramBuilder = schemaBuilder.build(e.getType())
 								.add("name", e.getName())
 								.add("in", swaggerParameterType)
-								.add("required", e.getDefaultValue() == null);
+								.add("required", e.isRequired());
 						if (!StringUtils.isBlank(e.getDescription())) {
 							paramBuilder.add("description", e.getDescription());
 						}

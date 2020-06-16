@@ -273,7 +273,7 @@ public class MarkdownBackendTest {
                         "*Content-Type*: `application/json` + \n" +
                         "*Request Body*: (Collection of `com.sebastian_daschner.test.Model`)\n\n" +
                         "```javascript\n" + "[{\"name\":\"string\",\"value\":0}]\n" + "```\n\n\n" +
-                        "*Form Param*: `form`, `com.sebastian_daschner.test.Model` + \n" +
+                        "* *Form Param*: `form`, `com.sebastian_daschner.test.Model`\n" +
                         "\n" +
                         "### Response\n" +
                         "*Content-Type*: `\\*/*`\n" +
@@ -297,7 +297,7 @@ public class MarkdownBackendTest {
                         "```javascript\n" +
                         "[{\"name\":\"string\",\"value\":0}]\n" +
                         "```\n\n\n" +
-                        "*Query Param*: `query`, `int` + \n" +
+                        "* *Query Param*: `query`, `int`\n" +
                         "\n" +
                         "### Response\n" +
                         "*Content-Type*: `\\*/*`\n" +

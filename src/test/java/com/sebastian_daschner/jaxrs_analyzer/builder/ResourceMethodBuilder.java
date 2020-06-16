@@ -86,6 +86,12 @@ public class ResourceMethodBuilder {
         return this;
     }
 
+
+	public ResourceMethodBuilder andQueryParam(final String name, final String type, boolean required) {
+		andParam(ParameterType.QUERY, name, type, null, null, required);
+		return this;
+	}
+
     public ResourceMethodBuilder andQueryParam(final String name, final String type, final String defaultValue) {
         andParam(ParameterType.QUERY, name, type, defaultValue, null);
         return this;
@@ -142,13 +148,18 @@ public class ResourceMethodBuilder {
     }
 
     public ResourceMethodBuilder andParam(final ParameterType parameterType, final String name, final String type, final String defaultValue, final String description) {
-        final MethodParameter methodParameter = new MethodParameter(TypeIdentifier.ofType(type), parameterType);
-        methodParameter.setName(name);
-        methodParameter.setDefaultValue(defaultValue);
-        methodParameter.setDescription(description);
-        method.getMethodParameters().add(methodParameter);
-        return this;
+        return andParam(parameterType, name, type, defaultValue, description, parameterType == ParameterType.PATH);
     }
+
+	public ResourceMethodBuilder andParam(final ParameterType parameterType, final String name, final String type, final String defaultValue, final String description, final boolean required) {
+		final MethodParameter methodParameter = new MethodParameter(TypeIdentifier.ofType(type), parameterType);
+		methodParameter.setName(name);
+		methodParameter.setDefaultValue(defaultValue);
+		methodParameter.setDescription(description);
+		methodParameter.setRequired(required);
+		method.getMethodParameters().add(methodParameter);
+		return this;
+	}
 
     public ResourceMethodBuilder andDeprecated(final boolean deprecated) {
         method.setDeprecated(deprecated);

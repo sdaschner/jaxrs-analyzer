@@ -32,6 +32,7 @@ import java.util.Set;
 import java.util.stream.Stream;
 
 import static com.sebastian_daschner.jaxrs_analyzer.model.JavaUtils.*;
+import static com.sebastian_daschner.jaxrs_analyzer.model.Types.*;
 
 /**
  * Analyzes a class (usually a POJO) for it's properties and methods.
@@ -72,7 +73,7 @@ class JavaTypeAnalyzer {
 			if (typeIdentifier != null) {
 				identifier = typeIdentifier;
 			}
-		} else if (isContainer(type) || !isJDKType(type)) {
+		} else if (isContainer(type) || isOptional(type) || !isJDKType(type)) {
 			analyzedTypes.add(type);
 			TypeRepresentation typeRepresentation = analyzeInternal(identifier, type);
 
@@ -105,8 +106,13 @@ class JavaTypeAnalyzer {
 
 	private TypeRepresentation analyzeInternal(final TypeIdentifier identifier, final String type) {
 		if (isContainer(type)) {
-			final String containedType = ResponseTypeNormalizer.normalizeCollection(type);
+			final String containedType = ResponseTypeNormalizer.normalizeWrapper(type);
 			return TypeRepresentation.ofCollection(identifier, analyzeInternal(TypeIdentifier.ofType(containedType), containedType));
+		}
+
+		if (isOptional(type)) {
+			final String containedType = ResponseTypeNormalizer.normalizeWrapper(type);
+			return TypeRepresentation.ofOptional(identifier, analyzeInternal(TypeIdentifier.ofType(containedType), containedType));
 		}
 
 		final Class<?> loadedClass = loadClassFromType(type);

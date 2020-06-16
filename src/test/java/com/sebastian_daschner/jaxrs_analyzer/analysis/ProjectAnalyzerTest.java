@@ -184,7 +184,12 @@ public class ProjectAnalyzerTest {
 		final TypeIdentifier modelListIdentifier = TypeIdentifier.ofType("Ljava/util/List<+Lcom/sebastian_daschner/jaxrs_test/Model;>;");
 		resources.getTypeRepresentations().put(modelListIdentifier, TypeRepresentation.ofCollection(modelListIdentifier, modelRepresentation));
 		final TypeIdentifier stringArrayListIdentifier = TypeIdentifier.ofType("Ljava/util/ArrayList<Ljava/lang/String;>;");
-		resources.getTypeRepresentations().put(stringArrayListIdentifier, TypeRepresentation.ofCollection(stringArrayListIdentifier, TypeRepresentation.ofConcrete(stringIdentifier)));
+		resources.getTypeRepresentations().put(stringArrayListIdentifier, TypeRepresentation.ofCollection(stringArrayListIdentifier,
+				TypeRepresentation.ofConcrete(stringIdentifier)));
+
+		final TypeIdentifier optionalInteger = TypeIdentifier.ofType("Ljava/util/Optional<Ljava/lang/Integer;>;");
+		resources.getTypeRepresentations().put(optionalInteger, TypeRepresentation.ofOptional(optionalInteger,
+				TypeRepresentation.ofOptional(optionalInteger, TypeRepresentation.ofConcrete(TypeIdentifier.ofType(Types.INTEGER)))));
 
 		resources.setBasePath("rest");
 
@@ -222,7 +227,8 @@ public class ProjectAnalyzerTest {
 		// test/{id}/test
 		ResourceMethod thirdDelete = ResourceMethodBuilder.withMethod(HttpMethod.DELETE, "Deletes another test.")
 				.andAcceptMediaTypes("application/json").andResponseMediaTypes("application/json")
-				.andPathParam("id", Types.STRING, null, "The ID").andQueryParam("query", Types.PRIMITIVE_INT, null, "The deletion query")
+				.andPathParam("id", Types.STRING, null, "The ID")
+				.andQueryParam("query", optionalInteger.getType(), null, "The deletion query")
 				.andResponse(204, ResponseBuilder.newBuilder().build()).build();
 		addMethods(resources, "test/{id}/test", thirdDelete);
 

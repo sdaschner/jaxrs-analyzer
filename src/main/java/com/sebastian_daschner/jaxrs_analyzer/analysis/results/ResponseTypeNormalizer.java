@@ -40,8 +40,8 @@ final class ResponseTypeNormalizer {
      * @param type The type
      * @return The normalized type
      */
-    static String normalizeCollection(final String type) {
-        if (isAssignableTo(type, Types.COLLECTION) || isAssignableTo(type, Types.ITERABLE)) {
+    static String normalizeWrapper(final String type) {
+        if (isAssignableTo(type, Types.COLLECTION) || isAssignableTo(type, Types.ITERABLE) || isAssignableTo(type, Types.OPTIONAL)) {
             if (!getTypeParameters(type).isEmpty()) {
                 return getTypeParameters(type).get(0);
             }

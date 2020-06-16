@@ -33,6 +33,7 @@ public final class Types {
     public static final String SUSPENDED = "Ljavax/ws/rs/container/Suspended;";
 
     public static final String DEFAULT_VALUE = "Ljavax/ws/rs/DefaultValue;";
+	public static final String REQUIRED_VALUE = "Lsigma/ws/rs/Required;";
     public static final String PATH_PARAM = "Ljavax/ws/rs/PathParam;";
     public static final String QUERY_PARAM = "Ljavax/ws/rs/QueryParam;";
     public static final String HEADER_PARAM = "Ljavax/ws/rs/HeaderParam;";
@@ -67,6 +68,7 @@ public final class Types {
     public static final String SET = "Ljava/util/Set;";
     public static final String COLLECTION = "Ljava/util/Collection;";
 	public static final String ITERABLE = "Ljava/lang/Iterable;";
+	public static final String OPTIONAL = "Ljava/util/Optional;";
     public static final String BIG_DECIMAL = "Ljava/math/BigDecimal;";
     public static final String BIG_INTEGER = "Ljava/math/BigInteger;";
     public static final String URI = "Ljava/net/URI;";
