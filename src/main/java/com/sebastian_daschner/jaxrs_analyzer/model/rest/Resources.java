@@ -16,8 +16,14 @@
 
 package com.sebastian_daschner.jaxrs_analyzer.model.rest;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 
 /**
  * Represents a set of resources and their possible methods.
@@ -75,14 +81,26 @@ public class Resources {
         Map<String, Set<ResourceMethod>> oldResources = resources;
         resources = new HashMap<>();
 
-        oldResources.keySet().forEach(s -> consolidateMultipleMethodsForSamePath(s, oldResources.get(s)));
-    }
+        // changed these rules a bit to fix some gross problems
+	    // basically, if the only difference between 2 things is
+	    // what they produce then they may be combined
 
-    private void consolidateMultipleMethodsForSamePath(String path, Set<ResourceMethod> resourceMethods) {
-        resourceMethods.stream()
-                .collect(Collectors.groupingBy(m -> m.getMethod().toString().toLowerCase(),
-                        Collectors.reducing(new ResourceMethod(), ResourceMethod::combine))
-                ).forEach((k, v) -> addMethod(path, v));
+	    for (Entry<String, Set<ResourceMethod>> resourceEntry : oldResources.entrySet()) {
+		    String path = resourceEntry.getKey();
+		    List<ResourceMethod> methodsX = new ArrayList<>(resourceEntry.getValue());
+		    while (!methodsX.isEmpty()) {
+			    ResourceMethod xMethod = methodsX.remove(0);
+			    for (int i1 = 0; i1 < methodsX.size(); i1++) {
+				    ResourceMethod yMethod = methodsX.get(i1);
+				    if (xMethod.mayCombineWith(yMethod)) {
+					    xMethod = xMethod.combine(yMethod);
+					    methodsX.remove(i1);
+					    i1--;
+				    }
+			    }
+			    addMethod(path, xMethod);
+		    }
+	    }
     }
 
     public Map<TypeIdentifier, TypeRepresentation> getTypeRepresentations() {

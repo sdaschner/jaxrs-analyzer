@@ -103,7 +103,8 @@ public class ProjectAnalyzerTest {
 
 			actualMethods.forEach(am -> {
 				final String methodText = resourceText + ", method " + am.getMethod();
-				final ResourceMethod em = expectedMethods.stream().filter(m -> m.getMethod() == am.getMethod()).findAny()
+				final ResourceMethod em = expectedMethods.stream().filter(
+						m -> m.getMethod() == am.getMethod() && m.getMethodParameters().equals(am.getMethodParameters())).findAny()
 						.orElseThrow(() -> new AssertionError(am.getMethod() + " method not found for resource " + r));
 				assertEquals(methodText, em.getMethodParameters(), am.getMethodParameters());
 				assertEquals(methodText, em.getRequestMediaTypes(), am.getRequestMediaTypes());
@@ -330,6 +331,21 @@ public class ProjectAnalyzerTest {
 				.andPathParam("id", Types.STRING, null, null)
 				.andResponse(200, ResponseBuilder.withResponseBody(collectionOfGeneratedThings).build()).build();
 		addMethods(resources, "complex/specialWrappingResult/{id}", getSpecialWrappingResult);
+
+		// complex/postTypeA
+		ResourceMethod postTypeABody = ResourceMethodBuilder.withMethod(HttpMethod.POST)
+				.andAcceptMediaTypes("application/json")
+				.andRequestBodyType(stringIdentifier)
+				.andResponse(200, ResponseBuilder.withResponseBody(stringIdentifier).build()).build();
+		addMethods(resources, "complex/postTypeA", postTypeABody);
+
+		// complex/postTypeA
+		ResourceMethod postTypeAForm = ResourceMethodBuilder.withMethod(HttpMethod.POST)
+				.andAcceptMediaTypes("multipart/form-data")
+				.andFormParam("foo", Types.STRING)
+				.andFormParam("bar", Types.STRING)
+				.andResponse(200, ResponseBuilder.withResponseBody(stringIdentifier).build()).build();
+		addMethods(resources, "complex/postTypeA", postTypeAForm);
 
 		// json_tests
 		final TypeIdentifier firstIdentifier = TypeIdentifier.ofDynamic();

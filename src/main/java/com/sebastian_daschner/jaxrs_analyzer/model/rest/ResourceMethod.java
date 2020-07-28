@@ -48,6 +48,11 @@ public class ResourceMethod {
     public ResourceMethod() {
     }
 
+    public boolean mayCombineWith(ResourceMethod resourceMethod) {
+    	return method == resourceMethod.method
+			    && methodParameters.equals(resourceMethod.methodParameters);
+    }
+
     public ResourceMethod(final HttpMethod method, final String description) {
         Objects.requireNonNull(method);
         this.method = method;

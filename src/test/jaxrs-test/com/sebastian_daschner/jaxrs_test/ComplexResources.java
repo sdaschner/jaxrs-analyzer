@@ -24,6 +24,8 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.FormParam;
 import javax.ws.rs.container.ResourceContext;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
@@ -40,74 +42,74 @@ import static javax.ws.rs.core.HttpHeaders.*;
 @Path("complex")
 public class ComplexResources extends AbstractResources implements Resources {
 
-    @Context
-    ResourceContext rc;
+	@Context
+	ResourceContext rc;
 
-    @Inject
-    Manager<Integer> manager;
+	@Inject
+	Manager<Integer> manager;
 
-    @Override
-    public Response getInfo(final String info) {
-        return Response.ok().header("X-Info", manager.getInstance(String.class, info.length()) + " is complex").build();
-    }
+	@Override
+	public Response getInfo(final String info) {
+		return Response.ok().header("X-Info", manager.getInstance(String.class, info.length()) + " is complex").build();
+	}
 
-    @Override
-    public String getStatus() {
-        return "status";
-    }
+	@Override
+	public String getStatus() {
+		return "status";
+	}
 
-    @GET
-    @Produces(MediaType.APPLICATION_JSON)
-    public ArrayList<String> getStrings() {
-        final ArrayList<String> strings = new ArrayList<>();
-        strings.add("hi");
-        strings.add("hello");
-        return strings;
-    }
+	@GET
+	@Produces(MediaType.APPLICATION_JSON)
+	public ArrayList<String> getStrings() {
+		final ArrayList<String> strings = new ArrayList<>();
+		strings.add("hi");
+		strings.add("hello");
+		return strings;
+	}
 
-    @Override
-    public String getString() {
-        return "hello";
-    }
+	@Override
+	public String getString() {
+		return "hello";
+	}
 
-    @Path("sub")
-    public SomeSubResource subResources() {
-        return createSomeSubResource();
-    }
+	@Path("sub")
+	public SomeSubResource subResources() {
+		return createSomeSubResource();
+	}
 
-    private SomeSubResource createSomeSubResource() {
-        return new SubResources("complex");
-    }
+	private SomeSubResource createSomeSubResource() {
+		return new SubResources("complex");
+	}
 
-    @Path("anotherSub")
-    public SomeSubResource anotherSubResource() {
-        return rc.initResource(new SubResources("complex"));
-    }
+	@Path("anotherSub")
+	public SomeSubResource anotherSubResource() {
+		return rc.initResource(new SubResources("complex"));
+	}
 
-    @Path("anotherSubres")
-    public SomeSubResource anotherSubresResource() {
-        // just for testing, this would fail due to missing default constructor
-        return rc.getResource(SubResources.class);
-    }
+	@Path("anotherSubres")
+	public SomeSubResource anotherSubresResource() {
+		// just for testing, this would fail due to missing default constructor
+		return rc.getResource(SubResources.class);
+	}
 
-    /**
-     * Creates an authorization endpoint.
-     *
-     * @param token auth token
-     */
-    @GET
-    @Path("auth")
-    public Response get(@HeaderParam(AUTHORIZATION) String token) {
-        return Response.ok("Authorized").build();
-    }
+	/**
+	 * Creates an authorization endpoint.
+	 *
+	 * @param token auth token
+	 */
+	@GET
+	@Path("auth")
+	public Response get(@HeaderParam(AUTHORIZATION) String token) {
+		return Response.ok("Authorized").build();
+	}
 
 	@POST
 	@Path("generatedThing/{id}")
-    public GeneratedThing generatedThing(@PathParam("id") StringableValue id, GeneratedThing g) {
-    	return new GeneratedThing()
-			    .setId(new StringableValue())
-			    .setName("asdf");
-    }
+	public GeneratedThing generatedThing(@PathParam("id") StringableValue id, GeneratedThing g) {
+		return new GeneratedThing()
+				.setId(new StringableValue())
+				.setName("asdf");
+	}
 
 	@GET
 	@Path("stringableValue/{id}")
@@ -118,6 +120,21 @@ public class ComplexResources extends AbstractResources implements Resources {
 	@GET
 	@Path("specialWrappingResult/{id}")
 	public SpecialWrappingResult<GeneratedThing> specialWrappingResult(@PathParam("id") StringableValue id) {
+		return null;
+	}
+
+	@POST
+	@Path("postTypeA")
+	@Consumes({"application/json"})
+	public String postTypeA(String id) {
+		return null;
+	}
+
+	@POST
+	@Path("postTypeA")
+	@Consumes("multipart/form-data")
+	public String postTypeA(@FormParam("foo") String foo,
+	                        @FormParam("bar") String bar) {
 		return null;
 	}
 }
