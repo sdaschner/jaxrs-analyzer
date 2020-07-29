@@ -10,6 +10,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
+import java.io.IOException;
+import java.io.StringWriter;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -37,10 +39,12 @@ public class AsciiDocBackendTest {
     }
 
     @Test
-    public void test() {
+    public void test() throws IOException {
         final Project project = new Project("project name", "1.0", resources);
         cut.configure(singletonMap(INLINE_PRETTIFY, String.valueOf(inlinePrettify)));
-        final String actualOutput = new String(cut.render(project));
+	    StringWriter stringWriter = new StringWriter();
+	    cut.render(project, stringWriter);
+	    final String actualOutput = stringWriter.toString();
 
         assertEquals(expectedOutput, actualOutput);
     }
@@ -347,6 +351,27 @@ public class AsciiDocBackendTest {
                         "==== `200 OK`\n" +
                         "*Header*: `Location` + \n" +
                         "*Response Body*: (`java.lang.String`)\n\n", false);
+
+	    // deprecated method test
+	    add(data, ResourcesBuilder.withBase("rest")
+					    .andResource("res19", ResourceMethodBuilder.withMethod(HttpMethod.GET).andAuthRequired(true)
+							    .andResponse(200, ResponseBuilder.withResponseBody(TypeIdentifier.ofType(Types.STRING)).andHeaders("Location").build()).build()).build(),
+			    "= REST resources of project name\n" +
+					    "1.0\n" +
+					    "\n" +
+					    "== `GET rest/res19`\n" +
+					    "\n" +
+					    "Authorization: required\n" +
+					    "\n" +
+					    "=== Request\n" +
+					    "_No body_ + \n" +
+					    "\n" +
+					    "=== Response\n" +
+					    "*Content-Type*: `\\*/*`\n" +
+					    "\n" +
+					    "==== `200 OK`\n" +
+					    "*Header*: `Location` + \n" +
+					    "*Response Body*: (`java.lang.String`)\n\n", false);
         return data;
     }
 

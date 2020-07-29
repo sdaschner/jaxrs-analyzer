@@ -21,28 +21,41 @@ import com.sebastian_daschner.jaxrs_analyzer.builder.ResourceMethodBuilder;
 import com.sebastian_daschner.jaxrs_analyzer.builder.ResourcesBuilder;
 import com.sebastian_daschner.jaxrs_analyzer.builder.ResponseBuilder;
 import com.sebastian_daschner.jaxrs_analyzer.model.Types;
-import com.sebastian_daschner.jaxrs_analyzer.model.rest.*;
+import com.sebastian_daschner.jaxrs_analyzer.model.rest.HttpMethod;
+import com.sebastian_daschner.jaxrs_analyzer.model.rest.Project;
+import com.sebastian_daschner.jaxrs_analyzer.model.rest.Resources;
+import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeIdentifier;
+import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeRepresentation;
+import org.junit.ClassRule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
 import javax.json.Json;
 import javax.json.JsonStructure;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.io.StringReader;
+import java.io.StringWriter;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 
-import static com.sebastian_daschner.jaxrs_analyzer.analysis.results.TypeUtils.MODEL_IDENTIFIER;
-import static com.sebastian_daschner.jaxrs_analyzer.backend.StringBackend.INLINE_PRETTIFY;
+import static com.sebastian_daschner.jaxrs_analyzer.analysis.results.TypeUtils.*;
+import static com.sebastian_daschner.jaxrs_analyzer.backend.StringBackend.*;
 import static com.sebastian_daschner.jaxrs_analyzer.backend.swagger.SwaggerOptions.*;
 import static com.sebastian_daschner.jaxrs_analyzer.backend.swagger.TypeIdentifierTestSupport.*;
-import static java.util.Collections.singletonMap;
-import static org.junit.Assert.assertEquals;
+import static java.util.Collections.*;
+import static org.junit.Assert.*;
 
 @RunWith(Parameterized.class)
 public class SwaggerBackendTest {
+
+	@ClassRule
+	public static TemporaryFolder temporaryFolder = new TemporaryFolder();
 
     private final Backend cut;
     private final Resources resources;
@@ -56,10 +69,12 @@ public class SwaggerBackendTest {
     }
 
     @Test
-    public void test() {
+    public void test() throws IOException {
         final Project project = new Project("project name", "1.0", resources);
         cut.configure(singletonMap(INLINE_PRETTIFY, "false"));
-        final String actualOutput = new String(cut.render(project));
+	    StringWriter stringWriter = new StringWriter();
+	    cut.render(project, stringWriter);
+        final String actualOutput = stringWriter.toString();
 
         // TODO to fix test w/ different formattings
 //            assertEquals(expectedOutput, actualOutput);
@@ -75,7 +90,7 @@ public class SwaggerBackendTest {
 
 
     @Parameterized.Parameters
-    public static Collection<Object[]> data() {
+    public static Collection<Object[]> data() throws IOException {
         final Collection<Object[]> data = new LinkedList<>();
         final TypeIdentifier stringIdentifier = TypeIdentifier.ofType(Types.STRING);
         final TypeIdentifier intIdentifier = TypeIdentifier.ofType(Types.PRIMITIVE_INT);
@@ -192,17 +207,24 @@ public class SwaggerBackendTest {
                         + "},\"definitions\":{}}",
                 options);
 
-        options = new HashMap<>();
+
+	    temporaryFolder.create();
+	    File file = temporaryFolder.newFile("patch.json");
+	    try (FileWriter writer = new FileWriter(file)) {
+	    	writer.write("[{ \"op\": \"replace\", \"path\": \"/info/version\", \"value\": \"2.0\" }]");
+	    }
+	    options = new HashMap<>();
         options.put(DOMAIN, "domain.tld");
         options.put(SWAGGER_SCHEMES, "http,https");
         options.put(RENDER_SWAGGER_TAGS, "true");
         options.put(SWAGGER_TAGS_PATH_OFFSET, "42");
+	    options.put(JSON_PATCH, file.getAbsolutePath());
         add(data, ResourcesBuilder.withBase("rest")
                         .andResource("v2/res13", ResourceMethodBuilder.withMethod(HttpMethod.GET)
                                 .andResponse(200, ResponseBuilder.withResponseBody(TypeIdentifier.ofType(Types.STRING)).andHeaders("Location").build()).build())
                         .andResource("v2/res14", ResourceMethodBuilder.withMethod(HttpMethod.GET)
                                 .andResponse(200, ResponseBuilder.withResponseBody(TypeIdentifier.ofType(Types.STRING)).andHeaders("Location").build()).build()).build(),
-                "{\"swagger\":\"2.0\",\"info\":{\"version\":\"1.0\",\"title\":\"project name\"},\"host\":\"domain.tld\",\"basePath\":\"/rest\",\"schemes\":[\"http\",\"https\"],\"tags\":[],\"paths\":{"
+                "{\"swagger\":\"2.0\",\"info\":{\"version\":\"2.0\",\"title\":\"project name\"},\"host\":\"domain.tld\",\"basePath\":\"/rest\",\"schemes\":[\"http\",\"https\"],\"tags\":[],\"paths\":{"
                         + "\"/v2/res13\":{\"get\":{\"consumes\":[],\"produces\":[],\"parameters\":[],\"responses\":{\"200\":{\"description\":\"OK\",\"headers\":{\"Location\":{\"type\":\"string\"}},\"schema\":{\"type\":\"string\"}}}}},"
                         + "\"/v2/res14\":{\"get\":{\"consumes\":[],\"produces\":[],\"parameters\":[],\"responses\":{\"200\":{\"description\":\"OK\",\"headers\":{\"Location\":{\"type\":\"string\"}},\"schema\":{\"type\":\"string\"}}}}}"
                         + "},\"definitions\":{}}",
@@ -213,28 +235,33 @@ public class SwaggerBackendTest {
                         .andTypeRepresentation(dynamicIdentifier, TypeRepresentation.ofCollection(identifier, TypeRepresentation.ofConcrete(identifier, properties)))
                         .andResource("res15", ResourceMethodBuilder.withMethod(HttpMethod.GET).andQueryParam("value", "Ljava/lang/Integer;").andAcceptMediaTypes("application/json")
                                 .andResponse(200, ResponseBuilder.withResponseBody(TypeIdentifier.ofType(Types.STRING)).andHeaders("Location").build()).build()).build(),
-                "{\"swagger\":\"2.0\",\"info\":{\"version\":\"1.0\",\"title\":\"project name\"},\"host\":\"example.com\",\"basePath\":\"/rest\",\"schemes\":[\"http\"],\"paths\":{\"/res15\":{\"get\":{\"consumes\":[\"application/json\"],\"produces\":[],\"parameters\":[{\"type\":\"integer\",\"name\":\"value\",\"in\":\"query\",\"required\":true}],\"responses\":{\"200\":{\"description\":\"OK\",\"headers\":{\"Location\":{\"type\":\"string\"}},\"schema\":{\"type\":\"string\"}}}}}},\"definitions\":{}}");
+                "{\"swagger\":\"2.0\",\"info\":{\"version\":\"1.0\",\"title\":\"project name\"},\"host\":\"example.com\",\"basePath\":\"/rest\",\"schemes\":[\"http\"],\"paths\":{\"/res15\":{\"get\":{\"consumes\":[\"application/json\"],\"produces\":[],\"parameters\":[{\"type\":\"integer\",\"name\":\"value\",\"in\":\"query\",\"required\":false}],\"responses\":{\"200\":{\"description\":\"OK\",\"headers\":{\"Location\":{\"type\":\"string\"}},\"schema\":{\"type\":\"string\"}}}}}},\"definitions\":{}}");
 
         add(data, ResourcesBuilder.withBase("rest")
                         .andTypeRepresentation(dynamicIdentifier, TypeRepresentation.ofCollection(identifier, TypeRepresentation.ofConcrete(identifier, properties)))
-                        .andResource("res16", ResourceMethodBuilder.withMethod(HttpMethod.GET).andQueryParam("value", "Ljava/lang/Integer;", "test").andAcceptMediaTypes("application/json")
+                        .andResource("res16", ResourceMethodBuilder.withMethod(HttpMethod.GET)
+		                        .andQueryParam("value", "Ljava/lang/Integer;", "test")
+		                        .andAcceptMediaTypes("application/json")
                                 .andResponse(200, ResponseBuilder.withResponseBody(TypeIdentifier.ofType(Types.STRING)).andHeaders("Location").build()).build()).build(),
                 "{\"swagger\":\"2.0\",\"info\":{\"version\":\"1.0\",\"title\":\"project name\"},\"host\":\"example.com\",\"basePath\":\"/rest\",\"schemes\":[\"http\"],\"paths\":{\"/res16\":{\"get\":{\"consumes\":[\"application/json\"],\"produces\":[],\"parameters\":[{\"type\":\"integer\",\"name\":\"value\",\"in\":\"query\",\"required\":false,\"default\":\"test\"}],\"responses\":{\"200\":{\"description\":\"OK\",\"headers\":{\"Location\":{\"type\":\"string\"}},\"schema\":{\"type\":\"string\"}}}}}},\"definitions\":{}}");
 
         add(data, ResourcesBuilder.withBase("rest")
                         .andTypeRepresentation(dynamicIdentifier, TypeRepresentation.ofCollection(identifier, TypeRepresentation.ofConcrete(identifier, properties)))
-                        .andResource("res17", ResourceMethodBuilder.withMethod(HttpMethod.GET).andQueryParam("value", "Ljava/lang/Integer;").andQueryParam("name", "Ljava/lang/String;", "foobar").andAcceptMediaTypes("application/json")
+                        .andResource("res17",
+		                        ResourceMethodBuilder.withMethod(HttpMethod.GET)
+				                        .andQueryParam("value", "Ljava/lang/Integer;")
+				                        .andQueryParam("name", "Ljava/lang/String;", "foobar").andAcceptMediaTypes("application/json")
                                 .andResponse(200, ResponseBuilder.withResponseBody(TypeIdentifier.ofType(Types.STRING)).andHeaders("Location").build()).build()).build(),
-                "{\"swagger\":\"2.0\",\"info\":{\"version\":\"1.0\",\"title\":\"project name\"},\"host\":\"example.com\",\"basePath\":\"/rest\",\"schemes\":[\"http\"],\"paths\":{\"/res17\":{\"get\":{\"consumes\":[\"application/json\"],\"produces\":[],\"parameters\":[{\"type\":\"string\",\"name\":\"name\",\"in\":\"query\",\"required\":false,\"default\":\"foobar\"},{\"type\":\"integer\",\"name\":\"value\",\"in\":\"query\",\"required\":true}],\"responses\":{\"200\":{\"description\":\"OK\",\"headers\":{\"Location\":{\"type\":\"string\"}},\"schema\":{\"type\":\"string\"}}}}}},\"definitions\":{}}");
+                "{\"swagger\":\"2.0\",\"info\":{\"version\":\"1.0\",\"title\":\"project name\"},\"host\":\"example.com\",\"basePath\":\"/rest\",\"schemes\":[\"http\"],\"paths\":{\"/res17\":{\"get\":{\"consumes\":[\"application/json\"],\"produces\":[],\"parameters\":[{\"type\":\"string\",\"name\":\"name\",\"in\":\"query\",\"required\":false,\"default\":\"foobar\"},{\"type\":\"integer\",\"name\":\"value\",\"in\":\"query\",\"required\":false}],\"responses\":{\"200\":{\"description\":\"OK\",\"headers\":{\"Location\":{\"type\":\"string\"}},\"schema\":{\"type\":\"string\"}}}}}},\"definitions\":{}}");
 
-        // Enum type tests
+	    // Enum type tests
         identifier = TypeIdentifier.ofType("Lcom/sebastian_daschner/test/FirstEnum;");
         final TypeIdentifier secondIdentifier = TypeIdentifier.ofType("Lcom/sebastian_daschner/test/SecondEnum;");
         add(data, ResourcesBuilder.withBase("rest")
                         .andResource("res18", ResourceMethodBuilder
                                 .withMethod(HttpMethod.GET)
-                                .andQueryParam("q1", identifier.getType())
-                                .andQueryParam("q2", secondIdentifier.getType())
+                                .andQueryParam("q1", identifier.getType(), true)
+                                .andQueryParam("q2", secondIdentifier.getType(), true)
                                 .build()
                         ).andTypeRepresentation(identifier, TypeRepresentation.ofEnum(identifier, "APPLE", "BANANA"))
                         .andTypeRepresentation(secondIdentifier, TypeRepresentation.ofEnum(secondIdentifier, "APPLE", "BANANA"))
@@ -247,6 +274,14 @@ public class SwaggerBackendTest {
                         .andResource("res19", ResourceMethodBuilder.withMethod(HttpMethod.GET).andDeprecated(true)
                                 .andResponse(200, ResponseBuilder.withResponseBody(TypeIdentifier.ofType(Types.STRING)).andHeaders("Location").build()).build()).build(),
                 "{\"swagger\":\"2.0\",\"info\":{\"version\":\"1.0\",\"title\":\"project name\"},\"host\":\"\",\"basePath\":\"/project name/rest\",\"schemes\":[\"http\"],\"paths\":{\"/res19\":{\"get\":{\"consumes\":[],\"produces\":[],\"parameters\":[],\"responses\":{\"200\":{\"description\":\"OK\",\"headers\":{\"Location\":{\"type\":\"string\"}},\"schema\":{\"type\":\"string\"}}},\"deprecated\":true}}},\"definitions\":{}}", new HashMap<>());
+
+	    // secure method test
+	    options = new HashMap<>();
+	    options.put(SWAGGER_SECURITY_SCHEME, "jwt");
+	    add(data, ResourcesBuilder.withBase("rest")
+					    .andResource("res19", ResourceMethodBuilder.withMethod(HttpMethod.GET).andAuthRequired(true)
+							    .andResponse(200, ResponseBuilder.withResponseBody(TypeIdentifier.ofType(Types.STRING)).andHeaders("Location").build()).build()).build(),
+			    "{\"swagger\":\"2.0\",\"info\":{\"version\":\"1.0\",\"title\":\"project name\"},\"host\":\"\",\"basePath\":\"/project name/rest\",\"schemes\":[\"http\"],\"securityDefinitions\":{\"JwtAuth\":{\"type\":\"apiKey\",\"in\":\"header\",\"name\":\"Authorization\"}},\"paths\":{\"/res19\":{\"get\":{\"consumes\":[],\"produces\":[],\"parameters\":[],\"responses\":{\"200\":{\"description\":\"OK\",\"headers\":{\"Location\":{\"type\":\"string\"}},\"schema\":{\"type\":\"string\"}}},\"security\":[{\"JwtAuth\":[]}]}}},\"definitions\":{}}", options);
 
         return data;
     }

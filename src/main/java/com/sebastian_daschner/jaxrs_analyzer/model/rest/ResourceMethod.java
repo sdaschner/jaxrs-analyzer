@@ -18,7 +18,11 @@ package com.sebastian_daschner.jaxrs_analyzer.model.rest;
 
 import com.sebastian_daschner.jaxrs_analyzer.utils.StringUtils;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -39,8 +43,14 @@ public class ResourceMethod {
     private TypeIdentifier requestBody;
     private String requestBodyDescription;
     private boolean deprecated;
+    private boolean authRequired;
 
     public ResourceMethod() {
+    }
+
+    public boolean mayCombineWith(ResourceMethod resourceMethod) {
+    	return method == resourceMethod.method
+			    && methodParameters.equals(resourceMethod.methodParameters);
     }
 
     public ResourceMethod(final HttpMethod method, final String description) {
@@ -97,7 +107,15 @@ public class ResourceMethod {
         this.requestBodyDescription = requestBodyDescription;
     }
 
-    public ResourceMethod combine(ResourceMethod with) {
+	public boolean isAuthRequired() {
+		return authRequired;
+	}
+
+	public void setAuthRequired(boolean authRequired) {
+		this.authRequired = authRequired;
+	}
+
+	public ResourceMethod combine(ResourceMethod with) {
         ResourceMethod rm = new ResourceMethod();
         rm.method = with.method;
         rm.requestBody = with.requestBody;
@@ -122,6 +140,7 @@ public class ResourceMethod {
         rm.requestBodyDescription = mergeRequestBodyDescription(with);
 
         rm.deprecated = Stream.of(this.deprecated, with.deprecated).anyMatch(Boolean.TRUE::equals);
+        rm.authRequired = authRequired || with.authRequired;
         return rm;
     }
 
@@ -181,6 +200,7 @@ public class ResourceMethod {
                 ", description=" + description +
                 ", requestBodyDescription=" + requestBodyDescription +
                 ", requestBody=" + requestBody +
+		        ", authRequired=" + authRequired +
                 '}';
     }
 

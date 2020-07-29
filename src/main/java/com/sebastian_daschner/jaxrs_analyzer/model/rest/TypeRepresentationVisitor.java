@@ -13,5 +13,9 @@ public interface TypeRepresentationVisitor {
     void visitEnd(TypeRepresentation.CollectionTypeRepresentation representation);
 
     void visit(TypeRepresentation.EnumTypeRepresentation representation);
+	default void visit(TypeRepresentation.OptionalTypeRepresentation representation) {
+		TypeRepresentation rep = representation.getRepresentation();
+		rep.accept(this);
+	}
 
 }

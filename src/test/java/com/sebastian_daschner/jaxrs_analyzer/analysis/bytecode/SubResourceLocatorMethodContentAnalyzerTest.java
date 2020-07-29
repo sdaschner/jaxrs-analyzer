@@ -7,7 +7,6 @@ import com.sebastian_daschner.jaxrs_analyzer.model.JavaUtils;
 import com.sebastian_daschner.jaxrs_analyzer.model.methods.MethodIdentifier;
 import com.sebastian_daschner.jaxrs_analyzer.model.results.ClassResult;
 import com.sebastian_daschner.jaxrs_analyzer.model.results.MethodResult;
-import org.junit.AfterClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -17,16 +16,14 @@ import org.objectweb.asm.Type;
 
 import javax.ws.rs.NotFoundException;
 import java.io.IOException;
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static com.sebastian_daschner.jaxrs_analyzer.analysis.utils.TestClassUtils.getClasses;
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.any;
+import static com.sebastian_daschner.jaxrs_analyzer.analysis.utils.TestClassUtils.*;
+import static org.junit.Assert.*;
+import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.*;
 
 @RunWith(Parameterized.class)
@@ -48,8 +45,7 @@ public class SubResourceLocatorMethodContentAnalyzerTest {
         this.signature = signature;
         this.expectedClassNames = expectedClassNames;
         jobRegistry = mock(JobRegistry.class);
-        this.classUnderTest = new SubResourceLocatorMethodContentAnalyzer();
-        injectJobRegistry(jobRegistry);
+        this.classUnderTest = new SubResourceLocatorMethodContentAnalyzer(jobRegistry);
     }
 
     @Parameterized.Parameters(name = "{0}")
@@ -97,20 +93,4 @@ public class SubResourceLocatorMethodContentAnalyzerTest {
         assertEquals("failed for " + testClassName, expectedClassNames, captor.getAllValues().stream().collect(Collectors.toSet()));
         verify(jobRegistry, times(expectedClassNames.size())).analyzeResourceClass(any(), any());
     }
-
-    @AfterClass
-    public static void tearDown() throws NoSuchFieldException, IllegalAccessException {
-        injectJobRegistry(originalJobRegistry);
-    }
-
-    private static void injectJobRegistry(final JobRegistry jobRegistry) throws NoSuchFieldException, IllegalAccessException {
-        final Field field = JobRegistry.class.getDeclaredField("INSTANCE");
-        field.setAccessible(true);
-        originalJobRegistry = JobRegistry.getInstance();
-        Field modifiersField = Field.class.getDeclaredField("modifiers");
-        modifiersField.setAccessible(true);
-        modifiersField.setInt(field, field.getModifiers() & ~Modifier.FINAL);
-        field.set(null, jobRegistry);
-    }
-
 }

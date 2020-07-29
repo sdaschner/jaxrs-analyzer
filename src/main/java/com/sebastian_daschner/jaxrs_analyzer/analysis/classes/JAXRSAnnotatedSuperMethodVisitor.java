@@ -1,7 +1,11 @@
 package com.sebastian_daschner.jaxrs_analyzer.analysis.classes;
 
 import com.sebastian_daschner.jaxrs_analyzer.LogProvider;
-import com.sebastian_daschner.jaxrs_analyzer.analysis.classes.annotation.*;
+import com.sebastian_daschner.jaxrs_analyzer.analysis.classes.annotation.ConsumesAnnotationVisitor;
+import com.sebastian_daschner.jaxrs_analyzer.analysis.classes.annotation.DefaultValueAnnotationVisitor;
+import com.sebastian_daschner.jaxrs_analyzer.analysis.classes.annotation.ParamAnnotationVisitor;
+import com.sebastian_daschner.jaxrs_analyzer.analysis.classes.annotation.PathAnnotationVisitor;
+import com.sebastian_daschner.jaxrs_analyzer.analysis.classes.annotation.ProducesAnnotationVisitor;
 import com.sebastian_daschner.jaxrs_analyzer.model.Types;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.HttpMethod;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.MethodParameter;
@@ -16,7 +20,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.objectweb.asm.Opcodes.ASM5;
+import static org.objectweb.asm.Opcodes.*;
 
 /**
  * @author Sebastian Daschner
@@ -57,6 +61,9 @@ class JAXRSAnnotatedSuperMethodVisitor extends MethodVisitor {
             case Types.OPTIONS:
                 methodResult.setHttpMethod(HttpMethod.OPTIONS);
                 break;
+	        case Types.PATCH:
+		        methodResult.setHttpMethod(HttpMethod.PATCH);
+		        break;
             case Types.DEPRECATED:
                 methodResult.setDeprecated(true);
                 break;
@@ -87,9 +94,12 @@ class JAXRSAnnotatedSuperMethodVisitor extends MethodVisitor {
                 return paramAnnotationVisitor(index, ParameterType.MATRIX);
             case Types.DEFAULT_VALUE:
                 return defaultAnnotationVisitor(index);
+	        case Types.REQUIRED_VALUE:
+		        return requiredAnnotationVisitor(index);
             case Types.SUSPENDED:
                 LogProvider.debug("Handling of " + annotationDesc + " not yet implemented");
             case Types.CONTEXT:
+	        case Types.AUTH_PARAM:
                 annotatedParameters.set(index);
             default:
                 return null;
@@ -122,6 +132,18 @@ class JAXRSAnnotatedSuperMethodVisitor extends MethodVisitor {
 
         return new DefaultValueAnnotationVisitor(methodParameter);
     }
+
+	private AnnotationVisitor requiredAnnotationVisitor(final int index) {
+		final String type = parameterTypes.get(index);
+
+		MethodParameter methodParameter = methodParameters.get(index);
+		if (methodParameter == null) {
+			methodParameter = new MethodParameter(TypeIdentifier.ofType(type));
+			methodParameters.put(index, methodParameter);
+		}
+		methodParameter.setRequired(true);
+		return null;
+	}
 
     @Override
     public void visitEnd() {

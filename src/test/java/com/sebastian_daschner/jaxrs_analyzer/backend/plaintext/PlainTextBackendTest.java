@@ -1,14 +1,5 @@
 package com.sebastian_daschner.jaxrs_analyzer.backend.plaintext;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Map;
-
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-
 import com.sebastian_daschner.jaxrs_analyzer.backend.Backend;
 import com.sebastian_daschner.jaxrs_analyzer.builder.ResourceMethodBuilder;
 import com.sebastian_daschner.jaxrs_analyzer.builder.ResourcesBuilder;
@@ -19,13 +10,21 @@ import com.sebastian_daschner.jaxrs_analyzer.model.rest.Project;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.Resources;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeIdentifier;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeRepresentation;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
-import static java.util.Collections.singletonMap;
+import java.io.IOException;
+import java.io.StringWriter;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
-
-import static com.sebastian_daschner.jaxrs_analyzer.analysis.results.TypeUtils.MODEL_IDENTIFIER;
-import static com.sebastian_daschner.jaxrs_analyzer.backend.StringBackend.INLINE_PRETTIFY;
+import static com.sebastian_daschner.jaxrs_analyzer.analysis.results.TypeUtils.*;
+import static com.sebastian_daschner.jaxrs_analyzer.backend.StringBackend.*;
+import static java.util.Collections.*;
+import static org.junit.Assert.*;
 
 @RunWith(Parameterized.class)
 public class PlainTextBackendTest {
@@ -41,10 +40,12 @@ public class PlainTextBackendTest {
     }
 
     @Test
-    public void test() {
+    public void test() throws IOException {
         final Project project = new Project("project name", "1.0", resources);
         cut.configure(singletonMap(INLINE_PRETTIFY, "false"));
-        final String actualOutput = new String(cut.render(project));
+	    StringWriter stringWriter = new StringWriter();
+	    cut.render(project, stringWriter);
+	    final String actualOutput = stringWriter.toString();
         assertEquals(expectedOutput, actualOutput);
     }
 
@@ -254,6 +255,24 @@ public class PlainTextBackendTest {
                     "  Status Codes: 200\n" +
                     "   Header: Location\n" +
                     "   Response Body: java.lang.String\n\n\n");
+
+        // auth
+	    add(data, ResourcesBuilder.withBase("rest")
+					    .andResource("res19", ResourceMethodBuilder.withMethod(HttpMethod.GET).andAuthRequired(true)
+							    .andResponse(200, ResponseBuilder.withResponseBody(TypeIdentifier.ofType(Types.STRING)).andHeaders("Location").build()).build()).build(),
+			    "REST resources of project name:\n" +
+					    "1.0\n" +
+					    "\n" +
+					    "GET rest/res19:\n" +
+					    " Authorization required\n" +
+					    " Request:\n" +
+					    "  No body\n" +
+					    "\n" +
+					    " Response:\n" +
+					    "  Content-Type: */*\n" +
+					    "  Status Codes: 200\n" +
+					    "   Header: Location\n" +
+					    "   Response Body: java.lang.String\n\n\n");
         return data;
     }
 

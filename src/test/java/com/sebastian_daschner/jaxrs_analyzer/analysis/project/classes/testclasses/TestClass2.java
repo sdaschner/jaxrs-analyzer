@@ -25,6 +25,7 @@ import com.sebastian_daschner.jaxrs_analyzer.model.results.ClassResult;
 import com.sebastian_daschner.jaxrs_analyzer.model.results.MethodResult;
 
 import javax.ws.rs.GET;
+import javax.ws.rs.PATCH;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -47,13 +48,20 @@ public class TestClass2 {
         return Response.accepted().build();
     }
 
+	@PATCH
+	public Response patch(final String string) {
+		return Response.accepted().build();
+	}
+
     public static ClassResult getResult() {
         final MethodResult firstMethod = MethodResultBuilder.withResponses(HttpResponseBuilder.newBuilder().andEntityTypes(Types.PRIMITIVE_INT)
                 .andContentTypes("text/html").build())
                 .andResponseMediaTypes("text/html").andMethod(HttpMethod.GET).build();
         final MethodResult secondMethod = MethodResultBuilder.withResponses(HttpResponseBuilder.withStatues(202).build())
                 .andMethod(HttpMethod.POST).andRequestBodyType(Types.STRING).build();
-        return ClassResultBuilder.withResourcePath("test").andResponseMediaTypes("application/json").andMethods(firstMethod, secondMethod).build();
+	    final MethodResult thirdMethod = MethodResultBuilder.withResponses(HttpResponseBuilder.withStatues(202).build())
+			    .andMethod(HttpMethod.PATCH).andRequestBodyType(Types.STRING).build();
+        return ClassResultBuilder.withResourcePath("test").andResponseMediaTypes("application/json").andMethods(firstMethod, secondMethod, thirdMethod).build();
     }
 
 }

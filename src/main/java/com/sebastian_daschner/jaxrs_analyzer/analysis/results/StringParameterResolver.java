@@ -34,6 +34,9 @@ class StringParameterResolver {
             if (isEnum(typeRepresentation))
                 return;
 
+	        if (isOptional(typeRepresentation))
+	            return;
+
             if (isCollection(typeRepresentation)) {
                 final TypeIdentifier componentType = typeRepresentation.getComponentType();
                 if (isStringOrPrimitive(componentType) || isEnum(typeRepresentations.get(componentType)))
@@ -59,4 +62,7 @@ class StringParameterResolver {
         return typeRepresentation instanceof TypeRepresentation.CollectionTypeRepresentation;
     }
 
+	private boolean isOptional(final TypeRepresentation typeRepresentation) {
+		return typeRepresentation instanceof TypeRepresentation.OptionalTypeRepresentation;
+	}
 }

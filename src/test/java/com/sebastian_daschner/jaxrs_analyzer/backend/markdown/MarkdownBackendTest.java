@@ -1,5 +1,7 @@
 package com.sebastian_daschner.jaxrs_analyzer.backend.markdown;
 
+import java.io.IOException;
+import java.io.StringWriter;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -44,10 +46,12 @@ public class MarkdownBackendTest {
     }
 
     @Test
-    public void test() {
+    public void test() throws IOException {
         final Project project = new Project("project name", "1.0", resources);
         cut.configure(singletonMap(INLINE_PRETTIFY, String.valueOf(inlinePrettify)));
-        final String actualOutput = new String(cut.render(project));
+	    StringWriter stringWriter = new StringWriter();
+	    cut.render(project, stringWriter);
+	    final String actualOutput = stringWriter.toString();
 
         assertEquals(expectedOutput, actualOutput);
     }
@@ -269,7 +273,7 @@ public class MarkdownBackendTest {
                         "*Content-Type*: `application/json` + \n" +
                         "*Request Body*: (Collection of `com.sebastian_daschner.test.Model`)\n\n" +
                         "```javascript\n" + "[{\"name\":\"string\",\"value\":0}]\n" + "```\n\n\n" +
-                        "*Form Param*: `form`, `com.sebastian_daschner.test.Model` + \n" +
+                        "* *Form Param*: `form`, `com.sebastian_daschner.test.Model`\n" +
                         "\n" +
                         "### Response\n" +
                         "*Content-Type*: `\\*/*`\n" +
@@ -293,7 +297,7 @@ public class MarkdownBackendTest {
                         "```javascript\n" +
                         "[{\"name\":\"string\",\"value\":0}]\n" +
                         "```\n\n\n" +
-                        "*Query Param*: `query`, `int` + \n" +
+                        "* *Query Param*: `query`, `int`\n" +
                         "\n" +
                         "### Response\n" +
                         "*Content-Type*: `\\*/*`\n" +
@@ -329,6 +333,27 @@ public class MarkdownBackendTest {
                         "#### `200 OK`\n" +
                         "*Header*: `Location` + \n" +
                         "*Response Body*: (`java.lang.String`)\n\n", false);
+
+	    // secure method test
+	    add(data, ResourcesBuilder.withBase("rest")
+					    .andResource("res19", ResourceMethodBuilder.withMethod(HttpMethod.GET).andAuthRequired(true)
+							    .andResponse(200, ResponseBuilder.withResponseBody(TypeIdentifier.ofType(Types.STRING)).andHeaders("Location").build()).build()).build(),
+			    "# REST resources of project name\n\n" +
+					    "1.0\n" +
+					    "\n" +
+					    "## `GET rest/res19`\n" +
+					    "\n" +
+					    "Authorization: required\n" +
+					    "\n" +
+					    "### Request\n" +
+					    "_No body_ + \n" +
+					    "\n" +
+					    "### Response\n" +
+					    "*Content-Type*: `\\*/*`\n" +
+					    "\n" +
+					    "#### `200 OK`\n" +
+					    "*Header*: `Location` + \n" +
+					    "*Response Body*: (`java.lang.String`)\n\n", false);
         return data;
     }
 

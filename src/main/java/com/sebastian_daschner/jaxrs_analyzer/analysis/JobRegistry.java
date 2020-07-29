@@ -7,17 +7,15 @@ import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
- * Thread-safe singleton of unhandled class analysis jobs.
+ * Thread-safe container of unhandled class analysis jobs.
  *
  * @author Sebastian Daschner
  */
 public class JobRegistry {
 
-    private static final JobRegistry INSTANCE = new JobRegistry();
-    private Queue<Pair<String, ClassResult>> unhandledClasses = new ConcurrentLinkedQueue<>();
+    private final Queue<Pair<String, ClassResult>> unhandledClasses = new ConcurrentLinkedQueue<>();
 
-    private JobRegistry() {
-        // only one instance allowed
+    public JobRegistry() {
     }
 
     /**
@@ -36,9 +34,4 @@ public class JobRegistry {
     public Pair<String, ClassResult> nextUnhandledClass() {
         return unhandledClasses.poll();
     }
-
-    public static JobRegistry getInstance() {
-        return INSTANCE;
-    }
-
 }

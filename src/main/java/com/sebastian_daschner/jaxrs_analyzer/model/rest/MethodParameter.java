@@ -17,6 +17,7 @@ public class MethodParameter {
     private String name;
     private String description;
     private String defaultValue;
+    private boolean required;
 
     public MethodParameter(final TypeIdentifier type) {
         this.type = type;
@@ -25,6 +26,7 @@ public class MethodParameter {
     public MethodParameter(final TypeIdentifier type, final ParameterType parameterType) {
         this.type = type;
         this.parameterType = parameterType;
+        this.required = parameterType == ParameterType.PATH;
     }
 
     public TypeIdentifier getType() {
@@ -67,7 +69,15 @@ public class MethodParameter {
         this.defaultValue = defaultValue;
     }
 
-    @Override
+	public void setRequired(boolean required) {
+		this.required = required;
+	}
+
+	public boolean isRequired() {
+		return required;
+	}
+
+	@Override
     public boolean equals(final Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
