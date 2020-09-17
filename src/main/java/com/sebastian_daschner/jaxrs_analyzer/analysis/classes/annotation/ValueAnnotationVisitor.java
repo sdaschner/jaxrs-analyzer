@@ -11,7 +11,7 @@ abstract class ValueAnnotationVisitor extends AnnotationVisitor {
     private static final String NAME = "value";
 
     ValueAnnotationVisitor() {
-        super(Opcodes.ASM5);
+        super(Opcodes.ASM7);
     }
 
     protected abstract void visitValue(String value);
@@ -25,7 +25,7 @@ abstract class ValueAnnotationVisitor extends AnnotationVisitor {
 
     @Override
     public AnnotationVisitor visitArray(String name) {
-        return new AnnotationVisitor(Opcodes.ASM5) {
+        return new AnnotationVisitor(Opcodes.ASM7) {
             @Override
             public void visit(String name, Object value) {
                 visitValue((String) value);

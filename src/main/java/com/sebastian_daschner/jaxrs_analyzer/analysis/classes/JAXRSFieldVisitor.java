@@ -21,7 +21,7 @@ class JAXRSFieldVisitor extends FieldVisitor {
     private MethodParameter parameter;
 
     JAXRSFieldVisitor(final ClassResult classResult, final String desc, final String signature) {
-        super(Opcodes.ASM5);
+        super(Opcodes.ASM7);
         this.classResult = classResult;
         this.signature = signature == null ? desc : signature;
     }
