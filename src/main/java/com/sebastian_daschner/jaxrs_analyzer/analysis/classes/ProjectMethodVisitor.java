@@ -28,7 +28,7 @@ class ProjectMethodVisitor extends MethodVisitor {
     private final String className;
 
     ProjectMethodVisitor(MethodResult methodResult, String className) {
-        super(ASM5);
+        super(ASM7);
         // TODO refactor to list of instructions only
         this.methodResult = methodResult;
         this.className = className;

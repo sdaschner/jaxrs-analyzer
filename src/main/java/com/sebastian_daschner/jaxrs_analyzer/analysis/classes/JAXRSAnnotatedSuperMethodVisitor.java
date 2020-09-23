@@ -16,7 +16,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.objectweb.asm.Opcodes.ASM5;
+import static org.objectweb.asm.Opcodes.ASM7;
 
 /**
  * @author Sebastian Daschner
@@ -29,7 +29,7 @@ class JAXRSAnnotatedSuperMethodVisitor extends MethodVisitor {
     private final BitSet annotatedParameters;
 
     JAXRSAnnotatedSuperMethodVisitor(final MethodResult methodResult) {
-        super(ASM5);
+        super(ASM7);
         this.methodResult = methodResult;
         parameterTypes = methodResult.getOriginalMethodSignature().getParameters();
         annotatedParameters = new BitSet(parameterTypes.size());

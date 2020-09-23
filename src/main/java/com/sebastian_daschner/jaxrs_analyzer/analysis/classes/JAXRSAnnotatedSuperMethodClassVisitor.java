@@ -18,7 +18,7 @@ class JAXRSAnnotatedSuperMethodClassVisitor extends ClassVisitor {
     private final Method method;
 
     JAXRSAnnotatedSuperMethodClassVisitor(final MethodResult methodResult, final Method method) {
-        super(ASM5);
+        super(ASM7);
         this.methodResult = methodResult;
         this.method = method;
     }

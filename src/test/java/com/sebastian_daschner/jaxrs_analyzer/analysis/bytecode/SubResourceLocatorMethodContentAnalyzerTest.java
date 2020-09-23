@@ -17,6 +17,8 @@ import org.objectweb.asm.Type;
 
 import javax.ws.rs.NotFoundException;
 import java.io.IOException;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.VarHandle;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.Collection;
@@ -39,6 +41,17 @@ public class SubResourceLocatorMethodContentAnalyzerTest {
     private final Set<String> expectedClassNames;
     private final JobRegistry jobRegistry;
     private String signature;
+    
+    private static final VarHandle MODIFIERS;
+
+    static {
+        try {
+            var lookup = MethodHandles.privateLookupIn(Field.class, MethodHandles.lookup());
+            MODIFIERS = lookup.findVarHandle(Field.class, "modifiers", int.class);
+        } catch (IllegalAccessException | NoSuchFieldException ex) {
+            throw new RuntimeException(ex);
+        }
+    }
 
 
     public SubResourceLocatorMethodContentAnalyzerTest(final String testClassSimpleName, final String testClassName, final String signature, final Set<String> expectedClassNames)
@@ -107,10 +120,15 @@ public class SubResourceLocatorMethodContentAnalyzerTest {
         final Field field = JobRegistry.class.getDeclaredField("INSTANCE");
         field.setAccessible(true);
         originalJobRegistry = JobRegistry.getInstance();
-        Field modifiersField = Field.class.getDeclaredField("modifiers");
-        modifiersField.setAccessible(true);
-        modifiersField.setInt(field, field.getModifiers() & ~Modifier.FINAL);
+        makeNonFinal(field);
+        field.setAccessible(true);
         field.set(null, jobRegistry);
     }
-
+    
+    private static void makeNonFinal(Field field) {
+        int mods = field.getModifiers();
+        if (Modifier.isFinal(mods)) {
+            MODIFIERS.set(field, mods & ~Modifier.FINAL);
+        }
+    }
 }

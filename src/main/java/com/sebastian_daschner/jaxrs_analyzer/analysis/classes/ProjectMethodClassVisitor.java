@@ -23,7 +23,7 @@ public class ProjectMethodClassVisitor extends ClassVisitor {
     private String superName;
 
     public ProjectMethodClassVisitor(final MethodResult methodResult, final MethodIdentifier identifier) {
-        super(ASM5);
+        super(ASM7);
         this.methodResult = methodResult;
         this.identifier = identifier;
     }

@@ -33,7 +33,7 @@ public class JAXRSClassVisitor extends ClassVisitor {
     private final ClassResult classResult;
 
     public JAXRSClassVisitor(final ClassResult classResult) {
-        super(ASM5);
+        super(ASM7);
         this.classResult = classResult;
     }
 
