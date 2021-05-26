@@ -3,9 +3,11 @@ package com.sebastian_daschner.jaxrs_analyzer.analysis.javadoc;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.PackageDeclaration;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
+import com.github.javaparser.ast.body.EnumDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.Parameter;
+import com.github.javaparser.ast.body.TypeDeclaration;
 import com.github.javaparser.ast.comments.Comment;
 import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.ast.expr.Expression;
@@ -38,7 +40,7 @@ import static com.sebastian_daschner.jaxrs_analyzer.model.methods.MethodIdentifi
 public class JavaDocParserVisitor extends VoidVisitorAdapter<Void> {
 
     private String packageName;
-    private String className;
+    private String typeName;
     private final Map<MethodIdentifier, MethodComment> methodComments;
     private final Map<String, ClassComment> classComments = new HashMap<>();
 
@@ -54,14 +56,25 @@ public class JavaDocParserVisitor extends VoidVisitorAdapter<Void> {
 
     @Override
     public void visit(ClassOrInterfaceDeclaration classOrInterface, Void arg) {
-        className = calculateClassName(classOrInterface);
-
-        classOrInterface.getComment()
-                .filter(Comment::isJavadocComment)
-                .map(this::toJavaDoc)
-                .ifPresent(this::recordClassComment);
+        recordTypeInfo(classOrInterface);
 
         super.visit(classOrInterface, arg);
+    }
+
+    @Override
+    public void visit(EnumDeclaration enumDeclaration, Void arg) {
+        recordTypeInfo(enumDeclaration);
+
+        super.visit(enumDeclaration, arg);
+    }
+
+    private void recordTypeInfo(TypeDeclaration typeDeclaration) {
+        typeName = calculateTypeName(typeDeclaration);
+
+        typeDeclaration.getComment()
+                .filter(Comment::isJavadocComment)
+                .map(this::toJavaDoc)
+                .ifPresent(this::recordTypeComment);
     }
 
     private Javadoc toJavaDoc(Comment comment) {
@@ -72,16 +85,16 @@ public class JavaDocParserVisitor extends VoidVisitorAdapter<Void> {
         return javadoc.getBlockTags().stream().anyMatch(t -> t.getType() == JavadocBlockTag.Type.DEPRECATED);
     }
 
-    private String calculateClassName(ClassOrInterfaceDeclaration classOrInterface) {
+    private String calculateTypeName(TypeDeclaration type) {
         if (StringUtils.isBlank(packageName))
-            return classOrInterface.getNameAsString();
-        return packageName.replace('.', '/') + "/" + classOrInterface.getNameAsString();
+            return type.getNameAsString();
+        return packageName.replace('.', '/') + "/" + type.getNameAsString();
     }
 
-    private void recordClassComment(Javadoc javadoc) {
+    private void recordTypeComment(Javadoc javadoc) {
         String comment = javadoc.getDescription().toText();
         Map<Integer, String> responseComments = createResponseComments(javadoc);
-        classComments.put(className, new ClassComment(comment, responseComments, isDeprecated(javadoc)));
+        classComments.put(typeName, new ClassComment(comment, responseComments, isDeprecated(javadoc)));
     }
 
     @Override
@@ -94,10 +107,10 @@ public class JavaDocParserVisitor extends VoidVisitorAdapter<Void> {
     }
 
     private void createFieldComment(Javadoc javadoc, FieldDeclaration field) {
-        ClassComment classComment = classComments.get(className);
+        ClassComment classComment = classComments.get(typeName);
         if (classComment == null) {
             classComment = new ClassComment();
-            classComments.put(className, classComment);
+            classComments.put(typeName, classComment);
         }
         classComment.getFieldComments().add(createMemberParamTag(javadoc.getDescription(), field.getAnnotations().stream()));
     }
@@ -116,7 +129,7 @@ public class JavaDocParserVisitor extends VoidVisitorAdapter<Void> {
         String comment = javadoc.getDescription().toText();
         List<MemberParameterTag> tags = createMethodParameterTags(javadoc, method);
         Map<Integer, String> responseComments = createResponseComments(javadoc);
-        methodComments.put(identifier, new MethodComment(comment, tags, responseComments, classComments.get(className), isDeprecated(javadoc)));
+        methodComments.put(identifier, new MethodComment(comment, tags, responseComments, classComments.get(typeName), isDeprecated(javadoc)));
     }
 
     private List<MemberParameterTag> createMethodParameterTags(Javadoc javadoc, MethodDeclaration method) {
@@ -176,9 +189,9 @@ public class JavaDocParserVisitor extends VoidVisitorAdapter<Void> {
         String returnType = method.getType().asString().replace('.', '/');
 
         if (method.isStatic()) {
-            return ofStatic(className, method.getNameAsString(), returnType, parameters);
+            return ofStatic(typeName, method.getNameAsString(), returnType, parameters);
         }
-        return ofNonStatic(className, method.getNameAsString(), returnType, parameters);
+        return ofNonStatic(typeName, method.getNameAsString(), returnType, parameters);
     }
 
 }
