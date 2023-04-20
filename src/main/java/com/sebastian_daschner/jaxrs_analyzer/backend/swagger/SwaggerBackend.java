@@ -18,19 +18,10 @@ package com.sebastian_daschner.jaxrs_analyzer.backend.swagger;
 
 import com.sebastian_daschner.jaxrs_analyzer.backend.Backend;
 import com.sebastian_daschner.jaxrs_analyzer.backend.BackendUtils;
-import com.sebastian_daschner.jaxrs_analyzer.model.rest.MethodParameter;
-import com.sebastian_daschner.jaxrs_analyzer.model.rest.ParameterType;
-import com.sebastian_daschner.jaxrs_analyzer.model.rest.Project;
-import com.sebastian_daschner.jaxrs_analyzer.model.rest.ResourceMethod;
-import com.sebastian_daschner.jaxrs_analyzer.model.rest.Resources;
+import com.sebastian_daschner.jaxrs_analyzer.model.rest.*;
 import com.sebastian_daschner.jaxrs_analyzer.utils.StringUtils;
 
-import javax.json.Json;
-import javax.json.JsonArrayBuilder;
-import javax.json.JsonObject;
-import javax.json.JsonObjectBuilder;
-import javax.json.JsonValue;
-import javax.json.JsonWriter;
+import javax.json.*;
 import javax.json.stream.JsonGenerator;
 import java.io.IOException;
 import java.io.Writer;
@@ -42,9 +33,10 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
 
-import static com.sebastian_daschner.jaxrs_analyzer.backend.ComparatorUtils.*;
-import static java.util.Collections.*;
-import static java.util.Comparator.*;
+import static com.sebastian_daschner.jaxrs_analyzer.backend.ComparatorUtils.mapKeyComparator;
+import static com.sebastian_daschner.jaxrs_analyzer.backend.ComparatorUtils.parameterComparator;
+import static java.util.Collections.singletonMap;
+import static java.util.Comparator.comparing;
 
 /**
  * A backend which produces a Swagger JSON representation of the resources.
@@ -65,6 +57,7 @@ public class SwaggerBackend implements Backend {
 	private String projectName;
 	private String projectVersion;
 	private String authType = null;
+	private String projectOverview;
 
 	@Override
 	public void configure(final Map<String, String> config) {
@@ -87,6 +80,7 @@ public class SwaggerBackend implements Backend {
 		resources = project.getResources();
 		projectName = project.getName();
 		projectVersion = project.getVersion();
+		projectOverview = project.getOverview();
 		schemaBuilder = new SchemaBuilder(resources.getTypeRepresentations());
 
 		return modifyJson(renderInternal());
@@ -113,7 +107,7 @@ public class SwaggerBackend implements Backend {
 
 	private void renderHeader() {
 		builder.add("swagger", SWAGGER_VERSION).add("info", Json.createObjectBuilder()
-				.add("version", projectVersion).add("title", projectName))
+				.add("version", projectVersion).add("title", projectName).add("description", projectOverview))
 				.add("host", options.getDomain() == null ? "" : options.getDomain()).add("basePath", (options.getDomain() != null && !"".equals(options.getDomain().trim()) ? '/' : '/' + projectName + '/') + resources.getBasePath())
 				.add("schemes", options.getSchemes().stream().map(Enum::name).map(String::toLowerCase).sorted()
 						.collect(Json::createArrayBuilder, JsonArrayBuilder::add, JsonArrayBuilder::add).build());

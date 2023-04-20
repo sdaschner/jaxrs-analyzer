@@ -9,11 +9,7 @@ import java.io.FileWriter;
 import java.io.PrintWriter;
 import java.io.Writer;
 import java.nio.file.Path;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Objects;
-import java.util.ServiceLoader;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.StreamSupport;
 
 /**
@@ -55,21 +51,21 @@ public class JAXRSAnalyzer {
             return;
         }
 
-        final Project project = new Project(analysis.projectName, analysis.projectVersion, resources);
+        final Project project = new Project(analysis.projectName, analysis.projectVersion, analysis.projectOverview, resources);
 
         try {
-	        Writer output = null;
-	        if (analysis.outputLocation == null) {
-		        output = new PrintWriter(System.out);
-	        } else {
-		        output = new FileWriter(analysis.outputLocation.toFile());
-	        }
-	        try (Writer out = output) {
-		        analysis.backend.render(project, out);
-	        }
+            Writer output = null;
+            if (analysis.outputLocation == null) {
+                output = new PrintWriter(System.out);
+            } else {
+                output = new FileWriter(analysis.outputLocation.toFile());
+            }
+            try (Writer out = output) {
+                analysis.backend.render(project, out);
+            }
         } catch (Exception e) {
-	        LogProvider.error("Could not write to the specified output location, reason: " + e.getMessage());
-	        LogProvider.debug(e);
+            LogProvider.error("Could not write to the specified output location, reason: " + e.getMessage());
+            LogProvider.debug(e);
         }
     }
 
@@ -88,6 +84,7 @@ public class JAXRSAnalyzer {
         private final Set<Path> classPaths = new HashSet<>();
         private final Set<String> ignoredResources = new HashSet<>();
         private String projectName;
+        private String projectOverview;
         private String projectVersion;
         private Path outputLocation;
         private Backend backend;
@@ -119,6 +116,10 @@ public class JAXRSAnalyzer {
 
         public void setProjectName(String projectName) {
             this.projectName = projectName;
+        }
+
+        public void setProjectOverview(String projectOverview) {
+            this.projectOverview = projectOverview;
         }
 
         public void setProjectVersion(String projectVersion) {

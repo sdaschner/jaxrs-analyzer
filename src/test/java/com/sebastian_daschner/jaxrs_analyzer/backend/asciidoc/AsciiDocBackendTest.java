@@ -40,7 +40,7 @@ public class AsciiDocBackendTest {
 
     @Test
     public void test() throws IOException {
-        final Project project = new Project("project name", "1.0", resources);
+        final Project project = new Project("project name", "1.0", "overview", resources);
         cut.configure(singletonMap(INLINE_PRETTIFY, String.valueOf(inlinePrettify)));
 	    StringWriter stringWriter = new StringWriter();
 	    cut.render(project, stringWriter);
@@ -73,6 +73,8 @@ public class AsciiDocBackendTest {
                 "= REST resources of project name\n" +
                         "1.0\n" +
                         "\n" +
+                        "overview\n" +
+                        "\n" +
                         "== `GET rest/res1`\n" +
                         "\n" +
                         "=== Description: Lorem Ipsum\n" +
@@ -90,6 +92,8 @@ public class AsciiDocBackendTest {
         add(data, getRestRes1String,
                 "= REST resources of project name\n" +
                         "1.0\n" +
+                        "\n" +
+                        "overview\n" +
                         "\n" +
                         "== `GET rest/res1`\n" +
                         "\n" +
@@ -122,6 +126,8 @@ public class AsciiDocBackendTest {
                 "= REST resources of project name\n" +
                         "1.0\n" +
                         "\n" +
+                        "overview\n" +
+                        "\n" +
                         "== `GET rest/res1`\n" +
                         "\n" +
                         "=== Request\n" +
@@ -134,6 +140,8 @@ public class AsciiDocBackendTest {
         add(data, getRestRes1Json,
                 "= REST resources of project name\n" +
                         "1.0\n" +
+                        "\n" +
+                        "overview\n" +
                         "\n" +
                         "== `GET rest/res1`\n" +
                         "\n" +
@@ -156,6 +164,8 @@ public class AsciiDocBackendTest {
                 "= REST resources of project name\n" +
                         "1.0\n" +
                         "\n" +
+                        "overview\n" +
+                        "\n" +
                         "== `GET rest/res1`\n" +
                         "\n" +
                         "=== Request\n" +
@@ -173,6 +183,8 @@ public class AsciiDocBackendTest {
                                 .andResponse(200, ResponseBuilder.withResponseBody(identifier).build()).build()).build(),
                 "= REST resources of project name\n" +
                         "1.0\n" +
+                        "\n" +
+                        "overview\n" +
                         "\n" +
                         "== `GET rest/res1`\n" +
                         "\n" +
@@ -196,6 +208,8 @@ public class AsciiDocBackendTest {
                 "= REST resources of project name\n" +
                         "1.0\n" +
                         "\n" +
+                        "overview\n" +
+                        "\n" +
                         "== `GET rest/res1`\n" +
                         "\n" +
                         "=== Request\n" +
@@ -217,6 +231,8 @@ public class AsciiDocBackendTest {
                                 .andResponse(200, ResponseBuilder.withResponseBody(MODEL_IDENTIFIER).build()).build()).build(),
                 "= REST resources of project name\n" +
                         "1.0\n" +
+                        "\n" +
+                        "overview\n" +
                         "\n" +
                         "== `GET rest/res1`\n" +
                         "\n" +
@@ -241,6 +257,8 @@ public class AsciiDocBackendTest {
                 "= REST resources of project name\n" +
                         "1.0\n" +
                         "\n" +
+                        "overview\n" +
+                        "\n" +
                         "== `GET rest/res1`\n" +
                         "\n" +
                         "=== Request\n" +
@@ -260,6 +278,8 @@ public class AsciiDocBackendTest {
                                 .andResponse(200, ResponseBuilder.withResponseBody(identifier).build()).build()).build(),
                 "= REST resources of project name\n" +
                         "1.0\n" +
+                        "\n" +
+                        "overview\n" +
                         "\n" +
                         "== `GET rest/res1`\n" +
                         "\n" +
@@ -284,6 +304,8 @@ public class AsciiDocBackendTest {
                 "= REST resources of project name\n" +
                         "1.0\n" +
                         "\n" +
+                        "overview\n" +
+                        "\n" +
                         "== `POST rest/res1`\n" +
                         "\n" +
                         "=== Request\n" +
@@ -305,6 +327,8 @@ public class AsciiDocBackendTest {
                         .andResource("res2", ResourceMethodBuilder.withMethod(HttpMethod.GET).andResponse(200, ResponseBuilder.newBuilder().build()).build()).build(),
                 "= REST resources of project name\n" +
                         "1.0\n" +
+                        "\n" +
+                        "overview\n" +
                         "\n" +
                         "== `POST rest/res1`\n" +
                         "\n" +
@@ -338,6 +362,8 @@ public class AsciiDocBackendTest {
                 "= REST resources of project name\n" +
                         "1.0\n" +
                         "\n" +
+                        "overview\n" +
+                        "\n" +
                         "== `GET rest/res19`\n" +
                         "\n" +
                         "CAUTION: deprecated\n" +
@@ -359,6 +385,8 @@ public class AsciiDocBackendTest {
 			    "= REST resources of project name\n" +
 					    "1.0\n" +
 					    "\n" +
+                        "overview\n" +
+                        "\n" +
 					    "== `GET rest/res19`\n" +
 					    "\n" +
 					    "Authorization: required\n" +

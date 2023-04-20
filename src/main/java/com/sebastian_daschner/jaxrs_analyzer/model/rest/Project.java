@@ -12,13 +12,15 @@ public class Project {
     private final String name;
     private final String version;
     private final Resources resources;
+    private final String overview;
 
-    public Project(final String name, final String version, final Resources resources) {
+    public Project(final String name, final String version, final String projectOverview, final Resources resources) {
         StringUtils.requireNonBlank(name);
         StringUtils.requireNonBlank(version);
         this.name = name;
         this.version = version;
         this.resources = resources;
+        this.overview = projectOverview;
     }
 
     public String getName() {
@@ -33,4 +35,7 @@ public class Project {
         return resources;
     }
 
+    public String getOverview() {
+        return overview;
+    }
 }

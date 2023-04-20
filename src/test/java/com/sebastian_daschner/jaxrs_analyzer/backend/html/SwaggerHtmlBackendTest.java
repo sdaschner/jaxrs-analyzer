@@ -34,7 +34,7 @@ public class SwaggerHtmlBackendTest {
 
     @Test
     public void test() throws IOException {
-        final Project project = new Project("project name", "1.0", resources);
+        final Project project = new Project("project name", "1.0", "overview", resources);
 	    StringWriter stringWriter = new StringWriter();
 	    cut.render(project, stringWriter);
 	    final String actualOutput = stringWriter.toString();

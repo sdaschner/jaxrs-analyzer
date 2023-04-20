@@ -20,6 +20,8 @@ import com.sebastian_daschner.jaxrs_analyzer.backend.StringBackend;
 import com.sebastian_daschner.jaxrs_analyzer.backend.swagger.SwaggerOptions;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
@@ -95,6 +97,7 @@ public class Main {
 
     private static void setDefaults() {
         analysis.setProjectName(DEFAULT_NAME);
+        analysis.setProjectOverview("");
         analysis.setProjectVersion(DEFAULT_VERSION);
     }
 
@@ -127,6 +130,10 @@ public class Main {
                         case "-o":
                             analysis.setOutputLocation(Paths.get(args[++i]));
                             break;
+                        case "-O":
+                        case "--overview":
+                            analysis.setProjectOverview(String.join("\n", Files.readAllLines(Paths.get(args[++i]))));
+                            break;
                         case "-e":
                             System.setProperty("project.build.sourceEncoding", args[++i]);
                             break;
@@ -139,12 +146,12 @@ public class Main {
                         case "--swaggerTagsPathOffset":
                             attributes.put(SwaggerOptions.SWAGGER_TAGS_PATH_OFFSET, args[++i]);
                             break;
-	                    case "--swaggerSecurityScheme":
-		                    attributes.put(SwaggerOptions.SWAGGER_SECURITY_SCHEME, args[++i]);
-		                    break;
-	                    case "--swaggerJsonPatch":
-		                    attributes.put(SwaggerOptions.JSON_PATCH, args[++i]);
-		                    break;
+                        case "--swaggerSecurityScheme":
+                            attributes.put(SwaggerOptions.SWAGGER_SECURITY_SCHEME, args[++i]);
+                            break;
+                        case "--swaggerJsonPatch":
+                            attributes.put(SwaggerOptions.JSON_PATCH, args[++i]);
+                            break;
                         case "--noInlinePrettify":
                             attributes.put(StringBackend.INLINE_PRETTIFY, "false");
                             break;
@@ -168,6 +175,8 @@ public class Main {
             }
         } catch (IndexOutOfBoundsException e) {
             throw new IllegalArgumentException("Please provide valid number of arguments");
+        } catch (IOException e) {
+            throw new IllegalArgumentException(e);
         }
     }
 
@@ -237,7 +246,7 @@ public class Main {
         System.err.println(" --swaggerSchemes <scheme>[,schemes] The Swagger schemes: http (default), https, ws, wss");
         System.err.println(" --renderSwaggerTags Enables rendering of Swagger tags (default tag will be used per default)");
         System.err.println(" --swaggerJsonPatch <path> A json patch for the generated swagger");
-	    System.err.println(" --swaggerTagsPathOffset <path offset> The number at which path position the Swagger tags will be extracted (0 will be used per default)");
+        System.err.println(" --swaggerTagsPathOffset <path offset> The number at which path position the Swagger tags will be extracted (0 will be used per default)");
         System.err.println(" --ignoredRootResources <fully qualified classname [class,...]> JAX-RS root resource classes which should be ignored by analyze (empty per default)");
         System.err.println(" --noPrettyPrint Don't pretty print inline JSON body representations (will be pretty printed per default)");
         System.err.println("\nExample: java -jar jaxrs-analyzer.jar -b swagger -n \"My Project\" -cp ~/libs/lib1.jar:~/libs/project/bin ~/project/target/classes");

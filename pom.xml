@@ -3,7 +3,7 @@
 
     <groupId>com.github.markrileybot</groupId>
     <artifactId>jaxrs-analyzer</artifactId>
-    <version>1.0.0</version>
+    <version>1.1.0</version>
     <name>JAX-RS Analyzer</name>
     <packaging>jar</packaging>
 

@@ -41,7 +41,7 @@ public class PlainTextBackendTest {
 
     @Test
     public void test() throws IOException {
-        final Project project = new Project("project name", "1.0", resources);
+        final Project project = new Project("project name", "1.0", "overview", resources);
         cut.configure(singletonMap(INLINE_PRETTIFY, "false"));
 	    StringWriter stringWriter = new StringWriter();
 	    cut.render(project, stringWriter);
@@ -62,7 +62,7 @@ public class PlainTextBackendTest {
                         .andResponse(200, ResponseBuilder.withResponseBody(TypeIdentifier.ofType(Types.STRING)).andHeaders("Location").build()).build()).build(),
                 "REST resources of project name:\n" +
                         "1.0\n" +
-                        "\n" +
+                        "\noverview\n\n" +
                         "GET rest/res1:\n" +
                         "Description: Lorem Ipsum\n" +
                         " Request:\n" +
@@ -83,7 +83,7 @@ public class PlainTextBackendTest {
                                 .andResponse(200, ResponseBuilder.withResponseBody(identifier).build()).build()).build(),
                 "REST resources of project name:\n" +
                         "1.0\n" +
-                        "\n" +
+                        "\noverview\n\n" +
                         "GET rest/res2:\n" +
                         " Request:\n" +
                         "  No body\n" +
@@ -104,7 +104,7 @@ public class PlainTextBackendTest {
                                 .andResponse(200, ResponseBuilder.withResponseBody(identifier).build()).build()).build(),
                 "REST resources of project name:\n" +
                         "1.0\n" +
-                        "\n" +
+                        "\noverview\n\n" +
                         "GET rest/res3:\n" +
                         " Request:\n" +
                         "  No body\n" +
@@ -122,7 +122,7 @@ public class PlainTextBackendTest {
                                 .andResponse(200, ResponseBuilder.withResponseBody(identifier).build()).build()).build(),
                 "REST resources of project name:\n" +
                         "1.0\n" +
-                        "\n" +
+                        "\noverview\n\n" +
                         "GET rest/res4:\n" +
                         " Request:\n" +
                         "  No body\n" +
@@ -142,7 +142,7 @@ public class PlainTextBackendTest {
                                 .andResponse(200, ResponseBuilder.withResponseBody(identifier).build()).build()).build(),
                 "REST resources of project name:\n" +
                         "1.0\n" +
-                        "\n" +
+                        "\noverview\n\n" +
                         "GET rest/res5:\n" +
                         " Request:\n" +
                         "  No body\n" +
@@ -162,7 +162,7 @@ public class PlainTextBackendTest {
                                 .andResponse(200, ResponseBuilder.withResponseBody(MODEL_IDENTIFIER).build()).build()).build(),
                 "REST resources of project name:\n" +
                         "1.0\n" +
-                        "\n" +
+                        "\noverview\n\n" +
                         "GET rest/res6:\n" +
                         " Request:\n" +
                         "  No body\n" +
@@ -183,7 +183,7 @@ public class PlainTextBackendTest {
                                 .andResponse(200, ResponseBuilder.withResponseBody(identifier).build()).build()).build(),
                 "REST resources of project name:\n" +
                         "1.0\n" +
-                        "\n" +
+                        "\noverview\n\n" +
                         "GET rest/res7:\n" +
                         " Request:\n" +
                         "  No body\n" +
@@ -200,7 +200,7 @@ public class PlainTextBackendTest {
                                 .andAcceptMediaTypes("application/json").andResponse(201, ResponseBuilder.newBuilder().andHeaders("Location").build()).build()).build(),
                 "REST resources of project name:\n" +
                         "1.0\n" +
-                        "\n" +
+                        "\noverview\n\n" +
                         "POST rest/res8:\n" +
                         " Request:\n" +
                         "  Content-Type: application/json\n" +
@@ -220,7 +220,7 @@ public class PlainTextBackendTest {
                         .andResource("res10", ResourceMethodBuilder.withMethod(HttpMethod.GET).andResponse(200, ResponseBuilder.newBuilder().build()).build()).build(),
                 "REST resources of project name:\n" +
                         "1.0\n" +
-                        "\n" +
+                        "\noverview\n\n" +
                         "GET rest/res10:\n" +
                         " Request:\n" +
                         "  No body\n" +
@@ -244,7 +244,7 @@ public class PlainTextBackendTest {
                 .andResponse(200, ResponseBuilder.withResponseBody(TypeIdentifier.ofType(Types.STRING)).andHeaders("Location").build()).build()).build(),
             "REST resources of project name:\n" +
                     "1.0\n" +
-                    "\n" +
+                    "\noverview\n\n" +
                     "GET rest/res19:\n" +
                     " Deprecated\n" +
                     " Request:\n" +
@@ -262,7 +262,7 @@ public class PlainTextBackendTest {
 							    .andResponse(200, ResponseBuilder.withResponseBody(TypeIdentifier.ofType(Types.STRING)).andHeaders("Location").build()).build()).build(),
 			    "REST resources of project name:\n" +
 					    "1.0\n" +
-					    "\n" +
+					    "\noverview\n\n" +
 					    "GET rest/res19:\n" +
 					    " Authorization required\n" +
 					    " Request:\n" +

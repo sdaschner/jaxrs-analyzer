@@ -1,18 +1,8 @@
 package com.sebastian_daschner.jaxrs_analyzer.backend;
 
-import com.sebastian_daschner.jaxrs_analyzer.model.rest.Project;
-import com.sebastian_daschner.jaxrs_analyzer.model.rest.ResourceMethod;
-import com.sebastian_daschner.jaxrs_analyzer.model.rest.Resources;
-import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeIdentifier;
-import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeRepresentation;
-import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeRepresentationVisitor;
+import com.sebastian_daschner.jaxrs_analyzer.model.rest.*;
 
-import javax.json.JsonArray;
-import javax.json.JsonObject;
-import javax.json.JsonReader;
-import javax.json.JsonStructure;
-import javax.json.JsonValue;
-import javax.json.JsonWriter;
+import javax.json.*;
 import javax.json.spi.JsonProvider;
 import javax.json.stream.JsonGenerator;
 import java.io.IOException;
@@ -24,9 +14,9 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.regex.Pattern;
 
-import static com.sebastian_daschner.jaxrs_analyzer.model.JavaUtils.*;
-import static java.util.Collections.*;
-import static java.util.Comparator.*;
+import static com.sebastian_daschner.jaxrs_analyzer.model.JavaUtils.toReadableType;
+import static java.util.Collections.singletonMap;
+import static java.util.Comparator.comparing;
 
 /**
  * A backend that is backed by Strings (plain text).
@@ -43,6 +33,7 @@ public abstract class StringBackend implements Backend {
     protected StringBuilder builder;
     protected Resources resources;
     protected String projectName;
+    protected String projectOverview;
     protected String projectVersion;
     protected boolean prettify;
 
@@ -69,6 +60,7 @@ public abstract class StringBackend implements Backend {
         resources = project.getResources();
         projectName = project.getName();
         projectVersion = project.getVersion();
+        projectOverview = project.getOverview();
     }
 
     private String renderInternal() {
@@ -82,6 +74,7 @@ public abstract class StringBackend implements Backend {
     private void appendHeader() {
         appendFirstLine();
         builder.append(projectVersion).append("\n\n");
+        builder.append(projectOverview).append("\n\n");
     }
 
     private void appendResource(final String resource) {
