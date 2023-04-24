@@ -15,7 +15,7 @@ public class JavaUtilsTest {
         assertThat(getTypeParameters("B").size(), is(0));
         assertThat(getTypeParameters("Z").size(), is(0));
         assertThat(getTypeParameters(Types.STRING).size(), is(0));
-        assertThat(getTypeParameters("[Ljava/lang/String;").size(), is(0));
+        assertThat(getTypeParameters("[Ljava/lang/String;"), hasItems(Types.STRING));
         assertThat(getTypeParameters("Ljava/util/List<Ljava/lang/String;>;"), hasItems(Types.STRING));
         assertThat(getTypeParameters("Ljava/lang/Map<Ljava/lang/String;Ljava/lang/Integer;>;"), hasItems(Types.STRING, Types.INTEGER));
         assertThat(getTypeParameters("Ljava/util/List<Ljava/util/List<Ljava/lang/Integer;>;>;"), hasItems("Ljava/util/List<Ljava/lang/Integer;>;"));

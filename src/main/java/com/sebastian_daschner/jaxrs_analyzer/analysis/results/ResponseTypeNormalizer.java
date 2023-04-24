@@ -19,9 +19,9 @@ package com.sebastian_daschner.jaxrs_analyzer.analysis.results;
 import com.sebastian_daschner.jaxrs_analyzer.model.Types;
 
 import javax.ws.rs.core.GenericEntity;
+import java.util.List;
 
-import static com.sebastian_daschner.jaxrs_analyzer.model.JavaUtils.getTypeParameters;
-import static com.sebastian_daschner.jaxrs_analyzer.model.JavaUtils.isAssignableTo;
+import static com.sebastian_daschner.jaxrs_analyzer.model.JavaUtils.*;
 
 /**
  * Normalizes the request/response body Java types.
@@ -41,9 +41,15 @@ final class ResponseTypeNormalizer {
      * @return The normalized type
      */
     static String normalizeWrapper(final String type) {
-        if (isAssignableTo(type, Types.COLLECTION) || isAssignableTo(type, Types.ITERABLE) || isAssignableTo(type, Types.OPTIONAL)) {
-            if (!getTypeParameters(type).isEmpty()) {
-                return getTypeParameters(type).get(0);
+        if (isAssignableTo(type, Types.COLLECTION)
+                || isAssignableTo(type, Types.ITERABLE)
+                || isAssignableTo(type, Types.OPTIONAL)
+                || isAssignableTo(type, Types.STREAM)
+                || isAssignableTo(type, Types.STREAMING)
+                || isArray(type)) {
+            List<String> typeParameters = getTypeParameters(type);
+            if (!typeParameters.isEmpty()) {
+                return typeParameters.get(0);
             }
             return Types.OBJECT;
         }
@@ -57,8 +63,12 @@ final class ResponseTypeNormalizer {
      * @return The normalized type
      */
     static String normalizeResponseWrapper(final String type) {
-        if (!getTypeParameters(type).isEmpty() && isAssignableTo(type, Types.GENERIC_ENTITY))
-            return getTypeParameters(type).get(0);
+        if (isAssignableTo(type, Types.GENERIC_ENTITY)) {
+            List<String> typeParameters = getTypeParameters(type);
+            if (!typeParameters.isEmpty()) {
+                return typeParameters.get(0);
+            }
+        }
         return type;
     }
 

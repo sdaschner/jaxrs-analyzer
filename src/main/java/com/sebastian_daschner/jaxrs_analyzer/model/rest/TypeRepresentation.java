@@ -17,12 +17,9 @@
 package com.sebastian_daschner.jaxrs_analyzer.model.rest;
 
 import com.sebastian_daschner.jaxrs_analyzer.model.Types;
+import com.sebastian_daschner.jaxrs_analyzer.model.javadoc.MemberParameterTag;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Represents a request/response body type including the properties which actually will be serialized (e.g. depending on the JAXB mapping).
@@ -128,9 +125,25 @@ public abstract class TypeRepresentation {
 
         private final Map<String, TypeIdentifier> properties;
 
+        private final Map<String, MemberParameterTag> propertyDocs = new HashMap<>();
+
+        private String classDoc;
+
         private ConcreteTypeRepresentation(final TypeIdentifier identifier, final Map<String, TypeIdentifier> properties) {
             super(identifier);
             this.properties = properties;
+        }
+
+        public String getClassDoc() {
+            return classDoc;
+        }
+
+        public void setClassDoc(String classDoc) {
+            this.classDoc = classDoc;
+        }
+
+        public Map<String, MemberParameterTag> getPropertyDocs() {
+            return propertyDocs;
         }
 
         public Map<String, TypeIdentifier> getProperties() {
@@ -292,9 +305,24 @@ public abstract class TypeRepresentation {
 
         private final Set<String> enumValues;
 
+        private final Map<String, MemberParameterTag> enumValuesDoc = new HashMap<>();
+        private String classDoc;
+
         private EnumTypeRepresentation(final TypeIdentifier identifier, final Set<String> enumValues) {
             super(identifier);
             this.enumValues = enumValues;
+        }
+
+        public String getClassDoc() {
+            return classDoc;
+        }
+
+        public void setClassDoc(String classDoc) {
+            this.classDoc = classDoc;
+        }
+
+        public Map<String, MemberParameterTag> getEnumValuesDoc() {
+            return enumValuesDoc;
         }
 
         public Set<String> getEnumValues() {

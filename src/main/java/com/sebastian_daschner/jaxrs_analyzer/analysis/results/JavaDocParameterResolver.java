@@ -37,7 +37,7 @@ final class JavaDocParameterResolver {
         if (classDoc == null)
             return Optional.empty();
 
-        return classDoc.getFieldComments().stream()
+        return classDoc.getFieldComments().values().stream()
                 .filter(f -> hasAnnotation(parameter, f.getAnnotations()))
                 .findAny();
     }

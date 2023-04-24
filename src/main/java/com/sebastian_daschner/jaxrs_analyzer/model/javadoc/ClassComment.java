@@ -1,13 +1,12 @@
 package com.sebastian_daschner.jaxrs_analyzer.model.javadoc;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class ClassComment extends MemberComment {
 
-    private List<MemberParameterTag> fieldComments = new ArrayList<>();
+    private final Map<String, MemberParameterTag> fieldComments = new HashMap<>();
 
     public ClassComment() {
         this("", new HashMap<>(), false);
@@ -17,7 +16,7 @@ public class ClassComment extends MemberComment {
         super(comment, responseComments, deprecated);
     }
 
-    public List<MemberParameterTag> getFieldComments() {
+    public Map<String, MemberParameterTag> getFieldComments() {
         return fieldComments;
     }
 

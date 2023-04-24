@@ -27,13 +27,7 @@ import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.TypeVariable;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.ListIterator;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -240,7 +234,7 @@ public final class JavaUtils {
     }
 
     public static boolean isIterableWithTypeParameters(String type) {
-    	return hasTypeParameters(type) && isAssignableTo(type, ITERABLE);
+    	return hasTypeParameters(type) && (isAssignableTo(type, ITERABLE) || isAssignableTo(type, STREAMING) || isAssignableTo(type, STREAM));
     }
 
 	/**
@@ -248,8 +242,18 @@ public final class JavaUtils {
 	 * @return true if the is a container type with type parameters
 	 */
 	public static boolean isContainer(String type) {
-		return isAssignableTo(type, COLLECTION) || isIterableWithTypeParameters(type);
+		return isAssignableTo(type, COLLECTION)
+                || isArray(type)
+                || isIterableWithTypeParameters(type);
 	}
+
+    /**
+     * @param type the type
+     * @return true if type is an array
+     */
+    public static boolean isArray(String type) {
+        return type.charAt(0) == '[';
+    }
 
 	/**
 	 * @param type the type
@@ -350,6 +354,8 @@ public final class JavaUtils {
      * Returns the type parameters of the given type. Will be an empty list if the type is not parametrized.
      */
     public static List<String> getTypeParameters(final String type) {
+        if (type.charAt(0) == '[')
+            return singletonList(type.substring(1));
         if (type.charAt(0) != 'L')
             return emptyList();
 

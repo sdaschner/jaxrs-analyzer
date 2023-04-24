@@ -16,9 +16,9 @@
 
 package com.sebastian_daschner.jaxrs_analyzer.backend.swagger;
 
+import com.sebastian_daschner.jaxrs_analyzer.model.javadoc.MemberParameterTag;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeIdentifier;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeRepresentation;
-import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeRepresentation.OptionalTypeRepresentation;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.TypeRepresentationVisitor;
 import com.sebastian_daschner.jaxrs_analyzer.utils.Pair;
 
@@ -147,10 +147,12 @@ class SchemaBuilder {
                 return;
         }
 
-        addObject(builder, representation.getIdentifier(), representation.getProperties());
+        addObject(builder, representation);
     }
 
-    private void addObject(final JsonObjectBuilder builder, final TypeIdentifier identifier, final Map<String, TypeIdentifier> properties) {
+    private void addObject(final JsonObjectBuilder builder, final TypeRepresentation.ConcreteTypeRepresentation representation) {
+        TypeIdentifier identifier = representation.getIdentifier();
+        Map<String, TypeIdentifier> properties = representation.getProperties();
         final String definition = definitionNameBuilder.buildDefinitionName(identifier.getName(), jsonDefinitions);
 
         if (jsonDefinitions.containsKey(definition)) {
@@ -163,8 +165,19 @@ class SchemaBuilder {
 
         final JsonObjectBuilder nestedBuilder = Json.createObjectBuilder();
 
-        properties.entrySet().stream().sorted(mapKeyComparator()).forEach(e -> nestedBuilder.add(e.getKey(), build(e.getValue())));
-        jsonDefinitions.put(definition, Pair.of(identifier.getName(), Json.createObjectBuilder().add("properties", nestedBuilder).build()));
+        JsonObjectBuilder objectBuilder = Json.createObjectBuilder();
+        if (representation.getClassDoc() != null) {
+            objectBuilder.add("description", representation.getClassDoc());
+        }
+        properties.entrySet().stream().sorted(mapKeyComparator()).forEach(e -> {
+            JsonObjectBuilder field = build(e.getValue());
+            MemberParameterTag memberParameterTag = representation.getPropertyDocs().get(e.getKey());
+            if (memberParameterTag != null) {
+                field.add("description", memberParameterTag.getComment());
+            }
+            nestedBuilder.add(e.getKey(), field);
+        });
+        jsonDefinitions.put(definition, Pair.of(identifier.getName(), objectBuilder.add("properties", nestedBuilder).build()));
 
         builder.add("$ref", "#/definitions/" + definition);
     }

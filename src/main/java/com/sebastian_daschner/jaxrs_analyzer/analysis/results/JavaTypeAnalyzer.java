@@ -101,7 +101,9 @@ class JavaTypeAnalyzer {
 
 	private static boolean isJDKType(final String type) {
 		// exclude java, javax, etc. packages
-		return Types.PRIMITIVE_TYPES.contains(type) || type.startsWith("Ljava/") || type.startsWith("Ljavax/");
+		return Types.PRIMITIVE_TYPES.contains(type)
+				|| type.startsWith("Ljava/")
+				|| type.startsWith("Ljavax/");
 	}
 
 	private TypeRepresentation analyzeInternal(final TypeIdentifier identifier, final String type) {

@@ -42,7 +42,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
-import static com.sebastian_daschner.jaxrs_analyzer.model.JavaUtils.*;
+import static com.sebastian_daschner.jaxrs_analyzer.model.JavaUtils.isAnnotationPresent;
 
 /**
  * Analyzes the JAX-RS project. This class is thread-safe.
@@ -104,9 +104,12 @@ public class ProjectAnalyzer {
 				bytecodeAnalyzer.analyzeBytecode(classResult);
 			}
 
-			javaDocAnalyzer.analyze(projectSourcePaths, classResults);
+			javaDocAnalyzer.analyze(projectSourcePaths);
+			javaDocAnalyzer.combineResults(classResults);
 
-			return resultInterpreter.interpret(classResults);
+			Resources resources = resultInterpreter.interpret(classResults);
+			javaDocAnalyzer.combineClassComments(resources.getTypeRepresentations());
+			return resources;
 		} finally {
 			lock.unlock();
 		}

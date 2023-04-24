@@ -22,7 +22,6 @@ import com.sebastian_daschner.jaxrs_analyzer.model.methods.MethodIdentifier;
 import com.sebastian_daschner.jaxrs_analyzer.utils.Pair;
 import com.sebastian_daschner.jaxrs_analyzer.utils.StringUtils;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -40,10 +39,11 @@ public class JavaDocParserVisitor extends VoidVisitorAdapter<Void> {
     private String packageName;
     private String className;
     private final Map<MethodIdentifier, MethodComment> methodComments;
-    private final Map<String, ClassComment> classComments = new HashMap<>();
+    private final Map<String, ClassComment> classComments;
 
-    public JavaDocParserVisitor(Map<MethodIdentifier, MethodComment> methodComments) {
+    public JavaDocParserVisitor(Map<MethodIdentifier, MethodComment> methodComments, Map<String, ClassComment> classComments) {
         this.methodComments = methodComments;
+        this.classComments = classComments;
     }
 
     @Override
@@ -99,7 +99,8 @@ public class JavaDocParserVisitor extends VoidVisitorAdapter<Void> {
             classComment = new ClassComment();
             classComments.put(className, classComment);
         }
-        classComment.getFieldComments().add(createMemberParamTag(javadoc.getDescription(), field.getAnnotations().stream()));
+
+        classComment.getFieldComments().put(field.getVariable(0).getNameAsString(), createMemberParamTag(javadoc.getDescription(), field.getAnnotations().stream()));
     }
 
     @Override
