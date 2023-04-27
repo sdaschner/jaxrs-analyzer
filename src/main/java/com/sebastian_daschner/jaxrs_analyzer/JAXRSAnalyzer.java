@@ -5,9 +5,9 @@ import com.sebastian_daschner.jaxrs_analyzer.backend.Backend;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.Project;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.Resources;
 
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
+import java.io.FileWriter;
+import java.io.PrintWriter;
+import java.io.Writer;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.stream.StreamSupport;
@@ -51,31 +51,19 @@ public class JAXRSAnalyzer {
             return;
         }
 
-        final Project project = new Project(analysis.projectName, analysis.projectVersion, resources);
-        final byte[] output = analysis.backend.render(project);
+        final Project project = new Project(analysis.projectName, analysis.projectVersion, analysis.projectOverview, resources);
 
-        if (analysis.outputLocation != null) {
-            outputToFile(output, analysis.outputLocation);
-        } else {
-            outputToConsole(output);
-        }
-    }
-
-    private void outputToConsole(final byte[] output) {
         try {
-            System.out.write(output);
-            System.out.flush();
-        } catch (IOException e) {
-            LogProvider.error("Could not write the output, reason: " + e.getMessage());
-            LogProvider.debug(e);
-        }
-    }
-
-    private static void outputToFile(final byte[] output, final Path outputLocation) {
-        try (final OutputStream stream = new FileOutputStream(outputLocation.toFile())) {
-            stream.write(output);
-            stream.flush();
-        } catch (IOException e) {
+            Writer output = null;
+            if (analysis.outputLocation == null) {
+                output = new PrintWriter(System.out);
+            } else {
+                output = new FileWriter(analysis.outputLocation.toFile());
+            }
+            try (Writer out = output) {
+                analysis.backend.render(project, out);
+            }
+        } catch (Exception e) {
             LogProvider.error("Could not write to the specified output location, reason: " + e.getMessage());
             LogProvider.debug(e);
         }
@@ -96,6 +84,7 @@ public class JAXRSAnalyzer {
         private final Set<Path> classPaths = new HashSet<>();
         private final Set<String> ignoredResources = new HashSet<>();
         private String projectName;
+        private String projectOverview;
         private String projectVersion;
         private Path outputLocation;
         private Backend backend;
@@ -127,6 +116,10 @@ public class JAXRSAnalyzer {
 
         public void setProjectName(String projectName) {
             this.projectName = projectName;
+        }
+
+        public void setProjectOverview(String projectOverview) {
+            this.projectOverview = projectOverview;
         }
 
         public void setProjectVersion(String projectVersion) {

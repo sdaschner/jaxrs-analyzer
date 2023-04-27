@@ -20,6 +20,8 @@ import com.sebastian_daschner.jaxrs_analyzer.backend.StringBackend;
 import com.sebastian_daschner.jaxrs_analyzer.backend.swagger.SwaggerOptions;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
@@ -52,7 +54,7 @@ public class Main {
      * <p>
      * Following available options:
      * <ul>
-     * <li>{@code -b backend} The backend to choose: {@code swagger} (default), {@code plaintext}, {@code asciidoc}, {@code markdown}</li>
+     * <li>{@code -b backend} The backend to choose: {@code swagger} (default), {@code plaintext}, {@code asciidoc}, {@code markdown}, {@code html}</li>
      * <li>{@code -cp class path[:class paths...]} The additional class paths which contain classes which are used in the project</li>
      * <li>{@code -sp source path[:source paths...]} The optional source paths  needed for JavaDoc analysis</li>
      * <li>{@code -X} Debug enabled (prints error debugging information on Standard error out)</li>
@@ -66,6 +68,7 @@ public class Main {
      * Following available backend specific options (only have effect if the corresponding backend is selected):
      * <ul>
      * <li>{@code --swaggerSchemes scheme[,schemes]} The Swagger schemes: {@code http} (default), {@code https}, {@code ws}, {@code wss}")</li>
+     * <li>{@code --swaggerSecurityScheme scheme} The Swagger security scheme: basic, jwt, apikey</li>
      * <li>{@code --renderSwaggerTags} Enables rendering of Swagger tags (will not be rendered per default)</li>
      * <li>{@code --swaggerTagsPathOffset path offset} The number at which path position the Swagger tags should be extracted ({@code 0} per default)</li>
      * <li>{@code --ignoredRootResources class[,classes]} JAX-RS root resource classes which should be ignored by analyze (empty per default)</li>
@@ -94,6 +97,7 @@ public class Main {
 
     private static void setDefaults() {
         analysis.setProjectName(DEFAULT_NAME);
+        analysis.setProjectOverview("");
         analysis.setProjectVersion(DEFAULT_VERSION);
     }
 
@@ -126,6 +130,10 @@ public class Main {
                         case "-o":
                             analysis.setOutputLocation(Paths.get(args[++i]));
                             break;
+                        case "-O":
+                        case "--overview":
+                            analysis.setProjectOverview(String.join("\n", Files.readAllLines(Paths.get(args[++i]))));
+                            break;
                         case "-e":
                             System.setProperty("project.build.sourceEncoding", args[++i]);
                             break;
@@ -137,6 +145,12 @@ public class Main {
                             break;
                         case "--swaggerTagsPathOffset":
                             attributes.put(SwaggerOptions.SWAGGER_TAGS_PATH_OFFSET, args[++i]);
+                            break;
+                        case "--swaggerSecurityScheme":
+                            attributes.put(SwaggerOptions.SWAGGER_SECURITY_SCHEME, args[++i]);
+                            break;
+                        case "--swaggerJsonPatch":
+                            attributes.put(SwaggerOptions.JSON_PATCH, args[++i]);
                             break;
                         case "--noInlinePrettify":
                             attributes.put(StringBackend.INLINE_PRETTIFY, "false");
@@ -161,6 +175,8 @@ public class Main {
             }
         } catch (IndexOutOfBoundsException e) {
             throw new IllegalArgumentException("Please provide valid number of arguments");
+        } catch (IOException e) {
+            throw new IllegalArgumentException(e);
         }
     }
 
@@ -216,7 +232,7 @@ public class Main {
         System.err.println("Usage: java -jar jaxrs-analyzer.jar [options] classPath [classPaths...]");
         System.err.println("The classPath entries may be directories or jar-files containing the classes to be analyzed\n");
         System.err.println("Following available options:\n");
-        System.err.println(" -b <backend> The backend to choose: swagger (default), plaintext, asciidoc, markdown");
+        System.err.println(" -b <backend> The backend to choose: swagger (default), plaintext, asciidoc, markdown, html");
         System.err.println(" -cp <class path>[:class paths] Additional class paths (separated with colon) which contain classes used in the project (may be directories or jar-files)");
         System.err.println(" -sp <source path>[:source paths] Optional source paths (separated with colon) needed for JavaDoc analysis (may be directories or jar-files)");
         System.err.println(" -X Debug enabled (enabled error debugging information)");
@@ -229,6 +245,7 @@ public class Main {
         System.err.println("\nFollowing available backend specific options (only have effect if the corresponding backend is selected):\n");
         System.err.println(" --swaggerSchemes <scheme>[,schemes] The Swagger schemes: http (default), https, ws, wss");
         System.err.println(" --renderSwaggerTags Enables rendering of Swagger tags (default tag will be used per default)");
+        System.err.println(" --swaggerJsonPatch <path> A json patch for the generated swagger");
         System.err.println(" --swaggerTagsPathOffset <path offset> The number at which path position the Swagger tags will be extracted (0 will be used per default)");
         System.err.println(" --ignoredRootResources <fully qualified classname [class,...]> JAX-RS root resource classes which should be ignored by analyze (empty per default)");
         System.err.println(" --noPrettyPrint Don't pretty print inline JSON body representations (will be pretty printed per default)");

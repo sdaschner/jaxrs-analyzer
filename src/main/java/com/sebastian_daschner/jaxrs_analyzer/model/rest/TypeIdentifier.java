@@ -1,6 +1,7 @@
 package com.sebastian_daschner.jaxrs_analyzer.model.rest;
 
 import com.sebastian_daschner.jaxrs_analyzer.model.Types;
+import org.objectweb.asm.Type;
 
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -26,6 +27,10 @@ public abstract class TypeIdentifier {
     public static TypeIdentifier ofType(final String type) {
         return new JavaTypeIdentifier(type);
     }
+
+	public static TypeIdentifier ofType(final Class<?> type) {
+		return new JavaTypeIdentifier(Type.getDescriptor(type));
+	}
 
     public static TypeIdentifier ofDynamic() {
         return new DynamicTypeIdentifier(dynamicCounter.incrementAndGet());

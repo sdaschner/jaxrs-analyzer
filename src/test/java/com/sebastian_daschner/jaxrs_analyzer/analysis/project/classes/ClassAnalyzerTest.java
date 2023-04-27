@@ -35,7 +35,7 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.Set;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 @RunWith(Parameterized.class)
 public class ClassAnalyzerTest {

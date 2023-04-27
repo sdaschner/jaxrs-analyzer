@@ -17,6 +17,7 @@
 package com.sebastian_daschner.jaxrs_analyzer.model.rest;
 
 import com.sebastian_daschner.jaxrs_analyzer.model.Types;
+import com.sebastian_daschner.jaxrs_analyzer.model.javadoc.MemberParameterTag;
 
 import java.util.*;
 
@@ -96,6 +97,19 @@ public abstract class TypeRepresentation {
         return new CollectionTypeRepresentation(identifier, typeRepresentation);
     }
 
+	/**
+	 * Creates a type representation of an optional type.
+	 * <p>
+	 * Example: {@code identifier: java.util.Optional<java.lang.String>, typeRepresentation: java.lang.String}
+	 *
+	 * @param identifier         The type identifier of the optional type
+	 * @param typeRepresentation The contained type representation
+	 * @return The type representation
+	 */
+	public static TypeRepresentation ofOptional(final TypeIdentifier identifier, final TypeRepresentation typeRepresentation) {
+		return new OptionalTypeRepresentation(identifier, typeRepresentation);
+	}
+
     /**
      * Creates a type representation of an enum type plus the available enumeration values.
      *
@@ -111,9 +125,25 @@ public abstract class TypeRepresentation {
 
         private final Map<String, TypeIdentifier> properties;
 
+        private final Map<String, MemberParameterTag> propertyDocs = new HashMap<>();
+
+        private String classDoc;
+
         private ConcreteTypeRepresentation(final TypeIdentifier identifier, final Map<String, TypeIdentifier> properties) {
             super(identifier);
             this.properties = properties;
+        }
+
+        public String getClassDoc() {
+            return classDoc;
+        }
+
+        public void setClassDoc(String classDoc) {
+            this.classDoc = classDoc;
+        }
+
+        public Map<String, MemberParameterTag> getPropertyDocs() {
+            return propertyDocs;
         }
 
         public Map<String, TypeIdentifier> getProperties() {
@@ -148,6 +178,66 @@ public abstract class TypeRepresentation {
                     '}';
         }
     }
+
+	public static class OptionalTypeRepresentation extends TypeRepresentation {
+
+		private final TypeRepresentation representation;
+
+		private OptionalTypeRepresentation(final TypeIdentifier identifier, final TypeRepresentation representation) {
+			super(identifier);
+			this.representation = representation;
+		}
+
+		public TypeRepresentation getRepresentation() {
+			return representation;
+		}
+
+		@Override
+		public TypeIdentifier getComponentType() {
+			return representation.getIdentifier();
+		}
+
+		@Override
+		public void accept(final TypeRepresentationVisitor visitor) {
+			representation.accept(visitor);
+		}
+
+		/**
+		 * Checks if the nested type of this collection representation matches the given type (i.e. the same property bindings for concrete types
+		 * or the same contained representation for collection types). This does not check the actual type (identifier).
+		 *
+		 * @param representation The other nested representation to check
+		 * @return {@code true} if the content equals
+		 */
+		public boolean contentEquals(final TypeRepresentation representation) {
+			final boolean thisStaticType = !this.representation.getIdentifier().getType().equals(Types.JSON);
+			final boolean otherStaticType = !representation.getIdentifier().getType().equals(Types.JSON);
+
+			if (thisStaticType ^ otherStaticType)
+				return false;
+
+			if (thisStaticType)
+				return this.representation.getIdentifier().equals(representation.getIdentifier());
+
+			final boolean thisOption = this.representation instanceof OptionalTypeRepresentation;
+			final boolean thatOption = representation instanceof OptionalTypeRepresentation;
+			if (thisOption ^ thatOption)
+				return false;
+
+			if (thisOption)
+				return ((OptionalTypeRepresentation) this.representation).contentEquals(((OptionalTypeRepresentation) representation).getRepresentation());
+
+			return ((ConcreteTypeRepresentation) this.representation).contentEquals(((ConcreteTypeRepresentation) representation).getProperties());
+		}
+
+		@Override
+		public String toString() {
+			return "OptionalTypeRepresentation{" +
+					"identifier=" + getIdentifier() +
+					",representation=" + representation +
+					'}';
+		}
+	}
 
     public static class CollectionTypeRepresentation extends TypeRepresentation {
 
@@ -215,9 +305,24 @@ public abstract class TypeRepresentation {
 
         private final Set<String> enumValues;
 
+        private final Map<String, MemberParameterTag> enumValuesDoc = new HashMap<>();
+        private String classDoc;
+
         private EnumTypeRepresentation(final TypeIdentifier identifier, final Set<String> enumValues) {
             super(identifier);
             this.enumValues = enumValues;
+        }
+
+        public String getClassDoc() {
+            return classDoc;
+        }
+
+        public void setClassDoc(String classDoc) {
+            this.classDoc = classDoc;
+        }
+
+        public Map<String, MemberParameterTag> getEnumValuesDoc() {
+            return enumValuesDoc;
         }
 
         public Set<String> getEnumValues() {

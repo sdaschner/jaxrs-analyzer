@@ -5,8 +5,10 @@ import com.sebastian_daschner.jaxrs_analyzer.model.rest.*;
 import javax.json.*;
 import javax.json.spi.JsonProvider;
 import javax.json.stream.JsonGenerator;
+import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.io.Writer;
 import java.util.Map;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -31,6 +33,7 @@ public abstract class StringBackend implements Backend {
     protected StringBuilder builder;
     protected Resources resources;
     protected String projectName;
+    protected String projectOverview;
     protected String projectVersion;
     protected boolean prettify;
 
@@ -40,14 +43,12 @@ public abstract class StringBackend implements Backend {
     }
 
     @Override
-    public byte[] render(final Project project) {
+    public void render(final Project project, Writer writer) throws IOException {
         lock.lock();
         try {
             initRender(project);
-
             final String output = renderInternal();
-
-            return serialize(output);
+	        writer.write(output);
         } finally {
             lock.unlock();
         }
@@ -59,6 +60,7 @@ public abstract class StringBackend implements Backend {
         resources = project.getResources();
         projectName = project.getName();
         projectVersion = project.getVersion();
+        projectOverview = project.getOverview();
     }
 
     private String renderInternal() {
@@ -72,6 +74,7 @@ public abstract class StringBackend implements Backend {
     private void appendHeader() {
         appendFirstLine();
         builder.append(projectVersion).append("\n\n");
+        builder.append(projectOverview).append("\n\n");
     }
 
     private void appendResource(final String resource) {

@@ -21,7 +21,7 @@ import static com.sebastian_daschner.jaxrs_analyzer.model.Types.*;
  */
 final class JavaDocParameterResolver {
 
-    private static final String[] KNOWN_ANNOTATIONS = {PATH_PARAM, QUERY_PARAM, HEADER_PARAM, FORM_PARAM, COOKIE_PARAM, MATRIX_PARAM, DEFAULT_VALUE, SUSPENDED, CONTEXT};
+    private static final String[] KNOWN_ANNOTATIONS = {PATH_PARAM, QUERY_PARAM, HEADER_PARAM, FORM_PARAM, COOKIE_PARAM, MATRIX_PARAM, DEFAULT_VALUE, SUSPENDED, CONTEXT, AUTH_PARAM};
 
     private JavaDocParameterResolver() {
         throw new UnsupportedOperationException();
@@ -37,7 +37,7 @@ final class JavaDocParameterResolver {
         if (classDoc == null)
             return Optional.empty();
 
-        return classDoc.getFieldComments().stream()
+        return classDoc.getFieldComments().values().stream()
                 .filter(f -> hasAnnotation(parameter, f.getAnnotations()))
                 .findAny();
     }

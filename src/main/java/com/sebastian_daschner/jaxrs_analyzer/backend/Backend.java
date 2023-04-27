@@ -18,6 +18,8 @@ package com.sebastian_daschner.jaxrs_analyzer.backend;
 
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.Project;
 
+import java.io.IOException;
+import java.io.Writer;
 import java.util.Map;
 
 /**
@@ -29,11 +31,10 @@ public interface Backend {
 
     /**
      * Renders the REST resources of the given project.
-     *
-     * @param project The project to render including all information and resources
-     * @return The data
+     *  @param project The project to render including all information and resources
+     * @param writer The thing to write the output to
      */
-    byte[] render(Project project);
+    void render(Project project, Writer writer) throws IOException;
 
     /**
      * Returns a human readable name of the actual backend.

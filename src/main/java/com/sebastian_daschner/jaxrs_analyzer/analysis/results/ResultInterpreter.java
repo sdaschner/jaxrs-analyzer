@@ -23,6 +23,7 @@ import com.sebastian_daschner.jaxrs_analyzer.model.javadoc.MemberComment;
 import com.sebastian_daschner.jaxrs_analyzer.model.javadoc.MemberParameterTag;
 import com.sebastian_daschner.jaxrs_analyzer.model.javadoc.MethodComment;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.MethodParameter;
+import com.sebastian_daschner.jaxrs_analyzer.model.rest.ParameterType;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.ResourceMethod;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.Resources;
 import com.sebastian_daschner.jaxrs_analyzer.model.rest.Response;
@@ -128,6 +129,8 @@ public class ResultInterpreter {
 
         if (methodResult.isDeprecated() || classResult.isDeprecated() || hasDeprecationTag(methodDoc))
             resourceMethod.setDeprecated(true);
+
+		resourceMethod.setAuthRequired(methodResult.isAuthRequired());
 
         return resourceMethod;
     }

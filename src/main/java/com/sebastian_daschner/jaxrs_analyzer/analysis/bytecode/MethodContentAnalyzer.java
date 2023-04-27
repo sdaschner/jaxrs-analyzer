@@ -122,7 +122,7 @@ abstract class MethodContentAnalyzer {
 
             classReader.accept(visitor, ClassReader.EXPAND_FRAMES);
             return methodResult;
-        } catch (IOException e) {
+        } catch (Exception e) {
             LogProvider.error("Could not analyze project method " + identifier.getContainingClass() + "#" + identifier.getMethodName());
             LogProvider.debug(e);
             return null;

@@ -32,8 +32,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.sebastian_daschner.jaxrs_analyzer.model.Types.*;
-import static java.util.Collections.emptyList;
-import static java.util.Collections.emptyMap;
+import static java.util.Collections.*;
 
 /**
  * Contains Java reflection utility functionality.
@@ -47,6 +46,20 @@ public final class JavaUtils {
     private JavaUtils() {
         throw new UnsupportedOperationException();
     }
+
+
+	/**
+	 * Converts a getter name to the property name (without the "get" or "is" and lowercase).
+	 *
+	 * @param name The name of the method (MUST match "get[A-Z][A-Za-z]*|is[A-Z][A-Za-z]*")
+	 * @return The name of the property
+	 */
+	public static String extractPropertyName(final String name) {
+		final int size = name.startsWith("is") ? 2 : 3;
+		final char chars[] = name.substring(size).toCharArray();
+		chars[0] = Character.toLowerCase(chars[0]);
+		return new String(chars);
+	}
 
     /**
      * Checks if the given method name is a Java initializer.
@@ -220,6 +233,36 @@ public final class JavaUtils {
         return type.indexOf('<') >= 0;
     }
 
+    public static boolean isIterableWithTypeParameters(String type) {
+    	return hasTypeParameters(type) && (isAssignableTo(type, ITERABLE) || isAssignableTo(type, STREAMING) || isAssignableTo(type, STREAM));
+    }
+
+	/**
+	 * @param type the type
+	 * @return true if the is a container type with type parameters
+	 */
+	public static boolean isContainer(String type) {
+		return isAssignableTo(type, COLLECTION)
+                || isArray(type)
+                || isIterableWithTypeParameters(type);
+	}
+
+    /**
+     * @param type the type
+     * @return true if type is an array
+     */
+    public static boolean isArray(String type) {
+        return type.charAt(0) == '[';
+    }
+
+	/**
+	 * @param type the type
+	 * @return true if the is a container type with type parameters
+	 */
+	public static boolean isOptional(String type) {
+		return isAssignableTo(type, OPTIONAL);
+	}
+
     /**
      * Converts the given JVM object type signature to a class name. Erasures parametrized types.
      * <p>
@@ -272,6 +315,22 @@ public final class JavaUtils {
         return 'L' + className + ';';
     }
 
+	/**
+	 * Converts the given JVM class name to a type signature.
+	 * <p>
+	 * Example: {@code java/util/List -> Ljava/util/List<La;Lb;Lc;>;}
+	 */
+	public static String toTypeWithParameters(final String className, final String ... types) {
+		StringBuilder params = new StringBuilder()
+				.append('L')
+				.append(className)
+				.append('<');
+		for (int i = 0; i < types.length; i++) {
+			params.append('L').append(types[i]).append(';');
+		}
+		return params.append(">;").toString();
+	}
+
     /**
      * Converts the given type signature to a human readable type string.
      * <p>
@@ -295,6 +354,8 @@ public final class JavaUtils {
      * Returns the type parameters of the given type. Will be an empty list if the type is not parametrized.
      */
     public static List<String> getTypeParameters(final String type) {
+        if (type.charAt(0) == '[')
+            return singletonList(type.substring(1));
         if (type.charAt(0) != 'L')
             return emptyList();
 

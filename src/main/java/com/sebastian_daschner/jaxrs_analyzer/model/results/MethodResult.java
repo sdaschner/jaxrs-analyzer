@@ -48,6 +48,7 @@ public class MethodResult {
     private ClassResult parentResource;
     private MethodComment methodDoc;
     private boolean deprecated;
+    private boolean authRequired;
 
     public Set<String> getRequestMediaTypes() {
         return requestMediaTypes;
@@ -134,7 +135,15 @@ public class MethodResult {
         this.deprecated = deprecated;
     }
 
-    @Override
+	public void setAuthRequired(boolean authRequired) {
+		this.authRequired = authRequired;
+	}
+
+	public boolean isAuthRequired() {
+		return authRequired;
+	}
+
+	@Override
     public boolean equals(final Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
